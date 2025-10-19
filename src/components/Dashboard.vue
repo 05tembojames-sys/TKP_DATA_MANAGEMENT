@@ -74,109 +74,53 @@
             
             <!-- Dashboard Buttons Grid (3x3) -->
             <div class="dashboard-buttons-grid">
-              <button class="dashboard-btn" @click="setCurrentView('tracker-capture')">
-                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="m22 21-3-3m0-6a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
-                </svg>
+              <button class="dashboard-btn tracker-btn" @click="setCurrentView('tracker-capture')">
+                <i class="fas fa-search-location btn-icon"></i>
                 <span>Tracker Capture</span>
               </button>
               
-              <button class="dashboard-btn" @click="setCurrentView('reports')">
-                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14,2 14,8 20,8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                  <polyline points="10,9 9,9 8,9" />
-                </svg>
+              <button class="dashboard-btn reports-btn" @click="setCurrentView('reports')">
+                <i class="fas fa-chart-bar btn-icon"></i>
                 <span>Reports</span>
               </button>
               
               <button class="dashboard-btn data-entry-btn" @click="setCurrentView('data-entry')">
-                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 20h9" />
-                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M12 1v6" />
-                  <path d="M12 17v6" />
-                </svg>
+                <i class="fas fa-edit btn-icon"></i>
                 <span>Data Entry</span>
               </button>
               
-              <button class="dashboard-btn" @click="setCurrentView('child-tracker')">
-                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="m3 21v-2a4 4 0 0 1 6-3.85" />
-                  <path d="M12 12h9" />
-                  <path d="m19 9 2 2-2 2" />
-                </svg>
+              <button class="dashboard-btn child-tracker-btn" @click="setCurrentView('child-tracker')">
+                <i class="fas fa-baby btn-icon"></i>
                 <span>Child Tracker</span>
               </button>
               
-              <button class="dashboard-btn" @click="setCurrentView('visualization')">
-                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 3v18h18" />
-                  <path d="m19 9-5 5-4-4-3 3" />
-                  <circle cx="9" cy="9" r="1" />
-                  <circle cx="20" cy="4" r="1" />
-                </svg>
+              <button class="dashboard-btn analytics-btn" @click="setCurrentView('visualization')">
+                <i class="fas fa-chart-line btn-icon"></i>
                 <span>Analytics</span>
               </button>
               
-              <button class="dashboard-btn" @click="setCurrentView('event-reports')">
-                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                  <path d="M8 14h.01" />
-                  <path d="M12 14h.01" />
-                  <path d="M16 14h.01" />
-                  <path d="M8 18h.01" />
-                  <path d="M12 18h.01" />
-                  <path d="M16 18h.01" />
-                </svg>
+              <button class="dashboard-btn events-btn" @click="setCurrentView('event-reports')">
+                <i class="fas fa-calendar-alt btn-icon"></i>
                 <span>Events</span>
               </button>
               
-              <button class="dashboard-btn" @click="setCurrentView('capture')">
-                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 20h9" />
-                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                </svg>
+              <button class="dashboard-btn capture-btn" @click="setCurrentView('capture')">
+                <i class="fas fa-camera btn-icon"></i>
                 <span>Capture</span>
               </button>
               
-              <button class="dashboard-btn" @click="setCurrentView('child-tracker-2')">
-                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
+              <button class="dashboard-btn residents-btn" @click="setCurrentView('child-tracker-2')">
+                <i class="fas fa-home btn-icon"></i>
                 <span>Residents</span>
               </button>
               
-              <button class="dashboard-btn" @click="setCurrentView('data-analysis')">
-                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2v20" />
-                  <path d="m15 5-3 3 3 3" />
-                  <path d="m9 9 3 3-3 3" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
+              <button class="dashboard-btn analysis-btn" @click="setCurrentView('data-analysis')">
+                <i class="fas fa-microscope btn-icon"></i>
                 <span>Analysis</span>
               </button>
               
-              <button class="dashboard-btn" @click="$router.push('/user-management')">
-                <svg class="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="m22 11-3-3m0-2a2 2 0 0 1 4 0v6a2 2 0 0 1-4 0" />
-                  <path d="m22 4-3 3 2.5 2.5" />
-                </svg>
+              <button class="dashboard-btn users-btn" @click="$router.push('/user-management')">
+                <i class="fas fa-users-cog btn-icon"></i>
                 <span>Users</span>
               </button>
             </div>
@@ -994,15 +938,15 @@ onMounted(() => {
 }
 
 .dashboard-btn {
-  background-color: #4A148C; /* Dark purple - same as logo */
-  color: #FFFFFF; /* White text */
-  padding: 16px 12px;
+  background: linear-gradient(135deg, #4A148C 0%, #2D1B69 100%);
+  color: #FFFFFF;
+  padding: 18px 14px;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-height: 75px;
+  min-height: 95px;
   width: 150px;
   max-width: 150px;
   font-weight: 500;
@@ -1012,46 +956,150 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 10px;
   position: relative;
-  box-shadow: 0 2px 4px rgba(74, 20, 140, 0.2);
+  box-shadow: 0 4px 15px rgba(74, 20, 140, 0.25);
+  overflow: hidden;
+}
+
+.dashboard-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .dashboard-btn:hover {
-  background-color: #2D1B69; /* Darker purple on hover */
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(74, 20, 140, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(74, 20, 140, 0.35);
+}
+
+.dashboard-btn:hover::before {
+  opacity: 1;
 }
 
 .dashboard-btn:active {
-  transform: translateY(0);
+  transform: translateY(-1px);
 }
 
-.dashboard-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+/* Individual button color schemes */
+.tracker-btn {
+  background: linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%);
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.tracker-btn:hover {
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.reports-btn {
+  background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+}
+
+.reports-btn:hover {
+  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+}
+
+.data-entry-btn {
+  background: linear-gradient(135deg, #FFD93D 0%, #FFC53D 100%);
+  box-shadow: 0 4px 15px rgba(255, 217, 61, 0.3);
+  color: #333;
+}
+
+.data-entry-btn:hover {
+  box-shadow: 0 6px 20px rgba(255, 217, 61, 0.4);
+}
+
+.child-tracker-btn {
+  background: linear-gradient(135deg, #A8E6CF 0%, #7BDCB5 100%);
+  box-shadow: 0 4px 15px rgba(168, 230, 207, 0.3);
+  color: #333;
+}
+
+.child-tracker-btn:hover {
+  box-shadow: 0 6px 20px rgba(168, 230, 207, 0.4);
+}
+
+.analytics-btn {
+  background: linear-gradient(135deg, #95E1D3 0%, #38A3A5 100%);
+  box-shadow: 0 4px 15px rgba(149, 225, 211, 0.3);
+}
+
+.analytics-btn:hover {
+  box-shadow: 0 6px 20px rgba(149, 225, 211, 0.4);
+}
+
+.events-btn {
+  background: linear-gradient(135deg, #FAA43A 0%, #F77F00 100%);
+  box-shadow: 0 4px 15px rgba(250, 164, 58, 0.3);
+}
+
+.events-btn:hover {
+  box-shadow: 0 6px 20px rgba(250, 164, 58, 0.4);
+}
+
+.capture-btn {
+  background: linear-gradient(135deg, #B983FF 0%, #8C5EFF 100%);
+  box-shadow: 0 4px 15px rgba(185, 131, 255, 0.3);
+}
+
+.capture-btn:hover {
+  box-shadow: 0 6px 20px rgba(185, 131, 255, 0.4);
+}
+
+.residents-btn {
+  background: linear-gradient(135deg, #FD79A8 0%, #E84393 100%);
+  box-shadow: 0 4px 15px rgba(253, 121, 168, 0.3);
+}
+
+.residents-btn:hover {
+  box-shadow: 0 6px 20px rgba(253, 121, 168, 0.4);
+}
+
+.analysis-btn {
+  background: linear-gradient(135deg, #74B9FF 0%, #0984E3 100%);
+  box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
+}
+
+.analysis-btn:hover {
+  box-shadow: 0 6px 20px rgba(116, 185, 255, 0.4);
+}
+
+.users-btn {
+  background: linear-gradient(135deg, #A29BFE 0%, #6C5CE7 100%);
+  box-shadow: 0 4px 15px rgba(162, 155, 254, 0.3);
+}
+
+.users-btn:hover {
+  box-shadow: 0 6px 20px rgba(162, 155, 254, 0.4);
 }
 
 .btn-icon {
+  font-size: 2rem;
   flex-shrink: 0;
-  opacity: 0.9;
+  opacity: 0.95;
   transition: all 0.3s ease;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .dashboard-btn:hover .btn-icon {
   opacity: 1;
-  transform: scale(1.05);
+  transform: scale(1.1) rotate(5deg);
 }
 
 .dashboard-btn span {
   line-height: 1.1;
   text-align: center;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
   display: block;
+  letter-spacing: 0.3px;
 }
 
 /* Dashboard Description */
