@@ -85,7 +85,7 @@
               </button>
               
               <button class="dashboard-btn data-entry-btn" @click="setCurrentView('data-entry')">
-                <i class="fas fa-edit btn-icon"></i>
+                <i class="fas fa-keyboard btn-icon"></i>
                 <span>Data Entry</span>
               </button>
               
@@ -119,7 +119,12 @@
                 <span>Analysis</span>
               </button>
               
-              <button class="dashboard-btn users-btn" @click="$router.push('/user-management')">
+              <button 
+                class="dashboard-btn users-btn" 
+                @click="canManageUsers ? $router.push('/user-management') : null"
+                :disabled="!canManageUsers"
+                :class="{ 'btn-disabled': !canManageUsers }"
+              >
                 <i class="fas fa-users-cog btn-icon"></i>
                 <span>Users</span>
               </button>
@@ -175,6 +180,20 @@
               <div class="form-group">
                 <label>Phone Number</label>
                 <input v-model="newUser.phoneNumber" type="tel" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Role</label>
+                <select v-model="newUser.role" required>
+                  <option value="admin">Administrator</option>
+                  <option value="user">User</option>
+                  <option value="manager">Manager</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+                <small style="color: #28a745; font-size: 0.85rem; margin-top: 0.25rem; display: block;">
+                  ✓ All roles can log in. Permissions are based on role selection.
+                </small>
               </div>
             </div>
             <div class="form-actions">
@@ -376,7 +395,7 @@
 
       <!-- Reports Section -->
       <div v-if="currentView === 'reports'" class="reports-section">
-        <Reports />
+        <Reports :can-approve="canApproveReports" />
         <div class="section-actions">
           <button class="back-btn" @click="setCurrentView('main')">
             Back to Dashboard
@@ -408,7 +427,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from '../composables/useToast.js'
 import AuthService from '../services/auth.js'
@@ -424,6 +443,9 @@ import DataAnalysis from './DataAnalysis.vue'
 import Reports from './Reports.vue'
 import EventReports from './EventReports.vue'
 import FormService from '../services/formService.js'
+
+// Import custom SVG icon (uncomment when you add the file)
+// import DataEntryIcon from '../assets/icons/data-entry.svg?url'
 
 const router = useRouter()
 const { success, error, confirm } = useToast()
@@ -467,6 +489,17 @@ const editUser = ref({
   fullName: '',
   email: '',
   phoneNumber: ''
+})
+
+// Permission checking computed properties
+const canManageUsers = computed(() => {
+  const role = AuthService.getUserRoleInfo()
+  return role === 'admin' || role === 'manager' || AuthService.hasPermission('users_write')
+})
+
+const canApproveReports = computed(() => {
+  const role = AuthService.getUserRoleInfo()
+  return role === 'admin' || role === 'manager'
 })
 
 
@@ -626,6 +659,24 @@ const handleAddUser = async () => {
       return
     }
 
+    // Check for duplicate email/username
+    const { default: DuplicationService } = await import('../services/duplicationService.js')
+    
+    const duplicateCheck = await DuplicationService.checkDuplicateUser({
+      email: newUser.value.email,
+      username: newUser.value.fullName // Using fullName as username for now
+    })
+    
+    if (duplicateCheck.hasDuplicates) {
+      const duplicateFields = duplicateCheck.duplicates.map(dup => {
+        return `${dup.field}: ${dup.value}`
+      }).join(', ')
+      
+      error(`User already exists with ${duplicateFields}. Please use different credentials.`)
+      loading.value = false
+      return
+    }
+
     const result = await UserService.addUser(newUser.value)
     if (result.success) {
       success('User created successfully!')
@@ -714,7 +765,8 @@ const resetAddUserForm = () => {
     fullName: '',
     email: '',
     password: '',
-    phoneNumber: ''
+    phoneNumber: '',
+    role: 'admin' // Default to admin role for dashboard users
   }
   showAddUserForm.value = false
 }
@@ -1091,6 +1143,26 @@ onMounted(() => {
 .dashboard-btn:hover .btn-icon {
   opacity: 1;
   transform: scale(1.1) rotate(5deg);
+}
+
+/* Disabled button state */
+.dashboard-btn:disabled,
+.dashboard-btn.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #9E9E9E 0%, #757575 100%);
+  box-shadow: 0 2px 8px rgba(158, 158, 158, 0.2);
+}
+
+.dashboard-btn:disabled:hover,
+.dashboard-btn.btn-disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(158, 158, 158, 0.2);
+}
+
+.dashboard-btn:disabled .btn-icon,
+.dashboard-btn.btn-disabled .btn-icon {
+  transform: none;
 }
 
 .dashboard-btn span {

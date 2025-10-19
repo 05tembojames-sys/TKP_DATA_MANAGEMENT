@@ -68,13 +68,24 @@ class AuthService {
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       this.user = userCredential.user
       
-      // Check for admin role in Firestore
+      // Get user data from Firestore
       const userDoc = await this.getUserRole(this.user.uid)
       
-      if (!userDoc || userDoc.role !== 'admin') {
+      // Check if user exists and is active
+      if (!userDoc) {
         await this.logout()
-        throw new Error('Access denied: Admin privileges required')
+        throw new Error('User data not found. Please contact administrator.')
       }
+      
+      // Check if user status is active
+      if (userDoc.status && userDoc.status !== 'active') {
+        await this.logout()
+        throw new Error(`Account is ${userDoc.status}. Please contact administrator.`)
+      }
+      
+      // Store user role and permissions
+      this.userRole = userDoc.role
+      this.userPermissions = userDoc.permissions || []
       
       // Find user document ID for activity tracking
       const usersQuery = query(
@@ -90,7 +101,12 @@ class AuthService {
       }
       
       this.isAuthenticated = true
-      return { success: true, user: this.user }
+      return { 
+        success: true, 
+        user: this.user,
+        role: this.userRole,
+        permissions: this.userPermissions
+      }
     } catch (error) {
       console.error('Login error:', error)
       return { 
@@ -137,12 +153,39 @@ class AuthService {
   // Get user role from Firestore
   async getUserRole(uid) {
     try {
+      // First, try to find user by UID as document ID (for first admin)
       const userDocRef = doc(this.db, 'users', uid)
       const userDocSnap = await getDoc(userDocRef)
       
       if (userDocSnap.exists()) {
         return userDocSnap.data()
       }
+      
+      // If not found, search for user by uid field (for regular users)
+      const usersQuery = query(
+        collection(this.db, 'users'),
+        where('uid', '==', uid)
+      )
+      const querySnapshot = await getDocs(usersQuery)
+      
+      if (!querySnapshot.empty) {
+        return querySnapshot.docs[0].data()
+      }
+      
+      // If still not found, search by email (for legacy users)
+      const user = auth.currentUser || this.user
+      if (user && user.email) {
+        const emailQuery = query(
+          collection(this.db, 'users'),
+          where('email', '==', user.email.toLowerCase())
+        )
+        const emailSnapshot = await getDocs(emailQuery)
+        
+        if (!emailSnapshot.empty) {
+          return emailSnapshot.docs[0].data()
+        }
+      }
+      
       return null
     } catch (error) {
       console.error('Error getting user role:', error)
@@ -154,21 +197,42 @@ class AuthService {
   onAuthStateChange(callback) {
     return onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Check admin role in Firestore
+        // Get user data from Firestore
         const userDoc = await this.getUserRole(user.uid)
         
-        if (userDoc && userDoc.role === 'admin') {
+        // Allow any valid user with active status
+        if (userDoc && (!userDoc.status || userDoc.status === 'active')) {
           this.user = user
+          this.userRole = userDoc.role
+          this.userPermissions = userDoc.permissions || []
           this.isAuthenticated = true
         } else {
           await this.logout()
         }
       } else {
         this.user = null
+        this.userRole = null
+        this.userPermissions = []
         this.isAuthenticated = false
       }
       callback(this.user, this.isAuthenticated)
     })
+  }
+
+  // Get current user role
+  getUserRoleInfo() {
+    return this.userRole
+  }
+
+  // Get user permissions
+  getUserPermissions() {
+    return this.userPermissions || []
+  }
+
+  // Check if user has specific permission
+  hasPermission(permission) {
+    if (this.userRole === 'admin') return true // Admin has all permissions
+    return this.userPermissions.includes(permission)
   }
 
   // Get current user

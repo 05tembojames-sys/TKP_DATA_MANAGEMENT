@@ -790,6 +790,54 @@ const handleSubmit = async (event) => {
   
   loading.value = true
   try {
+    // Check for duplicate child records before saving
+    const { default: DuplicationService } = await import('../services/duplicationService.js')
+    
+    const duplicateCheck = await DuplicationService.checkDuplicateChild({
+      childFirstName: formData.childFirstName,
+      childSurname: formData.childSurname,
+      dateOfBirth: formData.dateOfBirth,
+      ageAtIntake: formData.age
+    })
+    
+    if (duplicateCheck.hasDuplicates) {
+      const highConfidenceDuplicates = duplicateCheck.duplicates.filter(d => d.confidence >= 95)
+      
+      if (highConfidenceDuplicates.length > 0) {
+        // Show exact matches - require confirmation
+        const duplicateInfo = highConfidenceDuplicates.map(dup => {
+          const childName = `${dup.data.childFirstName} ${dup.data.childSurname}`
+          const dob = dup.data.dateOfBirth || 'Unknown DOB'
+          return `• ${childName} (DOB: ${dob}) - ${dup.reason}`
+        }).join('\n')
+        
+        const userConfirmed = confirm(
+          `⚠️ DUPLICATE WARNING
+
+A child with similar information already exists in the system:
+
+${duplicateInfo}
+
+Do you want to continue and create this assessment anyway?`
+        )
+        
+        if (!userConfirmed) {
+          loading.value = false
+          error('Form submission cancelled to prevent duplicate entry')
+          return
+        } else {
+          console.warn('User confirmed duplicate child override:', duplicateInfo)
+        }
+      } else {
+        // Medium confidence duplicates - just warn
+        const warningInfo = duplicateCheck.duplicates.map(dup => {
+          const childName = `${dup.data.childFirstName} ${dup.data.childSurname}`
+          return `${childName} - ${dup.reason}`
+        }).join(', ')
+        console.warn('Potential duplicates found:', warningInfo)
+      }
+    }
+    
     // Import FormService dynamically to avoid circular imports
     const { default: FormService } = await import('../services/formService.js')
     

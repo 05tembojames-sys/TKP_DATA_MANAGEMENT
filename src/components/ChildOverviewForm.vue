@@ -982,6 +982,49 @@ const handleSubmit = async (event) => {
   
   loading.value = true
   try {
+    // Check for duplicate children before saving
+    const { default: DuplicationService } = await import('../services/duplicationService.js')
+    
+    const duplicateCheck = await DuplicationService.checkDuplicateChild(formData)
+    
+    if (duplicateCheck.hasDuplicates) {
+      const highConfidenceDuplicates = duplicateCheck.duplicates.filter(d => d.confidence >= 95)
+      
+      if (highConfidenceDuplicates.length > 0) {
+        // Show exact matches - require confirmation
+        const duplicateInfo = highConfidenceDuplicates.map(dup => {
+          const childName = `${dup.data.childFirstName} ${dup.data.childSurname}`
+          const dob = dup.data.dateOfBirth || 'Unknown DOB'
+          return `• ${childName} (DOB: ${dob}) - ${dup.reason}`
+        }).join('\n')
+        
+        const userConfirmed = confirm(
+          `⚠️ DUPLICATE WARNING
+
+A child with similar information already exists in the system:
+
+${duplicateInfo}
+
+Are you sure you want to create a new record?`
+        )
+        
+        if (!userConfirmed) {
+          loading.value = false
+          error('Form submission cancelled to prevent duplicate entry')
+          return
+        }
+      } else {
+        // Show potential duplicates as warning
+        const warningInfo = duplicateCheck.duplicates.map(dup => {
+          const childName = `${dup.data.childFirstName} ${dup.data.childSurname}`
+          return `• ${childName} - ${dup.reason}`
+        }).join('\n')
+        
+        console.warn('Potential duplicates found:', warningInfo)
+        // Allow submission to continue with warning logged
+      }
+    }
+    
     // Prepare form data with additional metadata
     const submissionData = {
       ...formData,

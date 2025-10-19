@@ -32,7 +32,9 @@
           type="submit" 
           :disabled="loading"
           class="login-button"
+          @click="handleLogin"
         >
+          <span v-if="loading" class="spinner"></span>
           {{ loading ? 'Logging in...' : 'Login' }}
         </button>
       </form>
@@ -59,28 +61,39 @@ const error = ref('')
 
 // Handle form submission
 const handleLogin = async () => {
+  console.log('Login button clicked') // Debug log
+  
   if (!email.value || !password.value) {
     error.value = 'Please fill in all fields'
+    console.log('Validation failed: Missing email or password')
     return
   }
 
+  console.log('Attempting login with:', email.value) // Debug log
   loading.value = true
   error.value = ''
 
   try {
+    console.log('Calling AuthService.login()...') // Debug log
     const result = await AuthService.login(email.value, password.value)
     
+    console.log('Login result:', result) // Debug log
+    
     if (result.success) {
+      console.log('Login successful! Redirecting to dashboard...') // Debug log
       // Redirect to dashboard on successful login
-      router.push('/dashboard')
+      await router.push('/dashboard')
+      console.log('Navigation complete') // Debug log
     } else {
-      error.value = result.error
+      console.error('Login failed:', result.error) // Debug log
+      error.value = result.error || 'Login failed. Please try again.'
     }
   } catch (err) {
-    error.value = 'An unexpected error occurred'
-    console.error('Login error:', err)
+    console.error('Login error (catch block):', err) // Debug log
+    error.value = 'An unexpected error occurred: ' + (err.message || 'Unknown error')
   } finally {
     loading.value = false
+    console.log('Login process completed, loading set to false') // Debug log
   }
 }
 </script>
@@ -164,15 +177,35 @@ const handleLogin = async () => {
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
-.login-button:hover {
+.login-button:hover:not(:disabled) {
   background-color: #FF8A50; /* Lighter orange on hover */
 }
 
 .login-button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Error message */

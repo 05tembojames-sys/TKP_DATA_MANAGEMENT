@@ -98,13 +98,16 @@ router.beforeEach(async (to, from, next) => {
   const currentUser = auth.currentUser
   let isAuthenticated = false
   
-  // Check if user is authenticated and has admin role
+  // Check if user is authenticated (all roles allowed)
   if (currentUser) {
     const userDoc = await AuthService.getUserRole(currentUser.uid)
-    if (userDoc && userDoc.role === 'admin') {
+    // Allow any user with valid user data and active status
+    if (userDoc && (!userDoc.status || userDoc.status === 'active')) {
       isAuthenticated = true
       // Update AuthService state
       AuthService.user = currentUser
+      AuthService.userRole = userDoc.role
+      AuthService.userPermissions = userDoc.permissions || []
       AuthService.isAuthenticated = true
     }
   }

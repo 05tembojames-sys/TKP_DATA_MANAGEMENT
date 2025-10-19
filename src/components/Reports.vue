@@ -196,13 +196,14 @@
             
             <div v-if="isAdmin" class="admin-actions">
               <button 
-                v-if="report.status === 'pending'"
+                v-if="report.status === 'pending' && canUserApprove"
                 @click="showApprovalModal(report)"
                 class="action-btn approve-btn"
               >
                 ✅ Review
               </button>
               <button 
+                v-if="canUserApprove"
                 @click="confirmDeleteReport(report)"
                 class="action-btn delete-btn"
               >
@@ -337,6 +338,14 @@ import ReportService from '../services/reportService.js'
 import AuthService from '../services/auth.js'
 import UserService from '../services/userService.js'
 
+// Props
+const props = defineProps({
+  canApprove: {
+    type: Boolean,
+    default: true
+  }
+})
+
 // Template ref for file input
 const fileInput = ref(null)
 
@@ -375,6 +384,11 @@ const messageType = ref('success')
 // User permissions
 const isAdmin = ref(false)
 const currentUser = ref(null)
+
+// Computed property to check if user can approve reports
+const canUserApprove = computed(() => {
+  return props.canApprove && isAdmin.value
+})
 
 // Initialize component
 onMounted(async () => {

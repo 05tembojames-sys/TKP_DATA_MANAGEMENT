@@ -393,6 +393,9 @@
                     <option value="user">User</option>
                     <option value="viewer">Viewer</option>
                   </select>
+                  <small style="color: #28a745; font-size: 0.85rem; margin-top: 0.25rem; display: block; font-weight: 500;">
+                    ✓ All roles can log in. Permissions are controlled via role & permissions.
+                  </small>
                 </div>
                 <div class="form-group">
                   <label>Organization Unit *</label>

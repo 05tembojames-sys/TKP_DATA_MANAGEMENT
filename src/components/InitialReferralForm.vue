@@ -775,6 +775,46 @@ const handleSubmit = async (event) => {
   
   loading.value = true
   try {
+    // Check for duplicate referrals before saving
+    const { default: DuplicationService } = await import('../services/duplicationService.js')
+    
+    const duplicateCheck = await DuplicationService.checkDuplicateReferral({
+      childFirstName: formData.childFirstName,
+      childLastName: formData.childLastName,
+      dateOfReferral: formData.dateOfReferral
+    })
+    
+    if (duplicateCheck.hasDuplicates) {
+      const highConfidenceDuplicates = duplicateCheck.duplicates.filter(d => d.confidence >= 95)
+      
+      if (highConfidenceDuplicates.length > 0) {
+        // Show exact matches - require confirmation
+        const duplicateInfo = highConfidenceDuplicates.map(dup => {
+          const childName = `${dup.data.childFirstName} ${dup.data.childLastName}`
+          const refDate = dup.data.dateOfReferral || 'Unknown Date'
+          return `• ${childName} (Referral Date: ${refDate}) - ${dup.reason}`
+        }).join('\n')
+        
+        const userConfirmed = confirm(
+          `⚠️ DUPLICATE WARNING
+
+A referral with similar information already exists:
+
+${duplicateInfo}
+
+Do you want to continue and create this referral anyway?`
+        )
+        
+        if (!userConfirmed) {
+          loading.value = false
+          error('Form submission cancelled to prevent duplicate referral')
+          return
+        } else {
+          console.warn('User confirmed duplicate referral override:', duplicateInfo)
+        }
+      }
+    }
+    
     // Import FormService dynamically to avoid circular imports
     const { default: FormService } = await import('../services/formService.js')
     
