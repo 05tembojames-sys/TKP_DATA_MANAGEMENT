@@ -2,33 +2,45 @@
   <div class="child-tracker-container">
     <!-- Header -->
     <div class="tracker-header">
-      <div class="header-nav">
-        <div class="header-left">
-          <button @click="goBack" class="back-button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m12 19-7-7 7-7" />
-              <path d="m19 12H5" />
-            </svg>
-            Back to Dashboard
-          </button>
-        </div>
-        <div class="header-center">
-          <h2 class="tracker-title">Child Tracker - In-house/children</h2>
-          <p class="tracker-subtitle">Search and track children from TKP Care Plans using unique identification patterns</p>
-        </div>
-        <div class="header-right">
-          <button @click="handleLogout" class="logout-button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-            Logout
-          </button>
+      <div class="header-left">
+        <button @click="goBack" class="back-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m12 19-7-7 7-7" />
+            <path d="m19 12H5" />
+          </svg>
+          Back to Dashboard
+        </button>
+      </div>
+      <div class="header-center">
+        <h1 class="tracker-title">Child Tracker - In-house/children</h1>
+        <div class="data-source-indicator">
+          <span class="indicator-badge firebase">📡 Live Firebase Data</span>
         </div>
       </div>
-      <div class="tracker-info">
-        <span class="info-badge">Primary Source: Child Overview and Background Forms</span>
+      <div class="header-right">
+        <button @click="handleLogout" class="logout-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats-section">
+      <div class="stat-card">
+        <div class="stat-number">{{ totalChildren }}</div>
+        <div class="stat-label">Children Tracked</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ activeChildren }}</div>
+        <div class="stat-label">Active Cases</div>
+      </div>
+      <div class="stat-card info-card">
+        <span class="info-badge">📋 Primary Source: Child Overview and Background Forms</span>
       </div>
     </div>
 
@@ -342,6 +354,9 @@ import Pagination from './Pagination.vue'
 
 const router = useRouter()
 
+// Emits
+const emit = defineEmits(['back-to-dashboard'])
+
 // Reactive data
 const children = ref([])
 const filteredChildren = ref([])
@@ -602,7 +617,8 @@ const handlePageSizeChange = (newSize) => {
 
 // Navigation methods
 const goBack = () => {
-  router.push('/dashboard')
+  // Emit event to parent Dashboard component
+  emit('back-to-dashboard')
 }
 
 const handleLogout = async () => {
@@ -620,25 +636,19 @@ onMounted(() => {
 
 <style scoped>
 .child-tracker-container {
-  background: #EEEEEE;
+  background: #f8f9fa;
   min-height: 100vh;
   padding: 0;
 }
 
 .tracker-header {
-  background: linear-gradient(135deg, #4A148C 0%, #2D1B69 100%);
-  color: white;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 12px rgba(74, 20, 140, 0.3);
-}
-
-.header-nav {
+  background: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background: rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .header-left {
@@ -660,11 +670,48 @@ onMounted(() => {
   text-align: center;
 }
 
+.tracker-title {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.data-source-indicator {
+  margin-top: 0.25rem;
+}
+
+.indicator-badge {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  padding: 0.35rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.indicator-badge.firebase {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 16px rgba(40, 167, 69, 0.5);
+  }
+}
+
 .back-button,
 .logout-button {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   padding: 0.625rem 1.25rem;
   border-radius: 8px;
   cursor: pointer;
@@ -677,55 +724,90 @@ onMounted(() => {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .back-button:hover,
 .logout-button:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .logout-button {
   background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
-  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .logout-button:hover {
   background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
-  border-color: rgba(255, 255, 255, 0.3);
 }
 
-.tracker-title {
-  color: white;
-  font-size: 1.75rem;
-  margin: 0 0 0.25rem 0;
-  font-weight: 700;
+.quick-stats-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding: 1.5rem 2rem;
+  background: white;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.tracker-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.95rem;
-  margin: 0;
+.stat-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
 }
 
-.tracker-info {
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-color: #dee2e6;
+}
+
+.stat-card.info-card {
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding: 1rem 2rem 1.5rem;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-color: #90caf9;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .info-badge {
-  background: linear-gradient(135deg, rgba(255, 87, 34, 0.9), rgba(255, 138, 80, 0.9));
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1.25rem;
   border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  box-shadow: 0 2px 8px rgba(255, 87, 34, 0.3);
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .search-section {
@@ -1276,20 +1358,43 @@ onMounted(() => {
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .quick-stats-section {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 1.25rem 1.5rem;
+  }
+
+  .stat-card.info-card {
+    grid-column: 1 / -1;
+  }
+
+  .search-inputs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .children-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
   .child-tracker-container {
     padding: 0;
   }
 
-  .header-nav {
+  .tracker-header {
     flex-direction: column;
     gap: 1rem;
-    padding: 1rem;
+    padding: 1.25rem;
+    align-items: stretch;
   }
 
-  .header-left, .header-center, .header-right {
+  .header-left,
+  .header-center,
+  .header-right {
     flex: none;
     width: 100%;
+    justify-content: center;
   }
 
   .header-left {
@@ -1303,6 +1408,8 @@ onMounted(() => {
 
   .header-right {
     order: 3;
+    display: flex;
+    gap: 0.75rem;
     justify-content: center;
   }
 
@@ -1310,103 +1417,310 @@ onMounted(() => {
   .logout-button {
     padding: 0.75rem 1rem;
     font-size: 0.85rem;
+    flex: 1;
+    justify-content: center;
   }
 
   .tracker-title {
-    font-size: 1.5rem;
+    font-size: 1.35rem;
   }
 
-  .tracker-subtitle {
-    font-size: 0.875rem;
+  .indicator-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.75rem;
+  }
+
+  .quick-stats-section {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .stat-card.info-card {
+    grid-column: auto;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
   }
 
   .search-section,
   .results-section {
     margin: 0 1rem 1.5rem;
+    padding: 1.5rem;
   }
-  
+
+  .search-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .search-header h3 {
+    font-size: 1.25rem;
+  }
+
+  .search-stats {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    font-size: 0.85rem;
+  }
+
+  .stat-item strong {
+    font-size: 1.25rem;
+  }
+
   .search-inputs {
     grid-template-columns: 1fr;
   }
-  
+
   .search-actions {
     justify-content: stretch;
+    flex-direction: row;
   }
-  
+
   .clear-btn,
   .export-btn {
     flex: 1;
   }
-  
-  .children-list {
-    grid-template-columns: 1fr;
-  }
-  
-  .info-row {
-    grid-template-columns: 1fr;
-  }
-  
-  .child-details-modal {
-    width: 95vw;
-  }
-  
-  .details-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .search-header,
+
   .results-header {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
   }
-  
-  .search-stats {
+
+  .results-header h3 {
+    font-size: 1.25rem;
+    text-align: center;
+  }
+
+  .results-count {
+    text-align: center;
+  }
+
+  .children-list {
+    grid-template-columns: 1fr;
+  }
+
+  .info-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .child-card {
+    padding: 1.25rem;
+  }
+
+  .child-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .action-btn {
+    width: 100%;
+    text-align: center;
     justify-content: center;
+  }
+
+  .child-details-modal {
+    width: 95vw;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .edit-btn,
+  .cancel-btn {
+    width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .header-nav {
-    padding: 0.75rem;
+  .tracker-header {
+    padding: 1rem;
   }
 
   .tracker-title {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
 
-  .tracker-subtitle {
-    font-size: 0.8rem;
+  .indicator-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.625rem;
   }
 
   .back-button,
   .logout-button {
     padding: 0.625rem 0.875rem;
     font-size: 0.8rem;
-    width: 100%;
-    justify-content: center;
   }
 
   .header-right {
-    flex-direction: row;
+    flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .logout-button,
+  .back-button {
+    width: 100%;
+  }
+
+  .quick-stats-section {
+    padding: 0.875rem;
+    gap: 0.875rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-number {
+    font-size: 1.75rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+
+  .info-badge {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.875rem;
   }
 
   .search-section,
   .results-section {
-    margin: 0 0.5rem 1rem;
+    margin: 0 0.75rem 1rem;
+    padding: 1.25rem;
+  }
+
+  .search-header h3,
+  .results-header h3 {
+    font-size: 1.125rem;
+  }
+
+  .search-stats {
+    gap: 1rem;
+  }
+
+  .stat-item {
+    font-size: 0.8rem;
+  }
+
+  .stat-item strong {
+    font-size: 1.125rem;
+  }
+
+  .search-input,
+  .search-select {
+    padding: 0.625rem;
+    font-size: 0.9rem;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+  }
+
+  .clear-btn,
+  .export-btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
   }
 
   .child-card {
     padding: 1rem;
   }
-  
-  .child-actions {
+
+  .child-header {
     flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
-  
+
+  .id-label,
+  .id-value {
+    font-size: 0.85rem;
+  }
+
+  .child-status {
+    font-size: 0.75rem;
+  }
+
+  .info-label {
+    font-size: 0.75rem;
+  }
+
+  .info-value {
+    font-size: 0.85rem;
+  }
+
   .action-btn {
-    text-align: center;
+    padding: 0.625rem;
+    font-size: 0.8rem;
+  }
+
+  .modal-header,
+  .modal-footer {
+    padding: 1rem 1.25rem;
+  }
+
+  .modal-header h3 {
+    font-size: 1.125rem;
+  }
+
+  .modal-body {
+    padding: 1.25rem;
+  }
+
+  .details-section h4 {
+    font-size: 1rem;
+  }
+
+  .detail-item label {
+    font-size: 0.8rem;
+  }
+
+  .detail-item span {
+    font-size: 0.9rem;
+  }
+
+  .edit-btn,
+  .cancel-btn {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .no-results {
+    padding: 2rem 1rem;
+  }
+
+  .no-results-icon {
+    font-size: 2.5rem;
+  }
+
+  .no-results h4 {
+    font-size: 1rem;
+  }
+
+  .no-results p {
+    font-size: 0.875rem;
   }
 }
 </style>

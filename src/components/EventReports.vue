@@ -2,30 +2,30 @@
   <div class="event-reports-container">
     <!-- Header -->
     <div class="reports-header">
-      <div class="header-nav">
-        <div class="header-left">
-          <button @click="goBack" class="back-button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m12 19-7-7 7-7" />
-              <path d="m19 12H5" />
-            </svg>
-            Back to Dashboard
-          </button>
+      <div class="header-left">
+        <button @click="goBack" class="back-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m12 19-7-7 7-7" />
+            <path d="m19 12H5" />
+          </svg>
+          Back to Dashboard
+        </button>
+      </div>
+      <div class="header-center">
+        <h1 class="reports-title">Event Reports</h1>
+        <div class="data-source-indicator">
+          <span class="indicator-badge firebase">📡 Live Firebase Data</span>
         </div>
-        <div class="header-center">
-          <h1 class="reports-title">📊 Event Reports</h1>
-          <p class="reports-subtitle">Create dynamic pivot tables and visualizations from event data</p>
-        </div>
-        <div class="header-right">
-          <button @click="handleLogout" class="logout-button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-            Logout
-          </button>
-        </div>
+      </div>
+      <div class="header-right">
+        <button @click="handleLogout" class="logout-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </button>
       </div>
     </div>
 
@@ -895,18 +895,13 @@ onMounted(async () => {
 }
 
 .reports-header {
-  background: linear-gradient(135deg, #4A148C 0%, #2D1B69 100%);
-  color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.header-nav {
+  background: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background: rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .header-left {
@@ -930,9 +925,9 @@ onMounted(async () => {
 
 .back-button,
 .logout-button {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   padding: 0.625rem 1.25rem;
   border-radius: 8px;
   cursor: pointer;
@@ -949,39 +944,53 @@ onMounted(async () => {
 
 .back-button:hover,
 .logout-button:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .logout-button {
   background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
-  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .logout-button:hover {
   background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
-  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .reports-title {
-  font-size: 1.75rem;
-  margin: 0 0 0.25rem 0;
-  font-weight: 700;
-}
-
-.reports-subtitle {
-  font-size: 0.95rem;
-  opacity: 0.9;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
   margin: 0;
 }
 
-.header-content {
-  max-width: 1400px;
-  margin: 0 auto;
+.data-source-indicator {
+  margin-top: 0.5rem;
+}
+
+.indicator-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #28a745;
+  color: white;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.indicator-badge.firebase {
+  background: linear-gradient(45deg, #FF6B35, #F7931E);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
 }
 
 .reports-layout {

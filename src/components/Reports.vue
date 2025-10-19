@@ -1,34 +1,104 @@
 <template>
-  <div class="reports-container">
-    <!-- Header Section -->
+<div class="reports-container">
+    <!-- Header -->
     <div class="reports-header">
-      <div class="header-nav">
-        <div class="header-left">
-          <button @click="goBack" class="back-button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m12 19-7-7 7-7" />
-              <path d="m19 12H5" />
-            </svg>
-            Back to Dashboard
-          </button>
-        </div>
-        <div class="header-center">
-          <h1 class="reports-title">📊 Reports - Weekly</h1>
-          <p class="reports-subtitle">Upload and manage weekly reports with admin approval workflow</p>
-        </div>
-        <div class="header-right">
-          <button @click="handleLogout" class="logout-button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-            Logout
-          </button>
+      <div class="header-left">
+        <button @click="goBack" class="back-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m12 19-7-7 7-7" />
+            <path d="m19 12H5" />
+          </svg>
+          Back to Dashboard
+        </button>
+      </div>
+      <div class="header-center">
+        <h1 class="reports-title">Reports - Weekly</h1>
+        <div class="data-source-indicator">
+          <span class="indicator-badge firebase">📡 Live Firebase Data</span>
         </div>
       </div>
-      <div class="header-content">
-        <div class="header-stats">
+      <div class="header-right">
+        <button @click="showUploadForm = true" class="new-report-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14" />
+            <path d="m5 12 14 0" />
+          </svg>
+          Upload Report
+        </button>
+        <button @click="handleLogout" class="logout-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="reports-content">
+      <!-- Search and Filter Panel -->
+      <div class="search-panel">
+        <div class="search-controls">
+          <div class="search-input-group">
+            <label class="search-label">Search Reports</label>
+            <div class="search-input-container">
+              <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <input 
+                type="text" 
+                v-model="searchQuery" 
+                @input="performSearch"
+                placeholder="Search by title, uploader, or date..."
+                class="search-input"
+              />
+              <button v-if="searchQuery" @click="clearSearch" class="clear-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="m18 6-12 12" />
+                  <path d="m6 6 12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-item">
+              <label class="filter-label">Status</label>
+              <select v-model="selectedFilter" @change="loadReports" class="filter-select">
+                <option value="">All Status</option>
+                <option value="pending">Pending Approval</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+
+            <div class="filter-item">
+              <label class="filter-label">Report Type</label>
+              <select v-model="selectedTypeFilter" @change="loadReports" class="filter-select">
+                <option value="">All Types</option>
+                <option value="weekly">Weekly Reports</option>
+                <option value="monthly">Monthly Reports</option>
+                <option value="quarterly">Quarterly Reports</option>
+                <option value="annual">Annual Reports</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="search-actions">
+            <button @click="performSearch" class="search-button">
+              Search
+            </button>
+            <button @click="resetFilters" class="reset-button">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
           <div class="stat-card">
             <div class="stat-number">{{ reportStats.total || 0 }}</div>
             <div class="stat-label">Total Reports</div>
@@ -41,118 +111,19 @@
             <div class="stat-number">{{ reportStats.approved || 0 }}</div>
             <div class="stat-label">Approved</div>
           </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ reportStats.rejected || 0 }}</div>
+            <div class="stat-label">Rejected</div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Action Buttons -->
-    <div class="action-bar">
-      <button @click="showUploadForm = true" class="upload-btn">
-        📤 Upload New Report
-      </button>
-      <div class="filter-controls">
-        <select v-model="selectedFilter" @change="loadReports" class="filter-select">
-          <option value="">All Reports</option>
-          <option value="pending">Pending Approval</option>
-          <option value="approved">Approved</option>
-          <option value="rejected">Rejected</option>
-        </select>
-        <select v-model="selectedTypeFilter" @change="loadReports" class="filter-select">
-          <option value="">All Types</option>
-          <option value="weekly">Weekly Reports</option>
-          <option value="monthly">Monthly Reports</option>
-          <option value="quarterly">Quarterly Reports</option>
-          <option value="annual">Annual Reports</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Upload Form Modal -->
-    <div v-if="showUploadForm" class="modal-overlay" @click="closeUploadForm">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>📤 Upload New Report</h3>
-          <button @click="closeUploadForm" class="close-btn">&times;</button>
+      <!-- Reports List -->
+      <div class="reports-main">
+        <div v-if="loading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Loading reports...</p>
         </div>
-        <form @submit.prevent="handleUploadReport" class="upload-form">
-          <div class="form-group">
-            <label>Report Title *</label>
-            <input 
-              v-model="uploadForm.title" 
-              type="text" 
-              required 
-              placeholder="e.g., Weekly Report - Week 42"
-              class="form-input"
-            />
-          </div>
-          
-          <div class="form-group">
-            <label>Report Type</label>
-            <select v-model="uploadForm.reportType" class="form-select">
-              <option value="weekly">Weekly Report</option>
-              <option value="monthly">Monthly Report</option>
-              <option value="quarterly">Quarterly Report</option>
-              <option value="annual">Annual Report</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>Description (Optional)</label>
-            <textarea 
-              v-model="uploadForm.description" 
-              placeholder="Brief description of the report contents..."
-              class="form-textarea"
-              rows="3"
-            ></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Select File *</label>
-            <div class="file-upload-area" @click="fileInput.click()">
-              <input 
-                ref="fileInput"
-                type="file"
-                @change="handleFileSelect"
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                hidden
-                required
-              />
-              <div v-if="!uploadForm.file" class="upload-placeholder">
-                <div class="upload-icon">📁</div>
-                <div class="upload-text">Click to select a file</div>
-                <div class="upload-hint">Supported: PDF, Word, Excel, PowerPoint, Text files</div>
-              </div>
-              <div v-else class="selected-file">
-                <div class="file-info">
-                  <span class="file-icon">{{ getFileIcon(uploadForm.file.type) }}</span>
-                  <div class="file-details">
-                    <div class="file-name">{{ uploadForm.file.name }}</div>
-                    <div class="file-size">{{ formatFileSize(uploadForm.file.size) }}</div>
-                  </div>
-                </div>
-                <button type="button" @click.stop="clearFile" class="remove-file-btn">×</button>
-              </div>
-            </div>
-          </div>
-          
-          <div class="form-actions">
-            <button type="submit" :disabled="uploading || !uploadForm.file" class="submit-btn">
-              {{ uploading ? 'Uploading...' : 'Upload Report' }}
-            </button>
-            <button type="button" @click="closeUploadForm" class="cancel-btn">
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Reports List -->
-    <div class="reports-list">
-      <div v-if="loading" class="loading-state">
-        <div class="loading-spinner"></div>
-        <p>Loading reports...</p>
-      </div>
       
       <div v-else-if="reports.length === 0" class="empty-state">
         <div class="empty-icon">📋</div>
@@ -233,6 +204,87 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- Upload Form Modal -->
+    <div v-if="showUploadForm" class="modal-overlay" @click="closeUploadForm">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>📤 Upload New Report</h3>
+          <button @click="closeUploadForm" class="close-btn">&times;</button>
+        </div>
+        <form @submit.prevent="handleUploadReport" class="upload-form">
+          <div class="form-group">
+            <label>Report Title *</label>
+            <input 
+              v-model="uploadForm.title" 
+              type="text" 
+              required 
+              placeholder="e.g., Weekly Report - Week 42"
+              class="form-input"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label>Report Type</label>
+            <select v-model="uploadForm.reportType" class="form-select">
+              <option value="weekly">Weekly Report</option>
+              <option value="monthly">Monthly Report</option>
+              <option value="quarterly">Quarterly Report</option>
+              <option value="annual">Annual Report</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Description (Optional)</label>
+            <textarea 
+              v-model="uploadForm.description" 
+              placeholder="Brief description of the report contents..."
+              class="form-textarea"
+              rows="3"
+            ></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Select File *</label>
+            <div class="file-upload-area" @click="fileInput.click()">
+              <input 
+                ref="fileInput"
+                type="file"
+                @change="handleFileSelect"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                hidden
+                required
+              />
+              <div v-if="!uploadForm.file" class="upload-placeholder">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click to select a file</div>
+                <div class="upload-hint">Supported: PDF, Word, Excel, PowerPoint, Text files</div>
+              </div>
+              <div v-else class="selected-file">
+                <div class="file-info">
+                  <span class="file-icon">{{ getFileIcon(uploadForm.file.type) }}</span>
+                  <div class="file-details">
+                    <div class="file-name">{{ uploadForm.file.name }}</div>
+                    <div class="file-size">{{ formatFileSize(uploadForm.file.size) }}</div>
+                  </div>
+                </div>
+                <button type="button" @click.stop="clearFile" class="remove-file-btn">×</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit" :disabled="uploading || !uploadForm.file" class="submit-btn">
+              {{ uploading ? 'Uploading...' : 'Upload Report' }}
+            </button>
+            <button type="button" @click="closeUploadForm" class="cancel-btn">
+              Cancel
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -370,6 +422,9 @@ const props = defineProps({
   }
 })
 
+// Emits
+const emit = defineEmits(['back-to-dashboard'])
+
 // Template ref for file input
 const fileInput = ref(null)
 
@@ -380,6 +435,7 @@ const loading = ref(false)
 const uploading = ref(false)
 const approving = ref(false)
 const userNames = ref({}) // Cache for user names
+const searchQuery = ref('') // Search query
 
 // UI state
 const showUploadForm = ref(false)
@@ -454,6 +510,23 @@ const loadReports = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// Search and filter methods
+const performSearch = () => {
+  loadReports()
+}
+
+const clearSearch = () => {
+  searchQuery.value = ''
+  loadReports()
+}
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  selectedFilter.value = ''
+  selectedTypeFilter.value = ''
+  loadReports()
 }
 
 // Fetch user names for reports
@@ -715,7 +788,8 @@ const showMessage = (msg, type = 'success') => {
 
 // Navigation methods
 const goBack = () => {
-  router.push('/dashboard')
+  // Emit event to parent Dashboard component
+  emit('back-to-dashboard')
 }
 
 const handleLogout = async () => {
@@ -736,22 +810,13 @@ const handleLogout = async () => {
 
 /* Header */
 .reports-header {
-  background: linear-gradient(135deg, #4A148C 0%, #2D1B69 100%);
-  color: white;
-  border-radius: 12px;
-  padding: 0;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 12px rgba(74, 20, 140, 0.3);
-  overflow: hidden;
-}
-
-.header-nav {
+  background: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background: rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .header-left {
@@ -773,11 +838,44 @@ const handleLogout = async () => {
   text-align: center;
 }
 
+.reports-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.data-source-indicator {
+  margin-top: 0.5rem;
+}
+
+.indicator-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #28a745;
+  color: white;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.indicator-badge.firebase {
+  background: linear-gradient(45deg, #FF6B35, #F7931E);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
 .back-button,
 .logout-button {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   padding: 0.625rem 1.25rem;
   border-radius: 8px;
   cursor: pointer;
@@ -794,114 +892,231 @@ const handleLogout = async () => {
 
 .back-button:hover,
 .logout-button:hover {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .logout-button {
   background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
-  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .logout-button:hover {
   background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
-  border-color: rgba(255, 255, 255, 0.3);
 }
 
-.header-content {
-  padding: 2rem;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-}
-
-.reports-title {
-  font-size: 2rem;
-  margin: 0 0 0.5rem 0;
-  font-weight: 700;
-}
-
-.reports-subtitle {
-  font-size: 1rem;
-  opacity: 0.9;
-  margin: 0;
-}
-
-.header-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-
-.stat-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 8px;
-  padding: 1rem;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.stat-number {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-}
-
-.stat-label {
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
-
-/* Action Bar */
-.action-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  gap: 1rem;
-}
-
-.upload-btn {
-  background: linear-gradient(135deg, #4A148C 0%, #2D1B69 100%);
+.new-report-button {
+  background: #007bff;
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(74, 20, 140, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
-.upload-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(74, 20, 140, 0.4);
+.new-report-button:hover {
+  background: #0056b3;
 }
 
-.filter-controls {
+
+
+.reports-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.search-panel {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-controls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: end;
+  margin-bottom: 1.5rem;
+}
+
+.search-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.search-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: #6c757d;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.clear-search {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.125rem;
+}
+
+.clear-search:hover {
+  background: #f8f9fa;
+}
+
+.filter-group {
   display: flex;
   gap: 1rem;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
 }
 
 .filter-select {
-  padding: 8px 12px;
-  border: 2px solid #ddd;
-  border-radius: 6px;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
   font-size: 0.9rem;
-  color: #4A148C;
   background: white;
   cursor: pointer;
 }
 
 .filter-select:focus {
   outline: none;
-  border-color: #4A148C;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.search-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.search-button,
+.reset-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.search-button {
+  background: #007bff;
+  color: white;
+}
+
+.search-button:hover {
+  background: #0056b3;
+}
+
+.reset-button {
+  background: #6c757d;
+  color: white;
+}
+
+.reset-button:hover {
+  background: #5a6268;
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.stat-card:nth-child(2) {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-card:nth-child(3) {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stat-card:nth-child(4) {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.9;
 }
 
 /* Modal Styles */
@@ -1524,101 +1739,35 @@ const handleLogout = async () => {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-  .reports-container {
-    padding: 1rem;
+@media (max-width: 1024px) {
+  .reports-content {
+    padding: 1.5rem;
   }
 
-  .header-content {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .header-stats {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .action-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-controls {
-    justify-content: center;
+  .quick-stats {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .reports-grid {
     grid-template-columns: 1fr;
   }
+}
 
-  .report-header {
+@media (max-width: 768px) {
+  .reports-container {
+    padding: 0;
+  }
+
+  /* Header Mobile Styles */
+  .reports-header {
     flex-direction: column;
-    gap: 1rem;
-  }
-
-  .report-actions {
-    flex-direction: column;
-  }
-
-  .admin-actions {
-    flex-direction: column;
-  }
-
-  .modal-content {
-    width: 95%;
-    margin: 1rem;
-  }
-
-  .approval-modal {
-    max-width: 95%;
-  }
-
-  .preview-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .download-link-btn {
-    width: 100%;
-    text-align: center;
-  }
-
-  .embedded-preview {
-    min-height: 400px;
-    max-height: 500px;
-  }
-
-  .preview-iframe {
-    height: 400px;
-  }
-
-  .report-preview {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .preview-btn {
-    align-self: stretch;
-    text-align: center;
-  }
-
-  .form-actions, .approval-actions {
-    flex-direction: column;
-  }
-
-  .message-toast {
-    left: 20px;
-    right: 20px;
-    min-width: auto;
-  }
-
-  .header-nav {
-    flex-direction: column;
-    gap: 1rem;
     padding: 1rem;
+    gap: 1rem;
   }
 
-  .header-left, .header-center, .header-right {
+  .header-left,
+  .header-center,
+  .header-right {
     flex: none;
     width: 100%;
   }
@@ -1629,53 +1778,216 @@ const handleLogout = async () => {
 
   .header-center {
     order: 2;
-    text-align: center;
   }
 
   .header-right {
     order: 3;
-    justify-content: center;
+    justify-content: space-between;
   }
 
   .back-button,
-  .logout-button {
+  .logout-button,
+  .new-report-button {
     padding: 0.75rem 1rem;
     font-size: 0.85rem;
   }
 
   .reports-title {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
 
-  .reports-subtitle {
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .header-nav {
-    padding: 0.75rem;
+  .data-source-indicator {
+    margin-top: 0.25rem;
   }
 
-  .reports-title {
-    font-size: 1.25rem;
+  .indicator-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
   }
 
-  .reports-subtitle {
-    font-size: 0.85rem;
+  /* Content Mobile Styles */
+  .reports-content {
+    padding: 1rem;
   }
 
-  .back-button,
-  .logout-button {
-    padding: 0.625rem 0.875rem;
-    font-size: 0.8rem;
+  .search-panel {
+    padding: 1rem;
+  }
+
+  .search-controls {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .filter-group {
+    flex-direction: column;
+  }
+
+  .search-actions {
+    width: 100%;
+  }
+
+  .search-button,
+  .reset-button {
+    flex: 1;
+  }
+
+  .quick-stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  /* Reports Grid Mobile */
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-card {
+    padding: 1rem;
+  }
+
+  .report-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .report-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .report-actions {
+    flex-direction: column;
+  }
+
+  .admin-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-btn {
     width: 100%;
     justify-content: center;
   }
 
+  /* Modal Mobile Styles */
+  .modal-content {
+    width: 95%;
+    max-width: 95%;
+    margin: 1rem;
+  }
+
+  .modal-header {
+    padding: 1rem;
+  }
+
+  .upload-form,
+  .approval-form {
+    padding: 1rem;
+  }
+
+  .form-actions,
+  .approval-actions {
+    flex-direction: column;
+  }
+
+  .submit-btn,
+  .approve-btn,
+  .reject-btn,
+  .cancel-btn {
+    width: 100%;
+  }
+
+  /* Preview Mobile */
+  .preview-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .preview-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .download-link-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .embedded-preview {
+    min-height: 300px;
+    max-height: 400px;
+  }
+
+  .preview-iframe {
+    height: 300px;
+  }
+
+  /* Toast Mobile */
+  .message-toast {
+    left: 1rem;
+    right: 1rem;
+    min-width: auto;
+    top: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra Small Devices */
+  .reports-header {
+    padding: 0.75rem;
+  }
+
+  .reports-title {
+    font-size: 1.1rem;
+  }
+
+  .back-button,
+  .logout-button,
+  .new-report-button {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .back-button svg,
+  .logout-button svg,
+  .new-report-button svg {
+    width: 14px;
+    height: 14px;
+  }
+
   .header-right {
-    flex-direction: row;
+    flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .new-report-button,
+  .logout-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .reports-content {
+    padding: 0.75rem;
+  }
+
+  .search-panel {
+    padding: 0.75rem;
+  }
+
+  .search-input,
+  .filter-select {
+    font-size: 0.85rem;
   }
 
   .stat-card {
@@ -1683,11 +1995,39 @@ const handleLogout = async () => {
   }
 
   .stat-number {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
 
-  .header-stats {
-    grid-template-columns: 1fr;
+  .stat-label {
+    font-size: 0.8rem;
+  }
+
+  .report-card {
+    padding: 0.75rem;
+  }
+
+  .report-title {
+    font-size: 1rem;
+  }
+
+  .report-meta,
+  .metadata-item {
+    font-size: 0.8rem;
+  }
+
+  .action-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .modal-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 0.9rem;
   }
 }
 </style>

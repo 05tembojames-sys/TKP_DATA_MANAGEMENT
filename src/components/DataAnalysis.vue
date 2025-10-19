@@ -2,74 +2,83 @@
   <div class="data-analysis-pro">
     <!-- Professional Header -->
     <div class="analytics-header">
-      <div class="header-toolbar">
-        <div class="app-title">
-          <div class="title-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 3v18h18"/>
-              <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
-            </svg>
-          </div>
-          <div class="title-text">
-            <h1>Data Analytics</h1>
-            <span class="subtitle">KHUKOMA Project Analysis System</span>
-          </div>
+      <div class="header-left">
+        <button @click="goBack" class="back-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m12 19-7-7 7-7" />
+            <path d="m19 12H5" />
+          </svg>
+          Back to Dashboard
+        </button>
+      </div>
+      <div class="header-center">
+        <h1 class="page-title">Data Analytics</h1>
+        <div class="data-source-indicator">
+      
         </div>
-        <div class="toolbar-actions">
-          <button @click="refreshData" class="tool-btn" :disabled="loading">
+      </div>
+      <div class="header-right">
+        <button @click="refreshData" class="tool-btn" :disabled="loading">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 4v6h6"/>
+            <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+          </svg>
+          {{ loading ? 'Refreshing...' : 'Refresh' }}
+        </button>
+        <div class="dropdown" ref="exportDropdown">
+          <button @click="toggleExportDropdown" class="tool-btn dropdown-toggle">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 4v6h6"/>
-              <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7,10 12,15 17,10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            {{ loading ? 'Refreshing...' : 'Refresh' }}
+            Export
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6,9 12,15 18,9"/>
+            </svg>
           </button>
-          <div class="dropdown" ref="exportDropdown">
-            <button @click="toggleExportDropdown" class="tool-btn dropdown-toggle">
+          <div v-if="showExportDropdown" class="dropdown-menu">
+            <button @click="exportData('pdf')" class="dropdown-item">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                <polyline points="7,10 12,15 17,10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
               </svg>
-              Export
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6,9 12,15 18,9"/>
-              </svg>
+              Export as PDF
             </button>
-            <div v-if="showExportDropdown" class="dropdown-menu">
-              <button @click="exportData('pdf')" class="dropdown-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
-                </svg>
-                Export as PDF
-              </button>
-              <button @click="exportData('excel')" class="dropdown-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <line x1="9" y1="9" x2="15" y2="15"/>
-                  <line x1="15" y1="9" x2="9" y2="15"/>
-                </svg>
-                Export as Excel
-              </button>
-              <button @click="exportData('csv')" class="dropdown-item">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
-                  <line x1="8" y1="13" x2="16" y2="13"/>
-                  <line x1="8" y1="17" x2="16" y2="17"/>
-                </svg>
-                Export as CSV
-              </button>
-            </div>
+            <button @click="exportData('excel')" class="dropdown-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+              </svg>
+              Export as Excel
+            </button>
+            <button @click="exportData('csv')" class="dropdown-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14,2 14,8 20,8"/>
+                <line x1="8" y1="13" x2="16" y2="13"/>
+                <line x1="8" y1="17" x2="16" y2="17"/>
+              </svg>
+              Export as CSV
+            </button>
           </div>
-          <button @click="openSettings" class="tool-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
-            </svg>
-            Settings
-          </button>
         </div>
+        <button @click="openSettings" class="tool-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+          </svg>
+          Settings
+        </button>
+        <button @click="handleLogout" class="logout-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </button>
       </div>
     </div>
 
@@ -320,268 +329,17 @@
           </div>
 
           <!-- Pivot Table Tab -->
-          <div v-if="activeTab === 'pivot'" class="flex flex-col h-full bg-white">
-            <div class="flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50">
-              <h3 class="text-lg font-semibold text-gray-800">Pivot Table</h3>
-              <div class="flex gap-2">
-                <button @click="configurePivot" class="px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 flex items-center gap-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 20h9"/>
-                    <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/>
-                  </svg>
-                  Configure
-                </button>
-                <button @click="refreshPivot" class="px-3 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 flex items-center gap-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 4v6h6"/>
-                    <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
-                  </svg>
-                  Refresh
-                </button>
-              </div>
-            </div>
-            <div class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 p-4">
-              <!-- Available Fields -->
-              <div class="bg-gray-50 rounded-lg p-4">
-                <h4 class="text-sm font-semibold text-gray-700 mb-3">📋 Available Fields</h4>
-                <div class="space-y-2">
-                  <div v-for="field in availablePivotFields" 
-                       :key="field.id" 
-                       class="flex items-center gap-2 p-2 bg-white border border-gray-200 rounded hover:border-purple-300 hover:shadow-sm transition-all"
-                       :class="field.type === 'dimension' ? 'border-l-4 border-l-blue-400' : 'border-l-4 border-l-green-400'"
-                       draggable="true"
-                       @dragstart="startDrag($event, field)"
-                       style="cursor: crosshair;">
-                    <div class="flex-shrink-0">
-                      <svg v-if="field.type === 'dimension'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-blue-500">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="12" y1="3" x2="12" y2="21"/>
-                        <line x1="3" y1="12" x2="21" y2="12"/>
-                      </svg>
-                      <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green-500">
-                        <line x1="12" y1="2" x2="12" y2="22"/>
-                        <line x1="17" y1="5" x2="9" y2="19"/>
-                        <line x1="7" y1="5" x2="15" y2="19"/>
-                      </svg>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700 flex-1">{{ field.name }}</span>
-                    <span class="text-xs px-2 py-1 rounded-full" :class="field.type === 'dimension' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'">{{ field.type }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Quick Start Templates -->
-              <div class="bg-gray-50 rounded-lg p-4" v-if="showPivotConfig">
-                <h4 class="text-sm font-semibold text-gray-700 mb-3">🚀 Quick Start Templates</h4>
-                <div class="space-y-2">
-                  <button @click="loadPivotTemplate('age-status')" class="w-full text-left p-2 bg-white border border-gray-200 rounded hover:border-purple-300 hover:bg-purple-50 transition-all text-sm">
-                    📊 Age Groups vs Status
-                  </button>
-                  <button @click="loadPivotTemplate('form-types')" class="w-full text-left p-2 bg-white border border-gray-200 rounded hover:border-purple-300 hover:bg-purple-50 transition-all text-sm">
-                    📋 Form Types Analysis  
-                  </button>
-                  <button @click="loadPivotTemplate('referral-methods')" class="w-full text-left p-2 bg-white border border-gray-200 rounded hover:border-purple-300 hover:bg-purple-50 transition-all text-sm">
-                    🔗 Referral Sources
-                  </button>
-                  <button @click="clearPivotConfig" class="w-full text-left p-2 bg-white border border-gray-200 rounded hover:border-red-300 hover:bg-red-50 transition-all text-sm">
-                    🗑️ Clear All
-                  </button>
-                  <button @click="testDragDrop" class="w-full text-left p-2 bg-green-500 text-white rounded hover:bg-green-600 transition-all text-sm">
-                    🧪 Test Drag/Drop
-                  </button>
-                </div>
-              </div>
-
-              <!-- Configuration Area -->
-              <div class="col-span-2 space-y-4">
-                <!-- Configuration Sections -->
-                <div class="config-sections space-y-4">
-                  <!-- Rows Section -->
-                  <div class="config-section bg-white p-4 rounded-lg border border-gray-300">
-                    <div class="config-header flex items-center justify-between mb-3">
-                      <h4>📊 Rows</h4>
-                      <span class="config-hint text-gray-400 text-sm">Drag dimensions here</span>
-                    </div>
-                    <div class="drag-area rows min-h-[120px] border-2 border-dashed rounded p-2 overflow-auto"
-                         @drop="dropField($event, 'rows')" 
-                         @dragover.prevent="addDragOverClass($event)"
-                         @dragenter.prevent="addDragOverClass($event)"
-                         @dragleave="removeDragOverClass($event)">
-                      <div v-for="field in pivotConfig.rows" :key="'row-' + field.id" class="pivot-field flex justify-between items-center bg-purple-50 border border-purple-300 rounded px-3 py-1 mb-2">
-                        <div class="field-content flex items-center gap-2">
-                          <div class="field-icon">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            </svg>
-                          </div>
-                          <span class="field-name text-purple-700">{{ field.name }}</span>
-                        </div>
-                        <button @click="removeField('rows', field.id)" class="remove-field text-purple-700 hover:text-purple-900" title="Remove field">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"/>
-                            <line x1="6" y1="6" x2="18" y2="18"/>
-                          </svg>
-                        </button>
-                      </div>
-                      <div v-if="pivotConfig.rows.length === 0" class="drop-placeholder flex flex-col items-center gap-1 text-gray-400 text-sm">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                          <path d="M12 5v14m7-7H5"/>
-                        </svg>
-                        <span>Drop fields here for rows</span>
-                      </div>
-                    </div>
-                  </div>
-        
-        <!-- Columns Section -->
-        <div class="config-section bg-white p-4 rounded-lg border border-gray-300">
-          <div class="config-header flex items-center justify-between mb-3">
-            <h4>📈 Columns</h4>
-            <span class="config-hint text-gray-400 text-sm">Drag dimensions here</span>
-          </div>
-          <div class="drag-area columns min-h-[120px] border-2 border-dashed rounded p-2 overflow-auto"
-               @drop="dropField($event, 'columns')" 
-               @dragover.prevent="addDragOverClass($event)"
-               @dragenter.prevent="addDragOverClass($event)"
-               @dragleave="removeDragOverClass($event)">
-            <div v-for="field in pivotConfig.columns" :key="'col-' + field.id" class="pivot-field flex justify-between items-center bg-purple-50 border border-purple-300 rounded px-3 py-1 mb-2">
-              <div class="field-content flex items-center gap-2">
-                <div class="field-icon">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  </svg>
-                </div>
-                <span class="field-name text-purple-700">{{ field.name }}</span>
-              </div>
-              <button @click="removeField('columns', field.id)" class="remove-field text-purple-700 hover:text-purple-900" title="Remove field">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-            <div v-if="pivotConfig.columns.length === 0" class="drop-placeholder flex flex-col items-center gap-1 text-gray-400 text-sm">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M12 5v14m7-7H5"/>
-              </svg>
-              <span>Drop fields here for columns</span>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Values Section -->
-        <div class="config-section bg-white p-4 rounded-lg border border-gray-300">
-          <div class="config-header flex items-center justify-between mb-3">
-            <h4>📊 Values</h4>
-            <span class="config-hint text-gray-400 text-sm">Drag values here</span>
-          </div>
-          <div class="drag-area values min-h-[120px] border-2 border-dashed rounded p-2 overflow-auto"
-               @drop="dropField($event, 'values')" 
-               @dragover.prevent="addDragOverClass($event)"
-               @dragenter.prevent="addDragOverClass($event)"
-               @dragleave="removeDragOverClass($event)">
-            <div v-for="field in pivotConfig.values" :key="'val-' + field.id" class="pivot-field flex justify-between items-center bg-purple-50 border border-purple-300 rounded px-3 py-1 mb-2">
-              <div class="field-content flex items-center gap-2">
-                <div class="field-icon">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="2" x2="12" y2="22"/>
-                    <line x1="17" y1="5" x2="9" y2="19"/>
-                  </svg>
-                </div>
-                <span class="field-name text-purple-700">{{ field.name }}</span>
-                <select v-model="field.aggregation" class="ml-2 bg-transparent border border-purple-300 rounded text-xs text-purple-700 px-1 py-0.5 focus:outline-none" @change="generatePivotData">
-                  <option value="sum">Sum</option>
-                  <option value="count">Count</option>
-                  <option value="avg">Average</option>
-                  <option value="min">Min</option>
-                  <option value="max">Max</option>
-                </select>
-              </div>
-              <button @click="removeField('values', field.id)" class="remove-field text-purple-700 hover:text-purple-900" title="Remove field">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-            <div v-if="pivotConfig.values.length === 0" class="drop-placeholder flex flex-col items-center gap-1 text-gray-400 text-sm">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M12 5v14m7-7H5"/>
-              </svg>
-              <span>Drop values here</span>
-            </div>
-          </div>
-        </div>
-                </div>
-                
-                <!-- Pivot Table Results -->
-                <div class="w-full overflow-auto">
-                  <!-- Debug Info -->
-                  <div v-if="showDebugInfo" class="bg-gray-100 p-4 mb-4 rounded font-mono text-sm">
-                    <div><strong>Debug Info:</strong></div>
-                    <div>pivotData.length: {{ pivotData.length }}</div>
-                    <div>pivotHeaders.length: {{ pivotHeaders.length }}</div>
-                    <div>pivotConfig.rows.length: {{ pivotConfig.rows.length }}</div>
-                    <div>pivotConfig.values.length: {{ pivotConfig.values.length }}</div>
-                    <div>realAnalytics exists: {{ !!realAnalytics }}</div>
-                    <button @click="showDebugInfo = !showDebugInfo" class="mt-2 px-2 py-1 bg-green-500 text-white border-0 rounded cursor-pointer">Hide Debug</button>
-                  </div>
-                  
-                  <div v-if="pivotData.length > 0" class="block w-full visible opacity-100">
-                    <div class="flex justify-between items-center mb-4">
-                      <h4 class="text-lg font-semibold text-gray-800">📊 Pivot Table Results</h4>
-                      <div class="flex gap-2">
-                        <button @click="showDebugInfo = !showDebugInfo" class="px-3 py-2 bg-indigo-500 text-white border-0 rounded cursor-pointer text-xs">
-                          🐛 Debug
-                        </button>
-                        <button @click="exportPivotTable('csv')" class="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white border-0 rounded cursor-pointer text-sm hover:bg-purple-700">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                            <polyline points="7,10 12,15 17,10"/>
-                            <line x1="12" y1="15" x2="12" y2="3"/>
-                          </svg>
-                          Export CSV
-                        </button>
-                      </div>
-                    </div>
-                    <div class="w-full overflow-x-auto">
-                      <table class="w-full border-collapse bg-white rounded shadow-sm table visible opacity-100 relative z-10">
-                        <thead>
-                          <tr>
-                            <th v-for="header in pivotHeaders" :key="header.id" :colspan="header.colspan || 1" 
-                                class="px-4 py-3 text-left border-b border-gray-200 text-sm bg-gray-50 font-semibold text-gray-700">
-                              {{ header.name }}
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr v-for="row in pivotData" :key="row.id" class="border-b border-gray-100 hover:bg-gray-50">
-                            <td v-for="cell in row.cells" :key="cell.id" :class="cell.type" 
-                                class="px-4 py-3 text-left text-sm text-gray-900">
-                              {{ cell.value }}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  
-                  <div v-else class="flex flex-col items-center justify-center text-gray-500 py-12">
-                    <div class="text-center">
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="mx-auto mb-4">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <line x1="12" y1="3" x2="12" y2="21"/>
-                        <line x1="3" y1="12" x2="21" y2="12"/>
-                      </svg>
-                      <h4 class="text-lg font-semibold mb-2">Create Your Analytics Pivot Table</h4>
-                      <p class="text-gray-400 mb-6">Use the templates above or drag fields to build your analysis.</p>
-                      <button @click="showDebugInfo = !showDebugInfo" class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600">
-                        🐛 Show Debug Info
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div v-if="activeTab === 'pivot'" class="pivot-tab-container">
+            <PivotTable 
+              :config="pivotConfig"
+              :data="pivotData"
+              :headers="pivotHeaders"
+              :available-fields="availablePivotFields"
+              @drop-field="dropField"
+              @remove-field="removeField"
+              @update="generatePivotData"
+              @export="exportPivotTable('csv')"
+            />
           </div>
 
 
@@ -754,10 +512,13 @@
                     <div class="widget-grid">
                       <div v-for="widget in chartWidgets" :key="widget.id" 
                            class="widget-card" 
-                           @click="addWidget(widget.id)"
+                           :class="{ 'disabled': dashboardWidgets.length > 0 }"
+                           @click="handleWidgetClick(widget.id)"
+                           @mousedown="startWidgetMouseDown"
+                           @mouseup="handleWidgetMouseUp"
                            draggable="true"
-                           @dragstart="dragWidget($event, widget)"
-                           :title="widget.description">
+                           @dragstart="handleWidgetDragStart($event, widget)"
+                           :title="dashboardWidgets.length > 0 ? 'Only one widget allowed at a time. Please remove the existing widget first.' : widget.description">
                         <div class="widget-icon">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path :d="widget.icon"/>
@@ -777,10 +538,13 @@
                     <div class="widget-grid">
                       <div v-for="widget in dataWidgets" :key="widget.id" 
                            class="widget-card" 
-                           @click="addWidget(widget.id)"
+                           :class="{ 'disabled': dashboardWidgets.length > 0 }"
+                           @click="handleWidgetClick(widget.id)"
+                           @mousedown="startWidgetMouseDown"
+                           @mouseup="handleWidgetMouseUp"
                            draggable="true"
-                           @dragstart="dragWidget($event, widget)"
-                           :title="widget.description">
+                           @dragstart="handleWidgetDragStart($event, widget)"
+                           :title="dashboardWidgets.length > 0 ? 'Only one widget allowed at a time. Please remove the existing widget first.' : widget.description">
                         <div class="widget-icon">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path :d="widget.icon"/>
@@ -1409,6 +1173,125 @@
         </div>
       </div>
     </div>
+
+    <!-- Settings Modal -->
+    <div v-if="showSettingsModal" class="settings-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>⚙️ Analytics Settings</h3>
+          <button @click="closeSettings" class="close-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="modal-body">
+          <!-- Display Settings -->
+          <div class="settings-section">
+            <h4>📊 Display Settings</h4>
+            <div class="setting-item">
+              <label for="defaultTab">Default Tab</label>
+              <select id="defaultTab" v-model="settings.defaultTab" class="setting-select">
+                <option value="visualizer">Data Visualizer</option>
+                <option value="pivot">Pivot Table</option>
+                <option value="reports">Reports</option>
+                <option value="dashboard">Dashboard</option>
+              </select>
+            </div>
+            
+            <div class="setting-item">
+              <label for="defaultChartType">Default Chart Type</label>
+              <select id="defaultChartType" v-model="settings.defaultChartType" class="setting-select">
+                <option value="column">Column Chart</option>
+                <option value="line">Line Chart</option>
+                <option value="pie">Pie Chart</option>
+                <option value="bar">Bar Chart</option>
+                <option value="area">Area Chart</option>
+              </select>
+            </div>
+            
+            <div class="setting-item">
+              <label for="colorScheme">Color Scheme</label>
+              <select id="colorScheme" v-model="settings.colorScheme" class="setting-select">
+                <option value="default">Default</option>
+                <option value="professional">Professional</option>
+                <option value="vibrant">Vibrant</option>
+                <option value="pastel">Pastel</option>
+              </select>
+            </div>
+            
+            <div class="setting-item checkbox-item">
+              <input type="checkbox" id="showGridLines" v-model="settings.showGridLines">
+              <label for="showGridLines">Show Grid Lines</label>
+            </div>
+            
+            <div class="setting-item checkbox-item">
+              <input type="checkbox" id="enableAnimations" v-model="settings.enableAnimations">
+              <label for="enableAnimations">Enable Animations</label>
+            </div>
+          </div>
+          
+          <!-- Data Settings -->
+          <div class="settings-section">
+            <h4>🔄 Data Settings</h4>
+            <div class="setting-item checkbox-item">
+              <input type="checkbox" id="autoRefresh" v-model="settings.autoRefresh">
+              <label for="autoRefresh">Auto Refresh Data</label>
+            </div>
+            
+            <div class="setting-item" v-if="settings.autoRefresh">
+              <label for="refreshInterval">Refresh Interval (seconds)</label>
+              <input type="number" id="refreshInterval" v-model.number="settings.refreshInterval" min="10" max="300" class="setting-input">
+            </div>
+          </div>
+          
+          <!-- Export Settings -->
+          <div class="settings-section">
+            <h4>📥 Export Settings</h4>
+            <div class="setting-item">
+              <label for="exportFormat">Default Export Format</label>
+              <select id="exportFormat" v-model="settings.exportFormat" class="setting-select">
+                <option value="csv">CSV</option>
+                <option value="excel">Excel</option>
+                <option value="pdf">PDF</option>
+              </select>
+            </div>
+            
+            <div class="setting-item">
+              <label for="dateFormat">Date Format</label>
+              <select id="dateFormat" v-model="settings.dateFormat" class="setting-select">
+                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button @click="resetSettings" class="reset-settings-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 4v6h6"/>
+              <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+            </svg>
+            Reset to Defaults
+          </button>
+          <div class="modal-actions">
+            <button @click="closeSettings" class="cancel-btn">Cancel</button>
+            <button @click="saveSettings" class="save-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                <polyline points="17,21 17,13 7,13 7,21"/>
+                <polyline points="7,3 7,8 15,8"/>
+              </svg>
+              Save Settings
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -1417,19 +1300,54 @@ import { ref, onMounted, computed, nextTick, onUnmounted, watch } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import FormService from '../services/formService.js'
 import UserService from '../services/userService.js'
+import PivotTable from './PivotTable.vue'
 
 // Register Chart.js components
 Chart.register(...registerables)
 
+// Emits
+const emit = defineEmits(['back-to-dashboard'])
+
+// Navigation
+const goBack = () => {
+  emit('back-to-dashboard')
+}
+
+const handleLogout = async () => {
+  try {
+    await UserService.logout()
+    // Redirect to login page or emit event to parent
+    window.location.href = '/admin-login'
+  } catch (error) {
+    console.error('Logout error:', error)
+  }
+}
+
 // Reactive data
 const loading = ref(false)
 const showExportDropdown = ref(false)
+const showSettingsModal = ref(false)
 const activeTab = ref('visualizer')
 const chartType = ref('column')
 const hasData = ref(false)
 const chartTitle = ref('')
 const colorScheme = ref('default')
 const enableAnimation = ref(true)
+
+// Settings data
+const settings = ref({
+  autoRefresh: false,
+  refreshInterval: 30,
+  defaultTab: 'visualizer',
+  defaultChartType: 'column',
+  showGridLines: true,
+  enableAnimations: true,
+  colorScheme: 'default',
+  exportFormat: 'csv',
+  dateFormat: 'YYYY-MM-DD',
+  timezone: 'local'
+})
+
 const canGenerateChart = computed(() => {
   return selectedDimensions.value.length > 0 && selectedPeriod.value
 })
@@ -1837,6 +1755,19 @@ const toggleExportDropdown = () => {
   showExportDropdown.value = !showExportDropdown.value
 }
 
+// Close dropdown when clicking outside
+const handleClickOutside = (event) => {
+  const dropdown = document.querySelector('.dropdown')
+  if (dropdown && !dropdown.contains(event.target)) {
+    showExportDropdown.value = false
+  }
+  
+  const settingsModal = document.querySelector('.settings-modal')
+  if (settingsModal && !settingsModal.querySelector('.modal-content')?.contains(event.target)) {
+    showSettingsModal.value = false
+  }
+}
+
 const exportData = (format) => {
   console.log(`Exporting data as ${format}`)
   showExportDropdown.value = false
@@ -1859,7 +1790,39 @@ const exportData = (format) => {
 }
 
 const openSettings = () => {
-  console.log('Opening settings')
+  showSettingsModal.value = true
+}
+
+const closeSettings = () => {
+  showSettingsModal.value = false
+}
+
+const saveSettings = () => {
+  // Apply settings
+  chartType.value = settings.value.defaultChartType
+  colorScheme.value = settings.value.colorScheme
+  enableAnimation.value = settings.value.enableAnimations
+  
+  // Save to localStorage
+  localStorage.setItem('khukoma-analytics-settings', JSON.stringify(settings.value))
+  
+  showSettingsModal.value = false
+  console.log('Settings saved:', settings.value)
+}
+
+const resetSettings = () => {
+  settings.value = {
+    autoRefresh: false,
+    refreshInterval: 30,
+    defaultTab: 'visualizer',
+    defaultChartType: 'column',
+    showGridLines: true,
+    enableAnimations: true,
+    colorScheme: 'default',
+    exportFormat: 'csv',
+    dateFormat: 'YYYY-MM-DD',
+    timezone: 'local'
+  }
 }
 
 const setActiveTab = (tabId) => {
@@ -3071,15 +3034,26 @@ const selectWidget = (widgetId) => {
 
 const dragWidget = (event, widget) => {
   isDragging.value = true
+  dragState.value.isDragging = true
   event.dataTransfer.setData('text/plain', JSON.stringify({
     type: 'widget',
     widget: widget
   }))
 }
 
+const handleWidgetDragStart = (event, widget) => {
+  // Only allow drag if no widgets exist
+  if (dashboardWidgets.value.length > 0) {
+    event.preventDefault()
+    return
+  }
+  dragWidget(event, widget)
+}
+
 const dropWidget = (event) => {
   event.preventDefault()
   isDragging.value = false
+  dragState.value.isDragging = false
   
   try {
     const data = JSON.parse(event.dataTransfer.getData('text/plain'))
@@ -3141,8 +3115,32 @@ const dragState = ref({
   startX: 0,
   startY: 0,
   startWidgetX: 0,
-  startWidgetY: 0
+  startWidgetY: 0,
+  isMouseDown: false,
+  mouseDownX: 0,
+  mouseDownY: 0
 })
+
+const startWidgetMouseDown = (event) => {
+  dragState.value.isMouseDown = true
+  dragState.value.mouseDownX = event.clientX
+  dragState.value.mouseDownY = event.clientY
+}
+
+const handleWidgetMouseUp = (event) => {
+  dragState.value.isMouseDown = false
+}
+
+const handleWidgetClick = (widgetId) => {
+  // Only add widget if no widgets exist and it wasn't a drag operation
+  if (dashboardWidgets.value.length === 0 && !dragState.value.isDragging) {
+    addWidget(widgetId)
+  } else if (dashboardWidgets.value.length > 0) {
+    // Provide visual feedback that only one widget is allowed
+    console.log("Only one widget allowed at a time. Please remove the existing widget first.")
+  }
+  dragState.value.isDragging = false
+}
 
 const startWidgetDrag = (widgetId, event) => {
   event.preventDefault()
@@ -3783,6 +3781,23 @@ onMounted(async () => {
   
   // Create charts for any existing dashboard widgets
   await createChartsForAllWidgets()
+  
+  // Load saved settings
+  const savedSettings = localStorage.getItem('khukoma-analytics-settings')
+  if (savedSettings) {
+    try {
+      settings.value = JSON.parse(savedSettings)
+      // Apply saved settings
+      chartType.value = settings.value.defaultChartType
+      colorScheme.value = settings.value.colorScheme
+      enableAnimation.value = settings.value.enableAnimations
+    } catch (e) {
+      console.error('Error loading settings:', e)
+    }
+  }
+  
+  // Add click outside listener
+  document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
@@ -3799,11 +3814,196 @@ onUnmounted(() => {
   // Remove drag event listeners
   document.removeEventListener('mousemove', handleWidgetDrag)
   document.removeEventListener('mouseup', stopWidgetDrag)
+  
+  // Remove click outside listener
+  document.removeEventListener('click', handleClickOutside)
 })
 
 </script>
 
 <style scoped>
+/* Main Container */
+.data-analysis-pro {
+  min-height: 100vh;
+  height: 100vh;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+}
+
+/* Pivot Tab Container */
+.pivot-tab-container {
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  margin: 1rem;
+}
+
+/* Header Matching TrackerCapture Design */
+.analytics-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.header-center {
+  flex: 2;
+  text-align: center;
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.page-title {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.data-source-indicator {
+  margin-top: 0.5rem;
+}
+
+.indicator-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #28a745;
+  color: white;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.indicator-badge.firebase {
+  background: linear-gradient(45deg, #FF6B35, #F7931E);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.back-button,
+.tool-btn,
+.logout-button {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.back-button:hover,
+.tool-btn:hover:not(:disabled),
+.logout-button:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.logout-button {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+.logout-button:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.tool-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-toggle {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-width: 200px;
+  z-index: 1000;
+  overflow: hidden;
+  border: 1px solid #e9ecef;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: white;
+  color: #2c3e50;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+  font-weight: 500;
+}
+
+.dropdown-item:hover {
+  background: #f8f9fa;
+  color: #495057;
+}
+
 /* Enhanced Dashboard Styling */
 
 /* Dashboard Panel */
@@ -3970,6 +4170,34 @@ onUnmounted(() => {
 .widget-card:hover .add-indicator {
   opacity: 1;
   transform: scale(1);
+}
+
+.widget-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+}
+
+.widget-card.disabled:hover {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  transform: none;
+  box-shadow: none;
+}
+
+.widget-card.disabled:hover .add-indicator {
+  opacity: 0;
+}
+
+.widget-card.disabled-feedback {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
 .widget-icon {
@@ -5262,6 +5490,9 @@ onUnmounted(() => {
   display: flex;
   height: calc(100vh - 80px);
   overflow: hidden;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 /* Data Explorer Sidebar */
@@ -5545,14 +5776,16 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: #f8f9fa;
 }
 
 /* Analysis Tabs */
 .analysis-tabs {
   display: flex;
   background: white;
-  border-bottom: 1px solid #e0e4e7;
+  border-bottom: 1px solid #e9ecef;
   padding: 0 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .tab-btn {
@@ -5571,14 +5804,15 @@ onUnmounted(() => {
 }
 
 .tab-btn:hover {
-  color: #374151;
-  background: #f9fafb;
+  color: #495057;
+  background: #f8f9fa;
 }
 
 .tab-btn.active {
-  color: #4A148C;
-  border-bottom-color: #4A148C;
-  background: #faf5ff;
+  color: #2c3e50;
+  border-bottom-color: #6c757d;
+  background: #f8f9fa;
+  font-weight: 600;
 }
 
 /* Tab Content */
@@ -5601,9 +5835,9 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
+  padding: 1.5rem;
   background: white;
-  border-bottom: 1px solid #e0e4e7;
+  border-bottom: 1px solid #e9ecef;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -5621,7 +5855,7 @@ onUnmounted(() => {
 }
 
 .summary-badge {
-  background: linear-gradient(135deg, #4A148C, #6A1B9A);
+  background: linear-gradient(135deg, #6c757d, #5a6268);
   color: white;
   padding: 4px 12px;
   border-radius: 12px;
@@ -5635,7 +5869,8 @@ onUnmounted(() => {
 .panel-header h3 {
   font-weight: 600;
   margin: 0;
-  color: #111827;
+  color: #2c3e50;
+  font-size: 1.125rem;
 }
 
 .panel-controls {
@@ -5664,13 +5899,14 @@ onUnmounted(() => {
 }
 
 .chart-config-panel {
-  background: #f8fafc;
-  border-bottom: 1px solid #e0e4e7;
-  padding: 16px 24px;
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 1.5rem;
   display: flex;
-  gap: 24px;
+  gap: 1.5rem;
   align-items: center;
   flex-wrap: wrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .config-item {
@@ -5687,19 +5923,31 @@ onUnmounted(() => {
 }
 
 .chart-title-input {
-  padding: 6px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
   min-width: 200px;
 }
 
+.chart-title-input:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
 .color-scheme-select {
-  padding: 6px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
   min-width: 140px;
+}
+
+.color-scheme-select:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
 
 .animation-checkbox {
@@ -5712,57 +5960,70 @@ onUnmounted(() => {
 }
 
 .chart-type-select {
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
   font-size: 0.875rem;
   background: white;
+  color: #495057;
+}
+
+.chart-type-select:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
 
 .generate-btn {
-  background: linear-gradient(135deg, #4A148C, #6A1B9A);
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
   color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .generate-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(74, 20, 140, 0.3);
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .generate-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 .export-chart-btn {
-  background: #10b981;
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
   color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .export-chart-btn:hover {
-  background: #059669;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .config-btn,
@@ -5772,22 +6033,26 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #4A148C;
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
   color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .config-btn:hover,
 .refresh-btn:hover,
 .schedule-btn:hover,
 .save-btn:hover {
-  background: #6A1B9A;
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 /* Visualization Area */
@@ -5795,7 +6060,9 @@ onUnmounted(() => {
   flex: 1;
   padding: 1.5rem;
   background: #f9fafb;
-  overflow: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .no-data-message {
@@ -5912,13 +6179,14 @@ onUnmounted(() => {
 }
 
 .chart-container {
-  height: 100%;
+  flex: 1;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 500px;
 }
 
 .chart-header {
@@ -5969,6 +6237,7 @@ onUnmounted(() => {
 
 .main-chart {
   width: 100% !important;
+  height: 100% !important;
   flex: 1 !important;
   min-height: 400px !important;
   padding: 20px;
@@ -6303,30 +6572,35 @@ onUnmounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+/* Pivot Table Configuration - Simple Clean Design */
 .config-sections {
-  display: flex;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .config-section {
-  flex: 1;
-  min-width: 220px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
 }
 
 .config-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .config-header h4 {
   margin: 0;
   font-size: 0.875rem;
-  font-weight: 700;
-  color: #4A148C;
+  font-weight: 600;
+  color: #2c3e50;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -6334,91 +6608,82 @@ onUnmounted(() => {
 
 .config-hint {
   font-size: 0.75rem;
-  color: #6b7280;
-  font-style: italic;
-  font-weight: 500;
-}
-
-.config-section {
-  flex: 1;
-}
-
-.config-section h4 {
-  font-size: 0.875rem;
-  font-weight: 700;
-  margin: 0 0 0.75rem 0;
-  color: #4A148C;
+  color: #9ca3af;
 }
 
 .drag-area {
-  min-height: 120px;
+  min-height: 100px;
   border: 2px dashed #d1d5db;
-  border-radius: 12px;
-  padding: 1.25rem;
-  background: linear-gradient(135deg, #fafbfc 0%, #f9fafb 100%);
-  transition: all 0.3s ease;
-  position: relative;
+  border-radius: 6px;
+  padding: 0.75rem;
+  background: #f9fafb;
+  overflow-y: auto;
+  max-height: 250px;
 }
 
 .drag-area.dragover {
-  border-color: #4A148C;
-  background: linear-gradient(135deg, #faf5ff 0%, #f3f4f6 100%);
-  border-style: solid;
-  box-shadow: 0 4px 12px rgba(74, 20, 140, 0.1);
-  transform: scale(1.01);
+  border-color: #6c757d;
+  background: #f3f4f6;
 }
 
 .pivot-field {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
-  border: 1px solid #e0e4e7;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
   font-size: 0.875rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .pivot-field:hover {
-  background: linear-gradient(135deg, #faf8ff 0%, #f3f4f6 100%);
-  border-color: #4A148C;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(74, 20, 140, 0.1);
+  border-color: #d1d5db;
 }
 
 .field-content {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   flex: 1;
 }
 
+.field-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #6c757d;
+  color: white;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
 .field-name {
-  font-weight: 600;
-  color: #374151;
+  font-weight: 500;
+  color: #2c3e50;
+  flex: 1;
 }
 
 .remove-field {
-  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-  color: #dc2626;
+  background: #dc3545;
+  color: white;
   border: none;
-  border-radius: 6px;
-  padding: 0.375rem;
+  border-radius: 4px;
+  padding: 0.25rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  font-weight: 600;
+  width: 24px;
+  height: 24px;
+  transition: background 0.2s ease;
 }
 
 .remove-field:hover {
-  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
-  color: #b91c1c;
-  transform: scale(1.1);
+  background: #c82333;
 }
 
 .drop-placeholder {
@@ -6428,46 +6693,39 @@ onUnmounted(() => {
   justify-content: center;
   height: 100%;
   color: #9ca3af;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   text-align: center;
-  min-height: 80px;
-  gap: 0.75rem;
-  font-weight: 500;
+  min-height: 70px;
+  gap: 0.5rem;
 }
 
-.aggregation-select {
-  margin-left: 0.5rem;
-  padding: 0.25rem 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  background: white;
+.drop-placeholder svg {
+  opacity: 0.4;
 }
 
-/* Pivot Results - Enhanced Professional Style */
+/* Pivot Results - Simple Design */
 .pivot-results {
-  margin: 1rem;
+  margin: 1.5rem 0;
   background: white;
-  border: 1px solid #e0e4e7;
-  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .results-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 1.5rem;
-  background: linear-gradient(135deg, #4A148C 0%, #6A1B9A 100%);
-  color: white;
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .results-header h4 {
   margin: 0;
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -6475,7 +6733,7 @@ onUnmounted(() => {
 
 .results-actions {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .export-btn,
@@ -6483,51 +6741,108 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: none;
   padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
 }
 
 .export-btn:hover,
 .debug-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
 }
 
 .pivot-table-wrapper {
   overflow: auto;
-  max-height: 450px;
+  max-height: 500px;
   background: white;
 }
 
-/* Enhanced No Data State - Professional Welcome */
+.pivot-table-area {
+  padding: 0;
+}
+
+/* Pivot Table - Simple Clean Styling */
+.pivot-table,
+table.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.pivot-table th,
+.pivot-table td,
+table.table th,
+table.table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+}
+
+.pivot-table th,
+table.table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.pivot-table tbody tr:hover,
+table.table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.pivot-table tbody tr:last-child td,
+table.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pivot-table td.dimension,
+table.table td:first-child {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.pivot-table td.value,
+table.table td:nth-child(2) {
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.pivot-table td.percentage,
+table.table td:last-child {
+  font-weight: 600;
+  color: #28a745;
+  text-align: center;
+}
+
+/* No Data State */
 .no-pivot-data {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
+  padding: 3rem 2rem;
   color: #6b7280;
   text-align: center;
-  margin: 1rem;
-  background: linear-gradient(135deg, #fafbfc 0%, #f8fafc 100%);
-  border: 1px solid #e0e4e7;
-  border-radius: 16px;
-  gap: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: #f9fafb;
+  border-radius: 8px;
+  gap: 1rem;
+  margin: 1.5rem;
 }
 
 .no-pivot-data .welcome-icon {
   padding: 1.5rem;
-  background: linear-gradient(135deg, #faf5ff 0%, #f3f4f6 100%);
+  background: #e5e7eb;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -6535,28 +6850,29 @@ onUnmounted(() => {
 }
 
 .no-pivot-data svg {
-  opacity: 0.7;
-  color: #4A148C;
+  opacity: 0.5;
+  color: #6c757d;
 }
 
 .no-pivot-data h4 {
   margin: 0;
-  font-size: 1.375rem;
-  font-weight: 700;
-  color: #4A148C;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .no-pivot-data p {
   margin: 0;
   line-height: 1.6;
   max-width: 450px;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   color: #6b7280;
 }
 
+/* Quick Actions */
 .quick-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-top: 1rem;
   flex-wrap: wrap;
   justify-content: center;
@@ -6565,74 +6881,71 @@ onUnmounted(() => {
 .quick-action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  background: linear-gradient(135deg, #4A148C 0%, #6A1B9A 100%);
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
   color: white;
   border: none;
-  padding: 1rem 1.75rem;
-  border-radius: 12px;
-  font-weight: 700;
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 12px rgba(74, 20, 140, 0.25);
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.quick-action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(74, 20, 140, 0.35);
-}
-
-.quick-action-btn.secondary {
-  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-  box-shadow: 0 6px 12px rgba(107, 114, 128, 0.25);
-}
-
-.quick-action-btn.secondary:hover {
-  box-shadow: 0 8px 16px rgba(107, 114, 128, 0.35);
-}
-
-/* Additional aggregation select styling */
-.aggregation-select {
-  margin-left: 0.75rem;
-  padding: 0.375rem 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  background: white;
-  color: #374151;
-  font-weight: 500;
   transition: all 0.2s ease;
 }
 
-.aggregation-select:focus {
-  outline: none;
-  border-color: #4A148C;
-  box-shadow: 0 0 0 3px rgba(74, 20, 140, 0.1);
+.quick-action-btn:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
 }
 
-/* Debug info styling */
+.quick-action-btn.secondary {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+}
+
+/* Aggregation Select */
+select.aggregation-select,
+.aggregation-select {
+  margin-left: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  background: white;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+select.aggregation-select:focus,
+.aggregation-select:focus {
+  outline: none;
+  border-color: #6c757d;
+}
+
+/* Debug Info */
 .debug-info {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 1px solid #f59e0b;
-  border-radius: 8px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
   padding: 1rem;
-  margin-bottom: 1rem;
-  font-size: 0.875rem;
-  color: #92400e;
+  margin: 1rem;
+  font-size: 0.8125rem;
+  color: #856404;
+  font-family: 'Courier New', monospace;
 }
 
 .debug-close-btn {
-  background: #f59e0b;
-  color: white;
+  background: #ffc107;
+  color: #212529;
   border: none;
-  padding: 0.25rem 0.5rem;
+  padding: 0.375rem 0.75rem;
   border-radius: 4px;
   font-size: 0.75rem;
   cursor: pointer;
   margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+.debug-close-btn:hover {
+  background: #e0a800;
 }
 
 /* Results content styling */
@@ -7200,6 +7513,20 @@ onUnmounted(() => {
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+  .analytics-container {
+    grid-template-columns: 280px 1fr;
+  }
+
+  .dashboard-builder {
+    grid-template-columns: 280px 1fr;
+  }
+
+  .config-sections {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1024px) {
   .charts-section {
     grid-template-columns: 1fr;
@@ -7208,80 +7535,759 @@ onUnmounted(() => {
   .tables-section {
     grid-template-columns: 1fr;
   }
+
+  .analytics-container {
+    grid-template-columns: 1fr;
+  }
+
+  .data-explorer {
+    display: none; /* Hide sidebar on tablets, show toggle instead */
+  }
+
+  .dashboard-builder {
+    grid-template-columns: 1fr;
+  }
+
+  .widget-library {
+    display: none; /* Collapsible on mobile */
+  }
+
+  .config-sections {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .pivot-table th,
+  .pivot-table td,
+  table.table th,
+  table.table td {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+  }
 }
 
 @media (max-width: 768px) {
-  .data-analysis {
+  .data-analysis-pro {
+    height: auto;
+    min-height: 100vh;
+  }
+  
+  .analytics-header {
+    flex-direction: column;
+    gap: 1rem;
     padding: 1rem;
   }
   
-  .header-content {
+  .header-left,
+  .header-center,
+  .header-right {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .header-right {
+    flex-wrap: wrap;
+  }
+  
+  .tool-btn,
+  .back-button {
+    flex: 1 1 auto;
+    justify-content: center;
+    margin: 0.25rem;
+  }
+  
+  .analytics-container {
     flex-direction: column;
-    gap: 1.5rem;
-    text-align: center;
+    height: auto;
   }
   
-  .title-section h1 {
-    font-size: 2rem;
+  .data-explorer {
+    width: 100%;
+    max-height: 300px;
+    border-right: none;
+    border-bottom: 1px solid #e0e4e7;
   }
   
-  .metrics-row {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  .main-content {
+    height: auto;
   }
   
-  .metric-card {
+  .analysis-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+  
+  .tab-btn {
+    white-space: nowrap;
+    padding: 0.75rem 1rem;
+  }
+  
+  .panel-header {
     flex-direction: column;
-    text-align: center;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .panel-controls {
+    width: 100%;
+    flex-direction: column;
     gap: 1rem;
   }
   
-  .charts-section, .tables-section {
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .generate-btn,
+  .export-chart-btn {
+    width: 100%;
+  }
+  
+  .visualization-area {
+    padding: 1rem;
+  }
+  
+  .no-data-message {
+    padding: 2rem 1rem;
+  }
+  
+  .no-data-message h4 {
+    font-size: 1.25rem;
+  }
+  
+  .chart-container {
+    min-height: 300px;
+  }
+  
+  .reports-grid {
     grid-template-columns: 1fr;
   }
   
-  .chart-header, .table-header {
+  .report-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .report-info {
+    margin-bottom: 1rem;
+  }
+  
+  .report-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .generate-report-btn,
+  .download-btn {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  /* Dashboard Mobile Improvements */
+  .dashboard-builder {
+    flex-direction: column;
+  }
+  
+  .widget-library {
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .widget-categories {
+    display: flex;
     flex-direction: column;
     gap: 1rem;
-    align-items: stretch;
   }
   
-  .trend-legend {
-    justify-content: center;
+  .category-section {
+    padding: 0.5rem;
+  }
+  
+  .category-title {
+    font-size: 0.9rem;
+  }
+  
+  .widget-grid {
+    flex-direction: row;
     flex-wrap: wrap;
-  }
-}
-
-@media (max-width: 480px) {
-  .title-section h1 {
-    font-size: 1.5rem;
+    gap: 0.5rem;
   }
   
-  .header-actions {
+  .widget-card {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 140px;
+    padding: 0.75rem;
+  }
+  
+  .widget-name {
+    font-size: 0.8rem;
+  }
+  
+  .widget-desc {
+    font-size: 0.7rem;
+  }
+  
+  .widget-icon {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .dashboard-canvas-container {
+    padding: 1rem;
+  }
+  
+  .canvas-header {
     flex-direction: column;
-    width: 100%;
+    gap: 0.75rem;
+    padding: 0.75rem;
   }
   
-  .refresh-btn, .export-btn {
+  .canvas-controls {
     width: 100%;
-    text-align: center;
+    justify-content: center;
   }
   
-  .metric-number {
+  .dashboard-widget {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 200px;
+    margin-bottom: 1rem;
+  }
+  
+  .widget-content {
+    padding: 1rem;
+  }
+  
+  .metric-value {
     font-size: 2rem;
   }
   
-  .chart-content {
-    height: 250px;
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
   }
   
-  .activity-table th, .performers-table th,
-  .activity-table td, .performers-table td {
+  .stat-item {
+    padding: 0.75rem;
+  }
+  
+  .stat-value {
+    font-size: 1.25rem;
+  }
+  
+  /* Pivot Table Mobile Improvements */
+  .pivot-config {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+  
+  .config-sections {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .config-section {
+    padding: 0.75rem;
+  }
+  
+  .drag-area {
+    min-height: 80px;
+    padding: 0.5rem;
+  }
+  
+  .pivot-field {
     padding: 0.5rem;
     font-size: 0.8rem;
   }
   
-  .insight-item {
+  .results-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  .results-actions {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .export-btn,
+  .debug-btn {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .pivot-table-wrapper {
+    max-height: 400px;
+  }
+  
+  .pivot-table th,
+  .pivot-table td {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-header {
+    padding: 0.75rem;
+  }
+  
+  .page-title {
+    font-size: 1.125rem;
+  }
+  
+  .tool-btn,
+  .back-button {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .data-explorer {
+    max-height: 250px;
+  }
+  
+  .explorer-title h3 {
+    font-size: 1rem;
+  }
+  
+  .dimension-header,
+  .org-header {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+  
+  .dimension-child,
+  .org-child {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8125rem;
+  }
+  
+  .item-count {
+    font-size: 0.7rem;
+  }
+  
+  .chart-config-panel {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  .config-item {
+    width: 100%;
+  }
+  
+  .chart-title-input,
+  .color-scheme-select,
+  .chart-type-select {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .generate-btn,
+  .export-chart-btn {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .visualization-area {
+    padding: 0.75rem;
+  }
+  
+  .no-data-message {
+    padding: 1.5rem 0.75rem;
+  }
+  
+  .no-data-message h4 {
+    font-size: 1.125rem;
+  }
+  
+  .chart-container {
+    min-height: 250px;
+  }
+  
+  .chart-header h4 {
+    font-size: 1.25rem;
+  }
+  
+  .reports-container {
+    padding: 0.75rem;
+    gap: 1rem;
+  }
+  
+  .data-summary-card,
+  .recent-activity-card {
     padding: 1rem;
+  }
+  
+  .summary-header h4,
+  .activity-header h4 {
+    font-size: 1rem;
+  }
+  
+  .summary-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .real-activity-table th,
+  .real-activity-table td {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .reports-grid {
+    gap: 0.75rem;
+  }
+  
+  .report-card {
+    padding: 1rem;
+  }
+  
+  .report-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .report-info h4 {
+    font-size: 1rem;
+  }
+  
+  .report-info p {
+    font-size: 0.8125rem;
+  }
+  
+  .generate-report-btn,
+  .download-btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.75rem;
+  }
+  
+  /* Dashboard Mobile Improvements */
+  .dashboard-header {
+    padding: 1rem;
+  }
+  
+  .header-info h3 {
+    font-size: 1.25rem;
+  }
+  
+  .dashboard-subtitle {
+    font-size: 0.875rem;
+  }
+  
+  .action-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .widget-card {
+    flex: 1 1 calc(100% - 0.5rem);
+    min-width: auto;
+  }
+  
+  .widget-grid {
+    flex-direction: column;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .activity-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .activity-meta {
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+  
+  .pivot-table th,
+  .pivot-table td {
+    padding: 0.375rem;
+    font-size: 0.7rem;
+  }
+  
+  .drop-placeholder {
+    font-size: 0.75rem;
+  }
+  
+  .no-pivot-data {
+    padding: 1rem;
+  }
+  
+  .no-pivot-data h4 {
+    font-size: 1rem;
+  }
+  
+  .quick-action-btn {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Settings Modal */
+.settings-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #f3f4f6;
+  color: #2c3e50;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.settings-section {
+  margin-bottom: 2rem;
+}
+
+.settings-section:last-child {
+  margin-bottom: 0;
+}
+
+.settings-section h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.setting-item {
+  margin-bottom: 1rem;
+}
+
+.setting-item label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.setting-select,
+.setting-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #2c3e50;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.setting-select:focus,
+.setting-input:focus {
+  outline: none;
+  border-color: #6c757d;
+  box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.1);
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #6c757d;
+}
+
+.checkbox-item label {
+  margin: 0;
+  cursor: pointer;
+}
+
+.modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.reset-settings-btn,
+.cancel-btn,
+.save-btn {
+  padding: 0.625rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+}
+
+.reset-settings-btn {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.reset-settings-btn:hover {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+.cancel-btn {
+  background: white;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.cancel-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #4b5563;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(108, 117, 125, 0.3);
+}
+
+.save-btn:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Settings Modal Mobile */
+@media (max-width: 768px) {
+  .modal-content {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .modal-header {
+    padding: 1rem;
+  }
+  
+  .modal-header h3 {
+    font-size: 1.125rem;
+  }
+  
+  .modal-body {
+    padding: 1rem;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .reset-settings-btn,
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

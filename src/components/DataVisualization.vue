@@ -1,11 +1,45 @@
 <template>
-  <div class="visualization-container">
+<div class="visualization-container">
     <!-- Header -->
     <div class="viz-header">
-      <h1>📊 Data Visualization Dashboard</h1>
-      <p>Comprehensive analytics and insights from The Kukhoma Project data</p>
-      
-      <!-- Stats Summary -->
+      <div class="header-left">
+        <button @click="goBack" class="back-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m12 19-7-7 7-7" />
+            <path d="m19 12H5" />
+          </svg>
+          Back to Dashboard
+        </button>
+      </div>
+      <div class="header-center">
+        <h1 class="viz-title">Data Visualization Dashboard</h1>
+        <div class="data-source-indicator">
+          <span class="indicator-badge firebase">📡 Live Firebase Data</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button @click="exportAnalytics" class="export-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Export Data
+        </button>
+        <button @click="refreshData" class="refresh-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6" />
+            <path d="M2.5 22v-6h6" />
+            <path d="M2 11.5a10 10 0 0 1 18.8-4.3" />
+            <path d="M22 12.5a10 10 0 0 1-18.8 4.2" />
+          </svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Summary -->
+    <div class="content-wrapper">
       <div class="stats-summary">
         <div class="stat-card">
           <div class="stat-icon">👥</div>
@@ -36,7 +70,6 @@
           </div>
         </div>
       </div>
-    </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="loading-container">
@@ -160,28 +193,10 @@
         </div>
       </div>
 
-      <!-- Actions Section -->
-      <div class="actions-section">
-        <button @click="exportAnalytics" class="export-btn">
-          📊 Export Data
-        </button>
-        <button @click="refreshData" class="refresh-btn">
-          🔄 Refresh
-        </button>
-      </div>
-
       <!-- Detailed Analytics Table -->
       <div class="analytics-table">
         <div class="table-header">
           <h3>📊 Detailed Analytics</h3>
-          <div class="table-actions">
-            <button @click="exportAnalytics" class="export-btn">
-              📊 Export Data
-            </button>
-            <button @click="refreshData" class="refresh-btn">
-              🔄 Refresh
-            </button>
-          </div>
         </div>
         
         <div class="table-container">
@@ -209,6 +224,7 @@
         </div>
       </div>
     </div>
+    </div>
   </div>
 </template>
 
@@ -216,6 +232,9 @@
 import { ref, onMounted, computed, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import FormService from '../services/formService.js'
+
+// Emits
+const emit = defineEmits(['back-to-dashboard'])
 
 // Reactive data
 const loading = ref(true)
@@ -1226,6 +1245,11 @@ const createTrendsChart = () => {
   console.log('Trends chart created')
 }
 
+// Navigation
+const goBack = () => {
+  emit('back-to-dashboard')
+}
+
 const refreshData = () => {
   // Destroy existing charts
   Object.values(charts.value).forEach(chart => {
@@ -1270,40 +1294,141 @@ onMounted(() => {
 <style scoped>
 .visualization-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 2rem;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Header - Match TrackerCapture */
 .viz-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.header-center {
+  flex: 2;
   text-align: center;
-  margin-bottom: 3rem;
 }
 
-.viz-header h1 {
-  color: #4A148C;
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  font-weight: 700;
+.viz-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
 }
 
-.viz-header p {
-  color: #666;
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
+.data-source-indicator {
+  margin-top: 0.5rem;
+}
+
+.indicator-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #28a745;
+  color: white;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.indicator-badge.firebase {
+  background: linear-gradient(45deg, #FF6B35, #F7931E);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.back-button,
+.export-button,
+.refresh-button {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.back-button:hover,
+.export-button:hover,
+.refresh-button:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.export-button {
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+}
+
+.export-button:hover {
+  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+}
+
+.refresh-button {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.refresh-button:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+}
+
+/* Content Wrapper */
+.content-wrapper {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .stats-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
+  padding: 0 1rem;
 }
 
 .stat-card {
   background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 8px 24px rgba(74, 20, 140, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border: 2px solid transparent;
   transition: all 0.3s ease;
   display: flex;
@@ -1313,7 +1438,7 @@ onMounted(() => {
 
 .stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(74, 20, 140, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   border-color: #4A148C;
 }
 
@@ -1324,21 +1449,33 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #4A148C, #FF5722);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
-  color: white;
+  flex-shrink: 0;
+}
+
+.stat-card:nth-child(2) .stat-icon {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-card:nth-child(3) .stat-icon {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stat-card:nth-child(4) .stat-icon {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
 
 .stat-content h3 {
   font-size: 2rem;
   font-weight: 700;
-  color: #4A148C;
+  color: #2c3e50;
   margin: 0;
 }
 
 .stat-content p {
   color: #666;
-  font-size: 1rem;
+  font-size: 0.9rem;
   margin: 0.25rem 0 0 0;
 }
 
@@ -1369,52 +1506,57 @@ onMounted(() => {
 .charts-section {
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 2rem;
+  padding: 0 1rem;
 }
 
 .chart-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
 }
 
 .chart-container {
   background: white;
   border-radius: 12px;
-  padding: 1.25rem;
+  padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border: 2px solid transparent;
   transition: all 0.3s ease;
-  position: relative;
-  height: 300px;
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-container:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border-color: #e9ecef;
 }
 
 .chart-header {
   margin-bottom: 1rem;
   text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f8f9fa;
 }
 
 .chart-header h3 {
-  color: #4A148C;
+  color: #2c3e50;
   font-size: 1.1rem;
   font-weight: 600;
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 0.5rem 0;
 }
 
 .chart-header p {
-  color: #666;
-  font-size: 0.8rem;
+  color: #6c757d;
+  font-size: 0.85rem;
   margin: 0;
 }
 
 .chart-container canvas {
   width: 100% !important;
-  height: 300px !important;
+  height: 280px !important;
+  margin: 0 auto;
 }
 
 .actions-section {
@@ -1426,10 +1568,10 @@ onMounted(() => {
 
 .analytics-table {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  margin-top: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-top: 1rem;
 }
 
 .table-header {
@@ -1442,44 +1584,10 @@ onMounted(() => {
 }
 
 .table-header h3 {
-  color: #4A148C;
-  font-size: 1.5rem;
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
   margin: 0;
-}
-
-.table-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-.export-btn,
-.refresh-btn {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.export-btn {
-  background: #28a745;
-  color: white;
-}
-
-.export-btn:hover {
-  background: #218838;
-  transform: translateY(-1px);
-}
-
-.refresh-btn {
-  background: #4A148C;
-  color: white;
-}
-
-.refresh-btn:hover {
-  background: #2D1B69;
-  transform: translateY(-1px);
 }
 
 .table-container {
@@ -1499,7 +1607,7 @@ th, td {
 
 th {
   background: #f8f9fa;
-  color: #4A148C;
+  color: #2c3e50;
   font-weight: 600;
   font-size: 0.9rem;
   text-transform: uppercase;
@@ -1508,7 +1616,7 @@ th {
 
 .metric-name {
   font-weight: 500;
-  color: #333;
+  color: #2c3e50;
 }
 
 .metric-value {
@@ -1541,22 +1649,71 @@ th {
 /* Responsive Design */
 @media (max-width: 1200px) {
   .chart-row {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1fr;
+  }
+  
+  .stats-summary {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
   .visualization-container {
+    background-color: #fff;
+  }
+  
+  /* Header Mobile */
+  .viz-header {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .header-left,
+  .header-center,
+  .header-right {
+    flex: none;
+    width: 100%;
+  }
+  
+  .header-left {
+    order: 1;
+  }
+  
+  .header-center {
+    order: 2;
+  }
+  
+  .header-right {
+    order: 3;
+    justify-content: space-between;
+  }
+  
+  .back-button,
+  .export-button,
+  .refresh-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .viz-title {
+    font-size: 1.3rem;
+  }
+  
+  .indicator-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+  }
+  
+  /* Content Mobile */
+  .content-wrapper {
     padding: 1rem;
   }
   
-  .viz-header h1 {
-    font-size: 1.8rem;
-  }
-  
   .stats-summary {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 1rem;
+    padding: 0;
   }
   
   .stat-card {
@@ -1573,18 +1730,22 @@ th {
     font-size: 1.5rem;
   }
   
+  .charts-section {
+    gap: 1.5rem;
+    padding: 0;
+  }
+  
   .chart-row {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
   
   .chart-container {
-    height: 280px;
     padding: 1rem;
   }
   
   .chart-container canvas {
-    max-height: 200px;
+    height: 220px !important;
   }
   
   .chart-header h3 {
@@ -1601,31 +1762,47 @@ th {
     align-items: stretch;
   }
   
-  .table-actions {
-    justify-content: center;
-  }
-  
-  .charts-section {
-    gap: 2rem;
+  .analytics-table {
+    padding: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  .visualization-container {
-    padding: 0.5rem;
+  .viz-header {
+    padding: 0.75rem;
   }
   
-  .viz-header h1 {
-    font-size: 1.5rem;
+  .viz-title {
+    font-size: 1.1rem;
   }
   
-  .viz-header p {
-    font-size: 1rem;
+  .back-button,
+  .export-button,
+  .refresh-button {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.8rem;
   }
   
-  .stats-summary {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
+  .back-button svg,
+  .export-button svg,
+  .refresh-button svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .header-right {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .export-button,
+  .refresh-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .content-wrapper {
+    padding: 0.75rem;
   }
   
   .stat-card {
@@ -1650,12 +1827,11 @@ th {
   }
   
   .chart-container {
-    height: 250px;
     padding: 0.75rem;
   }
   
   .chart-container canvas {
-    max-height: 180px;
+    height: 200px !important;
   }
   
   .chart-header h3 {
@@ -1667,17 +1843,16 @@ th {
   }
   
   .analytics-table {
-    padding: 1rem;
+    padding: 0.75rem;
   }
   
-  .export-btn,
-  .refresh-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
+  .table-header h3 {
+    font-size: 1.1rem;
   }
   
-  .charts-section {
-    gap: 1.5rem;
+  th, td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
   }
 }
 </style>

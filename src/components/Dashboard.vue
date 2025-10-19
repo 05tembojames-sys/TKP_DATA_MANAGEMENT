@@ -365,42 +365,22 @@
 
       <!-- Child Tracker Section -->
       <div v-if="currentView === 'child-tracker' || currentView === 'child-tracker-2'" class="child-tracker-section">
-        <ChildTracker />
-        <div class="section-actions">
-          <button class="back-btn" @click="setCurrentView('main')">
-            Back to Dashboard
-          </button>
-        </div>
+        <ChildTracker @back-to-dashboard="setCurrentView('main')" />
       </div>
 
       <!-- Data Visualization Section -->
       <div v-if="currentView === 'visualization'" class="visualization-section">
-        <DataVisualization />
-        <div class="section-actions">
-          <button class="back-btn" @click="setCurrentView('main')">
-            Back to Dashboard
-          </button>
-        </div>
+        <DataVisualization @back-to-dashboard="setCurrentView('main')" />
       </div>
 
       <!-- Data Analysis Section -->
       <div v-if="currentView === 'data-analysis'" class="data-analysis-section">
-        <DataAnalysis />
-        <div class="section-actions">
-          <button class="back-btn" @click="setCurrentView('main')">
-            Back to Dashboard
-          </button>
-        </div>
+        <DataAnalysis @back-to-dashboard="setCurrentView('main')" />
       </div>
 
       <!-- Reports Section -->
       <div v-if="currentView === 'reports'" class="reports-section">
-        <Reports :can-approve="canApproveReports" />
-        <div class="section-actions">
-          <button class="back-btn" @click="setCurrentView('main')">
-            Back to Dashboard
-          </button>
-        </div>
+        <Reports :can-approve="canApproveReports" @back-to-dashboard="setCurrentView('main')" />
       </div>
 
       <!-- Event Reports Section -->
