@@ -1,0 +1,92 @@
+// Additional Firestore security rules for user management collections
+// Add these rules to your existing firestore.rules file
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users collection - enhanced rules
+    match /users/{userId} {
+      // Admin can read all users, users can only read their own data
+      allow read: if request.auth != null && 
+        (isAdmin(request.auth.uid) || request.auth.uid == resource.data.uid);
+      
+      // Only admin can create users
+      allow create: if request.auth != null && isAdmin(request.auth.uid) &&
+        validateUserData(request.resource.data);
+      
+      // Admin can update any user, users can update their own profile (limited fields)
+      allow update: if request.auth != null && 
+        (isAdmin(request.auth.uid) || 
+         (request.auth.uid == resource.data.uid && isValidUserSelfUpdate(request.resource.data)));
+      
+      // Only admin can delete users
+      allow delete: if request.auth != null && isAdmin(request.auth.uid);
+    }
+    
+    // User sessions collection
+    match /userSessions/{sessionId} {
+      // Admin can read all sessions, users can read their own sessions
+      allow read: if request.auth != null && 
+        (isAdmin(request.auth.uid) || request.auth.uid == resource.data.userId);
+      
+      // System can create sessions (usually done server-side)
+      allow create: if request.auth != null;
+      
+      // System can update sessions (for logout, activity tracking)
+      allow update: if request.auth != null && 
+        (isAdmin(request.auth.uid) || request.auth.uid == resource.data.userId);
+      
+      // Admin can delete sessions, users can delete their own sessions
+      allow delete: if request.auth != null && 
+        (isAdmin(request.auth.uid) || request.auth.uid == resource.data.userId);
+    }
+    
+    // User activities collection
+    match /userActivities/{activityId} {
+      // Admin can read all activities, users can read their own activities
+      allow read: if request.auth != null && 
+        (isAdmin(request.auth.uid) || request.auth.uid == resource.data.userId);
+      
+      // System can create activity logs
+      allow create: if request.auth != null && validateActivityData(request.resource.data);
+      
+      // Activities should not be updated once created (for audit trail)
+      allow update: if false;
+      
+      // Only admin can delete activities (for cleanup)
+      allow delete: if request.auth != null && isAdmin(request.auth.uid);
+    }
+  }
+  
+  // Helper functions
+  function isAdmin(uid) {
+    return exists(/databases/$(database)/documents/users/$(uid)) &&
+           get(/databases/$(database)/documents/users/$(uid)).data.role == 'admin';
+  }
+  
+  function validateUserData(data) {
+    return data.keys().hasAll(['name', 'username', 'email', 'role', 'status']) &&
+           data.name is string &&
+           data.username is string &&
+           data.email is string &&
+           data.role in ['admin', 'manager', 'user', 'viewer'] &&
+           data.status in ['active', 'inactive', 'suspended'] &&
+           data.permissions is list &&
+           data.createdAt is timestamp &&
+           data.updatedAt is timestamp;
+  }
+  
+  function isValidUserSelfUpdate(data) {
+    // Users can only update limited fields about themselves
+    return data.diff(resource.data).affectedKeys().hasOnly(['name', 'phone', 'updatedAt']);
+  }
+  
+  function validateActivityData(data) {
+    return data.keys().hasAll(['userId', 'activityType', 'timestamp']) &&
+           data.userId is string &&
+           data.activityType is string &&
+           data.timestamp is timestamp &&
+           (data.performedBy == null || data.performedBy is string);
+  }
+}

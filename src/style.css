@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+/* Define your theme directly in CSS */
+@theme {
+  --color-kukhoma-primary: #1a1a2e;
+  --color-kukhoma-secondary: #16213e;
+  --color-kukhoma-accent: #e74c3c;
+  --color-kukhoma-light: #f8f9fa;
+  --color-kukhoma-gray: #6c757d;
+}

@@ -1,0 +1,1498 @@
+<template>
+  <div class="form-wrapper">
+    <div class="form-header">
+      <h3>Child Overview and Background (TKP Care Plan)</h3>
+      <p>Complete this form to document child information and background details</p>
+      <div class="form-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div>
+        </div>
+        <div class="progress-info">
+          <span class="progress-text">Section {{ currentSection }} of {{ totalSections }} • {{ overallCompletion }}% Complete</span>
+          <span class="section-title">{{ currentSectionName }}</span>
+          <div class="section-status">
+            <span class="status-indicator" :class="{ 'complete': sectionCompletionStatus[currentSection - 1] }">
+              {{ sectionCompletionStatus[currentSection - 1] ? '✓' : '○' }} 
+              {{ currentSection <= 5 ? 'Required' : 'Optional' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="overview-form">
+      <!-- Child Information Section -->
+      <div v-show="currentSection === 1" class="form-section">
+        <h4>Child Information</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Child First Name *</label>
+            <input v-model="formData.childFirstName" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Child Middle Name</label>
+            <input v-model="formData.childMiddleName" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Child Surname *</label>
+            <input v-model="formData.childSurname" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Other First Name</label>
+            <input v-model="formData.otherFirstName" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Other Middle Name</label>
+            <input v-model="formData.otherMiddleName" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Other Surname</label>
+            <input v-model="formData.otherSurname" type="text" />
+          </div>
+          <div class="form-group">
+            <label>ID *</label>
+            <input v-model="formData.id" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Date of Admission *</label>
+            <input v-model="formData.dateOfAdmission" type="date" required />
+          </div>
+          <div class="form-group">
+            <label>Gender *</label>
+            <select v-model="formData.gender" required>
+              <option value="">Select Gender</option>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date of Birth *</label>
+            <input v-model="formData.dateOfBirth" type="date" required />
+          </div>
+          <div class="form-group">
+            <label>Age at Intake (years) *</label>
+            <input v-model="formData.ageAtIntake" type="number" min="0" max="18" required />
+          </div>
+          <div class="form-group">
+            <label>Place of Birth *</label>
+            <input v-model="formData.placeOfBirth" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Resident Area at Intake *</label>
+            <input v-model="formData.residentArea" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Village</label>
+            <input v-model="formData.village" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Chief</label>
+            <input v-model="formData.chief" type="text" />
+          </div>
+          <div class="form-group">
+            <label>District *</label>
+            <input v-model="formData.district" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Tribe</label>
+            <input v-model="formData.tribe" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Denomination</label>
+            <input v-model="formData.denomination" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Nationality *</label>
+            <input v-model="formData.nationality" type="text" required />
+          </div>
+        </div>
+        <div class="section-navigation">
+          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+        </div>
+      </div>
+
+      <!-- Vulnerability Status Section -->
+      <div v-show="currentSection === 2" class="form-section">
+        <h4>Vulnerability Status</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>OVC Status *</label>
+            <select v-model="formData.ovcStatus" required>
+              <option value="">Select Status</option>
+              <option value="Vulnerable">Vulnerable</option>
+              <option value="Single Orphan">Single Orphan</option>
+              <option value="Double Orphan">Double Orphan</option>
+              <option value="Serial Orphan">Serial Orphan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date Effective</label>
+            <input v-model="formData.ovcDateEffective" type="date" />
+          </div>
+          <div class="form-group">
+            <label>Parent Deceased</label>
+            <select v-model="formData.parentDeceased">
+              <option value="">Select</option>
+              <option value="Father">Father</option>
+              <option value="Mother">Mother</option>
+              <option value="Both">Both</option>
+              <option value="Neither">Neither</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date of Death</label>
+            <input v-model="formData.parentDeathDate" type="date" />
+          </div>
+          <div class="form-group">
+            <label>Guardian Deceased</label>
+            <select v-model="formData.guardianDeceased">
+              <option value="">Select</option>
+              <option value="Y">Yes</option>
+              <option value="N">No</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Guardian Date of Death</label>
+            <input v-model="formData.guardianDeathDate" type="date" />
+          </div>
+        </div>
+        <div class="section-navigation">
+          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
+          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+        </div>
+      </div>
+
+      <!-- Referral Method Section -->
+      <div v-show="currentSection === 3" class="form-section">
+        <h4>Referral Method</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Select One *</label>
+            <select v-model="formData.referralMethod" required>
+              <option value="">Select Method</option>
+              <option value="Family Legacy">Family Legacy</option>
+              <option value="Coptic Hospital">Coptic Hospital</option>
+              <option value="Department of Social Welfare - Lusaka">Department of Social Welfare - Lusaka</option>
+              <option value="Department of Social Welfare - Chongwe">Department of Social Welfare - Chongwe</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="section-navigation">
+          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
+          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+        </div>
+      </div>
+
+      <!-- Reason for Admission Section -->
+      <div v-show="currentSection === 4" class="form-section">
+        <h4>Reason(s) for Admission</h4>
+        <div class="form-group">
+          <label>Select All That Apply *</label>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" v-model="formData.reasons.attemptedAbortion" />
+              Attempted/Considered Abortion
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" v-model="formData.reasons.attemptedSuicide" />
+              Attempted/Considered Suicide
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" v-model="formData.reasons.pregnant" />
+              Pregnant
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" v-model="formData.reasons.rapeDefilement" />
+              Rape/Defilement
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" v-model="formData.reasons.survivalProstitution" />
+              Survival Prostitution
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" v-model="formData.reasons.other" />
+              Other
+            </label>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Estimated Date of Conception</label>
+            <input v-model="formData.estimatedConceptionDate" type="date" />
+          </div>
+          <div class="form-group">
+            <label>Current Duration of Pregnancy (Months/weeks)</label>
+            <input v-model="formData.pregnancyDuration" type="text" placeholder="e.g., 12 weeks" />
+          </div>
+        </div>
+        <div class="form-group full-width">
+          <label>Additional Details of Abuse Situation</label>
+          <textarea v-model="formData.abuseDetails" rows="4"></textarea>
+        </div>
+        <div class="section-navigation">
+          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
+          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+        </div>
+      </div>
+
+      <!-- Caregiver/Guardian Information Section -->
+      <div v-show="currentSection === 5" class="form-section">
+        <h4>Caregiver/Guardian Information</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date Compiled *</label>
+            <input v-model="formData.dateCompiled" type="date" required />
+          </div>
+          <div class="form-group">
+            <label>Child Name *</label>
+            <input v-model="formData.childName" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Child ID *</label>
+            <input v-model="formData.childId" type="text" required />
+          </div>
+        </div>
+
+        <!-- Primary Caregiver -->
+        <h5>Primary Caregiver/Guardian</h5>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Name *</label>
+            <input v-model="formData.primaryCaregiver.name" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Relationship to Child *</label>
+            <input v-model="formData.primaryCaregiver.relationship" type="text" required />
+          </div>
+          <div class="form-group">
+            <label>Phone #1</label>
+            <input v-model="formData.primaryCaregiver.phone1" type="tel" />
+          </div>
+          <div class="form-group">
+            <label>Phone #2</label>
+            <input v-model="formData.primaryCaregiver.phone2" type="tel" />
+          </div>
+          <div class="form-group">
+            <label>Occupation</label>
+            <input v-model="formData.primaryCaregiver.occupation" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Area of Town</label>
+            <input v-model="formData.primaryCaregiver.area" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Age</label>
+            <input v-model="formData.primaryCaregiver.age" type="number" min="0" />
+          </div>
+          <div class="form-group">
+            <label>NRC Number</label>
+            <input v-model="formData.primaryCaregiver.nrcNumber" type="text" />
+          </div>
+        </div>
+        <div class="form-group full-width">
+          <label>Additional Notes</label>
+          <textarea v-model="formData.primaryCaregiver.notes" rows="3"></textarea>
+        </div>
+
+        <!-- Secondary Caregiver -->
+        <h5>Secondary Caregiver/Guardian</h5>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Name</label>
+            <input v-model="formData.secondaryCaregiver.name" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Relationship to Child</label>
+            <input v-model="formData.secondaryCaregiver.relationship" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Phone #1</label>
+            <input v-model="formData.secondaryCaregiver.phone1" type="tel" />
+          </div>
+          <div class="form-group">
+            <label>Phone #2</label>
+            <input v-model="formData.secondaryCaregiver.phone2" type="tel" />
+          </div>
+          <div class="form-group">
+            <label>Occupation</label>
+            <input v-model="formData.secondaryCaregiver.occupation" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Area of Town</label>
+            <input v-model="formData.secondaryCaregiver.area" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Age</label>
+            <input v-model="formData.secondaryCaregiver.age" type="number" min="0" />
+          </div>
+          <div class="form-group">
+            <label>NRC Number</label>
+            <input v-model="formData.secondaryCaregiver.nrcNumber" type="text" />
+          </div>
+        </div>
+        <div class="form-group full-width">
+          <label>Additional Notes</label>
+          <textarea v-model="formData.secondaryCaregiver.notes" rows="3"></textarea>
+        </div>
+        <div class="section-navigation">
+          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
+          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+        </div>
+      </div>
+
+      <!-- General Family Information Section -->
+      <div v-show="currentSection === 6" class="form-section">
+        <h4>General Family Information</h4>
+        
+        <!-- Biological Father -->
+        <h5>Biological Father</h5>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Name</label>
+            <input v-model="formData.biologicalFather.name" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Age</label>
+            <input v-model="formData.biologicalFather.age" type="number" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Alive / Deceased</label>
+            <select v-model="formData.biologicalFather.status">
+              <option value="">Select</option>
+              <option value="Alive">Alive</option>
+              <option value="Deceased">Deceased</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>If deceased, date of death</label>
+            <input v-model="formData.biologicalFather.deathDate" type="date" />
+          </div>
+          <div class="form-group">
+            <label>Cause of death</label>
+            <input v-model="formData.biologicalFather.causeOfDeath" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input v-model="formData.biologicalFather.location" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Profession</label>
+            <input v-model="formData.biologicalFather.profession" type="text" />
+          </div>
+        </div>
+
+        <!-- Biological Mother -->
+        <h5>Biological Mother</h5>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Name</label>
+            <input v-model="formData.biologicalMother.name" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Age</label>
+            <input v-model="formData.biologicalMother.age" type="number" min="0" />
+          </div>
+          <div class="form-group">
+            <label>Alive / Deceased</label>
+            <select v-model="formData.biologicalMother.status">
+              <option value="">Select</option>
+              <option value="Alive">Alive</option>
+              <option value="Deceased">Deceased</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>If deceased, date of death</label>
+            <input v-model="formData.biologicalMother.deathDate" type="date" />
+          </div>
+          <div class="form-group">
+            <label>Cause of death</label>
+            <input v-model="formData.biologicalMother.causeOfDeath" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input v-model="formData.biologicalMother.location" type="text" />
+          </div>
+          <div class="form-group">
+            <label>Profession</label>
+            <input v-model="formData.biologicalMother.profession" type="text" />
+          </div>
+        </div>
+
+        <!-- Biological Siblings -->
+        <h5>Biological Siblings</h5>
+        <div v-for="(sibling, index) in formData.siblings" :key="index" class="sibling-section">
+          <h6>Sibling {{ index + 1 }}</h6>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Name</label>
+              <input v-model="sibling.name" type="text" />
+            </div>
+            <div class="form-group">
+              <label>Age</label>
+              <input v-model="sibling.age" type="number" min="0" />
+            </div>
+            <div class="form-group">
+              <label>Older / Younger</label>
+              <select v-model="sibling.ageRelation">
+                <option value="">Select</option>
+                <option value="Older">Older</option>
+                <option value="Younger">Younger</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Alive / Deceased</label>
+              <select v-model="sibling.status">
+                <option value="">Select</option>
+                <option value="Alive">Alive</option>
+                <option value="Deceased">Deceased</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>If deceased, date of death</label>
+              <input v-model="sibling.deathDate" type="date" />
+            </div>
+            <div class="form-group">
+              <label>Profession</label>
+              <input v-model="sibling.profession" type="text" />
+            </div>
+            <div class="form-group">
+              <label>Potential Guardian for Program</label>
+              <select v-model="sibling.potentialGuardian">
+                <option value="">Select</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <button type="button" class="remove-btn" @click="removeSibling(index)">Remove</button>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="add-btn" @click="addSibling">Add Sibling</button>
+        <div class="section-navigation">
+          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
+          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+        </div>
+      </div>
+
+      <!-- Additional Family Members Section -->
+      <div v-show="currentSection === 7" class="form-section">
+        <h4>Additional Family Members</h4>
+        <div class="family-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Relation to Child</th>
+                <th>Full Name</th>
+                <th>Age</th>
+                <th>Profession</th>
+                <th>Location</th>
+                <th>Potential Guardian (Y/N)</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(member, index) in formData.additionalFamily" :key="index">
+                <td><input v-model="member.relation" type="text" /></td>
+                <td><input v-model="member.fullName" type="text" /></td>
+                <td><input v-model="member.age" type="number" min="0" /></td>
+                <td><input v-model="member.profession" type="text" /></td>
+                <td><input v-model="member.location" type="text" /></td>
+                <td>
+                  <select v-model="member.potentialGuardian">
+                    <option value="">Select</option>
+                    <option value="Y">Y</option>
+                    <option value="N">N</option>
+                  </select>
+                </td>
+                <td><button type="button" class="remove-btn" @click="removeFamilyMember(index)">Remove</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <button type="button" class="add-btn" @click="addFamilyMember">Add Family Member</button>
+        </div>
+        <div class="form-group">
+          <label>Are there 2-3 potential guardians/caretakers who would be willing and able to participate in the program?</label>
+          <select v-model="formData.potentialGuardiansAvailable">
+            <option value="">Select</option>
+            <option value="YES">YES</option>
+            <option value="NO">NO</option>
+          </select>
+        </div>
+        <div class="section-navigation">
+          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
+          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+        </div>
+      </div>
+
+      <!-- Documents Section -->
+      <div v-show="currentSection === 8" class="form-section">
+        <h4>Documents Included Upon Admission</h4>
+        <div class="checkbox-group">
+          <label class="checkbox-item">
+            <input type="checkbox" v-model="formData.documents.tkpReferralForm" />
+            TKP Referral Form
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" v-model="formData.documents.carePlanAssessment" />
+            Care Plan Assessment Form
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" v-model="formData.documents.birthRecord" />
+            Copy of Birth Record
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" v-model="formData.documents.policeRecord" />
+            Copy of Police Record
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" v-model="formData.documents.dswAdmissionLetter" />
+            DSW Admission Letter
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" v-model="formData.documents.medicalRecords" />
+            Medical Records
+          </label>
+        </div>
+        <div class="section-navigation">
+          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
+          <button type="button" class="submit-btn" :disabled="loading" @click="handleSubmit">
+            {{ loading ? 'Saving...' : 'Save Care Plan' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, computed } from 'vue'
+import { useToast } from '../composables/useToast.js'
+
+const emit = defineEmits(['form-saved'])
+const { success, error } = useToast()
+
+const loading = ref(false)
+
+// Section navigation
+const currentSection = ref(1)
+const totalSections = 8
+
+const progressPercentage = computed(() => {
+  return (currentSection.value / totalSections) * 100
+})
+
+const sectionNames = [
+  'Child Information',
+  'Vulnerability Status', 
+  'Referral Method',
+  'Reason for Admission',
+  'Caregiver Information',
+  'General Family Information',
+  'Additional Family Members',
+  'Documents Included'
+]
+
+const currentSectionName = computed(() => {
+  return sectionNames[currentSection.value - 1] || 'Unknown Section'
+})
+
+const sectionCompletionStatus = computed(() => {
+  const status = []
+  
+  // Section 1: Child Information
+  const section1Complete = formData.childFirstName && formData.childSurname && 
+    formData.id && formData.dateOfAdmission && formData.gender && 
+    formData.dateOfBirth && formData.ageAtIntake && formData.placeOfBirth && 
+    formData.residentArea && formData.district && formData.nationality
+  status.push(section1Complete)
+  
+  // Section 2: Vulnerability Status
+  const section2Complete = formData.ovcStatus
+  status.push(section2Complete)
+  
+  // Section 3: Referral Method
+  const section3Complete = formData.referralMethod
+  status.push(section3Complete)
+  
+  // Section 4: Reasons for Admission
+  const section4Complete = Object.values(formData.reasons).some(reason => reason === true)
+  status.push(section4Complete)
+  
+  // Section 5: Caregiver Information
+  const section5Complete = formData.dateCompiled && formData.childName && 
+    formData.childId && formData.primaryCaregiver.name && 
+    formData.primaryCaregiver.relationship
+  status.push(section5Complete)
+  
+  // Sections 6-8 are optional
+  status.push(true) // General Family Information
+  status.push(true) // Additional Family Members
+  status.push(true) // Documents
+  
+  return status
+})
+
+const completedSections = computed(() => {
+  return sectionCompletionStatus.value.filter(status => status).length
+})
+
+const overallCompletion = computed(() => {
+  const requiredSections = 5 // Only first 5 sections are required
+  const completedRequired = sectionCompletionStatus.value.slice(0, 5).filter(status => status).length
+  return Math.round((completedRequired / requiredSections) * 100)
+})
+
+// Section validation rules
+const sectionValidationRules = {
+  1: [ // Child Information - required fields
+    'childFirstName',
+    'childSurname',
+    'id',
+    'dateOfAdmission',
+    'gender',
+    'dateOfBirth',
+    'ageAtIntake',
+    'placeOfBirth',
+    'residentArea',
+    'district',
+    'nationality'
+  ],
+  2: [ // Vulnerability Status
+    'ovcStatus'
+  ],
+  3: [ // Referral Method
+    'referralMethod'
+  ],
+  4: [ // Reasons for Admission - at least one reason must be selected
+  ],
+  5: [ // Caregiver Information
+    'dateCompiled',
+    'childName',
+    'childId'
+  ],
+  6: [], // General Family Information - optional
+  7: [], // Additional Family Members - optional
+  8: []  // Documents - optional
+}
+
+// Validation error messages
+const validationErrors = ref({})
+const showValidationMessage = ref(false)
+
+// Validate current section
+const validateCurrentSection = () => {
+  const requiredFields = sectionValidationRules[currentSection.value] || []
+  const errors = {}
+  let isValid = true
+
+  // Special validation for section 4 (Reasons for Admission)
+  if (currentSection.value === 4) {
+    const hasSelectedReason = Object.values(formData.reasons).some(reason => reason === true)
+    if (!hasSelectedReason) {
+      errors.reasons = 'Please select at least one reason for admission'
+      isValid = false
+    }
+  }
+
+  // Validate primary caregiver fields for section 5
+  if (currentSection.value === 5) {
+    if (!formData.primaryCaregiver.name || formData.primaryCaregiver.name.trim() === '') {
+      errors['primaryCaregiver.name'] = 'Primary Caregiver Name is required'
+      isValid = false
+    }
+    if (!formData.primaryCaregiver.relationship || formData.primaryCaregiver.relationship.trim() === '') {
+      errors['primaryCaregiver.relationship'] = 'Relationship to Child is required'
+      isValid = false
+    }
+  }
+
+  // Check regular required fields
+  requiredFields.forEach(fieldName => {
+    const value = formData[fieldName]
+    if (!value || (typeof value === 'string' && value.trim() === '')) {
+      errors[fieldName] = getFieldDisplayName(fieldName) + ' is required'
+      isValid = false
+    }
+  })
+
+  validationErrors.value = errors
+  return isValid
+}
+
+// Get user-friendly field names
+const getFieldDisplayName = (fieldName) => {
+  const fieldNames = {
+    childFirstName: 'Child First Name',
+    childSurname: 'Child Surname',
+    id: 'Child ID',
+    dateOfAdmission: 'Date of Admission',
+    gender: 'Gender',
+    dateOfBirth: 'Date of Birth',
+    ageAtIntake: 'Age at Intake',
+    placeOfBirth: 'Place of Birth',
+    residentArea: 'Resident Area at Intake',
+    district: 'District',
+    nationality: 'Nationality',
+    ovcStatus: 'OVC Status',
+    referralMethod: 'Referral Method',
+    dateCompiled: 'Date Compiled',
+    childName: 'Child Name',
+    childId: 'Child ID'
+  }
+  return fieldNames[fieldName] || fieldName
+}
+
+// Clear validation error for specific field
+const clearFieldError = (fieldName) => {
+  if (validationErrors.value[fieldName]) {
+    delete validationErrors.value[fieldName]
+    validationErrors.value = { ...validationErrors.value }
+  }
+}
+
+// Enhanced nextSection with validation
+const nextSection = () => {
+  // Validate current section before proceeding
+  if (!validateCurrentSection()) {
+    showValidationMessage.value = true
+    
+    // Hide validation message after 5 seconds
+    setTimeout(() => {
+      showValidationMessage.value = false
+    }, 5000)
+    
+    return
+  }
+  
+  // Clear any existing validation errors
+  validationErrors.value = {}
+  showValidationMessage.value = false
+  
+  if (currentSection.value < totalSections) {
+    currentSection.value++
+  }
+}
+
+const prevSection = () => {
+  // Clear validation errors when going back
+  validationErrors.value = {}
+  showValidationMessage.value = false
+  
+  if (currentSection.value > 1) {
+    currentSection.value--
+  }
+}
+
+// Form data
+const formData = reactive({
+  // Child Information
+  childFirstName: '',
+  childMiddleName: '',
+  childSurname: '',
+  otherFirstName: '',
+  otherMiddleName: '',
+  otherSurname: '',
+  id: '',
+  dateOfAdmission: '',
+  gender: '',
+  dateOfBirth: '',
+  ageAtIntake: '',
+  placeOfBirth: '',
+  residentArea: '',
+  village: '',
+  chief: '',
+  district: '',
+  tribe: '',
+  denomination: '',
+  nationality: '',
+  
+  // Vulnerability Status
+  ovcStatus: '',
+  ovcDateEffective: '',
+  parentDeceased: '',
+  parentDeathDate: '',
+  guardianDeceased: '',
+  guardianDeathDate: '',
+  
+  // Referral Method
+  referralMethod: '',
+  
+  // Reasons for Admission
+  reasons: {
+    attemptedAbortion: false,
+    attemptedSuicide: false,
+    pregnant: false,
+    rapeDefilement: false,
+    survivalProstitution: false,
+    other: false
+  },
+  estimatedConceptionDate: '',
+  pregnancyDuration: '',
+  abuseDetails: '',
+  
+  // Caregiver Information
+  dateCompiled: '',
+  childName: '',
+  childId: '',
+  
+  primaryCaregiver: {
+    name: '',
+    relationship: '',
+    phone1: '',
+    phone2: '',
+    occupation: '',
+    area: '',
+    age: '',
+    nrcNumber: '',
+    notes: ''
+  },
+  
+  secondaryCaregiver: {
+    name: '',
+    relationship: '',
+    phone1: '',
+    phone2: '',
+    occupation: '',
+    area: '',
+    age: '',
+    nrcNumber: '',
+    notes: ''
+  },
+  
+  // Biological Parents
+  biologicalFather: {
+    name: '',
+    age: '',
+    status: '',
+    deathDate: '',
+    causeOfDeath: '',
+    location: '',
+    profession: ''
+  },
+  
+  biologicalMother: {
+    name: '',
+    age: '',
+    status: '',
+    deathDate: '',
+    causeOfDeath: '',
+    location: '',
+    profession: ''
+  },
+  
+  // Siblings
+  siblings: [],
+  
+  // Additional Family Members
+  additionalFamily: [],
+  potentialGuardiansAvailable: '',
+  
+  // Documents
+  documents: {
+    tkpReferralForm: false,
+    carePlanAssessment: false,
+    birthRecord: false,
+    policeRecord: false,
+    dswAdmissionLetter: false,
+    medicalRecords: false
+  }
+})
+
+const addSibling = () => {
+  formData.siblings.push({
+    name: '',
+    age: '',
+    ageRelation: '',
+    status: '',
+    deathDate: '',
+    profession: '',
+    potentialGuardian: ''
+  })
+}
+
+const removeSibling = (index) => {
+  formData.siblings.splice(index, 1)
+}
+
+const addFamilyMember = () => {
+  formData.additionalFamily.push({
+    relation: '',
+    fullName: '',
+    age: '',
+    profession: '',
+    location: '',
+    potentialGuardian: ''
+  })
+}
+
+const removeFamilyMember = (index) => {
+  formData.additionalFamily.splice(index, 1)
+}
+
+const validateRequiredFields = () => {
+  const errors = []
+  
+  // Section 1: Child Information - Required fields
+  if (!formData.childFirstName.trim()) errors.push('Child First Name is required')
+  if (!formData.childSurname.trim()) errors.push('Child Surname is required')
+  if (!formData.id.trim()) errors.push('ID is required')
+  if (!formData.dateOfAdmission) errors.push('Date of Admission is required')
+  if (!formData.gender) errors.push('Gender is required')
+  if (!formData.dateOfBirth) errors.push('Date of Birth is required')
+  if (!formData.ageAtIntake) errors.push('Age at Intake is required')
+  if (!formData.placeOfBirth.trim()) errors.push('Place of Birth is required')
+  if (!formData.residentArea.trim()) errors.push('Resident Area at Intake is required')
+  if (!formData.district.trim()) errors.push('District is required')
+  if (!formData.nationality.trim()) errors.push('Nationality is required')
+  
+  // Section 2: Vulnerability Status - Required fields
+  if (!formData.ovcStatus) errors.push('OVC Status is required')
+  
+  // Section 3: Referral Method - Required field
+  if (!formData.referralMethod) errors.push('Referral Method is required')
+  
+  // Section 4: Reasons for Admission - At least one reason must be selected
+  const hasReason = Object.values(formData.reasons).some(reason => reason === true)
+  if (!hasReason) errors.push('At least one reason for admission must be selected')
+  
+  // Section 5: Caregiver Information - Required fields
+  if (!formData.dateCompiled) errors.push('Date Compiled is required')
+  if (!formData.childName.trim()) errors.push('Child Name is required')
+  if (!formData.childId.trim()) errors.push('Child ID is required')
+  if (!formData.primaryCaregiver.name.trim()) errors.push('Primary Caregiver Name is required')
+  if (!formData.primaryCaregiver.relationship.trim()) errors.push('Primary Caregiver Relationship is required')
+  
+  return errors
+}
+
+const handleSubmit = async (event) => {
+  // Prevent default form submission
+  if (event) {
+    event.preventDefault()
+  }
+  
+  // Validate required fields before submission
+  const validationErrors = validateRequiredFields()
+  if (validationErrors.length > 0) {
+    error('Please complete the following required fields: ' + validationErrors.join(', '))
+    return
+  }
+  
+  loading.value = true
+  try {
+    // Prepare form data with additional metadata
+    const submissionData = {
+      ...formData,
+      submittedAt: new Date(),
+      formVersion: '1.0',
+      completedSections: totalSections,
+      status: 'submitted'
+    }
+    
+    // Import FormService dynamically to avoid circular imports
+    const { default: FormService } = await import('../services/formService.js')
+    
+    const result = await FormService.saveChildOverview(submissionData)
+    
+    if (result.success) {
+      // Emit success event to parent component
+      emit('form-saved', { 
+        formType: 'child-overview', 
+        id: result.id, 
+        childName: `${formData.childFirstName} ${formData.childSurname}`,
+        uniqueId: generateChildId(formData)
+      })
+      
+      // Show success message with child information
+      success(`Child Overview Form saved successfully! Child: ${formData.childFirstName} ${formData.childSurname} (ID: ${result.id}) has been added to the tracking system.`)
+      
+      resetForm()
+      currentSection.value = 1 // Reset to first section
+    } else {
+      error('Error saving form: ' + result.error)
+    }
+  } catch (err) {
+    console.error('Error saving form:', err)
+    error('Error saving form. Please try again.')
+  } finally {
+    loading.value = false
+  }
+}
+
+const generateChildId = (data) => {
+  // Generate the unique ID pattern for display
+  const firstName = (data.childFirstName || '').toUpperCase()
+  const lastName = (data.childSurname || '').toUpperCase()
+  const tribe = (data.tribe || '').toUpperCase()
+  
+  const firstNamePrefix = firstName.substring(0, 2).padEnd(2, 'X')
+  const lastNamePrefix = lastName.substring(0, 2).padEnd(2, 'X')
+  const locationCode = '03' // Lusaka code
+  const currentYear = new Date().getFullYear().toString().slice(-2)
+  const tribePrefix = tribe.substring(0, 2).padEnd(2, 'X')
+  const sequence = '001'
+  
+  return `${firstNamePrefix}${lastNamePrefix}${locationCode}${currentYear}${tribePrefix}${sequence}`
+}
+
+const resetForm = () => {
+  Object.keys(formData).forEach(key => {
+    if (key === 'reasons' || key === 'primaryCaregiver' || key === 'secondaryCaregiver' || 
+        key === 'biologicalFather' || key === 'biologicalMother' || key === 'documents') {
+      Object.keys(formData[key]).forEach(subKey => {
+        if (typeof formData[key][subKey] === 'boolean') {
+          formData[key][subKey] = false
+        } else {
+          formData[key][subKey] = ''
+        }
+      })
+    } else if (key === 'siblings' || key === 'additionalFamily') {
+      formData[key] = []
+    } else {
+      formData[key] = ''
+    }
+  })
+}
+</script>
+
+<style scoped>
+.form-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #4A148C;
+}
+
+.form-header h3 {
+  color: #4A148C;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-header p {
+  color: #666;
+  font-size: 1rem;
+}
+
+.form-progress {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4A148C, #2D1B69);
+  transition: width 0.3s ease;
+}
+
+.progress-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  color: #4A148C;
+  font-weight: 500;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  color: #FF5722;
+  font-weight: 600;
+}
+
+.section-status {
+  margin-top: 0.5rem;
+}
+
+.status-indicator {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-weight: 500;
+  background: #e9ecef;
+  color: #6c757d;
+  transition: all 0.3s ease;
+}
+
+.status-indicator.complete {
+  background: #d4edda;
+  color: #155724;
+}
+
+.overview-form {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #4A148C;
+}
+
+.form-section h4 {
+  color: #4A148C;
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.form-section h5 {
+  color: #4A148C;
+  font-size: 1.1rem;
+  margin: 1.5rem 0 1rem 0;
+  font-weight: 500;
+}
+
+.form-section h6 {
+  color: #666;
+  font-size: 1rem;
+  margin: 1rem 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  color: #4A148C;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.75rem;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #333;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4A148C;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.checkbox-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.sibling-section {
+  background: white;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border: 1px solid #e9ecef;
+}
+
+.family-table {
+  margin-bottom: 1rem;
+}
+
+.family-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.family-table th,
+.family-table td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.family-table th {
+  background-color: #4A148C;
+  color: white;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.family-table input,
+.family-table select {
+  width: 100%;
+  padding: 0.25rem;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.add-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.add-btn:hover {
+  background-color: #218838;
+}
+
+.remove-btn {
+  background-color: #dc3545;
+  color: white;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.remove-btn:hover {
+  background-color: #c82333;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 2px solid #e9ecef;
+}
+
+.section-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.prev-btn,
+.next-btn {
+  background-color: #4A148C;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.prev-btn:hover,
+.next-btn:hover {
+  background-color: #2D1B69;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(74, 20, 140, 0.3);
+}
+
+.submit-btn {
+  background-color: #FF5722;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(255, 87, 34, 0.3);
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #2D1B69;
+}
+
+.submit-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.cancel-btn:hover {
+  background-color: #5a6268;
+}
+
+.section-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e9ecef;
+}
+
+.prev-btn,
+.next-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 150px;
+}
+
+.prev-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.prev-btn:hover {
+  background: #5a6268;
+}
+
+.next-btn {
+  background: #4A148C;
+  color: white;
+}
+
+.next-btn:hover {
+  background: #2D1B69;
+}
+
+.submit-btn {
+  background: #28a745;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 150px;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #218838;
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .checkbox-group {
+    grid-template-columns: 1fr;
+  }
+  
+  .family-table {
+    overflow-x: auto;
+  }
+  
+  .family-table table {
+    min-width: 800px;
+  }
+  
+  .section-navigation {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .prev-btn,
+  .next-btn,
+  .submit-btn {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .form-header h3 {
+    font-size: 1.4rem;
+  }
+  
+  .section-title {
+    font-size: 1rem;
+  }
+}
+</style>
