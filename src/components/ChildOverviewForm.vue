@@ -1104,6 +1104,7 @@ const resetForm = () => {
 .form-wrapper {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .form-header {
@@ -1251,6 +1252,12 @@ const resetForm = () => {
   font-size: 1rem;
   color: #333;
   transition: border-color 0.3s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: white;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
@@ -1330,32 +1337,51 @@ const resetForm = () => {
 }
 
 .add-btn {
-  background-color: #28a745;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
-  padding: 8px 16px;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9rem;
-  margin-top: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.75rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.add-btn:before {
+  content: '+';
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .add-btn:hover {
-  background-color: #218838;
+  background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
 }
 
 .remove-btn {
-  background-color: #dc3545;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   color: white;
-  padding: 4px 8px;
+  padding: 0.25rem 0.5rem;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(220, 53, 69, 0.2);
 }
 
 .remove-btn:hover {
-  background-color: #c82333;
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
 }
 
 .form-actions {
@@ -1502,25 +1528,125 @@ const resetForm = () => {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .form-wrapper {
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+  
+  .form-header {
+    padding: 0.75rem 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .form-header h3 {
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+  
+  .form-header p {
+    font-size: 0.85rem;
+  }
+  
+  .overview-form {
+    padding: 0.75rem;
+    border-radius: 0;
+  }
+  
+  .form-section {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-radius: 6px;
+  }
+  
+  .form-section h4 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .form-section h5 {
+    font-size: 0.95rem;
+    margin: 1rem 0 0.5rem 0;
+  }
+  
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 0.5rem;
   }
   
   .checkbox-group {
     grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+  
+  .checkbox-item {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .form-group {
+    margin-bottom: 0;
+  }
+  
+  .form-group label {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    border-width: 1px;
+    min-height: 40px;
+  }
+  
+  .form-group textarea {
+    min-height: 70px;
   }
   
   .family-table {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0.5rem -0.75rem;
+    padding: 0 0.75rem;
   }
   
   .family-table table {
-    min-width: 800px;
+    min-width: 700px;
+    font-size: 0.75rem;
+  }
+  
+  .family-table th,
+  .family-table td {
+    padding: 0.4rem 0.3rem;
+  }
+  
+  .family-table input,
+  .family-table select {
+    padding: 0.3rem;
+    font-size: 0.75rem;
+  }
+  
+  .add-btn {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    justify-content: center;
+  }
+  
+  .remove-btn {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.7rem;
   }
   
   .section-navigation {
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
   }
   
   .prev-btn,
@@ -1528,14 +1654,105 @@ const resetForm = () => {
   .submit-btn {
     width: 100%;
     min-width: auto;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    min-height: 44px;
   }
   
-  .form-header h3 {
-    font-size: 1.4rem;
+  .form-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+  }
+  
+  .submit-btn,
+  .cancel-btn {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    min-height: 44px;
+  }
+  
+  .progress-info {
+    font-size: 0.8rem;
   }
   
   .section-title {
+    font-size: 0.85rem;
+  }
+  
+  .status-indicator {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+  }
+  
+  .progress-bar {
+    height: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-wrapper {
+    padding: 0 0.25rem;
+  }
+  
+  .form-header {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .form-header h3 {
     font-size: 1rem;
+  }
+  
+  .form-header p {
+    font-size: 0.8rem;
+  }
+  
+  .form-section {
+    padding: 0.5rem;
+  }
+  
+  .form-section h4 {
+    font-size: 0.95rem;
+  }
+  
+  .form-section h5 {
+    font-size: 0.9rem;
+  }
+  
+  .form-group label {
+    font-size: 0.75rem;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.4rem;
+    font-size: 0.8rem;
+  }
+  
+  .checkbox-item {
+    padding: 0.4rem;
+    font-size: 0.75rem;
+  }
+  
+  .progress-text {
+    font-size: 0.7rem;
+  }
+  
+  .section-title {
+    font-size: 0.8rem;
+  }
+  
+  .family-table table {
+    min-width: 650px;
+    font-size: 0.7rem;
+  }
+  
+  .add-btn {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
   }
 }
 </style>

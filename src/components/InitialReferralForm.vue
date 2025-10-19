@@ -847,6 +847,7 @@ const resetForm = () => {
 .form-wrapper {
   max-width: 1000px;
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .form-header {
@@ -949,6 +950,12 @@ const resetForm = () => {
   font-size: 1rem;
   color: #333;
   transition: border-color 0.3s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: white;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
@@ -1130,16 +1137,166 @@ const resetForm = () => {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .form-wrapper {
+    max-width: 100%;
+    padding: 0 0.5rem;
+  }
+  
+  .form-header {
+    padding: 0.75rem 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .form-header h3 {
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+  
+  .form-header p {
+    font-size: 0.85rem;
+  }
+  
+  .referral-form {
+    padding: 0.75rem;
+    border-radius: 0;
+  }
+  
+  .form-section {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    border-radius: 6px;
+  }
+  
+  .form-section h4 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .form-group {
+    margin-bottom: 0;
+  }
+  
+  .form-group label {
+    font-size: 0.8rem;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    border-width: 1px;
+    min-height: 40px;
+  }
+  
+  .form-group textarea {
+    min-height: 70px;
+  }
+  
+  .section-navigation {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  
+  .prev-btn,
+  .next-btn {
+    width: 100%;
+    min-width: auto;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    min-height: 44px;
   }
   
   .form-actions {
     flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+  }
+  
+  .submit-btn,
+  .cancel-btn {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    min-height: 44px;
+  }
+  
+  .validation-message {
+    padding: 0.625rem;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  
+  .validation-header {
+    font-size: 0.8rem;
+  }
+  
+  .validation-list {
+    padding-left: 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  .validation-item {
+    font-size: 0.75rem;
+  }
+  
+  .progress-bar {
+    height: 6px;
+  }
+  
+  .progress-text {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-wrapper {
+    padding: 0 0.25rem;
+  }
+  
+  .form-header {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .form-header h3 {
+    font-size: 1rem;
+  }
+  
+  .form-header p {
+    font-size: 0.8rem;
   }
   
   .form-section {
-    padding: 1rem;
+    padding: 0.5rem;
+  }
+  
+  .form-section h4 {
+    font-size: 0.95rem;
+  }
+  
+  .form-group label {
+    font-size: 0.75rem;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.4rem;
+    font-size: 0.8rem;
+  }
+  
+  .progress-text {
+    font-size: 0.75rem;
   }
 }
 </style>

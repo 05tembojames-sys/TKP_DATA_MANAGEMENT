@@ -18,6 +18,14 @@
         <button @click="saveData" class="save-button" :disabled="!hasUnsavedChanges">
           Save
         </button>
+        <button @click="handleLogout" class="logout-button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Logout
+        </button>
       </div>
     </div>
 
@@ -234,6 +242,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import CaptureService from '../services/captureService.js'
 import FormService from '../services/formService.js'
+import AuthService from '../services/auth.js'
 
 const router = useRouter()
 
@@ -277,6 +286,18 @@ const goBack = () => {
     }
   } else {
     router.push('/dashboard')
+  }
+}
+
+const handleLogout = async () => {
+  if (hasUnsavedChanges.value) {
+    if (!confirm('You have unsaved changes. Are you sure you want to logout?')) {
+      return
+    }
+  }
+  const result = await AuthService.logout()
+  if (result.success) {
+    router.push('/login')
   }
 }
 
@@ -591,8 +612,18 @@ watch(dataValues, () => {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.header-left, .header-right {
+.header-left {
   flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-end;
 }
 
 .header-center {
@@ -600,22 +631,41 @@ watch(dataValues, () => {
   text-align: center;
 }
 
-.back-button {
-  background: #6c757d;
+.back-button,
+.logout-button {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
   color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  transition: background-color 0.2s;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-.back-button:hover {
-  background: #5a6268;
+.back-button:hover,
+.logout-button:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.logout-button {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+.logout-button:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
 }
 
 .capture-title {
@@ -1035,8 +1085,26 @@ watch(dataValues, () => {
     width: 100%;
   }
 
+  .header-left {
+    order: 1;
+  }
+
   .header-center {
-    text-align: left;
+    order: 2;
+    text-align: center;
+  }
+
+  .header-right {
+    order: 3;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .back-button,
+  .logout-button,
+  .save-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
   }
 
   .capture-content {
@@ -1073,6 +1141,43 @@ watch(dataValues, () => {
     flex-direction: column;
     gap: 1rem;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .capture-header {
+    padding: 0.75rem;
+  }
+
+  .capture-title {
+    font-size: 1.25rem;
+  }
+
+  .back-button,
+  .logout-button,
+  .save-button {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .header-right {
+    flex-direction: column;
+  }
+
+  .selection-dropdown,
+  .element-input {
+    font-size: 0.875rem;
+  }
+
+  .load-button,
+  .validate-button,
+  .clear-button,
+  .draft-button,
+  .complete-button {
+    width: 100%;
+    padding: 0.75rem;
   }
 }
 </style>

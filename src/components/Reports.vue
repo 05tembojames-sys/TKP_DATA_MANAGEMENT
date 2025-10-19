@@ -2,11 +2,32 @@
   <div class="reports-container">
     <!-- Header Section -->
     <div class="reports-header">
-      <div class="header-content">
-        <div class="title-section">
+      <div class="header-nav">
+        <div class="header-left">
+          <button @click="goBack" class="back-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m12 19-7-7 7-7" />
+              <path d="m19 12H5" />
+            </svg>
+            Back to Dashboard
+          </button>
+        </div>
+        <div class="header-center">
           <h1 class="reports-title">📊 Reports - Weekly</h1>
           <p class="reports-subtitle">Upload and manage weekly reports with admin approval workflow</p>
         </div>
+        <div class="header-right">
+          <button @click="handleLogout" class="logout-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Logout
+          </button>
+        </div>
+      </div>
+      <div class="header-content">
         <div class="header-stats">
           <div class="stat-card">
             <div class="stat-number">{{ reportStats.total || 0 }}</div>
@@ -334,9 +355,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import ReportService from '../services/reportService.js'
 import AuthService from '../services/auth.js'
 import UserService from '../services/userService.js'
+
+const router = useRouter()
 
 // Props
 const props = defineProps({
@@ -688,6 +712,18 @@ const showMessage = (msg, type = 'success') => {
     message.value = ''
   }, 5000)
 }
+
+// Navigation methods
+const goBack = () => {
+  router.push('/dashboard')
+}
+
+const handleLogout = async () => {
+  const result = await AuthService.logout()
+  if (result.success) {
+    router.push('/login')
+  }
+}
 </script>
 
 <style scoped>
@@ -703,26 +739,94 @@ const showMessage = (msg, type = 'success') => {
   background: linear-gradient(135deg, #4A148C 0%, #2D1B69 100%);
   color: white;
   border-radius: 12px;
-  padding: 2rem;
+  padding: 0;
   margin-bottom: 2rem;
   box-shadow: 0 4px 12px rgba(74, 20, 140, 0.3);
+  overflow: hidden;
 }
 
-.header-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
+.header-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
   align-items: center;
 }
 
-.title-section h1 {
-  font-size: 2.5rem;
+.header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.header-center {
+  flex: 2;
+  text-align: center;
+}
+
+.back-button,
+.logout-button {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.back-button:hover,
+.logout-button:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.logout-button {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.logout-button:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.header-content {
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.reports-title {
+  font-size: 2rem;
   margin: 0 0 0.5rem 0;
   font-weight: 700;
 }
 
-.title-section p {
-  font-size: 1.1rem;
+.reports-subtitle {
+  font-size: 1rem;
   opacity: 0.9;
   margin: 0;
 }
@@ -1507,11 +1611,71 @@ const showMessage = (msg, type = 'success') => {
     right: 20px;
     min-width: auto;
   }
+
+  .header-nav {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .header-left, .header-center, .header-right {
+    flex: none;
+    width: 100%;
+  }
+
+  .header-left {
+    order: 1;
+  }
+
+  .header-center {
+    order: 2;
+    text-align: center;
+  }
+
+  .header-right {
+    order: 3;
+    justify-content: center;
+  }
+
+  .back-button,
+  .logout-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .reports-title {
+    font-size: 1.5rem;
+  }
+
+  .reports-subtitle {
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .title-section h1 {
-    font-size: 2rem;
+  .header-nav {
+    padding: 0.75rem;
+  }
+
+  .reports-title {
+    font-size: 1.25rem;
+  }
+
+  .reports-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .back-button,
+  .logout-button {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .header-right {
+    flex-direction: row;
+    gap: 0.5rem;
   }
 
   .stat-card {

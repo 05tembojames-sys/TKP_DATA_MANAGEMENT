@@ -2,10 +2,29 @@
   <div class="event-reports-container">
     <!-- Header -->
     <div class="reports-header">
-      <div class="header-content">
-        <div class="title-section">
+      <div class="header-nav">
+        <div class="header-left">
+          <button @click="goBack" class="back-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m12 19-7-7 7-7" />
+              <path d="m19 12H5" />
+            </svg>
+            Back to Dashboard
+          </button>
+        </div>
+        <div class="header-center">
           <h1 class="reports-title">📊 Event Reports</h1>
           <p class="reports-subtitle">Create dynamic pivot tables and visualizations from event data</p>
+        </div>
+        <div class="header-right">
+          <button @click="handleLogout" class="logout-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Logout
+          </button>
         </div>
       </div>
     </div>
@@ -483,9 +502,12 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useToast } from '../composables/useToast.js'
 import EventReportsService from '../services/eventReportsService.js'
+import AuthService from '../services/auth.js'
 
+const router = useRouter()
 const toast = useToast()
 
 // UI State
@@ -838,6 +860,18 @@ const viewEventDetails = (event) => {
   toast.info('Opening event details...')
 }
 
+// Navigation methods
+const goBack = () => {
+  router.push('/dashboard')
+}
+
+const handleLogout = async () => {
+  const result = await AuthService.logout()
+  if (result.success) {
+    router.push('/login')
+  }
+}
+
 // Lifecycle
 onMounted(async () => {
   config.value.selectedOrgUnits = ['unit-1']
@@ -863,25 +897,91 @@ onMounted(async () => {
 .reports-header {
   background: linear-gradient(135deg, #4A148C 0%, #2D1B69 100%);
   color: white;
-  padding: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.header-center {
+  flex: 2;
+  text-align: center;
+}
+
+.back-button,
+.logout-button {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.back-button:hover,
+.logout-button:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.logout-button {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.logout-button:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.reports-title {
+  font-size: 1.75rem;
+  margin: 0 0 0.25rem 0;
+  font-weight: 700;
+}
+
+.reports-subtitle {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  margin: 0;
 }
 
 .header-content {
   max-width: 1400px;
   margin: 0 auto;
-}
-
-.title-section h1 {
-  font-size: 2rem;
-  margin: 0 0 0.5rem 0;
-  font-weight: 700;
-}
-
-.title-section p {
-  font-size: 1rem;
-  opacity: 0.9;
-  margin: 0;
 }
 
 .reports-layout {
@@ -1721,6 +1821,74 @@ onMounted(async () => {
   .config-panel.collapsed {
     width: 100%;
     height: 50px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-nav {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .header-left, .header-center, .header-right {
+    flex: none;
+    width: 100%;
+  }
+
+  .header-left {
+    order: 1;
+  }
+
+  .header-center {
+    order: 2;
+    text-align: center;
+  }
+
+  .header-right {
+    order: 3;
+    justify-content: center;
+  }
+
+  .back-button,
+  .logout-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .reports-title {
+    font-size: 1.5rem;
+  }
+
+  .reports-subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-nav {
+    padding: 0.75rem;
+  }
+
+  .reports-title {
+    font-size: 1.25rem;
+  }
+
+  .reports-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .back-button,
+  .logout-button {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .header-right {
+    flex-direction: row;
+    gap: 0.5rem;
   }
 }
 </style>
