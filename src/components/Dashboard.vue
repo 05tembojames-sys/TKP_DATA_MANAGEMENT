@@ -2,6 +2,10 @@
   <div class="dashboard">
     <!-- Header Section -->
     <div class="header-section">
+      <!-- User Info -->
+      <div class="user-info" v-if="currentUserName">
+        <span class="user-name">{{ currentUserName }}</span>
+      </div>
       <!-- Logout Button -->
       <button @click="handleLogout" class="logout-button">
         Logout
@@ -433,6 +437,7 @@ const loadingUsers = ref(false)
 const loading = ref(false)
 const showAddUserForm = ref(false)
 const showEditUserForm = ref(false)
+const currentUserName = ref('')
 
 // Summary statistics
 const totalReports = ref(0)
@@ -777,6 +782,11 @@ const handleLogout = async () => {
 
 // Load summary data when component mounts
 onMounted(() => {
+  // Set current user name
+  const currentUser = AuthService.getCurrentUser()
+  if (currentUser) {
+    currentUserName.value = currentUser.email
+  }
   loadSummaryData()
 })
 </script>
@@ -843,6 +853,19 @@ onMounted(() => {
 
 .logout-button:hover {
   background-color: #2D1B69; /* Darker purple on hover */
+}
+
+/* User Info */
+.user-info {
+  margin-right: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.user-name {
+  color: #4A148C;
+  font-weight: 500;
+  font-size: 1rem;
 }
 
 /* Main Content */
