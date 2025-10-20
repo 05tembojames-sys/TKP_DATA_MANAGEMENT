@@ -38,6 +38,48 @@
 
     <!-- Main Content -->
     <div class="tracker-content">
+      <!-- DHIS2 EMIS Style Toolbar -->
+      <div class="dhis2-toolbar">
+        <div class="toolbar-section">
+          <div class="toolbar-item">
+            <label>Organisation Unit</label>
+            <select v-model="selectedOrgUnit" class="toolbar-select">
+              <option value="main">The Kukhoma Project - Main Center</option>
+              <option value="lusaka">Community Outreach - Lusaka</option>
+              <option value="chongwe">Community Outreach - Chongwe</option>
+            </select>
+          </div>
+          
+          <div class="toolbar-item">
+            <label>Program</label>
+            <select v-model="selectedProgram" class="toolbar-select">
+              <option value="child-protection">Child Protection Program</option>
+              <option value="pregnancy-support">Pregnancy Support Program</option>
+              <option value="family-support">Family Support Program</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="toolbar-section">
+          <button @click="refreshData" class="toolbar-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12a9 9 0 0 1-9 9c-4.97 0-9-4.03-9-9 0-4.97 4.03-9 9-9" />
+              <path d="M16 12l-4-4-4 4M12 16V8" />
+            </svg>
+            Refresh
+          </button>
+          
+          <button @click="exportData" class="toolbar-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Export
+          </button>
+        </div>
+      </div>
+
       <!-- Search and Filter Panel -->
       <div class="search-panel">
         <div class="search-controls">
@@ -457,13 +499,21 @@
                           </span>
                         </div>
                       </div>
+                      <!-- Show "No events" message when there are no events for this stage -->
+                      <div v-if="getStageEvents(stage.id).length === 0" class="no-events-message">
+                        No events recorded
+                      </div>
                     </div>
                     <button 
                       v-if="stage.active || stage.completed"
                       @click="addStageEvent(stage)"
                       class="add-stage-event-button"
                     >
-                      Add {{ stage.name }} Event
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14" />
+                        <path d="m5 12 14 0" />
+                      </svg>
+                      Add {{ stage.id === 'referral' ? 'Initial Referral' : stage.name }} Event
                     </button>
                   </div>
                 </div>
@@ -574,6 +624,10 @@ const pageSize = ref(10)
 const sortField = ref('lastActivity')
 const sortOrder = ref('desc')
 
+// DHIS2 EMIS style toolbar data
+const selectedOrgUnit = ref('main')
+const selectedProgram = ref('child-protection')
+
 // Cases data
 const allCases = ref([])
 const selectedCase = ref(null)
@@ -596,14 +650,14 @@ const programStages = ref([
     id: 'referral',
     name: 'Initial Referral',
     description: 'Child referred to the program',
-    completed: true,
-    active: false
+    completed: false,
+    active: true
   },
   {
     id: 'assessment',
     name: 'Initial Assessment',
     description: 'Comprehensive assessment of child needs',
-    completed: true,
+    completed: false,
     active: false
   },
   {
@@ -611,7 +665,7 @@ const programStages = ref([
     name: 'Program Enrollment',
     description: 'Child enrolled in program services',
     completed: false,
-    active: true
+    active: false
   },
   {
     id: 'care-plan',
@@ -715,6 +769,18 @@ const handleLogout = async () => {
   }
 }
 
+// DHIS2 EMIS style toolbar methods
+const refreshData = async () => {
+  loading.value = true
+  loadingMessage.value = 'Refreshing data...'
+  await loadCases()
+}
+
+const exportData = () => {
+  // In a real implementation, this would export the data to a file
+  alert('Export functionality would be implemented here')
+}
+
 const performSearch = () => {
   currentPage.value = 1
   // Search is reactive through computed property
@@ -768,8 +834,18 @@ const addEvent = () => {
 }
 
 const addStageEvent = (stage) => {
-  const formType = getFormTypeForStage(stage.id)
-  router.push(`/capture?preset=${formType}&caseId=${selectedCase.value.id}&stage=${stage.id}`)
+  // Special handling for referral stage to open Initial Referral form
+  if (stage.id === 'referral') {
+    // Navigate to Initial Referral form with case data
+    const route = `/capture?preset=initial-referral&caseId=${selectedCase.value.id}&stage=${stage.id}`
+    console.log('Navigating to Initial Referral form:', route)
+    router.push(route)
+  } else {
+    const formType = getFormTypeForStage(stage.id)
+    const route = `/capture?preset=${formType}&caseId=${selectedCase.value.id}&stage=${stage.id}`
+    console.log('Navigating to form:', route)
+    router.push(route)
+  }
 }
 
 const viewEvent = (event) => {
@@ -872,12 +948,57 @@ const loadCaseDetails = async (caseId) => {
 const updateProgramStages = () => {
   if (!selectedCase.value) return
   
-  // Update program stages based on case progress
-  programStages.value.forEach((stage, index) => {
-    const hasEvents = selectedCase.value.events.some(event => event.stageId === stage.id)
-    stage.completed = hasEvents && selectedCase.value.currentStage !== stage.id
-    stage.active = selectedCase.value.currentStage === stage.id
+  // Reset all stages
+  programStages.value.forEach(stage => {
+    stage.completed = false
+    stage.active = false
   })
+  
+  // Update program stages based on case progress
+  const caseEvents = selectedCase.value.events || []
+  
+  // Mark stages with events as completed
+  programStages.value.forEach(stage => {
+    const stageEvents = caseEvents.filter(event => event.stageId === stage.id)
+    if (stageEvents.length > 0) {
+      stage.completed = true
+    }
+  })
+  
+  // Set the current stage as active
+  const currentStageId = selectedCase.value.currentStage || 'referral'
+  const currentStageIndex = programStages.value.findIndex(stage => stage.id === currentStageId)
+  
+  if (currentStageIndex >= 0) {
+    const currentStage = programStages.value[currentStageIndex]
+    // If current stage has no events, mark it as active
+    const currentStageEvents = caseEvents.filter(event => event.stageId === currentStageId)
+    if (currentStageEvents.length === 0) {
+      currentStage.active = true
+    } else {
+      // If it has events, mark it as completed
+      currentStage.completed = true
+      // Mark next stage as active if it exists
+      if (currentStageIndex < programStages.value.length - 1) {
+        programStages.value[currentStageIndex + 1].active = true
+      }
+    }
+  } else {
+    // Default to first stage if current stage is not found
+    programStages.value[0].active = true
+  }
+  
+  // If no events exist at all, make sure the first stage is active
+  const hasAnyEvents = caseEvents.length > 0
+  if (!hasAnyEvents) {
+    programStages.value[0].active = true
+    programStages.value.forEach((stage, index) => {
+      if (index > 0) {
+        stage.active = false
+        stage.completed = false
+      }
+    })
+  }
 }
 
 const getFormTypeForStage = (stageId) => {
@@ -1049,6 +1170,381 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
 
 .new-enrollment-button:hover {
   background: #0056b3;
+}
+
+.tracker-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.search-panel {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-controls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: end;
+  margin-bottom: 1.5rem;
+}
+
+.search-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.search-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: #6c757d;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.clear-search {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.125rem;
+}
+
+.clear-search:hover {
+  background: #f8f9fa;
+}
+
+.filter-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.filter-select {
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+  background: white;
+  min-width: 150px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.search-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.search-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.search-button:hover {
+  background: #0056b3;
+}
+
+.reset-button {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.reset-button:hover {
+  background: #5a6268;
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 0.25rem;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #007bff;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.tracker-main {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.tracker-capture-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+}
+
+.tracker-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.header-center {
+  flex: 2;
+  text-align: center;
+}
+
+.back-button,
+.logout-button {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.back-button:hover,
+.logout-button:hover {
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.logout-button {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+.logout-button:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.tracker-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.data-source-indicator {
+  margin-top: 0.5rem;
+}
+
+.indicator-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #28a745;
+  color: white;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.indicator-badge.firebase {
+  background: linear-gradient(45deg, #FF6B35, #F7931E);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.new-enrollment-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  margin-left: auto;
+}
+
+.new-enrollment-button:hover {
+  background: #0056b3;
+}
+
+/* DHIS2 EMIS Style Toolbar */
+.dhis2-toolbar {
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.toolbar-section {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.toolbar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.toolbar-item label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+}
+
+.toolbar-select {
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+  background: white;
+  min-width: 200px;
+}
+
+.toolbar-select:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.toolbar-button {
+  background: #f8f9fa;
+  border: 1px solid #ced4da;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.toolbar-button:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
 }
 
 .tracker-content {
@@ -1802,6 +2298,7 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
 
 .stage-events {
   margin-bottom: 1rem;
+  min-height: 60px;
 }
 
 .event-item {
@@ -1842,6 +2339,20 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
   color: #6c757d;
 }
 
+.event-status {
+  display: flex;
+  align-items: center;
+}
+
+.no-events-message {
+  padding: 0.75rem;
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+  border: 1px dashed #dee2e6;
+  border-radius: 0.25rem;
+}
+
 .add-stage-event-button {
   background: #17a2b8;
   color: white;
@@ -1852,10 +2363,17 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
   font-size: 0.9rem;
   font-weight: 500;
   transition: background-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .add-stage-event-button:hover {
   background: #138496;
+}
+
+.add-stage-event-button:active {
+  transform: translateY(1px);
 }
 
 /* Modal Styles */
@@ -2074,6 +2592,26 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
     font-size: 0.85rem;
   }
 
+  .dhis2-toolbar {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .toolbar-section {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .toolbar-item {
+    align-items: stretch;
+  }
+
+  .toolbar-select {
+    min-width: auto;
+  }
+
   .tracker-content {
     padding: 1rem;
   }
@@ -2168,4 +2706,3 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
     font-size: 0.875rem;
   }
 }
-</style>

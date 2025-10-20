@@ -8,7 +8,7 @@
             <path d="m12 19-7-7 7-7" />
             <path d="m19 12H5" />
           </svg>
-          Back to Dashboard
+          <span class="button-text">Back to Dashboard</span>
         </button>
       </div>
       <div class="header-center">
@@ -18,74 +18,149 @@
         </div>
       </div>
       <div class="header-right">
-        <button @click="refreshData" class="tool-btn" :disabled="loading">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M1 4v6h6"/>
-            <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+        <!-- Mobile Menu Toggle -->
+        <button @click="toggleMobileMenu" class="mobile-menu-toggle" v-if="isMobile">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
           </svg>
-          {{ loading ? 'Refreshing...' : 'Refresh' }}
         </button>
-        <div class="dropdown" ref="exportDropdown">
-          <button @click="toggleExportDropdown" class="tool-btn dropdown-toggle">
+        
+        <!-- Desktop Actions -->
+        <div class="desktop-actions" v-if="!isMobile">
+          <button @click="refreshData" class="tool-btn" :disabled="loading">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-              <polyline points="7,10 12,15 17,10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
+              <path d="M1 4v6h6"/>
+              <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
             </svg>
-            Export
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="6,9 12,15 18,9"/>
+            {{ loading ? 'Refreshing...' : 'Refresh' }}
+          </button>
+          <div class="dropdown" ref="exportDropdown">
+            <button @click="toggleExportDropdown" class="tool-btn dropdown-toggle">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="7,10 12,15 17,10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Export
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6,9 12,15 18,9"/>
+              </svg>
+            </button>
+            <div v-if="showExportDropdown" class="dropdown-menu">
+              <button @click="exportData('pdf')" class="dropdown-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                  <polyline points="14,2 14,8 20,8"/>
+                </svg>
+                Export as PDF
+              </button>
+              <button @click="exportData('excel')" class="dropdown-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <line x1="9" y1="9" x2="15" y2="15"/>
+                  <line x1="15" y1="9" x2="9" y2="15"/>
+                </svg>
+                Export as Excel
+              </button>
+              <button @click="exportData('csv')" class="dropdown-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                  <polyline points="14,2 14,8 20,8"/>
+                  <line x1="8" y1="13" x2="16" y2="13"/>
+                  <line x1="8" y1="17" x2="16" y2="17"/>
+                </svg>
+                Export as CSV
+              </button>
+            </div>
+          </div>
+          <button @click="openSettings" class="tool-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+            </svg>
+            Settings
+          </button>
+          <button @click="handleLogout" class="logout-button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div v-if="showMobileMenu && isMobile" class="mobile-menu-overlay" @click="closeMobileMenu">
+      <div class="mobile-menu" @click.stop>
+        <div class="mobile-menu-header">
+          <h3>Menu</h3>
+          <button @click="closeMobileMenu" class="close-menu-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           </button>
-          <div v-if="showExportDropdown" class="dropdown-menu">
-            <button @click="exportData('pdf')" class="dropdown-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                <polyline points="14,2 14,8 20,8"/>
-              </svg>
-              Export as PDF
-            </button>
-            <button @click="exportData('excel')" class="dropdown-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <line x1="9" y1="9" x2="15" y2="15"/>
-                <line x1="15" y1="9" x2="9" y2="15"/>
-              </svg>
-              Export as Excel
-            </button>
-            <button @click="exportData('csv')" class="dropdown-item">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                <polyline points="14,2 14,8 20,8"/>
-                <line x1="8" y1="13" x2="16" y2="13"/>
-                <line x1="8" y1="17" x2="16" y2="17"/>
-              </svg>
-              Export as CSV
-            </button>
-          </div>
         </div>
-        <button @click="openSettings" class="tool-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
-          </svg>
-          Settings
-        </button>
-        <button @click="handleLogout" class="logout-button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Logout
-        </button>
+        <div class="mobile-menu-actions">
+          <button @click="refreshData" class="mobile-action-btn" :disabled="loading">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 4v6h6"/>
+              <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+            </svg>
+            <span>{{ loading ? 'Refreshing...' : 'Refresh Data' }}</span>
+          </button>
+          <button @click="exportData('pdf')" class="mobile-action-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+            </svg>
+            <span>Export as PDF</span>
+          </button>
+          <button @click="exportData('excel')" class="mobile-action-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+            </svg>
+            <span>Export as Excel</span>
+          </button>
+          <button @click="exportData('csv')" class="mobile-action-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="8" y1="13" x2="16" y2="13"/>
+              <line x1="8" y1="17" x2="16" y2="17"/>
+            </svg>
+            <span>Export as CSV</span>
+          </button>
+          <button @click="openSettings" class="mobile-action-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"/>
+            </svg>
+            <span>Settings</span>
+          </button>
+          <button @click="handleLogout" class="mobile-action-btn logout">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Main Analytics Interface -->
     <div class="analytics-container">
       <!-- Left Sidebar - Data Explorer -->
-      <div class="data-explorer">
+      <div class="data-explorer" :class="{ 'mobile-hidden': isMobile && !showSidebar }">
         <div class="explorer-header">
           <div class="explorer-title">
             <h3>Data Explorer</h3>
@@ -192,6 +267,27 @@
       </div>
 
       <!-- Main Content Area -->
+      <!-- Mobile Sidebar Toggle Button -->
+      <button @click="toggleSidebar" class="mobile-sidebar-toggle-btn" v-if="isMobile && !showSidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        <span>Data Explorer</span>
+      </button>
+
+      <!-- Mobile Widget Toggle Button -->
+      <button @click="toggleWidgetLibrary" class="mobile-widget-toggle-btn" v-if="isMobile && activeTab === 'dashboard'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        <span>Widgets</span>
+      </button>
+
       <div class="main-content">
         <!-- Analysis Tabs -->
         <div class="analysis-tabs">
@@ -499,10 +595,17 @@
             
             <div class="dashboard-builder">
               <!-- Widget Library Sidebar -->
-              <div class="widget-library">
+              <div class="widget-library" :class="{ 'mobile-hidden': isMobile && !showWidgetLibrary }">
                 <div class="library-header">
                   <h4>📊 Widget Library</h4>
                   <p class="library-subtitle">Drag widgets to your dashboard</p>
+                  <!-- Mobile close button -->
+                  <button @click="toggleWidgetLibrary" class="mobile-widget-close-btn" v-if="isMobile">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="18" y1="6" x2="6" y2="18"/>
+                      <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
                 </div>
                 
                 <!-- Widget Categories -->
@@ -1334,6 +1437,12 @@ const chartTitle = ref('')
 const colorScheme = ref('default')
 const enableAnimation = ref(true)
 
+// Mobile responsiveness
+const isMobile = ref(false)
+const showMobileMenu = ref(false)
+const showSidebar = ref(false)
+const showWidgetLibrary = ref(false)
+
 // Settings data
 const settings = ref({
   autoRefresh: false,
@@ -1753,6 +1862,32 @@ const setMockData = () => {
 
 const toggleExportDropdown = () => {
   showExportDropdown.value = !showExportDropdown.value
+}
+
+// Mobile functions
+const toggleMobileMenu = () => {
+  showMobileMenu.value = !showMobileMenu.value
+}
+
+const closeMobileMenu = () => {
+  showMobileMenu.value = false
+}
+
+const toggleSidebar = () => {
+  showSidebar.value = !showSidebar.value
+}
+
+const toggleWidgetLibrary = () => {
+  showWidgetLibrary.value = !showWidgetLibrary.value
+}
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+  if (!isMobile.value) {
+    showSidebar.value = false
+    showMobileMenu.value = false
+    showWidgetLibrary.value = false
+  }
 }
 
 // Close dropdown when clicking outside
@@ -3771,6 +3906,10 @@ onMounted(async () => {
     dimensions.value[0].expanded = true
   }
   
+  // Check mobile on mount
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+  
   // Load real analytics data
   await refreshData()
   
@@ -3817,6 +3956,9 @@ onUnmounted(() => {
   
   // Remove click outside listener
   document.removeEventListener('click', handleClickOutside)
+  
+  // Remove resize listener
+  window.removeEventListener('resize', checkMobile)
 })
 
 </script>
@@ -3858,25 +4000,30 @@ onUnmounted(() => {
   position: sticky;
   top: 0;
   z-index: 100;
+  min-height: 80px;
 }
 
 .header-left {
-  flex: 1;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .header-center {
-  flex: 2;
+  flex: 1;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .header-right {
-  flex: 1;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .page-title {
@@ -4088,7 +4235,12 @@ onUnmounted(() => {
 .dashboard-builder {
   display: grid;
   grid-template-columns: 320px 1fr;
-  min-height: 700px;
+  min-height: calc(100vh - 200px);
+  gap: 0;
+  background: #f8f9fa;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Widget Library */
@@ -4097,7 +4249,8 @@ onUnmounted(() => {
   border-right: 1px solid #e5e7eb;
   padding: 1.5rem;
   overflow-y: auto;
-  max-height: 700px;
+  max-height: calc(100vh - 200px);
+  position: relative;
 }
 
 .library-header {
@@ -4281,6 +4434,8 @@ onUnmounted(() => {
   background: #f8fafc;
   padding: 1.5rem;
   position: relative;
+  min-height: calc(100vh - 300px);
+  overflow-y: auto;
 }
 
 .canvas-header {
@@ -4349,6 +4504,7 @@ onUnmounted(() => {
   border-radius: 12px;
   box-shadow: inset 0 0 0 1px #e5e7eb;
   overflow: hidden;
+  padding: 1rem;
 }
 
 .dashboard-canvas.show-grid {
@@ -5421,12 +5577,14 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.1);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1rem;
   border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
+  min-height: 40px;
 }
 
 .tool-btn:hover {
@@ -5437,6 +5595,35 @@ onUnmounted(() => {
 .tool-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.desktop-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.2);
+  padding: 0.625rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.logout-button:hover {
+  background: rgba(220, 53, 69, 0.2);
+  border-color: rgba(220, 53, 69, 0.3);
+  color: #c82333;
 }
 
 .dropdown {
@@ -5493,6 +5680,9 @@ onUnmounted(() => {
   max-width: 1600px;
   margin: 0 auto;
   width: 100%;
+  background: #f8f9fa;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* Data Explorer Sidebar */
@@ -5502,6 +5692,10 @@ onUnmounted(() => {
   border-right: 1px solid #e0e4e7;
   overflow-y: auto;
   flex-shrink: 0;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .explorer-header {
@@ -5601,7 +5795,9 @@ onUnmounted(() => {
 
 .dimension-tree,
 .org-tree {
-  space-y: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .dimension-item,
@@ -5777,6 +5973,8 @@ onUnmounted(() => {
   flex-direction: column;
   overflow: hidden;
   background: #f8f9fa;
+  position: relative;
+  min-width: 0;
 }
 
 /* Analysis Tabs */
@@ -5841,6 +6039,7 @@ onUnmounted(() => {
   position: sticky;
   top: 0;
   z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .header-left {
@@ -7549,7 +7748,25 @@ select.aggregation-select:focus,
   }
 
   .widget-library {
-    display: none; /* Collapsible on mobile */
+    position: fixed;
+    right: 0;
+    top: 80px;
+    width: 85%;
+    max-width: 320px;
+    height: calc(100vh - 80px);
+    max-height: none;
+    border-right: none;
+    border-left: 1px solid #e5e7eb;
+    background: white;
+    z-index: 500;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+  }
+  
+  .widget-library.mobile-hidden {
+    transform: translateX(100%);
+    opacity: 0;
   }
 
   .config-sections {
@@ -7566,6 +7783,230 @@ select.aggregation-select:focus,
   }
 }
 
+/* Mobile Menu Styles */
+.mobile-menu-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.mobile-menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.mobile-menu {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 80%;
+  max-width: 320px;
+  background: white;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+  animation: slideInRight 0.3s ease;
+  overflow-y: auto;
+}
+
+.mobile-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(135deg, #4A148C 0%, #6A1B9A 100%);
+  color: white;
+}
+
+.mobile-menu-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.close-menu-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.mobile-menu-actions {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mobile-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+  color: #333;
+  text-align: left;
+}
+
+.mobile-action-btn:hover {
+  background: #f8f9fa;
+  border-color: #4A148C;
+  transform: translateX(4px);
+}
+
+.mobile-action-btn.logout {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.mobile-action-btn.logout:hover {
+  background: #fff5f5;
+}
+
+.mobile-action-btn svg {
+  flex-shrink: 0;
+}
+
+.mobile-action-btn span {
+  flex: 1;
+}
+
+.mobile-sidebar-toggle-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #4A148C 0%, #6A1B9A 100%);
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(74, 20, 140, 0.3);
+  cursor: pointer;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  z-index: 100;
+  animation: slideUp 0.3s ease;
+}
+
+.mobile-sidebar-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.mobile-widget-toggle-btn {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, #4A148C 0%, #6A1B9A 100%);
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 12px rgba(74, 20, 140, 0.3);
+  cursor: pointer;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  z-index: 100;
+  animation: slideUp 0.3s ease;
+}
+
+.mobile-widget-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.data-explorer.mobile-hidden {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.widget-library.mobile-hidden {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mobile-widget-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  color: #666;
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-widget-close-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 @media (max-width: 768px) {
   .data-analysis-pro {
     height: auto;
@@ -7573,20 +8014,47 @@ select.aggregation-select:focus,
   }
   
   .analytics-header {
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: row;
+    gap: 0.5rem;
     padding: 1rem;
-  }
-  
-  .header-left,
-  .header-center,
-  .header-right {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .header-right {
     flex-wrap: wrap;
+  }
+  
+  .header-left {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .header-center {
+    width: 100%;
+    order: 3;
+    text-align: center;
+  }
+  
+  .header-right {
+    flex-shrink: 0;
+  }
+  
+  .back-button .button-text {
+    display: none;
+  }
+  
+  .back-button {
+    padding: 0.75rem;
+    min-width: auto;
+  }
+  
+  .desktop-actions {
+    display: none !important;
+  }
+  
+  .mobile-menu-toggle {
+    display: flex;
+  }
+  
+  .page-title {
+    font-size: 1.25rem;
+    margin: 0.5rem 0 0 0;
   }
   
   .tool-btn,
@@ -7602,24 +8070,75 @@ select.aggregation-select:focus,
   }
   
   .data-explorer {
-    width: 100%;
-    max-height: 300px;
+    position: fixed;
+    left: 0;
+    top: 80px;
+    width: 85%;
+    max-width: 320px;
+    height: calc(100vh - 80px);
+    max-height: none;
     border-right: none;
-    border-bottom: 1px solid #e0e4e7;
+    border-right: 1px solid #e0e4e7;
+    background: white;
+    z-index: 500;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+  }
+  
+  .data-explorer.mobile-hidden {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  
+  .mobile-sidebar-toggle-btn {
+    display: flex;
+  }
+  
+  .mobile-widget-toggle-btn {
+    display: flex;
+  }
+  
+  .explorer-actions .action-text {
+    display: none;
+  }
+  
+  .action-btn,
+  .reset-btn {
+    padding: 0.5rem;
+    min-width: 36px;
+    justify-content: center;
   }
   
   .main-content {
     height: auto;
+    width: 100%;
   }
   
   .analysis-tabs {
     overflow-x: auto;
     flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  
+  .analysis-tabs::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .analysis-tabs::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  .analysis-tabs::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
   }
   
   .tab-btn {
     white-space: nowrap;
     padding: 0.75rem 1rem;
+    font-size: 0.875rem;
   }
   
   .panel-header {
@@ -7657,11 +8176,64 @@ select.aggregation-select:focus,
   }
   
   .chart-container {
-    min-height: 300px;
+    min-height: 250px;
+    max-height: 400px;
+    overflow: hidden;
+  }
+  
+  .chart-container canvas {
+    max-height: 350px !important;
+  }
+  
+  .chart-config-panel {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .config-item {
+    width: 100%;
+  }
+  
+  .config-item label {
+    font-size: 0.875rem;
+  }
+  
+  .config-item select,
+  .config-item input {
+    width: 100%;
+    font-size: 0.875rem;
+    padding: 0.5rem;
+  }
+  
+  /* Table Improvements */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+  
+  .real-activity-table,
+  .pivot-table,
+  table.table {
+    min-width: 600px;
+    font-size: 0.8125rem;
+  }
+  
+  .real-activity-table th,
+  .real-activity-table td,
+  .pivot-table th,
+  .pivot-table td,
+  table.table th,
+  table.table td {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
   }
   
   .reports-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .report-card {
@@ -7736,6 +8308,7 @@ select.aggregation-select:focus,
   
   .dashboard-canvas-container {
     padding: 1rem;
+    min-height: 400px;
   }
   
   .canvas-header {
@@ -7755,6 +8328,13 @@ select.aggregation-select:focus,
     height: auto !important;
     min-height: 200px;
     margin-bottom: 1rem;
+    left: 0 !important;
+    top: auto !important;
+  }
+  
+  .dashboard-canvas {
+    min-height: 400px;
+    padding: 1rem;
   }
   
   .widget-content {
@@ -7840,14 +8420,17 @@ select.aggregation-select:focus,
     font-size: 1.125rem;
   }
   
-  .tool-btn,
   .back-button {
     padding: 0.5rem;
     font-size: 0.75rem;
   }
   
+  .mobile-menu-toggle {
+    padding: 0.5rem;
+  }
+  
   .data-explorer {
-    max-height: 250px;
+    width: 90%;
   }
   
   .explorer-title h3 {

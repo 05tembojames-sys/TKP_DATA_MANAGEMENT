@@ -239,12 +239,13 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import CaptureService from '../services/captureService.js'
 import FormService from '../services/formService.js'
 import AuthService from '../services/auth.js'
 
 const router = useRouter()
+const route = useRoute()
 
 // Reactive data
 const selectedDataSet = ref('')
@@ -357,6 +358,40 @@ const loadDataEntry = async () => {
   }
 }
 
+// Handle route query parameters
+const handleRouteQuery = async () => {
+  // Handle preset parameter
+  if (route.query.preset) {
+    selectedDataSet.value = route.query.preset
+    // Set default org unit and period for preset forms
+    selectedOrgUnit.value = 'kukhoma-main'
+    selectedPeriod.value = '202510' // Default to current period
+    
+    // Auto-load the form if all required parameters are present
+    if (selectedDataSet.value && selectedOrgUnit.value && selectedPeriod.value) {
+      await loadDataEntry()
+    }
+  }
+  
+  // Handle view parameter
+  if (route.query.view) {
+    // Load specific form for viewing
+    const result = await FormService.getFormById(route.query.view)
+    if (result.success) {
+      selectedDataSet.value = result.form.formType
+      selectedOrgUnit.value = 'kukhoma-main'
+      selectedPeriod.value = '202510'
+      
+      if (selectedDataSet.value && selectedOrgUnit.value && selectedPeriod.value) {
+        await loadDataEntry()
+        // Load the form data for viewing
+        const { id, formType, createdAt, updatedAt, status, ...rest } = result.form
+        dataValues.value = rest || {}
+      }
+    }
+  }
+}
+
 const onDataValueChange = (elementId, value) => {
   dataValues.value[elementId] = value
   hasUnsavedChanges.value = true
@@ -427,11 +462,17 @@ const saveData = async () => {
   loadingMessage.value = 'Saving data...'
   
   try {
+    // Include caseId in the data if present in route
+    const saveData = {
+      ...dataValues.value,
+      caseId: route.query.caseId
+    }
+    
     await CaptureService.saveDataValues({
       dataSetId: selectedDataSet.value,
       orgUnitId: selectedOrgUnit.value,
       periodId: selectedPeriod.value,
-      dataValues: dataValues.value
+      dataValues: saveData
     })
     
     hasUnsavedChanges.value = false
@@ -451,11 +492,17 @@ const saveAsDraft = async () => {
   loadingMessage.value = 'Saving as draft...'
   
   try {
+    // Include caseId in the data if present in route
+    const saveData = {
+      ...dataValues.value,
+      caseId: route.query.caseId
+    }
+    
     await CaptureService.saveAsDraft({
       dataSetId: selectedDataSet.value,
       orgUnitId: selectedOrgUnit.value,
       periodId: selectedPeriod.value,
-      dataValues: dataValues.value
+      dataValues: saveData
     })
     
     hasUnsavedChanges.value = false
@@ -481,17 +528,30 @@ const completeEntry = async () => {
   loadingMessage.value = 'Completing data entry...'
   
   try {
+    // Include caseId in the data if present in route
+    const saveData = {
+      ...dataValues.value,
+      caseId: route.query.caseId
+    }
+    
     await CaptureService.completeDataEntry({
       dataSetId: selectedDataSet.value,
       orgUnitId: selectedOrgUnit.value,
       periodId: selectedPeriod.value,
-      dataValues: dataValues.value
+      dataValues: saveData
     })
     
     hasUnsavedChanges.value = false
     lastSaved.value = new Date()
     completionStatus.value = 100
     alert('Data entry completed successfully!')
+    
+    // If this was opened from TrackerCapture, go back to the case details
+    if (route.query.caseId) {
+      router.push(`/tracker-capture`)
+    } else {
+      router.push('/dashboard')
+    }
     
   } catch (error) {
     console.error('Error completing data entry:', error)
@@ -563,6 +623,9 @@ onMounted(async () => {
     orgUnits.value = orgUnitsData
     periods.value = periodsData
     
+    // Handle route query parameters
+    await handleRouteQuery()
+    
     if (selectedDataSet.value) {
       await loadFormsForSelectedDataSet()
     }
@@ -592,6 +655,13 @@ const loadFormsForSelectedDataSet = async () => {
 watch(dataValues, () => {
   hasUnsavedChanges.value = true
 }, { deep: true })
+
+// Watch for route changes
+watch(() => route.query, async (newQuery, oldQuery) => {
+  if (JSON.stringify(newQuery) !== JSON.stringify(oldQuery)) {
+    await handleRouteQuery()
+  }
+})
 </script>
 
 <style scoped>
