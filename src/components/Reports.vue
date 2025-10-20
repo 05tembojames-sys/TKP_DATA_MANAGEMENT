@@ -488,11 +488,13 @@ const checkUserPermissions = async () => {
   }
 }
 
-// Load reports with optional filtering
+// Load reports with optional filtering - only general reports
 const loadReports = async () => {
   loading.value = true
   try {
-    const filters = {}
+    const filters = {
+      category: 'general-report' // Only show general reports
+    }
     if (selectedFilter.value) filters.status = selectedFilter.value
     if (selectedTypeFilter.value) filters.reportType = selectedTypeFilter.value
 
@@ -599,7 +601,7 @@ const clearFile = () => {
   }
 }
 
-// Handle report upload
+// Handle report upload - set category for general reports
 const handleUploadReport = async () => {
   if (!uploadForm.value.file || !uploadForm.value.title) {
     showMessage('Please provide a title and select a file', 'error')
@@ -610,7 +612,8 @@ const handleUploadReport = async () => {
   try {
     const reportData = {
       ...uploadForm.value,
-      uploadedBy: currentUser.value
+      uploadedBy: currentUser.value,
+      category: 'general-report' // Set category for general reports
     }
 
     const result = await ReportService.uploadReport(reportData)

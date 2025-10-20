@@ -435,19 +435,49 @@
 
             <div class="form-section">
               <h4>Permissions</h4>
+              <div class="permissions-instruction">
+                <p>Select specific permissions for this user. Administrators have all permissions by default.</p>
+              </div>
               <div class="permissions-grid">
-                <label class="permission-item" v-for="permission in availablePermissions" :key="permission.id">
-                  <input 
-                    type="checkbox" 
-                    :value="permission.id"
-                    v-model="userForm.permissions"
-                  />
-                  <span class="checkmark"></span>
-                  <div class="permission-info">
-                    <div class="permission-name">{{ permission.name }}</div>
-                    <div class="permission-description">{{ permission.description }}</div>
+                <div class="permission-category" v-for="category in permissionCategories" :key="category.id">
+                  <div class="category-header">
+                    <h5>{{ category.name }}</h5>
+                    <button 
+                      @click="toggleCategory(category.id)" 
+                      class="toggle-category"
+                      :class="{ 'all-selected': isCategoryFullySelected(category) }"
+                    >
+                      {{ isCategoryFullySelected(category) ? 'Deselect All' : 'Select All' }}
+                    </button>
                   </div>
-                </label>
+                  <div class="category-permissions">
+                    <label class="permission-item" v-for="permission in category.permissions" :key="permission.id">
+                      <input 
+                        type="checkbox" 
+                        :value="permission.id"
+                        v-model="userForm.permissions"
+                        :disabled="userForm.role === 'admin'"
+                      />
+                      <span class="checkmark"></span>
+                      <div class="permission-info">
+                        <div class="permission-name">{{ permission.name }}</div>
+                        <div class="permission-description">{{ permission.description }}</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="permissions-summary" v-if="userForm.permissions.length > 0">
+                <strong>Selected Permissions ({{ userForm.permissions.length }}):</strong>
+                <div class="selected-permissions">
+                  <span 
+                    v-for="permission in getSelectedPermissionNames()" 
+                    :key="permission.id" 
+                    class="permission-tag"
+                  >
+                    {{ permission.name }}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -599,14 +629,55 @@ const userForm = ref({
 })
 
 const availablePermissions = ref([
-  { id: 'users_read', name: 'View Users', description: 'Can view user information' },
-  { id: 'users_write', name: 'Manage Users', description: 'Can create, edit, and delete users' },
-  { id: 'forms_read', name: 'View Forms', description: 'Can view form data' },
-  { id: 'forms_write', name: 'Manage Forms', description: 'Can create and edit forms' },
-  { id: 'reports_read', name: 'View Reports', description: 'Can view reports' },
-  { id: 'reports_write', name: 'Manage Reports', description: 'Can create and manage reports' },
-  { id: 'analytics_read', name: 'View Analytics', description: 'Can view analytics and dashboards' },
-  { id: 'system_admin', name: 'System Administration', description: 'Full system administration access' }
+  { id: 'users_read', name: 'View Users', description: 'Can view user information', category: 'users' },
+  { id: 'users_write', name: 'Manage Users', description: 'Can create, edit, and delete users', category: 'users' },
+  { id: 'forms_read', name: 'View Forms', description: 'Can view form data', category: 'forms' },
+  { id: 'forms_write', name: 'Manage Forms', description: 'Can create and edit forms', category: 'forms' },
+  { id: 'reports_read', name: 'View Reports', description: 'Can view reports', category: 'reports' },
+  { id: 'reports_write', name: 'Manage Reports', description: 'Can create and manage reports', category: 'reports' },
+  { id: 'analytics_read', name: 'View Analytics', description: 'Can view analytics and dashboards', category: 'analytics' },
+  { id: 'system_admin', name: 'System Administration', description: 'Full system administration access', category: 'system' }
+])
+
+const permissionCategories = ref([
+  {
+    id: 'users',
+    name: 'User Management',
+    permissions: [
+      { id: 'users_read', name: 'View Users', description: 'Can view user information' },
+      { id: 'users_write', name: 'Manage Users', description: 'Can create, edit, and delete users' }
+    ]
+  },
+  {
+    id: 'forms',
+    name: 'Form Management',
+    permissions: [
+      { id: 'forms_read', name: 'View Forms', description: 'Can view form data' },
+      { id: 'forms_write', name: 'Manage Forms', description: 'Can create and edit forms' }
+    ]
+  },
+  {
+    id: 'reports',
+    name: 'Report Management',
+    permissions: [
+      { id: 'reports_read', name: 'View Reports', description: 'Can view reports' },
+      { id: 'reports_write', name: 'Manage Reports', description: 'Can create and manage reports' }
+    ]
+  },
+  {
+    id: 'analytics',
+    name: 'Analytics & Dashboards',
+    permissions: [
+      { id: 'analytics_read', name: 'View Analytics', description: 'Can view analytics and dashboards' }
+    ]
+  },
+  {
+    id: 'system',
+    name: 'System Administration',
+    permissions: [
+      { id: 'system_admin', name: 'System Administration', description: 'Full system administration access' }
+    ]
+  }
 ])
 
 // Computed properties
@@ -966,6 +1037,45 @@ const loadUsers = async () => {
 onMounted(() => {
   loadUsers()
 })
+
+// Watch for role changes to handle admin role
+watch(() => userForm.value.role, (newRole) => {
+  if (newRole === 'admin') {
+    // Auto-select all permissions for admin
+    userForm.value.permissions = availablePermissions.value.map(p => p.id)
+  }
+})
+
+const isCategoryFullySelected = (category) => {
+  return category.permissions.every(permission => userForm.value.permissions.includes(permission.id))
+}
+
+const toggleCategory = (categoryId) => {
+  const category = permissionCategories.value.find(cat => cat.id === categoryId)
+  if (!category) return
+  
+  const allSelected = isCategoryFullySelected(category)
+  
+  if (allSelected) {
+    // Deselect all in category
+    userForm.value.permissions = userForm.value.permissions.filter(
+      permId => !category.permissions.some(p => p.id === permId)
+    )
+  } else {
+    // Select all in category
+    category.permissions.forEach(permission => {
+      if (!userForm.value.permissions.includes(permission.id)) {
+        userForm.value.permissions.push(permission.id)
+      }
+    })
+  }
+}
+
+const getSelectedPermissionNames = () => {
+  return availablePermissions.value.filter(
+    perm => userForm.value.permissions.includes(perm.id)
+  )
+}
 
 // Watch for filter changes
 watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
@@ -1749,55 +1859,92 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
   box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
 }
 
-.permissions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1rem;
+.permissions-instruction {
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.permissions-instruction p {
+  margin: 0;
+  color: #1565c0;
+  font-size: 0.9rem;
+}
+
+.permission-category {
+  border: 1px solid #e9ecef;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  border-radius: 0.25rem 0.25rem 0 0;
+}
+
+.category-header h5 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.toggle-category {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.125rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s;
+}
+
+.toggle-category:hover {
+  background: #0056b3;
+}
+
+.toggle-category.all-selected {
+  background: #28a745;
+}
+
+.toggle-category.all-selected:hover {
+  background: #1e7e34;
+}
+
+.category-permissions {
+  padding: 1rem;
 }
 
 .permission-item {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
-  padding: 1rem;
+  padding: 0.75rem;
   border: 1px solid #e9ecef;
   border-radius: 0.25rem;
   cursor: pointer;
   transition: all 0.2s;
+  margin-bottom: 0.5rem;
 }
 
 .permission-item:hover {
   background: #f8f9fa;
 }
 
-.permission-item input {
-  margin: 0;
+.permission-item input:disabled + .checkmark {
+  background: #e9ecef;
+  border-color: #ced4da;
 }
 
-.checkmark {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #ced4da;
-  border-radius: 0.25rem;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.permission-item input:checked + .checkmark {
-  background: #007bff;
-  border-color: #007bff;
-}
-
-.permission-item input:checked + .checkmark::after {
-  content: '';
-  position: absolute;
-  left: 5px;
-  top: 2px;
-  width: 6px;
-  height: 10px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+.permission-item input:disabled + .checkmark::after {
+  border-color: #adb5bd;
 }
 
 .permission-info {
@@ -1813,6 +1960,33 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
 .permission-description {
   font-size: 0.85rem;
   color: #6c757d;
+}
+
+.permissions-summary {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 0.25rem;
+}
+
+.permissions-summary strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.selected-permissions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.permission-tag {
+  background: #007bff;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
 }
 
 .modal-actions {

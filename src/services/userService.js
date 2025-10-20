@@ -25,6 +25,14 @@ class UserService {
     this.usersCollection = 'users'
     this.userSessionsCollection = 'userSessions'
     this.userActivitiesCollection = 'userActivities'
+    // Define permission categories and hierarchies
+    this.permissionStructure = {
+      users: ['users_read', 'users_write'],
+      forms: ['forms_read', 'forms_write'],
+      reports: ['reports_read', 'reports_write'],
+      analytics: ['analytics_read'],
+      system: ['system_admin']
+    }
   }
 
   // Get all users with comprehensive data
@@ -119,6 +127,9 @@ class UserService {
         permissions
       } = userData
       
+      // Validate permissions based on role
+      const validatedPermissions = this.validatePermissions(role, permissions)
+      
       // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const authUser = userCredential.user
@@ -133,7 +144,7 @@ class UserService {
         role: role || 'user',
         orgUnit: orgUnit || '',
         status: status || 'active',
-        permissions: permissions || [],
+        permissions: validatedPermissions,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         loginCount: 0,
@@ -168,6 +179,18 @@ class UserService {
   async updateUser(userId, userData) {
     try {
       const userDocRef = doc(db, this.usersCollection, userId)
+      
+      // Validate permissions if they are being updated
+      if (userData.permissions && userData.role) {
+        userData.permissions = this.validatePermissions(userData.role, userData.permissions)
+      } else if (userData.permissions) {
+        // Get current role to validate permissions
+        const userDoc = await getDoc(userDocRef)
+        if (userDoc.exists()) {
+          const currentData = userDoc.data()
+          userData.permissions = this.validatePermissions(currentData.role, userData.permissions)
+        }
+      }
       
       // Prepare update data
       const updateData = {
@@ -589,6 +612,96 @@ class UserService {
     ].join('\n')
     
     return csvContent
+  }
+
+  // Validate permissions based on role hierarchy
+  validatePermissions(role, permissions) {
+    // Admins get all permissions automatically
+    if (role === 'admin') {
+      return [
+        'users_read', 'users_write',
+        'forms_read', 'forms_write',
+        'reports_read', 'reports_write',
+        'analytics_read',
+        'system_admin'
+      ]
+    }
+    
+    // For other roles, validate that permissions are valid
+    const validPermissions = []
+    const allValidPermissions = Object.values(this.permissionStructure).flat()
+    
+    if (Array.isArray(permissions)) {
+      permissions.forEach(permission => {
+        if (allValidPermissions.includes(permission)) {
+          validPermissions.push(permission)
+        }
+      })
+    }
+    
+    // Remove duplicates
+    return [...new Set(validPermissions)]
+  }
+
+  // Check if user has specific permission
+  async userHasPermission(userId, permission) {
+    try {
+      const user = await this.getUserById(userId)
+      if (!user.success) return false
+      
+      // Admins have all permissions
+      if (user.user.role === 'admin') return true
+      
+      // Check if user has specific permission
+      return Array.isArray(user.user.permissions) && user.user.permissions.includes(permission)
+    } catch (error) {
+      console.error('Error checking user permission:', error)
+      return false
+    }
+  }
+
+  // Get all permissions for a user
+  async getUserPermissions(userId) {
+    try {
+      const user = await this.getUserById(userId)
+      if (!user.success) return []
+      
+      // Admins have all permissions
+      if (user.user.role === 'admin') {
+        return [
+          'users_read', 'users_write',
+          'forms_read', 'forms_write',
+          'reports_read', 'reports_write',
+          'analytics_read',
+          'system_admin'
+        ]
+      }
+      
+      return Array.isArray(user.user.permissions) ? user.user.permissions : []
+    } catch (error) {
+      console.error('Error getting user permissions:', error)
+      return []
+    }
+  }
+
+  // Get permission categories with user's permissions
+  async getUserPermissionCategories(userId) {
+    try {
+      const permissions = await this.getUserPermissions(userId)
+      
+      const categories = {}
+      for (const [category, perms] of Object.entries(this.permissionStructure)) {
+        categories[category] = {
+          permissions: perms,
+          hasPermission: perms.some(p => permissions.includes(p))
+        }
+      }
+      
+      return { success: true, categories }
+    } catch (error) {
+      console.error('Error getting user permission categories:', error)
+      return { success: false, error: error.message }
+    }
   }
 
   // Convert Firebase error codes to user-friendly messages

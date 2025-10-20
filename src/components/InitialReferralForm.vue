@@ -1298,5 +1298,124 @@ const resetForm = () => {
   .progress-text {
     font-size: 0.75rem;
   }
+  
+  .section-navigation {
+    gap: 0.4rem;
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .prev-btn,
+  .next-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+  
+  .form-actions {
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+  }
+  
+  .submit-btn,
+  .cancel-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+}
+
+/* Extra small devices (phones, less than 360px) */
+@media (max-width: 360px) {
+  .form-wrapper {
+    padding: 0 0.125rem;
+  }
+  
+  .form-header {
+    padding: 0.4rem 0.125rem;
+  }
+  
+  .form-header h3 {
+    font-size: 0.9rem;
+  }
+  
+  .form-header p {
+    font-size: 0.75rem;
+  }
+  
+  .referral-form {
+    padding: 0.5rem;
+  }
+  
+  .form-section {
+    padding: 0.4rem;
+  }
+  
+  .form-section h4 {
+    font-size: 0.9rem;
+  }
+  
+  .form-grid {
+    gap: 0.4rem;
+  }
+  
+  .form-group label {
+    font-size: 0.7rem;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.3rem;
+    font-size: 0.75rem;
+  }
+  
+  .form-group textarea {
+    min-height: 60px;
+  }
+  
+  .section-navigation {
+    gap: 0.3rem;
+    padding-top: 0.4rem;
+    margin-top: 0.4rem;
+  }
+  
+  .prev-btn,
+  .next-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+    min-height: 36px;
+  }
+  
+  .form-actions {
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+  }
+  
+  .submit-btn,
+  .cancel-btn {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+    min-height: 36px;
+  }
+  
+  .validation-message {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .validation-header {
+    font-size: 0.75rem;
+  }
+  
+  .validation-item {
+    font-size: 0.7rem;
+  }
+  
+  .progress-text {
+    font-size: 0.7rem;
+  }
 }
 </style>

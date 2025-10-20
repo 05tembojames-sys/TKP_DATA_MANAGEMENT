@@ -16,6 +16,19 @@ import { storage, ID } from '../lib/appwrite.js'
 class ReportService {
   constructor() {
     this.collectionName = 'reports'
+    // Define document types for proper separation
+    this.customDocumentTypes = [
+      'tkp-parent-guardian',
+      'parental-consent', 
+      'child-admission',
+      'medical-care'
+    ]
+    this.reportTypes = [
+      'weekly',
+      'monthly',
+      'quarterly',
+      'annual'
+    ]
   }
 
   // Upload a report file using Appwrite
@@ -31,6 +44,9 @@ class ReportService {
         }
       }
 
+      // Determine report category based on type
+      const isCustomDocument = this.customDocumentTypes.includes(reportType);
+      
       // Get bucket ID from environment or use default
       const bucketId = import.meta.env.VITE_APPWRITE_BUCKET_ID || 'reports'
 
@@ -72,7 +88,9 @@ class ReportService {
         status: 'pending', // pending, approved, rejected
         adminComments: '',
         approvedBy: null,
-        approvedAt: null
+        approvedAt: null,
+        // Add category field to distinguish between custom documents and general reports
+        category: isCustomDocument ? 'custom-document' : 'general-report'
       }
 
       const docRef = await addDoc(collection(db, this.collectionName), reportDoc)
@@ -97,22 +115,32 @@ class ReportService {
     try {
       let q = collection(db, this.collectionName)
       
-      // Apply filters
-      if (filters.status) {
-        q = query(q, where('status', '==', filters.status))
-      }
-      if (filters.reportType) {
-        q = query(q, where('reportType', '==', filters.reportType))
-      }
-      if (filters.uploadedBy) {
+      // Apply filters - simplified to avoid composite index issues
+      // We'll apply one primary filter and do additional filtering client-side
+      
+      // Handle category filtering first (this is the key to separation)
+      if (filters.category && filters.uploadedBy) {
+        // When both category and uploadedBy are provided, we need to handle this carefully
+        // Since Firestore doesn't support composite queries without indexes, we'll use category as primary
+        q = query(q, where('category', '==', filters.category))
+      } else if (filters.category) {
+        q = query(q, where('category', '==', filters.category))
+      } else if (filters.uploadedBy) {
+        // Primary filter - this is the most common use case
         q = query(q, where('uploadedBy', '==', filters.uploadedBy))
+      } else if (filters.status) {
+        // Alternative primary filter
+        q = query(q, where('status', '==', filters.status))
+      } else if (filters.reportType) {
+        // Alternative primary filter
+        q = query(q, where('reportType', '==', filters.reportType))
       }
 
       // Order by upload date (newest first)
       q = query(q, orderBy('uploadedAt', 'desc'))
 
       const querySnapshot = await getDocs(q)
-      const reports = []
+      let reports = []
 
       querySnapshot.forEach((doc) => {
         reports.push({
@@ -124,12 +152,109 @@ class ReportService {
         })
       })
 
+      // Apply additional filters client-side to avoid composite index issues
+      if (filters.category && filters.uploadedBy) {
+        // Filter by uploadedBy since category was used as primary filter
+        reports = reports.filter(report => report.uploadedBy === filters.uploadedBy)
+      }
+      
+      if (filters.status && !filters.uploadedBy && !filters.category) {
+        reports = reports.filter(report => report.status === filters.status)
+      }
+      
+      if (filters.reportType && !filters.uploadedBy && !filters.status && !filters.category) {
+        reports = reports.filter(report => report.reportType === filters.reportType)
+      }
+      
+      if (filters.uploadedBy && filters.status && !filters.category) {
+        reports = reports.filter(report => report.status === filters.status)
+      }
+      
+      if (filters.uploadedBy && filters.reportType && !filters.category) {
+        reports = reports.filter(report => report.reportType === filters.reportType)
+      }
+      
+      if (filters.status && filters.reportType && !filters.uploadedBy && !filters.category) {
+        reports = reports.filter(report => report.reportType === filters.reportType)
+      }
+      
+      if (filters.category && filters.status && !filters.uploadedBy) {
+        reports = reports.filter(report => report.status === filters.status)
+      }
+      
+      if (filters.category && filters.reportType && !filters.uploadedBy) {
+        reports = reports.filter(report => report.reportType === filters.reportType)
+      }
+
+      // Apply search filter client-side if provided
+      if (filters.searchQuery) {
+        const searchTerm = filters.searchQuery.toLowerCase().trim()
+        reports = reports.filter(report => 
+          report.title?.toLowerCase().includes(searchTerm) ||
+          report.description?.toLowerCase().includes(searchTerm) ||
+          report.uploadedBy?.toLowerCase().includes(searchTerm)
+        )
+      }
+
       return {
         success: true,
         reports
       }
     } catch (error) {
       console.error('Error fetching reports:', error)
+      // Handle the specific case of missing indexes
+      if (error.code === 'failed-precondition' && error.message.includes('index')) {
+        console.warn('Firestore index required. Falling back to less efficient query.')
+        // Fallback: get all reports and filter client-side
+        try {
+          const fallbackQuery = query(collection(db, this.collectionName), orderBy('uploadedAt', 'desc'))
+          const fallbackSnapshot = await getDocs(fallbackQuery)
+          let fallbackReports = []
+          
+          fallbackSnapshot.forEach((doc) => {
+            fallbackReports.push({
+              id: doc.id,
+              ...doc.data(),
+              uploadedAt: doc.data().uploadedAt?.toDate(),
+              approvedAt: doc.data().approvedAt?.toDate()
+            })
+          })
+          
+          // Apply all filters client-side
+          if (filters.category) {
+            fallbackReports = fallbackReports.filter(report => report.category === filters.category)
+          }
+          
+          if (filters.uploadedBy) {
+            fallbackReports = fallbackReports.filter(report => report.uploadedBy === filters.uploadedBy)
+          }
+          
+          if (filters.status) {
+            fallbackReports = fallbackReports.filter(report => report.status === filters.status)
+          }
+          
+          if (filters.reportType) {
+            fallbackReports = fallbackReports.filter(report => report.reportType === filters.reportType)
+          }
+          
+          if (filters.searchQuery) {
+            const searchTerm = filters.searchQuery.toLowerCase().trim()
+            fallbackReports = fallbackReports.filter(report => 
+              report.title?.toLowerCase().includes(searchTerm) ||
+              report.description?.toLowerCase().includes(searchTerm) ||
+              report.uploadedBy?.toLowerCase().includes(searchTerm)
+            )
+          }
+          
+          return {
+            success: true,
+            reports: fallbackReports
+          }
+        } catch (fallbackError) {
+          console.error('Fallback query also failed:', fallbackError)
+        }
+      }
+      
       return {
         success: false,
         error: error.message || 'Failed to fetch reports',

@@ -14,6 +14,15 @@ class AuthService {
     this.user = null
     this.isAuthenticated = false
     this.db = getFirestore(app)
+    this.userRole = null
+    this.userPermissions = []
+    this.permissionStructure = {
+      users: ['users_read', 'users_write'],
+      forms: ['forms_read', 'forms_write'],
+      reports: ['reports_read', 'reports_write'],
+      analytics: ['analytics_read'],
+      system: ['system_admin']
+    }
   }
 
   // Check if any admin exists in the system
@@ -85,7 +94,7 @@ class AuthService {
       
       // Store user role and permissions
       this.userRole = userDoc.role
-      this.userPermissions = userDoc.permissions || []
+      this.userPermissions = this.validatePermissions(userDoc.role, userDoc.permissions || [])
       
       // Find user document ID for activity tracking
       const usersQuery = query(
@@ -233,6 +242,64 @@ class AuthService {
   hasPermission(permission) {
     if (this.userRole === 'admin') return true // Admin has all permissions
     return this.userPermissions.includes(permission)
+  }
+
+  // Check if user has any permission in a category
+  hasCategoryPermission(category) {
+    if (this.userRole === 'admin') return true // Admin has all permissions
+    
+    if (this.permissionStructure[category]) {
+      return this.permissionStructure[category].some(permission => 
+        this.userPermissions.includes(permission)
+      )
+    }
+    
+    return false
+  }
+
+  // Get all user permissions
+  getAllPermissions() {
+    if (this.userRole === 'admin') {
+      // Admins have all permissions
+      return [
+        'users_read', 'users_write',
+        'forms_read', 'forms_write',
+        'reports_read', 'reports_write',
+        'analytics_read',
+        'system_admin'
+      ]
+    }
+    
+    return this.userPermissions
+  }
+
+  // Validate permissions based on role hierarchy
+  validatePermissions(role, permissions) {
+    // Admins get all permissions automatically
+    if (role === 'admin') {
+      return [
+        'users_read', 'users_write',
+        'forms_read', 'forms_write',
+        'reports_read', 'reports_write',
+        'analytics_read',
+        'system_admin'
+      ]
+    }
+    
+    // For other roles, validate that permissions are valid
+    const validPermissions = []
+    const allValidPermissions = Object.values(this.permissionStructure).flat()
+    
+    if (Array.isArray(permissions)) {
+      permissions.forEach(permission => {
+        if (allValidPermissions.includes(permission)) {
+          validPermissions.push(permission)
+        }
+      })
+    }
+    
+    // Remove duplicates
+    return [...new Set(validPermissions)]
   }
 
   // Get current user

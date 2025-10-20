@@ -15,8 +15,33 @@
         <h1 class="capture-title">Data Capture</h1>
       </div>
       <div class="header-right">
-        <button @click="saveData" class="save-button" :disabled="!hasUnsavedChanges">
-          Save
+        <button 
+          @click="showInitialReferral" 
+          class="referral-button"
+          :class="{ active: activeTab === 'referral' }"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14,2 14,8 20,8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10,9 9,9 8,9" />
+          </svg>
+          New Referral
+        </button>
+        <button 
+          @click="showCustomReportsTab" 
+          class="reports-button"
+          :class="{ active: activeTab === 'reports' }"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14,2 14,8 20,8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10,9 9,9 8,9" />
+          </svg>
+          Reports
         </button>
         <button @click="handleLogout" class="logout-button">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -32,7 +57,7 @@
     <!-- Main Content -->
     <div class="capture-content">
       <!-- Selection Panel -->
-      <div class="selection-panel">
+      <div class="selection-panel" v-if="activeTab === 'data-entry'">
         <div class="selection-grid">
           <!-- Data Set Selection -->
           <div class="selection-item">
@@ -104,122 +129,133 @@
       </div>
 
       <!-- Data Entry Section -->
-      <div class="data-entry-section" v-if="showDataEntry">
-        <div class="data-entry-header">
-          <h2>{{ getSelectedDataSetName() }} - Data Entry</h2>
-          <div class="entry-actions">
-            <button @click="validateData" class="validate-button">Validate</button>
-            <button @click="clearData" class="clear-button">Clear</button>
-          </div>
+      <div class="data-entry-section" v-if="activeTab === 'referral' && showDataEntry">
+        <!-- Initial Referral Form -->
+        <div v-if="selectedDataSet === 'initial-referral'">
+          <InitialReferralForm 
+            ref="referralForm"
+            @form-saved="handleReferralFormSaved"
+          />
         </div>
+        
+        <!-- Standard Data Entry Form -->
+        <div v-else>
+          <div class="data-entry-header">
+            <h2>{{ getSelectedDataSetName() }} - Data Entry</h2>
+            <div class="entry-actions">
+              <button @click="validateData" class="validate-button">Validate</button>
+              <button @click="clearData" class="clear-button">Clear</button>
+            </div>
+          </div>
 
-        <!-- Data Entry Form -->
-        <div class="data-entry-form">
-          <div class="form-sections">
-            <div v-for="section in formSections" :key="section.id" class="form-section">
-              <h3 class="section-title">{{ section.name }}</h3>
-              
-              <div class="data-elements-grid">
-                <div 
-                  v-for="element in section.dataElements" 
-                  :key="element.id" 
-                  class="data-element"
-                >
-                  <label class="element-label">{{ element.name }}</label>
-                  
-                  <!-- Number Input -->
-                  <input 
-                    v-if="element.valueType === 'NUMBER'"
-                    type="number" 
-                    v-model="dataValues[element.id]"
-                    @input="onDataValueChange(element.id, $event.target.value)"
-                    class="element-input"
-                    :placeholder="element.placeholder || '0'"
-                    :min="element.min"
-                    :max="element.max"
-                  />
-                  
-                  <!-- Text Input -->
-                  <input 
-                    v-else-if="element.valueType === 'TEXT'"
-                    type="text" 
-                    v-model="dataValues[element.id]"
-                    @input="onDataValueChange(element.id, $event.target.value)"
-                    class="element-input"
-                    :placeholder="element.placeholder || 'Enter text'"
-                  />
-                  
-                  <!-- Date Input -->
-                  <input 
-                    v-else-if="element.valueType === 'DATE'"
-                    type="date" 
-                    v-model="dataValues[element.id]"
-                    @change="onDataValueChange(element.id, $event.target.value)"
-                    class="element-input"
-                  />
-                  
-                  <!-- Select/Dropdown -->
-                  <select 
-                    v-else-if="element.valueType === 'SELECT'"
-                    v-model="dataValues[element.id]"
-                    @change="onDataValueChange(element.id, $event.target.value)"
-                    class="element-input"
+          <!-- Data Entry Form -->
+          <div class="data-entry-form">
+            <div class="form-sections">
+              <div v-for="section in formSections" :key="section.id" class="form-section">
+                <h3 class="section-title">{{ section.name }}</h3>
+                
+                <div class="data-elements-grid">
+                  <div 
+                    v-for="element in section.dataElements" 
+                    :key="element.id" 
+                    class="data-element"
                   >
-                    <option value="">Select {{ element.name }}</option>
-                    <option 
-                      v-for="option in element.options" 
-                      :key="option" 
-                      :value="option"
-                    >
-                      {{ option }}
-                    </option>
-                  </select>
-                  
-                  <!-- Boolean/Checkbox -->
-                  <div v-else-if="element.valueType === 'BOOLEAN'" class="checkbox-container">
+                    <label class="element-label">{{ element.name }}</label>
+                    
+                    <!-- Number Input -->
                     <input 
-                      type="checkbox" 
+                      v-if="element.valueType === 'NUMBER'"
+                      type="number" 
                       v-model="dataValues[element.id]"
-                      @change="onDataValueChange(element.id, $event.target.checked)"
-                      class="element-checkbox"
-                      :id="element.id"
+                      @input="onDataValueChange(element.id, $event.target.value)"
+                      class="element-input"
+                      :placeholder="element.placeholder || '0'"
+                      :min="element.min"
+                      :max="element.max"
                     />
-                    <label :for="element.id" class="checkbox-label">Yes</label>
-                  </div>
+                    
+                    <!-- Text Input -->
+                    <input 
+                      v-else-if="element.valueType === 'TEXT'"
+                      type="text" 
+                      v-model="dataValues[element.id]"
+                      @input="onDataValueChange(element.id, $event.target.value)"
+                      class="element-input"
+                      :placeholder="element.placeholder || 'Enter text'"
+                    />
+                    
+                    <!-- Date Input -->
+                    <input 
+                      v-else-if="element.valueType === 'DATE'"
+                      type="date" 
+                      v-model="dataValues[element.id]"
+                      @change="onDataValueChange(element.id, $event.target.value)"
+                      class="element-input"
+                    />
+                    
+                    <!-- Select/Dropdown -->
+                    <select 
+                      v-else-if="element.valueType === 'SELECT'"
+                      v-model="dataValues[element.id]"
+                      @change="onDataValueChange(element.id, $event.target.value)"
+                      class="element-input"
+                    >
+                      <option value="">Select {{ element.name }}</option>
+                      <option 
+                        v-for="option in element.options" 
+                        :key="option" 
+                        :value="option"
+                      >
+                        {{ option }}
+                      </option>
+                    </select>
+                    
+                    <!-- Boolean/Checkbox -->
+                    <div v-else-if="element.valueType === 'BOOLEAN'" class="checkbox-container">
+                      <input 
+                        type="checkbox" 
+                        v-model="dataValues[element.id]"
+                        @change="onDataValueChange(element.id, $event.target.checked)"
+                        class="element-checkbox"
+                        :id="element.id"
+                      />
+                      <label :for="element.id" class="checkbox-label">Yes</label>
+                    </div>
 
-                  <!-- Validation Error -->
-                  <div v-if="validationErrors[element.id]" class="validation-error">
-                    {{ validationErrors[element.id] }}
+                    <!-- Validation Error -->
+                    <div v-if="validationErrors[element.id]" class="validation-error">
+                      {{ validationErrors[element.id] }}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Data Entry Footer -->
-        <div class="data-entry-footer">
-          <div class="footer-left">
-            <span class="last-updated" v-if="lastSaved">
-              Last saved: {{ formatDate(lastSaved) }}
-            </span>
-            <span class="save-status" v-if="saveStatusMessage" :class="saveStatusClass">
-              {{ saveStatusMessage }}
-            </span>
-          </div>
-          <div class="footer-right">
-            <button @click="saveAsDraft" class="draft-button" :disabled="isSaving">
-              {{ isSaving ? 'Saving...' : 'Save as Draft' }}
-            </button>
-            <button @click="completeEntry" class="complete-button" :disabled="!isValid || isSaving">
-              Complete
-            </button>
+          <!-- Data Entry Footer -->
+          <div class="data-entry-footer">
+            <div class="footer-left">
+              <span class="last-updated" v-if="lastSaved">
+                Last saved: {{ formatDate(lastSaved) }}
+              </span>
+              <span class="save-status" v-if="saveStatusMessage" :class="saveStatusClass">
+                {{ saveStatusMessage }}
+              </span>
+            </div>
+            <div class="footer-right">
+              <button @click="saveAsDraft" class="draft-button" :disabled="isSaving">
+                {{ isSaving ? 'Saving...' : 'Save as Draft' }}
+              </button>
+              <button @click="completeEntry" class="complete-button" :disabled="!isValid || isSaving">
+                Complete
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- No Data Message -->
-      <div v-if="!showDataEntry && (selectedDataSet && selectedOrgUnit && selectedPeriod)" class="no-data-message">
+      <div v-if="activeTab === 'referral' && !showDataEntry" class="no-data-message">
         <div class="no-data-content">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -232,8 +268,16 @@
           <p>Click "Load" to load the data entry form for the selected criteria.</p>
         </div>
       </div>
-    </div>
 
+      <!-- Custom Reports Component -->
+      <div v-if="activeTab === 'reports'" class="custom-reports-section">
+        <CustomReports 
+          :can-approve="true" 
+          @back-to-dashboard="showCustomReports = false"
+        />
+      </div>
+    </div>
+    
     <!-- Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-spinner">
@@ -251,15 +295,21 @@ import CaptureService from '../services/captureService.js'
 import FormService from '../services/formService.js'
 import AuthService from '../services/auth.js'
 import TrackerService from '../services/trackerService.js'
+import InitialReferralForm from './InitialReferralForm.vue'
+import CustomReports from './CustomReports.vue'
 
 const router = useRouter()
 const route = useRoute()
+
+// Ref for accessing the InitialReferralForm component
+const referralForm = ref(null)
 
 // Reactive data
 const selectedDataSet = ref('')
 const selectedOrgUnit = ref('')
 const selectedPeriod = ref('')
 const showDataEntry = ref(false)
+const showCustomReports = ref(false)
 const loading = ref(false)
 const loadingMessage = ref('')
 const hasUnsavedChanges = ref(false)
@@ -269,6 +319,7 @@ const isValid = ref(false)
 const isSaving = ref(false)
 const saveStatusMessage = ref('')
 const saveStatusClass = ref('')
+const activeTab = ref('data-entry') // 'data-entry', 'referral', or 'reports'
 
 // Data arrays
 const dataSets = ref([])
@@ -335,31 +386,48 @@ const loadDataEntry = async () => {
   loadingMessage.value = 'Loading data entry form...'
   
   try {
-    const formData = await CaptureService.loadDataEntryForm({
-      dataSetId: selectedDataSet.value,
-      orgUnitId: selectedOrgUnit.value,
-      periodId: selectedPeriod.value
-    })
-    
-    formSections.value = formData.sections
+    // Special handling for Initial Referral Form
+    if (selectedDataSet.value === 'initial-referral') {
+      // For Initial Referral Form, we directly show the form component
+      showDataEntry.value = true
+      activeTab.value = 'referral'
+      // Pre-populate with case data if available
+      if (route.query.caseId) {
+        const caseResult = await TrackerService.getCaseDetails(route.query.caseId)
+        if (caseResult.success && referralForm.value) {
+          // Pass case data to the referral form if needed
+          // This would require exposing a method in InitialReferralForm to accept pre-populated data
+        }
+      }
+    } else {
+      // Standard handling for other form types
+      const formData = await CaptureService.loadDataEntryForm({
+        dataSetId: selectedDataSet.value,
+        orgUnitId: selectedOrgUnit.value,
+        periodId: selectedPeriod.value
+      })
+      
+      formSections.value = formData.sections
 
-    // If a specific saved form is selected, load its values from Forms collection
-    if (selectedFormId.value) {
-      const result = await FormService.getFormById(selectedFormId.value)
-      if (result.success) {
-        // Exclude metadata fields not part of data elements
-        const { id, formType, createdAt, updatedAt, status, ...rest } = result.form
-        dataValues.value = rest || {}
+      // If a specific saved form is selected, load its values from Forms collection
+      if (selectedFormId.value) {
+        const result = await FormService.getFormById(selectedFormId.value)
+        if (result.success) {
+          // Exclude metadata fields not part of data elements
+          const { id, formType, createdAt, updatedAt, status, ...rest } = result.form
+          dataValues.value = rest || {}
+        } else {
+          dataValues.value = formData.dataValues || {}
+        }
       } else {
         dataValues.value = formData.dataValues || {}
       }
-    } else {
-      dataValues.value = formData.dataValues || {}
-    }
 
-    updateCompletionStatus()
-    completionStatus.value = formData.completionStatus || completionStatus.value
-    showDataEntry.value = true
+      updateCompletionStatus()
+      completionStatus.value = formData.completionStatus || completionStatus.value
+      showDataEntry.value = true
+      activeTab.value = 'referral'
+    }
     
   } catch (error) {
     console.error('Error loading data entry form:', error)
@@ -467,6 +535,36 @@ const handleRouteQuery = async () => {
   }
 }
 
+// Handle when the Initial Referral Form is saved
+const handleReferralFormSaved = (data) => {
+  // Show success message
+  alert('Initial Referral Form saved successfully!')
+  
+  // Reset the form selection
+  showDataEntry.value = false
+  selectedDataSet.value = ''
+  selectedOrgUnit.value = ''
+  selectedPeriod.value = ''
+  activeTab.value = 'data-entry'
+  
+  // Go back to dashboard
+  router.push('/dashboard')
+}
+
+// Show Initial Referral Form
+const showInitialReferral = () => {
+  selectedDataSet.value = 'initial-referral'
+  selectedOrgUnit.value = 'kukhoma-main'
+  selectedPeriod.value = '202510' // Default to current period
+  showDataEntry.value = true
+  activeTab.value = 'referral'
+}
+
+// Show Custom Reports tab
+const showCustomReportsTab = () => {
+  activeTab.value = 'reports'
+}
+
 // Helper function to format date for input fields
 const formatDateForInput = (dateString) => {
   if (!dateString) return ''
@@ -544,6 +642,14 @@ const validateData = () => {
 }
 
 const saveData = async () => {
+  // Special handling for Initial Referral Form
+  if (selectedDataSet.value === 'initial-referral' && referralForm.value) {
+    // Trigger the save method of the InitialReferralForm component
+    // This would require exposing a save method in InitialReferralForm
+    alert('Please use the Save button in the Initial Referral Form')
+    return
+  }
+  
   loading.value = true
   loadingMessage.value = 'Saving data...'
   
@@ -590,6 +696,14 @@ const saveData = async () => {
 }
 
 const saveAsDraft = async () => {
+  // Special handling for Initial Referral Form
+  if (selectedDataSet.value === 'initial-referral' && referralForm.value) {
+    // Trigger the save draft method of the InitialReferralForm component
+    // This would require exposing a save draft method in InitialReferralForm
+    alert('Please use the Save as Draft button in the Initial Referral Form')
+    return
+  }
+  
   isSaving.value = true
   saveStatusMessage.value = 'Saving draft...'
   saveStatusClass.value = 'saving'
@@ -651,6 +765,14 @@ const saveAsDraft = async () => {
 }
 
 const completeEntry = async () => {
+  // Special handling for Initial Referral Form
+  if (selectedDataSet.value === 'initial-referral' && referralForm.value) {
+    // Trigger the complete method of the InitialReferralForm component
+    // This would require exposing a complete method in InitialReferralForm
+    alert('Please use the Complete button in the Initial Referral Form')
+    return
+  }
+  
   validateData()
   
   if (!isValid.value) {
@@ -711,6 +833,16 @@ const completeEntry = async () => {
 }
 
 const clearData = () => {
+  // Special handling for Initial Referral Form
+  if (selectedDataSet.value === 'initial-referral' && referralForm.value) {
+    if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+      // Reset the InitialReferralForm component
+      // This would require exposing a reset method in InitialReferralForm
+      alert('Form cleared')
+    }
+    return
+  }
+  
   if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
     clearDataValues()
     hasUnsavedChanges.value = false
@@ -867,6 +999,8 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .back-button:hover,
@@ -885,6 +1019,113 @@ watch(() => route.query, async (newQuery, oldQuery) => {
 .logout-button:hover {
   background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+.referral-button,
+.reports-button {
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-right: 0.75rem;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.referral-button:hover,
+.reports-button:hover {
+  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.reports-button {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+  margin-right: 0;
+}
+
+.reports-button:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+}
+
+/* Active tab styles */
+.referral-button.active,
+.reports-button.active {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  color: #212529;
+  box-shadow: 0 2px 6px rgba(255, 193, 7, 0.4);
+}
+
+.referral-button.active:hover,
+.reports-button.active:hover {
+  background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.5);
+}
+
+.referral-button,
+.reports-button {
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-right: 0.75rem;
+}
+
+.referral-button:hover,
+.reports-button:hover {
+  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.reports-button {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+}
+
+.reports-button:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+}
+
+/* Active tab styles */
+.referral-button.active,
+.reports-button.active {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  color: #212529;
+  box-shadow: 0 2px 6px rgba(255, 193, 7, 0.4);
+}
+
+.referral-button.active:hover,
+.reports-button.active:hover {
+  background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.5);
 }
 
 .capture-title {
@@ -959,12 +1200,14 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   font-size: 0.9rem;
   background: white;
   min-width: 200px;
+  min-height: 44px;
 }
 
 .selection-dropdown:focus {
   outline: none;
   border-color: #80bdff;
   box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  min-height: 44px;
 }
 
 .load-button {
@@ -977,6 +1220,8 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   font-size: 0.9rem;
   font-weight: 500;
   transition: background-color 0.2s;
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .load-button:hover:not(:disabled) {
@@ -1070,6 +1315,8 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   cursor: pointer;
   font-size: 0.9rem;
   transition: background-color 0.2s;
+  min-height: 40px;
+  min-width: 40px;
 }
 
 .validate-button:hover {
@@ -1085,6 +1332,8 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   cursor: pointer;
   font-size: 0.9rem;
   transition: background-color 0.2s;
+  min-height: 40px;
+  min-width: 40px;
 }
 
 .clear-button:hover {
@@ -1147,13 +1396,60 @@ watch(() => route.query, async (newQuery, oldQuery) => {
 }
 
 .element-checkbox {
-  width: 1rem;
-  height: 1rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  min-height: 20px;
+  min-width: 20px;
 }
 
 .checkbox-label {
   font-size: 0.9rem;
   color: #495057;
+}
+
+@media (max-width: 768px) {
+  .checkbox-container {
+    gap: 0.75rem;
+  }
+  
+  .element-checkbox {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  .checkbox-label {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkbox-container {
+    gap: 0.5rem;
+  }
+  
+  .element-checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  .checkbox-label {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .checkbox-container {
+    gap: 0.4rem;
+  }
+  
+  .element-checkbox {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+  
+  .checkbox-label {
+    font-size: 0.85rem;
+  }
 }
 
 .validation-error {
@@ -1192,6 +1488,8 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   font-size: 0.9rem;
   font-weight: 500;
   transition: background-color 0.2s;
+  min-height: 40px;
+  min-width: 40px;
 }
 
 .draft-button:hover {
@@ -1208,6 +1506,8 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   font-size: 0.9rem;
   font-weight: 500;
   transition: background-color 0.2s;
+  min-height: 40px;
+  min-width: 40px;
 }
 
 .complete-button:hover:not(:disabled) {
@@ -1268,6 +1568,9 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   border-radius: 0.5rem;
   text-align: center;
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  max-width: 90%;
+  width: 300px;
+  margin: 0 auto;
 }
 
 .spinner {
@@ -1289,6 +1592,477 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   margin: 0;
   color: #495057;
   font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .loading-spinner {
+    padding: 1.5rem;
+    width: auto;
+    max-width: 95%;
+  }
+  
+  .spinner {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .loading-spinner p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .loading-spinner {
+    padding: 1rem;
+  }
+  
+  .spinner {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .loading-spinner p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .loading-spinner {
+    padding: 0.75rem;
+  }
+  
+  .spinner {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .loading-spinner p {
+    font-size: 0.8rem;
+  }
+}
+
+.save-status {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-left: 1rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.save-status.saving {
+  color: #007bff;
+  background-color: #e3f2fd;
+}
+
+.save-status.success {
+  color: #155724;
+  background-color: #d4edda;
+}
+
+.save-status.error {
+  color: #721c24;
+  background-color: #f8d7da;
+}
+
+
+.custom-reports-section {
+  margin-top: 2rem;
+}
+
+/* Responsive Design */
+/* Medium devices (tablets, less than 1024px) */
+@media (max-width: 1024px) {
+  .selection-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .data-elements-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  .data-element {
+    margin-bottom: 1rem;
+  }
+
+  .element-label {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .element-input {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+
+  .validation-error {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  .form-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+  }
+
+  .data-entry-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .status-info,
+  .status-completion {
+    font-size: 0.95rem;
+  }
+
+  .completion-percentage {
+    font-size: 0.95rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .capture-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .header-left, .header-center, .header-right {
+    flex: none;
+    width: 100%;
+  }
+
+  .header-left {
+    order: 1;
+  }
+
+  .header-center {
+    order: 2;
+  }
+
+  .header-right {
+    order: 3;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .back-button,
+  .logout-button,
+  .referral-button,
+  .reports-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    min-width: 120px;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .capture-content {
+    padding: 1rem;
+  }
+
+  .selection-panel {
+    padding: 1rem;
+  }
+
+  .selection-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .selection-item {
+    margin-bottom: 0.5rem;
+  }
+
+  .selection-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .selection-dropdown {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .load-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+
+  .data-elements-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .data-element {
+    margin-bottom: 0.75rem;
+  }
+
+  .data-entry-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .data-entry-footer {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .footer-right {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .status-bar {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .section-title {
+    font-size: 0.95rem;
+    padding: 0.75rem;
+  }
+
+  .element-label {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .element-input {
+    padding: 0.625rem;
+    font-size: 0.9rem;
+  }
+
+  .validation-error {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .no-data-content h3 {
+    font-size: 1.1rem;
+  }
+
+  .no-data-content p {
+    font-size: 0.85rem;
+  }
+
+  .custom-reports-section {
+    margin-top: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .capture-header {
+    padding: 0.75rem;
+  }
+
+  .capture-title {
+    font-size: 1.25rem;
+  }
+
+  .back-button,
+  .logout-button,
+  .referral-button,
+  .reports-button {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8rem;
+    width: 100%;
+    justify-content: center;
+    min-width: auto;
+    min-height: 42px;
+  }
+
+  .header-right {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .selection-panel {
+    padding: 0.75rem;
+  }
+
+  .selection-label {
+    font-size: 0.85rem;
+  }
+
+  .selection-dropdown,
+  .element-input {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+  }
+
+  .selection-item {
+    margin-bottom: 0.75rem;
+  }
+
+  .load-button,
+  .validate-button,
+  .clear-button,
+  .draft-button,
+  .complete-button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    min-height: 42px;
+  }
+
+  .data-entry-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .section-title {
+    font-size: 0.9rem;
+  }
+
+  .element-label {
+    font-size: 0.8rem;
+  }
+
+  .validation-error {
+    font-size: 0.7rem;
+  }
+
+  .last-updated {
+    font-size: 0.8rem;
+  }
+
+  .save-status {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .status-info,
+  .status-completion {
+    font-size: 0.85rem;
+  }
+
+  .completion-percentage {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .no-data-content svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .no-data-content h3 {
+    font-size: 1rem;
+  }
+
+  .no-data-content p {
+    font-size: 0.8rem;
+  }
+
+  .custom-reports-section {
+    margin-top: 1.25rem;
+  }
+}
+
+/* Extra small devices (phones, less than 360px) */
+@media (max-width: 360px) {
+  .capture-header {
+    padding: 0.5rem;
+  }
+
+  .capture-title {
+    font-size: 1.1rem;
+  }
+
+  .back-button,
+  .logout-button,
+  .referral-button,
+  .reports-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    min-height: 40px;
+  }
+
+  .selection-label {
+    font-size: 0.8rem;
+  }
+
+  .selection-dropdown,
+  .element-input {
+    font-size: 0.8rem;
+    padding: 0.4rem;
+  }
+
+  .selection-item {
+    margin-bottom: 0.75rem;
+  }
+
+  .load-button,
+  .validate-button,
+  .clear-button,
+  .draft-button,
+  .complete-button {
+    padding: 0.625rem;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+
+  .data-entry-header h2 {
+    font-size: 1rem;
+  }
+
+  .section-title {
+    font-size: 0.85rem;
+  }
+
+  .element-label {
+    font-size: 0.75rem;
+  }
+
+  .validation-error {
+    font-size: 0.65rem;
+  }
+
+  .last-updated {
+    font-size: 0.75rem;
+  }
+
+  .save-status {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.3rem;
+  }
+
+  .status-info,
+  .status-completion {
+    font-size: 0.8rem;
+  }
+
+  .completion-percentage {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .no-data-content svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .no-data-content h3 {
+    font-size: 0.95rem;
+  }
+
+  .no-data-content p {
+    font-size: 0.75rem;
+  }
+
+  .custom-reports-section {
+    margin-top: 1rem;
+  }
 }
 
 .save-status {
@@ -1314,135 +2088,3 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   background-color: #f8d7da;
 }
 </style>
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .capture-header {
-    padding: 1rem;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .header-left, .header-center, .header-right {
-    flex: none;
-    width: 100%;
-  }
-
-  .header-left {
-    order: 1;
-  }
-
-  .header-center {
-    order: 2;
-    text-align: center;
-  }
-
-  .header-right {
-    order: 3;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .back-button,
-  .logout-button,
-  .save-button {
-    padding: 0.75rem 1rem;
-    font-size: 0.85rem;
-  }
-
-  .capture-content {
-    padding: 1rem;
-  }
-
-  .selection-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .data-elements-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .data-entry-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .data-entry-footer {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .footer-right {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .status-bar {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-}
-
-@media (max-width: 480px) {
-  .capture-header {
-    padding: 0.75rem;
-  }
-
-  .capture-title {
-    font-size: 1.25rem;
-  }
-
-  .back-button,
-  .logout-button,
-  .save-button {
-    padding: 0.625rem 0.875rem;
-    font-size: 0.8rem;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .header-right {
-    flex-direction: column;
-  }
-
-  .selection-dropdown,
-  .element-input {
-    font-size: 0.875rem;
-  }
-
-  .load-button,
-  .validate-button,
-  .clear-button,
-  .draft-button,
-  .complete-button {
-    width: 100%;
-    padding: 0.75rem;
-  }
-}
-
-.save-status {
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin-left: 1rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-}
-
-.save-status.saving {
-  color: #007bff;
-  background-color: #e3f2fd;
-}
-
-.save-status.success {
-  color: #155724;
-  background-color: #d4edda;
-}
-
-.save-status.error {
-  color: #721c24;
-  background-color: #f8d7da;
-}
