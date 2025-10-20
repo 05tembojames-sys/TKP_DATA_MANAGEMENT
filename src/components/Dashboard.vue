@@ -57,14 +57,6 @@
                   <div class="stat-label">Data Entries</div>
                 </div>
               </div>
-              
-              <!-- New Referral Button -->
-              <div class="new-referral-section">
-                <button class="new-referral-btn" @click="goToNewReferral">
-                  <i class="fas fa-plus-circle btn-icon"></i>
-                  <span>New Referral</span>
-                </button>
-              </div>
             </div>
           </div>
 
@@ -788,12 +780,6 @@ const handleLogout = async () => {
   }
 }
 
-// Add this new method for navigating to the new referral form
-const goToNewReferral = () => {
-  // Navigate to the capture page with the initial referral form pre-selected
-  router.push('/capture?preset=initial-referral')
-}
-
 // Load summary data when component mounts
 onMounted(() => {
   // Set current user name
@@ -976,41 +962,6 @@ onMounted(() => {
   font-size: 0.8rem;
   color: #666;
   font-weight: 500;
-}
-
-/* New Referral Button */
-.new-referral-section {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #eee;
-  display: flex;
-  justify-content: center;
-}
-
-.new-referral-btn {
-  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-  color: white;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-}
-
-.new-referral-btn:hover {
-  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-}
-
-.new-referral-btn:active {
-  transform: translateY(0);
 }
 
 /* Right Section */
@@ -1792,67 +1743,6 @@ tbody tr:hover {
   
   .description-text {
     font-size: 0.85rem;
-    text-align: left;
-  }
-}
-
-/* Extra small devices (phones, less than 360px) */
-@media (max-width: 360px) {
-  .dashboard-buttons-grid {
-    grid-template-columns: 1fr;
-    gap: 0.4rem;
-  }
-  
-  .project-title {
-    font-size: 1rem;
-  }
-  
-  .section-title h2 {
-    font-size: 1.2rem;
-  }
-  
-  .user-management {
-    padding: 0.75rem;
-  }
-  
-  table {
-    font-size: 0.75rem;
-  }
-  
-  th, td {
-    padding: 0.4rem;
-  }
-  
-  .logo-card {
-    padding: 1rem;
-  }
-  
-  .logo-container {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .dashboard-btn {
-    font-size: 0.75rem;
-    padding: 12px 8px;
-    min-height: 65px;
-    width: 100px;
-    max-width: 100px;
-    gap: 4px;
-  }
-  
-  .dashboard-btn span {
-    font-size: 0.7rem;
-    line-height: 1.0;
-  }
-  
-  .btn-icon {
-    width: 16px;
-    height: 16px;
-  }
-  
-  .description-text {
-    font-size: 0.8rem;
     text-align: left;
   }
 }
