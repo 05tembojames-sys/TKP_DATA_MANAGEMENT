@@ -106,7 +106,7 @@
       <!-- Data Entry Section -->
       <div class="data-entry-section" v-if="showDataEntry">
         <div class="data-entry-header">
-          <h2>{{ selectedDataSetName }} - Data Entry</h2>
+          <h2>{{ getSelectedDataSetName() }} - Data Entry</h2>
           <div class="entry-actions">
             <button @click="validateData" class="validate-button">Validate</button>
             <button @click="clearData" class="clear-button">Clear</button>
@@ -135,6 +135,8 @@
                     @input="onDataValueChange(element.id, $event.target.value)"
                     class="element-input"
                     :placeholder="element.placeholder || '0'"
+                    :min="element.min"
+                    :max="element.max"
                   />
                   
                   <!-- Text Input -->
@@ -201,10 +203,15 @@
             <span class="last-updated" v-if="lastSaved">
               Last saved: {{ formatDate(lastSaved) }}
             </span>
+            <span class="save-status" v-if="saveStatusMessage" :class="saveStatusClass">
+              {{ saveStatusMessage }}
+            </span>
           </div>
           <div class="footer-right">
-            <button @click="saveAsDraft" class="draft-button">Save as Draft</button>
-            <button @click="completeEntry" class="complete-button" :disabled="!isValid">
+            <button @click="saveAsDraft" class="draft-button" :disabled="isSaving">
+              {{ isSaving ? 'Saving...' : 'Save as Draft' }}
+            </button>
+            <button @click="completeEntry" class="complete-button" :disabled="!isValid || isSaving">
               Complete
             </button>
           </div>
@@ -243,6 +250,7 @@ import { useRouter, useRoute } from 'vue-router'
 import CaptureService from '../services/captureService.js'
 import FormService from '../services/formService.js'
 import AuthService from '../services/auth.js'
+import TrackerService from '../services/trackerService.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -258,6 +266,9 @@ const hasUnsavedChanges = ref(false)
 const lastSaved = ref(null)
 const completionStatus = ref(0)
 const isValid = ref(false)
+const isSaving = ref(false)
+const saveStatusMessage = ref('')
+const saveStatusClass = ref('')
 
 // Data arrays
 const dataSets = ref([])
@@ -370,6 +381,48 @@ const handleRouteQuery = async () => {
     // Auto-load the form if all required parameters are present
     if (selectedDataSet.value && selectedOrgUnit.value && selectedPeriod.value) {
       await loadDataEntry()
+      
+      // Pre-populate form data if caseId is provided
+      if (route.query.caseId) {
+        const caseResult = await TrackerService.getCaseDetails(route.query.caseId)
+        if (caseResult.success) {
+          const caseData = caseResult.details
+          
+          // Pre-populate child information
+          if (caseData.childFirstName) {
+            dataValues.value.childFirstName = caseData.childFirstName
+          }
+          if (caseData.childLastName) {
+            dataValues.value.childLastName = caseData.childLastName
+          }
+          if (caseData.childSurname) {
+            dataValues.value.childSurname = caseData.childSurname
+          }
+          if (caseData.dateOfBirth) {
+            dataValues.value.dateOfBirth = formatDateForInput(caseData.dateOfBirth)
+          }
+          if (caseData.gender) {
+            dataValues.value.gender = caseData.gender
+          }
+          if (caseData.age) {
+            dataValues.value.age = caseData.age
+          }
+          
+          // Set default dates based on form type
+          const today = new Date().toISOString().split('T')[0]
+          if (selectedDataSet.value === 'initial-referral' && !dataValues.value.dateOfReferral) {
+            dataValues.value.dateOfReferral = today
+          }
+          
+          if (selectedDataSet.value === 'initial-assessment' && !dataValues.value.assessmentDate) {
+            dataValues.value.assessmentDate = today
+          }
+          
+          if (selectedDataSet.value === 'child-overview' && !dataValues.value.dateOfAdmission) {
+            dataValues.value.dateOfAdmission = today
+          }
+        }
+      }
     }
   }
   
@@ -387,8 +440,41 @@ const handleRouteQuery = async () => {
         // Load the form data for viewing
         const { id, formType, createdAt, updatedAt, status, ...rest } = result.form
         dataValues.value = rest || {}
+        // Store the form ID for updates
+        dataValues.value.formId = id
       }
     }
+  }
+  
+  // Handle edit parameter (similar to view but for editing)
+  if (route.query.edit) {
+    // Load specific form for editing
+    const result = await FormService.getFormById(route.query.edit)
+    if (result.success) {
+      selectedDataSet.value = result.form.formType
+      selectedOrgUnit.value = 'kukhoma-main'
+      selectedPeriod.value = '202510'
+      
+      if (selectedDataSet.value && selectedOrgUnit.value && selectedPeriod.value) {
+        await loadDataEntry()
+        // Load the form data for editing
+        const { id, formType, createdAt, updatedAt, status, ...rest } = result.form
+        dataValues.value = rest || {}
+        // Store the form ID for updates
+        dataValues.value.formId = id
+      }
+    }
+  }
+}
+
+// Helper function to format date for input fields
+const formatDateForInput = (dateString) => {
+  if (!dateString) return ''
+  try {
+    const date = new Date(dateString)
+    return date.toISOString().split('T')[0]
+  } catch (e) {
+    return ''
   }
 }
 
@@ -463,9 +549,11 @@ const saveData = async () => {
   
   try {
     // Include caseId in the data if present in route
-    const saveData = {
-      ...dataValues.value,
-      caseId: route.query.caseId
+    const saveData = { ...dataValues.value }
+    
+    // Only include caseId if it exists
+    if (route.query.caseId) {
+      saveData.caseId = route.query.caseId
     }
     
     await CaptureService.saveDataValues({
@@ -477,43 +565,88 @@ const saveData = async () => {
     
     hasUnsavedChanges.value = false
     lastSaved.value = new Date()
-    alert('Data saved successfully!')
+    saveStatusMessage.value = 'Data saved successfully!'
+    saveStatusClass.value = 'success'
+    
+    // Clear status message after 3 seconds
+    setTimeout(() => {
+      saveStatusMessage.value = ''
+      saveStatusClass.value = ''
+    }, 3000)
     
   } catch (error) {
     console.error('Error saving data:', error)
-    alert('Failed to save data')
+    saveStatusMessage.value = 'Failed to save data'
+    saveStatusClass.value = 'error'
+    
+    // Clear error message after 5 seconds
+    setTimeout(() => {
+      saveStatusMessage.value = ''
+      saveStatusClass.value = ''
+    }, 5000)
   } finally {
     loading.value = false
   }
 }
 
 const saveAsDraft = async () => {
-  loading.value = true
-  loadingMessage.value = 'Saving as draft...'
+  isSaving.value = true
+  saveStatusMessage.value = 'Saving draft...'
+  saveStatusClass.value = 'saving'
   
   try {
     // Include caseId in the data if present in route
-    const saveData = {
-      ...dataValues.value,
-      caseId: route.query.caseId
+    const saveData = { ...dataValues.value }
+    
+    // Only include caseId if it exists
+    if (route.query.caseId) {
+      saveData.caseId = route.query.caseId
     }
     
-    await CaptureService.saveAsDraft({
+    const result = await CaptureService.saveAsDraft({
       dataSetId: selectedDataSet.value,
       orgUnitId: selectedOrgUnit.value,
       periodId: selectedPeriod.value,
       dataValues: saveData
     })
     
-    hasUnsavedChanges.value = false
-    lastSaved.value = new Date()
-    alert('Draft saved successfully!')
+    if (result.success) {
+      hasUnsavedChanges.value = false
+      lastSaved.value = new Date()
+      saveStatusMessage.value = 'Draft saved successfully!'
+      saveStatusClass.value = 'success'
+      
+      // Auto-refresh the form list to show the new draft
+      await loadFormsForSelectedDataSet()
+      
+      // Clear status message after 3 seconds
+      setTimeout(() => {
+        saveStatusMessage.value = ''
+        saveStatusClass.value = ''
+      }, 3000)
+    } else {
+      saveStatusMessage.value = 'Failed to save draft: ' + result.error
+      saveStatusClass.value = 'error'
+      
+      // Clear error message after 5 seconds
+      setTimeout(() => {
+        saveStatusMessage.value = ''
+        saveStatusClass.value = ''
+      }, 5000)
+    }
     
   } catch (error) {
     console.error('Error saving draft:', error)
-    alert('Failed to save draft')
+    saveStatusMessage.value = 'Failed to save draft'
+    saveStatusClass.value = 'error'
+    
+    // Clear error message after 5 seconds
+    setTimeout(() => {
+      saveStatusMessage.value = ''
+      saveStatusClass.value = ''
+    }, 5000)
   } finally {
-    loading.value = false
+    isSaving.value = false
   }
 }
 
@@ -529,9 +662,11 @@ const completeEntry = async () => {
   
   try {
     // Include caseId in the data if present in route
-    const saveData = {
-      ...dataValues.value,
-      caseId: route.query.caseId
+    const saveData = { ...dataValues.value }
+    
+    // Only include caseId if it exists
+    if (route.query.caseId) {
+      saveData.caseId = route.query.caseId
     }
     
     await CaptureService.completeDataEntry({
@@ -544,7 +679,14 @@ const completeEntry = async () => {
     hasUnsavedChanges.value = false
     lastSaved.value = new Date()
     completionStatus.value = 100
-    alert('Data entry completed successfully!')
+    saveStatusMessage.value = 'Data entry completed successfully!'
+    saveStatusClass.value = 'success'
+    
+    // Clear status message after 3 seconds
+    setTimeout(() => {
+      saveStatusMessage.value = ''
+      saveStatusClass.value = ''
+    }, 3000)
     
     // If this was opened from TrackerCapture, go back to the case details
     if (route.query.caseId) {
@@ -555,7 +697,14 @@ const completeEntry = async () => {
     
   } catch (error) {
     console.error('Error completing data entry:', error)
-    alert('Failed to complete data entry')
+    saveStatusMessage.value = 'Failed to complete data entry'
+    saveStatusClass.value = 'error'
+    
+    // Clear error message after 5 seconds
+    setTimeout(() => {
+      saveStatusMessage.value = ''
+      saveStatusClass.value = ''
+    }, 5000)
   } finally {
     loading.value = false
   }
@@ -1142,6 +1291,30 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   font-weight: 500;
 }
 
+.save-status {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-left: 1rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.save-status.saving {
+  color: #007bff;
+  background-color: #e3f2fd;
+}
+
+.save-status.success {
+  color: #155724;
+  background-color: #d4edda;
+}
+
+.save-status.error {
+  color: #721c24;
+  background-color: #f8d7da;
+}
+</style>
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .capture-header {
@@ -1250,4 +1423,26 @@ watch(() => route.query, async (newQuery, oldQuery) => {
     padding: 0.75rem;
   }
 }
-</style>
+
+.save-status {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-left: 1rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.save-status.saving {
+  color: #007bff;
+  background-color: #e3f2fd;
+}
+
+.save-status.success {
+  color: #155724;
+  background-color: #d4edda;
+}
+
+.save-status.error {
+  color: #721c24;
+  background-color: #f8d7da;
+}

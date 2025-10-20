@@ -513,7 +513,7 @@
                         <path d="M12 5v14" />
                         <path d="m5 12 14 0" />
                       </svg>
-                      Add {{ stage.id === 'referral' ? 'Initial Referral' : stage.name }} Event
+                      Add {{ stage.name }} Event
                     </button>
                   </div>
                 </div>
@@ -571,14 +571,71 @@
                 <option value="family-support">Family Support Program</option>
               </select>
             </div>
+            
+            <!-- Dynamic form fields based on selected form type -->
             <div class="form-group">
-              <label>Initial Form Type *</label>
-              <select v-model="newEnrollment.initialFormType" required>
-                <option value="">Select Initial Form</option>
-                <option value="initial-referral">Initial Referral Form</option>
-                <option value="initial-assessment">Initial Assessment Form</option>
+              <label>Form Type *</label>
+              <select v-model="newEnrollment.initialFormType" required @change="handleFormTypeChange">
+                <option value="">Select Form Type</option>
+                <option value="initial-referral">Initial Referral</option>
+                <option value="initial-assessment">Initial Assessment</option>
+                <option value="program-enrollment">Program Enrollment</option>
+                <option value="care-plan">Care Plan Development</option>
+                <option value="regular-follow-up">Regular Follow-up</option>
               </select>
             </div>
+            
+            <!-- Additional fields for Initial Referral -->
+            <div v-if="newEnrollment.initialFormType === 'initial-referral'" class="form-group">
+              <label>Referral Date *</label>
+              <input v-model="newEnrollment.referralDate" type="date" required />
+            </div>
+            
+            <div v-if="newEnrollment.initialFormType === 'initial-referral'" class="form-group">
+              <label>Referral Method *</label>
+              <select v-model="newEnrollment.referralMethod" required>
+                <option value="">Select Method</option>
+                <option value="Department of Social Welfare - Lusaka">Department of Social Welfare - Lusaka</option>
+                <option value="Coptic Hospital">Coptic Hospital</option>
+                <option value="MNK Psychotherapy">MNK Psychotherapy</option>
+                <option value="Department of Social Welfare: Chongwe">Department of Social Welfare: Chongwe</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <!-- Additional fields for Initial Assessment -->
+            <div v-if="newEnrollment.initialFormType === 'initial-assessment'" class="form-group">
+              <label>Assessment Date *</label>
+              <input v-model="newEnrollment.assessmentDate" type="date" required />
+            </div>
+            
+            <div v-if="newEnrollment.initialFormType === 'initial-assessment'" class="form-group">
+              <label>Assessment Type *</label>
+              <select v-model="newEnrollment.assessmentType" required>
+                <option value="">Select Type</option>
+                <option value="Initial">Initial Assessment</option>
+                <option value="Follow-up">Follow-up Assessment</option>
+              </select>
+            </div>
+            
+            <!-- Additional fields for Program Enrollment -->
+            <div v-if="newEnrollment.initialFormType === 'program-enrollment'" class="form-group">
+              <label>Enrollment Date *</label>
+              <input v-model="newEnrollment.enrollmentDate" type="date" required />
+            </div>
+            
+            <!-- Additional fields for Care Plan Development -->
+            <div v-if="newEnrollment.initialFormType === 'care-plan'" class="form-group">
+              <label>Care Plan Date *</label>
+              <input v-model="newEnrollment.carePlanDate" type="date" required />
+            </div>
+            
+            <!-- Additional fields for Regular Follow-up -->
+            <div v-if="newEnrollment.initialFormType === 'regular-follow-up'" class="form-group">
+              <label>Follow-up Date *</label>
+              <input v-model="newEnrollment.followUpDate" type="date" required />
+            </div>
+            
             <div class="modal-actions">
               <button type="button" @click="showNewEnrollmentModal = false" class="cancel-button">
                 Cancel
@@ -588,6 +645,63 @@
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Type Selection Modal -->
+    <div v-if="showEventTypeModal" class="modal-overlay" @click="cancelEventTypeSelection">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Select Event Type</h3>
+          <button @click="cancelEventTypeSelection" class="close-button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m18 6-12 12" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Choose the type of event you want to add:</label>
+            <div class="event-type-options">
+              <button 
+                @click="selectEventType('initial-referral')" 
+                class="event-type-button"
+              >
+                Initial Referral
+              </button>
+              <button 
+                @click="selectEventType('initial-assessment')" 
+                class="event-type-button"
+              >
+                Initial Assessment
+              </button>
+              <button 
+                @click="selectEventType('program-enrollment')" 
+                class="event-type-button"
+              >
+                Program Enrollment
+              </button>
+              <button 
+                @click="selectEventType('care-plan')" 
+                class="event-type-button"
+              >
+                Care Plan Development
+              </button>
+              <button 
+                @click="selectEventType('regular-follow-up')" 
+                class="event-type-button"
+              >
+                Regular Follow-up
+              </button>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button @click="cancelEventTypeSelection" class="cancel-button">
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -632,16 +746,78 @@ const selectedProgram = ref('child-protection')
 const allCases = ref([])
 const selectedCase = ref(null)
 const showNewEnrollmentModal = ref(false)
+const showEventTypeModal = ref(false)
 const enrollmentLoading = ref(false)
 
-// New enrollment form
+// New enrollment form with additional fields
 const newEnrollment = ref({
   childFirstName: '',
   childLastName: '',
   dateOfBirth: '',
   gender: '',
   program: '',
-  initialFormType: ''
+  initialFormType: '',
+  referralDate: '',
+  referralMethod: '',
+  assessmentDate: '',
+  assessmentType: '',
+  enrollmentDate: '',
+  carePlanDate: '',
+  followUpDate: ''
+})
+
+const resetEnrollmentForm = () => {
+  newEnrollment.value = {
+    childFirstName: '',
+    childLastName: '',
+    dateOfBirth: '',
+    gender: '',
+    program: '',
+    initialFormType: '',
+    referralDate: '',
+    referralMethod: '',
+    assessmentDate: '',
+    assessmentType: '',
+    enrollmentDate: '',
+    carePlanDate: '',
+    followUpDate: ''
+  }
+}
+
+// Handle form type change
+const handleFormTypeChange = () => {
+  // Reset specific fields when form type changes
+  if (newEnrollment.value.initialFormType === 'initial-referral') {
+    newEnrollment.value.referralDate = new Date().toISOString().split('T')[0]
+  } else if (newEnrollment.value.initialFormType === 'initial-assessment') {
+    newEnrollment.value.assessmentDate = new Date().toISOString().split('T')[0]
+  } else if (newEnrollment.value.initialFormType === 'program-enrollment') {
+    newEnrollment.value.enrollmentDate = new Date().toISOString().split('T')[0]
+  } else if (newEnrollment.value.initialFormType === 'care-plan') {
+    newEnrollment.value.carePlanDate = new Date().toISOString().split('T')[0]
+  } else if (newEnrollment.value.initialFormType === 'regular-follow-up') {
+    newEnrollment.value.followUpDate = new Date().toISOString().split('T')[0]
+  }
+}
+
+// Watch for changes in initialFormType to pre-populate fields
+watch(() => newEnrollment.value.initialFormType, (newVal) => {
+  if (newVal === 'initial-referral') {
+    // Pre-populate some fields for initial referral
+    console.log('Selected Initial Referral Form')
+  } else if (newVal === 'initial-assessment') {
+    // Pre-populate some fields for initial assessment
+    console.log('Selected Initial Assessment Form')
+  } else if (newVal === 'program-enrollment') {
+    // Pre-populate some fields for program enrollment
+    console.log('Selected Program Enrollment Form')
+  } else if (newVal === 'care-plan') {
+    // Pre-populate some fields for care plan
+    console.log('Selected Care Plan Development Form')
+  } else if (newVal === 'regular-follow-up') {
+    // Pre-populate some fields for regular follow-up
+    console.log('Selected Regular Follow-up Form')
+  }
 })
 
 // Program stages
@@ -826,11 +1002,19 @@ const editCase = (case_) => {
 const addEvent = () => {
   if (!selectedCase.value) return
   
-  // Show modal to select event type or navigate to form
-  const formType = prompt('Select form type: initial-referral, child-overview, initial-assessment')
+  // Show modal to select event type instead of prompt
+  showEventTypeModal.value = true
+}
+
+const selectEventType = (formType) => {
+  showEventTypeModal.value = false
   if (formType) {
     router.push(`/capture?preset=${formType}&caseId=${selectedCase.value.id}`)
   }
+}
+
+const cancelEventTypeSelection = () => {
+  showEventTypeModal.value = false
 }
 
 const addStageEvent = (stage) => {
@@ -862,12 +1046,24 @@ const createNewEnrollment = async () => {
   enrollmentLoading.value = true
   
   try {
-    const enrollment = await TrackerService.createEnrollment({
+    // Map form types to program stages
+    const formTypeToStageMap = {
+      'initial-referral': 'referral',
+      'initial-assessment': 'assessment',
+      'program-enrollment': 'enrollment',
+      'care-plan': 'care-plan',
+      'regular-follow-up': 'follow-up'
+    }
+    
+    // Prepare enrollment data based on form type
+    const enrollmentData = {
       ...newEnrollment.value,
       enrollmentDate: new Date().toISOString(),
       status: 'active',
-      currentStage: 'referral'
-    })
+      currentStage: formTypeToStageMap[newEnrollment.value.initialFormType] || 'referral'
+    }
+    
+    const enrollment = await TrackerService.createEnrollment(enrollmentData)
     
     if (enrollment.success) {
       // Navigate to the initial form
@@ -883,17 +1079,6 @@ const createNewEnrollment = async () => {
     enrollmentLoading.value = false
     showNewEnrollmentModal.value = false
     resetEnrollmentForm()
-  }
-}
-
-const resetEnrollmentForm = () => {
-  newEnrollment.value = {
-    childFirstName: '',
-    childLastName: '',
-    dateOfBirth: '',
-    gender: '',
-    program: '',
-    initialFormType: ''
   }
 }
 
@@ -1005,9 +1190,9 @@ const getFormTypeForStage = (stageId) => {
   const stageFormMap = {
     'referral': 'initial-referral',
     'assessment': 'initial-assessment',
-    'enrollment': 'child-overview',
-    'care-plan': 'child-overview',
-    'follow-up': 'child-overview'
+    'enrollment': 'program-enrollment',
+    'care-plan': 'care-plan',
+    'follow-up': 'regular-follow-up'
   }
   return stageFormMap[stageId] || 'initial-referral'
 }
@@ -2557,6 +2742,33 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
   font-weight: 500;
 }
 
+/* Event Type Selection Modal */
+.event-type-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.event-type-button {
+  background: #f8f9fa;
+  border: 1px solid #ced4da;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.event-type-button:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .tracker-header {
@@ -2706,3 +2918,4 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
     font-size: 0.875rem;
   }
 }
+</style>

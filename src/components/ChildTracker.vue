@@ -12,10 +12,8 @@
         </button>
       </div>
       <div class="header-center">
-        <h1 class="tracker-title">Child Tracker - In-house/children</h1>
-        <div class="data-source-indicator">
-          <span class="indicator-badge firebase">📡 Live Firebase Data</span>
-        </div>
+        <h1 class="tracker-title">{{ showOnlyComplete ? 'In Housed Girls - Complete Forms Only' : 'Child Tracker - All Girls' }}</h1>
+        
       </div>
       <div class="header-right">
         <button @click="handleLogout" class="logout-button">
@@ -39,9 +37,7 @@
         <div class="stat-number">{{ activeChildren }}</div>
         <div class="stat-label">Active Cases</div>
       </div>
-      <div class="stat-card info-card">
-        <span class="info-badge">📋 Primary Source: Child Overview and Background Forms</span>
-      </div>
+      
     </div>
 
     <!-- Search Section -->
@@ -354,6 +350,14 @@ import Pagination from './Pagination.vue'
 
 const router = useRouter()
 
+// Props
+const props = defineProps({
+  showOnlyComplete: {
+    type: Boolean,
+    default: false
+  }
+})
+
 // Emits
 const emit = defineEmits(['back-to-dashboard'])
 
@@ -431,6 +435,7 @@ const processFormData = (formData, formType) => {
     denomination: formData.denomination,
     customId: formData.id, // The ID field from the form
     formType: getFormTypeName(formType),
+    formTypes: [formType], // Track which forms this child has
     status: determineStatus(formData, formType),
     createdAt: formData.createdAt,
     updatedAt: formData.updatedAt || formData.createdAt,
@@ -469,49 +474,70 @@ const determineStatus = (formData, formType) => {
 const loadChildren = async () => {
   loading.value = true
   try {
-    // Load primarily Child Overview forms as they have the most comprehensive data
-    const overviewResult = await FormService.getForms('child-overview', 1000)
-    
-    const allChildren = []
-    
-    // Process Child Overview forms (primary source)
-    if (overviewResult.success) {
-      overviewResult.forms.forEach(form => {
-        allChildren.push(processFormData(form, 'child-overview'))
-      })
-    }
-    
-    // Load other forms as supplementary data
-    const [referralResult, assessmentResult] = await Promise.all([
+    // Load all forms
+    const [overviewResult, referralResult, assessmentResult] = await Promise.all([
+      FormService.getForms('child-overview', 1000),
       FormService.getForms('initial-referral', 1000),
       FormService.getForms('initial-assessment', 1000)
     ])
     
-    // Only add children from other forms if they don't exist in overview
+    // Create a map to track children and their forms
+    const childrenMap = new Map()
+    
+    // Process all forms
+    const allForms = []
+    
+    if (overviewResult.success) {
+      overviewResult.forms.forEach(form => {
+        allForms.push({ form, formType: 'child-overview' })
+      })
+    }
+    
     if (referralResult.success) {
       referralResult.forms.forEach(form => {
-        const childData = processFormData(form, 'initial-referral')
-        const exists = allChildren.find(child => 
-          child.fullName.toLowerCase() === childData.fullName.toLowerCase() &&
-          child.dateOfBirth === childData.dateOfBirth
-        )
-        if (!exists) {
-          allChildren.push(childData)
-        }
+        allForms.push({ form, formType: 'initial-referral' })
       })
     }
     
     if (assessmentResult.success) {
       assessmentResult.forms.forEach(form => {
-        const childData = processFormData(form, 'initial-assessment')
-        const exists = allChildren.find(child => 
-          child.fullName.toLowerCase() === childData.fullName.toLowerCase() &&
-          child.dateOfBirth === childData.dateOfBirth
-        )
-        if (!exists) {
-          allChildren.push(childData)
-        }
+        allForms.push({ form, formType: 'initial-assessment' })
       })
+    }
+    
+    // Group forms by child (based on name and date of birth)
+    allForms.forEach(({ form, formType }) => {
+      const key = `${form.childFirstName || ''}-${form.childSurname || ''}-${form.dateOfBirth || ''}`.toLowerCase()
+      
+      if (childrenMap.has(key)) {
+        // Add form type to existing child
+        const child = childrenMap.get(key)
+        if (!child.formTypes.includes(formType)) {
+          child.formTypes.push(formType)
+        }
+        // Update with the most recent form data
+        if (!child.createdAt || new Date(form.createdAt) > new Date(child.createdAt)) {
+          const updatedChild = processFormData(form, formType)
+          updatedChild.formTypes = child.formTypes
+          childrenMap.set(key, updatedChild)
+        }
+      } else {
+        // Create new child entry
+        const child = processFormData(form, formType)
+        childrenMap.set(key, child)
+      }
+    })
+    
+    // Convert map to array
+    let allChildren = Array.from(childrenMap.values())
+    
+    // If showOnlyComplete is true, filter to only children with all three forms
+    if (props.showOnlyComplete) {
+      allChildren = allChildren.filter(child => 
+        child.formTypes.includes('initial-referral') &&
+        child.formTypes.includes('child-overview') &&
+        child.formTypes.includes('initial-assessment')
+      )
     }
     
     children.value = allChildren.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -639,6 +665,12 @@ onMounted(() => {
   background: #f8f9fa;
   min-height: 100vh;
   padding: 0;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: auto;
 }
 
 .tracker-header {

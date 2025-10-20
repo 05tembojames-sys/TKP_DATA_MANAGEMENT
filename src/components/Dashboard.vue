@@ -19,16 +19,7 @@
             <!-- Logo Card -->
             <div class="logo-card">
               <div class="logo-container">
-                <svg viewBox="0 0 100 100" class="logo-svg">
-                  <defs>
-                    <linearGradient id="kGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style="stop-color:#4A148C;stop-opacity:1" />
-                      <stop offset="100%" style="stop-color:#2D1B69;stop-opacity:1" />
-                    </linearGradient>
-                  </defs>
-                  <!-- K Letter Shape -->
-                  <path d="M20 15 L20 85 L30 85 L30 55 L45 40 L70 85 L82 85 L50 35 L80 15 L68 15 L45 35 L30 50 L30 15 Z" fill="url(#kGradient)"/>
-                </svg>
+                <img src="//images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png" alt="The Kukhoma Project" sizes="240px" class="Mobile-bar-branding-logo" style="display:block" srcset="//images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=100w 100w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=300w 300w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=500w 500w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=750w 750w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=1000w 1000w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=1500w 1500w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=2500w 2500w" loading="lazy" decoding="async" data-loader="sqs">
               </div>
               <h1 class="project-title">THE KUKHOMA PROJECT</h1>
             </div>
@@ -111,7 +102,7 @@
               
               <button class="dashboard-btn residents-btn" @click="setCurrentView('child-tracker-2')">
                 <i class="fas fa-home btn-icon"></i>
-                <span>Residents</span>
+                <span>In Housed Girls</span>
               </button>
               
               <button class="dashboard-btn analysis-btn" @click="setCurrentView('data-analysis')">
@@ -365,7 +356,10 @@
 
       <!-- Child Tracker Section -->
       <div v-if="currentView === 'child-tracker' || currentView === 'child-tracker-2'" class="child-tracker-section">
-        <ChildTracker @back-to-dashboard="setCurrentView('main')" />
+        <ChildTracker 
+          :show-only-complete="currentView === 'child-tracker-2'" 
+          @back-to-dashboard="setCurrentView('main')" 
+        />
       </div>
 
       <!-- Data Visualization Section -->
@@ -592,7 +586,7 @@ const getSectionTitle = (view) => {
     'data-entry': 'Data Entry / Forms',
     'event-reports': 'Event Reports',
     'child-tracker': 'Child Tracker - In-house/children',
-    'child-tracker-2': 'Child Tracker - In-house/children',
+    'child-tracker-2': 'In Housed Girls - Complete Forms Only',
     'visualization': 'Visualization',
     'data-analysis': 'Data Analysis',
     'capture': 'Capture'
@@ -815,16 +809,17 @@ onMounted(() => {
 }
 
 .logo-container {
-  width: 60px;
-  height: 60px;
+  width: 100px;
+  height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.logo-svg {
+.logo-image {
   width: 100%;
   height: 100%;
+  object-fit: contain;
 }
 
 .project-title {
@@ -885,16 +880,17 @@ onMounted(() => {
 }
 
 .logo-container {
-  width: 80px;
-  height: 80px;
+  width: 240px;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.logo-svg {
+.Mobile-bar-branding-logo {
   width: 100%;
-  height: 100%;
+  height: auto;
+  object-fit: contain;
 }
 
 .project-title {
@@ -1644,6 +1640,17 @@ tbody tr:hover {
     width: 100%;
   }
   
+  .logo-container {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .logo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  
   .summary-stats {
     grid-template-columns: 1fr;
   }
@@ -1716,5 +1723,4 @@ tbody tr:hover {
     text-align: left;
   }
 }
-
 </style>

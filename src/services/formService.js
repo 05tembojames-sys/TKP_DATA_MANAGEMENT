@@ -204,6 +204,57 @@ class FormService {
       }
     }
   }
+  
+  // Get forms by case ID
+  async getFormsByCaseId(caseId, formType = null) {
+    try {
+      let q
+      
+      if (formType) {
+        q = query(
+          collection(db, this.formsCollection),
+          where('caseId', '==', caseId),
+          where('formType', '==', formType),
+          limit(10)
+        )
+      } else {
+        q = query(
+          collection(db, this.formsCollection),
+          where('caseId', '==', caseId),
+          limit(50)
+        )
+      }
+      
+      const querySnapshot = await getDocs(q)
+      const forms = []
+      
+      querySnapshot.forEach((doc) => {
+        forms.push({
+          id: doc.id,
+          ...doc.data()
+        })
+      })
+      
+      // Sort forms by createdAt in memory
+      forms.sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0)
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0)
+        return dateB - dateA
+      })
+      
+      return {
+        success: true,
+        forms
+      }
+    } catch (error) {
+      console.error('Error getting forms by case ID:', error)
+      return {
+        success: false,
+        error: error.message,
+        forms: []
+      }
+    }
+  }
 
   // Delete form
   async deleteForm(formId) {

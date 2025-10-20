@@ -134,9 +134,37 @@ class TrackerService {
       }
       
       if (!case_) {
-        return {
-          success: false,
-          error: 'Case not found'
+        // Check if there's a draft in localStorage for this case
+        const draftEvents = this.loadDraftEventsFromLocalStorage(caseId)
+        if (draftEvents.length > 0) {
+          // Create a case from the draft data
+          const latestDraft = draftEvents[0]
+          const draftData = latestDraft.data
+          
+          case_ = {
+            id: caseId,
+            caseId: caseId,
+            childId: `CH${caseId.slice(-6)}`,
+            childName: `${draftData.childFirstName || 'Unknown'} ${draftData.childLastName || 'Child'}`,
+            childFirstName: draftData.childFirstName || 'Unknown',
+            childLastName: draftData.childLastName || draftData.childSurname || 'Child',
+            dateOfBirth: draftData.dateOfBirth || '',
+            gender: draftData.gender || 'Unknown',
+            program: draftData.program || 'Unknown Program',
+            enrollmentDate: latestDraft.date,
+            status: 'draft',
+            currentStage: latestDraft.stageId,
+            assignedWorker: 'System User',
+            lastActivity: latestDraft.date,
+            age: draftData.age || 0,
+            createdAt: latestDraft.date,
+            updatedAt: latestDraft.date
+          }
+        } else {
+          return {
+            success: false,
+            error: 'Case not found'
+          }
         }
       }
       
@@ -175,58 +203,110 @@ class TrackerService {
       // Process referral forms
       if (referralResult.success) {
         referralResult.forms.forEach(form => {
-          allEvents.push({
-            id: form.id,
-            formType: 'Initial Referral',
-            stageId: 'referral',
-            date: form.createdAt,
-            status: form.status || 'completed',
-            data: form
-          })
+          // Check if this form is for the requested case
+          if (form.caseId === caseId) {
+            allEvents.push({
+              id: form.id,
+              formType: form.status === 'draft' ? 'Initial Referral (Draft)' : 'Initial Referral',
+              stageId: 'referral',
+              date: form.createdAt,
+              status: form.status || 'completed',
+              data: form
+            })
+          }
         })
       }
       
       // Process overview forms
       if (overviewResult.success) {
         overviewResult.forms.forEach(form => {
-          allEvents.push({
-            id: form.id,
-            formType: 'Child Overview',
-            stageId: 'enrollment',
-            date: form.createdAt,
-            status: form.status || 'completed',
-            data: form
-          })
+          // Check if this form is for the requested case
+          if (form.caseId === caseId) {
+            allEvents.push({
+              id: form.id,
+              formType: form.status === 'draft' ? 'Child Overview (Draft)' : 'Child Overview',
+              stageId: 'enrollment',
+              date: form.createdAt,
+              status: form.status || 'completed',
+              data: form
+            })
+          }
         })
       }
       
       // Process assessment forms
       if (assessmentResult.success) {
         assessmentResult.forms.forEach(form => {
-          allEvents.push({
-            id: form.id,
-            formType: 'Initial Assessment',
-            stageId: 'assessment',
-            date: form.createdAt,
-            status: form.status || 'completed',
-            data: form
-          })
+          // Check if this form is for the requested case
+          if (form.caseId === caseId) {
+            allEvents.push({
+              id: form.id,
+              formType: form.status === 'draft' ? 'Initial Assessment (Draft)' : 'Initial Assessment',
+              stageId: 'assessment',
+              date: form.createdAt,
+              status: form.status || 'completed',
+              data: form
+            })
+          }
         })
       }
       
-      // Sort by date
-      allEvents.sort((a, b) => {
-        const dateA = a.date?.toDate ? a.date.toDate() : new Date(a.date || 0)
-        const dateB = b.date?.toDate ? b.date.toDate() : new Date(b.date || 0)
-        return dateB - dateA
-      })
+      // Sort events by date
+      allEvents.sort((a, b) => new Date(b.date) - new Date(a.date))
       
-      return allEvents.slice(0, 20) // Limit to 20 most recent events
+      return allEvents
       
     } catch (error) {
       console.error('Error loading case events:', error)
       return []
     }
+  }
+  
+  // Load draft events from localStorage
+  static loadDraftEventsFromLocalStorage(caseId) {
+    const events = []
+    const localStorageKeys = Object.keys(localStorage).filter(key => 
+      key.startsWith('capture-data-')
+    )
+    
+    localStorageKeys.forEach(key => {
+      try {
+        const storedData = JSON.parse(localStorage.getItem(key))
+        if (storedData && storedData.status === 'DRAFT' && storedData.dataValues) {
+          // Check if this draft is for the requested case
+          if (storedData.dataValues.caseId === caseId) {
+            // Extract form type from key (format: capture-data-{formType}-{orgUnit}-{period})
+            const parts = key.split('-')
+            const formType = parts[2]
+            
+            // Map form type to display name and stage
+            const formTypeMap = {
+              'initial-referral': { name: 'Initial Referral', stage: 'referral' },
+              'initial-assessment': { name: 'Initial Assessment', stage: 'assessment' },
+              'program-enrollment': { name: 'Program Enrollment', stage: 'enrollment' },
+              'care-plan': { name: 'Care Plan Development', stage: 'care-plan' },
+              'regular-follow-up': { name: 'Regular Follow-up', stage: 'follow-up' },
+              'child-overview': { name: 'Child Overview', stage: 'enrollment' }
+            }
+            
+            const formInfo = formTypeMap[formType] || { name: formType, stage: 'other' }
+            
+            events.push({
+              id: `draft-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              formType: `${formInfo.name} (Draft)`,
+              stageId: formInfo.stage,
+              date: storedData.lastUpdated || new Date().toISOString(),
+              status: 'draft',
+              data: storedData.dataValues
+            })
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing localStorage data:', e)
+      }
+    })
+    
+    return events
   }
   
   // Generate cases from existing forms - Enhanced for real Firebase data

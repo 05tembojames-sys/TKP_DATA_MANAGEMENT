@@ -248,6 +248,111 @@ class CaptureService {
           }
         ]
       },
+      'initial-assessment': {
+        sections: [
+          {
+            id: 'section-child-info',
+            name: 'Child Information',
+            dataElements: [
+              {
+                id: 'childFirstName',
+                name: 'Child First Name',
+                valueType: 'TEXT',
+                required: true
+              },
+              {
+                id: 'childSurname',
+                name: 'Child Surname',
+                valueType: 'TEXT',
+                required: true
+              },
+              {
+                id: 'gender',
+                name: 'Gender',
+                valueType: 'SELECT',
+                required: true,
+                options: ['Female', 'Male']
+              },
+              {
+                id: 'dateOfBirth',
+                name: 'Date of Birth',
+                valueType: 'DATE',
+                required: true
+              },
+              {
+                id: 'age',
+                name: 'Age (years)',
+                valueType: 'NUMBER',
+                required: true,
+                min: 0,
+                max: 18
+              },
+              {
+                id: 'assessmentDate',
+                name: 'Date of Assessment',
+                valueType: 'DATE',
+                required: true
+              }
+            ]
+          },
+          {
+            id: 'section-pregnancy-details',
+            name: 'Pregnancy Details',
+            dataElements: [
+              {
+                id: 'pregnancyDuration',
+                name: 'Duration of Pregnancy',
+                valueType: 'TEXT',
+                required: true,
+                placeholder: 'e.g., 12 weeks'
+              },
+              {
+                id: 'conceptionCategory',
+                name: 'Category of Conception',
+                valueType: 'SELECT',
+                required: true,
+                options: [
+                  'Rape',
+                  'Incest',
+                  'Defilement',
+                  'Survival Prostitution',
+                  'Other'
+                ]
+              },
+              {
+                id: 'fatherRelation',
+                name: 'Relationship to Father',
+                valueType: 'TEXT',
+                required: true
+              }
+            ]
+          },
+          {
+            id: 'section-family-info',
+            name: 'Family Information',
+            dataElements: [
+              {
+                id: 'primaryCaregiverName',
+                name: 'Primary Caregiver Name',
+                valueType: 'TEXT',
+                required: true
+              },
+              {
+                id: 'relationshipToChild',
+                name: 'Relationship to Child',
+                valueType: 'TEXT',
+                required: true
+              },
+              {
+                id: 'areaOfTown',
+                name: 'Area of Town',
+                valueType: 'TEXT',
+                required: true
+              }
+            ]
+          }
+        ]
+      },
       'child-overview': {
         sections: [
           {
@@ -399,161 +504,20 @@ class CaptureService {
                 name: 'Counseling Sessions This Period',
                 valueType: 'NUMBER',
                 required: true,
-                min: 0,
-                max: 50
+                min: 0
               },
               {
-                id: 'material_support',
-                name: 'Material Support Provided',
+                id: 'health_checkups',
+                name: 'Health Check-ups',
+                valueType: 'NUMBER',
+                required: true,
+                min: 0
+              },
+              {
+                id: 'educational_support',
+                name: 'Educational Support Provided',
                 valueType: 'BOOLEAN',
-                required: true
-              },
-              {
-                id: 'service_notes',
-                name: 'Service Notes',
-                valueType: 'TEXT',
-                required: false,
-                placeholder: 'Additional notes about services provided'
-              }
-            ]
-          }
-        ]
-      },
-      'ds-004': {
-        sections: [
-          {
-            id: 'section-outreach-activities',
-            name: 'Outreach Activities',
-            dataElements: [
-              {
-                id: 'community_visits',
-                name: 'Community Visits Conducted',
-                valueType: 'NUMBER',
-                required: true,
-                min: 0,
-                max: 100
-              },
-              {
-                id: 'families_reached',
-                name: 'Families Reached',
-                valueType: 'NUMBER',
-                required: true,
-                min: 0,
-                max: 500
-              },
-              {
-                id: 'awareness_sessions',
-                name: 'Awareness Sessions Held',
-                valueType: 'NUMBER',
-                required: true,
-                min: 0,
-                max: 50
-              },
-              {
-                id: 'referrals_made',
-                name: 'Referrals Made to Services',
-                valueType: 'NUMBER',
-                required: true,
-                min: 0,
-                max: 100
-              }
-            ]
-          },
-          {
-            id: 'section-impact',
-            name: 'Impact Assessment',
-            dataElements: [
-              {
-                id: 'new_cases_identified',
-                name: 'New Cases Identified',
-                valueType: 'NUMBER',
-                required: true,
-                min: 0,
-                max: 50
-              },
-              {
-                id: 'follow_up_cases',
-                name: 'Follow-up Cases',
-                valueType: 'NUMBER',
-                required: true,
-                min: 0,
-                max: 100
-              },
-              {
-                id: 'success_stories',
-                name: 'Success Stories/Outcomes',
-                valueType: 'TEXT',
-                required: false,
-                placeholder: 'Describe positive outcomes and success stories'
-              }
-            ]
-          }
-        ]
-      },
-      'ds-005': {
-        sections: [
-          {
-            id: 'section-training',
-            name: 'Training Activities',
-            dataElements: [
-              {
-                id: 'training_sessions',
-                name: 'Training Sessions Conducted',
-                valueType: 'NUMBER',
-                required: true,
-                min: 0,
-                max: 20
-              },
-              {
-                id: 'staff_trained',
-                name: 'Number of Staff Trained',
-                valueType: 'NUMBER',
-                required: true,
-                min: 0,
-                max: 50
-              },
-              {
-                id: 'training_hours',
-                name: 'Total Training Hours',
-                valueType: 'NUMBER',
-                required: true,
-                min: 0,
-                max: 200
-              },
-              {
-                id: 'external_trainers',
-                name: 'External Trainers Used',
-                valueType: 'BOOLEAN',
-                required: true
-              }
-            ]
-          },
-          {
-            id: 'section-development',
-            name: 'Staff Development',
-            dataElements: [
-              {
-                id: 'certifications_earned',
-                name: 'Certifications Earned',
-                valueType: 'NUMBER',
-                required: false,
-                min: 0,
-                max: 20
-              },
-              {
-                id: 'skill_assessments',
-                name: 'Skill Assessments Conducted',
-                valueType: 'NUMBER',
-                required: true,
-                min: 0,
-                max: 50
-              },
-              {
-                id: 'development_notes',
-                name: 'Development Notes',
-                valueType: 'TEXT',
-                required: false,
-                placeholder: 'Notes on staff development activities and outcomes'
+                required: false
               }
             ]
           }
@@ -668,23 +632,102 @@ class CaptureService {
 
   // Save as draft
   static async saveAsDraft({ dataSetId, orgUnitId, periodId, dataValues }) {
-    // Mock delay
-    await new Promise(resolve => setTimeout(resolve, 800))
-    
-    const key = `${dataSetId}-${orgUnitId}-${periodId}`
-    const dataToSave = {
-      dataValues,
-      lastUpdated: new Date().toISOString(),
-      status: 'DRAFT'
-    }
-    
-    localStorage.setItem(`capture-data-${key}`, JSON.stringify(dataToSave))
-    
-    console.log('Draft saved:', { dataSetId, orgUnitId, periodId, dataValues })
-    
-    return {
-      success: true,
-      message: 'Draft saved successfully'
+    try {
+      // Check if there's already a draft for this case that we should update
+      let result
+      const caseId = dataValues.caseId
+      
+      if (caseId) {
+        // Look for existing draft forms for this case
+        const existingFormsResult = await FormService.getFormsByCaseId(caseId, dataSetId)
+        
+        if (existingFormsResult.success && existingFormsResult.forms.length > 0) {
+          // Found existing draft, update it
+          const existingForm = existingFormsResult.forms[0] // Use the most recent one
+          const updatedData = {
+            ...dataValues,
+            status: 'draft',
+            draftSavedAt: new Date().toISOString(),
+            orgUnitId: orgUnitId,
+            periodId: periodId,
+            updatedAt: new Date()
+          }
+          
+          result = await FormService.updateForm(existingForm.id, updatedData)
+          result.id = existingForm.id // Preserve the existing ID
+        } else {
+          // No existing draft, create a new one
+          const draftData = {
+            ...dataValues,
+            status: 'draft',
+            draftSavedAt: new Date().toISOString(),
+            orgUnitId: orgUnitId,
+            periodId: periodId
+          }
+          
+          // Save to Firebase based on form type
+          switch (dataSetId) {
+            case 'initial-referral':
+              result = await FormService.saveInitialReferral(draftData)
+              break
+            case 'child-overview':
+              result = await FormService.saveChildOverview(draftData)
+              break
+            case 'initial-assessment':
+              result = await FormService.saveInitialAssessment(draftData)
+              break
+            default:
+              // For other form types, create a generic save
+              result = await this.saveGenericForm(dataSetId, draftData)
+          }
+        }
+      } else {
+        // No case ID, create a new draft
+        const draftData = {
+          ...dataValues,
+          status: 'draft',
+          draftSavedAt: new Date().toISOString(),
+          orgUnitId: orgUnitId,
+          periodId: periodId
+        }
+        
+        // Save to Firebase based on form type
+        switch (dataSetId) {
+          case 'initial-referral':
+            result = await FormService.saveInitialReferral(draftData)
+            break
+          case 'child-overview':
+            result = await FormService.saveChildOverview(draftData)
+            break
+          case 'initial-assessment':
+            result = await FormService.saveInitialAssessment(draftData)
+            break
+          default:
+            // For other form types, create a generic save
+            result = await this.saveGenericForm(dataSetId, draftData)
+        }
+      }
+      
+      if (result.success) {
+        // Also save to localStorage as a backup
+        const key = `${dataSetId}-${orgUnitId}-${periodId}`
+        const localStorageData = {
+          dataValues,
+          lastUpdated: new Date().toISOString(),
+          status: 'DRAFT'
+        }
+        localStorage.setItem(`capture-data-${key}`, JSON.stringify(localStorageData))
+      }
+      
+      console.log('Draft saved to Firebase:', { dataSetId, orgUnitId, periodId, dataValues })
+      
+      return result
+    } catch (error) {
+      console.error('Error saving draft to Firebase:', error)
+      return {
+        success: false,
+        error: error.message || 'Failed to save draft'
+      }
     }
   }
 
