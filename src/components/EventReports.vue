@@ -4,7 +4,14 @@
     <div class="reports-header">
       <div class="header-left">
         <button @click="goBack" class="back-button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="m12 19-7-7 7-7" />
             <path d="m19 12H5" />
           </svg>
@@ -13,12 +20,18 @@
       </div>
       <div class="header-center">
         <h1 class="reports-title">Event Reports</h1>
-        <div class="data-source-indicator">
-        </div>
+        <div class="data-source-indicator"></div>
       </div>
       <div class="header-right">
         <button @click="handleLogout" class="logout-button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
             <polyline points="16 17 21 12 16 7" />
             <line x1="21" y1="12" x2="9" y2="12" />
@@ -33,8 +46,11 @@
       <div class="config-panel" :class="{ collapsed: panelCollapsed }">
         <div class="panel-header">
           <h3>📋 Report Configuration</h3>
-          <button @click="panelCollapsed = !panelCollapsed" class="collapse-btn">
-            {{ panelCollapsed ? '▶' : '◀' }}
+          <button
+            @click="panelCollapsed = !panelCollapsed"
+            class="collapse-btn"
+          >
+            {{ panelCollapsed ? "▶" : "◀" }}
           </button>
         </div>
 
@@ -46,28 +62,45 @@
               <label>Program/Event Type</label>
               <select v-model="config.program" class="form-select">
                 <option value="">Select program...</option>
-                <option value="child-assessment">Child Assessments</option>
-                <option value="child-tracking">Child Tracking</option>
                 <option value="initial-referral">Initial Referrals</option>
-                <option value="reports">Submitted Reports</option>
+                <option value="child-overview">Child Overview</option>
+                <option value="initial-assessment">Initial Assessments</option>
+                <option value="medical-intake">
+                  Medical Intake Assessments
+                </option>
+                <option value="academics-literacy">
+                  Academics & Literacy Plans
+                </option>
+                <option value="psychological-assessment">
+                  Psychological Assessments
+                </option>
+                <option value="life-skills-survey">Life Skills Surveys</option>
+                <option value="birth-delivery">Birth & Delivery Reports</option>
+                <option value="care-plan-summary">Care Plan Summaries</option>
+                <option value="care-plan-baby">Care Plan (Baby)</option>
+                <option value="care-plan-ongoing-life-skills">
+                  Ongoing Life Skills
+                </option>
               </select>
             </div>
 
             <div class="form-group">
               <label>Data Elements</label>
               <div class="data-elements-list">
-                <div 
-                  v-for="element in availableDataElements" 
+                <div
+                  v-for="element in availableDataElements"
                   :key="element.id"
                   class="data-element-item"
                 >
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     :id="`element-${element.id}`"
                     :value="element.id"
                     v-model="config.selectedElements"
                   />
-                  <label :for="`element-${element.id}`">{{ element.name }}</label>
+                  <label :for="`element-${element.id}`">{{
+                    element.name
+                  }}</label>
                 </div>
               </div>
             </div>
@@ -90,7 +123,11 @@
 
             <div v-if="config.periodType === 'custom'" class="form-group">
               <label>Start Date</label>
-              <input type="date" v-model="config.startDate" class="form-input" />
+              <input
+                type="date"
+                v-model="config.startDate"
+                class="form-input"
+              />
             </div>
 
             <div v-if="config.periodType === 'custom'" class="form-group">
@@ -101,13 +138,13 @@
             <div v-else class="form-group">
               <label>Select Periods</label>
               <div class="periods-list">
-                <div 
-                  v-for="period in availablePeriods" 
+                <div
+                  v-for="period in availablePeriods"
                   :key="period.id"
                   class="period-item"
                 >
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     :id="`period-${period.id}`"
                     :value="period.id"
                     v-model="config.selectedPeriods"
@@ -124,13 +161,13 @@
             <div class="form-group">
               <label>Select Units</label>
               <div class="org-units-list">
-                <div 
-                  v-for="unit in organizationUnits" 
+                <div
+                  v-for="unit in organizationUnits"
                   :key="unit.id"
                   class="org-unit-item"
                 >
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     :id="`org-${unit.id}`"
                     :value="unit.id"
                     v-model="config.selectedOrgUnits"
@@ -144,10 +181,15 @@
           <!-- Layout Configuration -->
           <div class="config-section">
             <h4 class="section-title">📐 Table Layout</h4>
-            
+
             <div class="form-group">
               <label>Columns</label>
-              <select multiple v-model="config.columnDimensions" class="form-select multi" size="3">
+              <select
+                multiple
+                v-model="config.columnDimensions"
+                class="form-select multi"
+                size="3"
+              >
                 <option value="data">Data Elements</option>
                 <option value="period">Period</option>
                 <option value="orgUnit">Organization Unit</option>
@@ -156,7 +198,12 @@
 
             <div class="form-group">
               <label>Rows</label>
-              <select multiple v-model="config.rowDimensions" class="form-select multi" size="3">
+              <select
+                multiple
+                v-model="config.rowDimensions"
+                class="form-select multi"
+                size="3"
+              >
                 <option value="data">Data Elements</option>
                 <option value="period">Period</option>
                 <option value="orgUnit">Organization Unit</option>
@@ -165,7 +212,12 @@
 
             <div class="form-group">
               <label>Filters</label>
-              <select multiple v-model="config.filterDimensions" class="form-select multi" size="3">
+              <select
+                multiple
+                v-model="config.filterDimensions"
+                class="form-select multi"
+                size="3"
+              >
                 <option value="data">Data Elements</option>
                 <option value="period">Period</option>
                 <option value="orgUnit">Organization Unit</option>
@@ -176,24 +228,40 @@
           <!-- Table Options -->
           <div class="config-section">
             <h4 class="section-title">⚙️ Options</h4>
-            
+
             <div class="checkbox-group">
-              <input type="checkbox" id="showTotals" v-model="config.showTotals" />
+              <input
+                type="checkbox"
+                id="showTotals"
+                v-model="config.showTotals"
+              />
               <label for="showTotals">Show row totals</label>
             </div>
 
             <div class="checkbox-group">
-              <input type="checkbox" id="showSubtotals" v-model="config.showSubtotals" />
+              <input
+                type="checkbox"
+                id="showSubtotals"
+                v-model="config.showSubtotals"
+              />
               <label for="showSubtotals">Show subtotals</label>
             </div>
 
             <div class="checkbox-group">
-              <input type="checkbox" id="hideEmptyRows" v-model="config.hideEmptyRows" />
+              <input
+                type="checkbox"
+                id="hideEmptyRows"
+                v-model="config.hideEmptyRows"
+              />
               <label for="hideEmptyRows">Hide empty rows</label>
             </div>
 
             <div class="checkbox-group">
-              <input type="checkbox" id="showHierarchy" v-model="config.showHierarchy" />
+              <input
+                type="checkbox"
+                id="showHierarchy"
+                v-model="config.showHierarchy"
+              />
               <label for="showHierarchy">Show hierarchy</label>
             </div>
 
@@ -219,9 +287,9 @@
 
             <div class="form-group">
               <label>Limit rows</label>
-              <input 
-                type="number" 
-                v-model="config.rowLimit" 
+              <input
+                type="number"
+                v-model="config.rowLimit"
                 class="form-input"
                 min="1"
                 max="10000"
@@ -232,8 +300,12 @@
 
           <!-- Action Buttons -->
           <div class="panel-actions">
-            <button @click="updateReport" class="update-btn" :disabled="loading">
-              {{ loading ? '⏳ Loading...' : '🔄 Update' }}
+            <button
+              @click="updateReport"
+              class="update-btn"
+              :disabled="loading"
+            >
+              {{ loading ? "⏳ Loading..." : "🔄 Update" }}
             </button>
             <button @click="saveAsFavorite" class="favorite-btn">
               ⭐ Save as favorite
@@ -250,22 +322,22 @@
         <!-- Toolbar -->
         <div class="content-toolbar">
           <div class="view-tabs">
-            <button 
-              @click="currentView = 'table'" 
+            <button
+              @click="currentView = 'table'"
               class="tab-btn"
               :class="{ active: currentView === 'table' }"
             >
               📊 Table
             </button>
-            <button 
-              @click="currentView = 'chart'" 
+            <button
+              @click="currentView = 'chart'"
               class="tab-btn"
               :class="{ active: currentView === 'chart' }"
             >
               📈 Chart
             </button>
-            <button 
-              @click="currentView = 'line-list'" 
+            <button
+              @click="currentView = 'line-list'"
               class="tab-btn"
               :class="{ active: currentView === 'line-list' }"
             >
@@ -275,7 +347,10 @@
 
           <div class="toolbar-actions">
             <div class="dropdown-container">
-              <button @click="showDownloadMenu = !showDownloadMenu" class="action-btn">
+              <button
+                @click="showDownloadMenu = !showDownloadMenu"
+                class="action-btn"
+              >
                 ⬇️ Download
               </button>
               <div v-if="showDownloadMenu" class="download-menu">
@@ -299,10 +374,16 @@
           </div>
 
           <!-- Empty State -->
-          <div v-else-if="!tableHeaders || tableHeaders.length === 0" class="empty-state">
+          <div
+            v-else-if="!tableHeaders || tableHeaders.length === 0"
+            class="empty-state"
+          >
             <div class="empty-icon">📊</div>
             <h3>No Data Available</h3>
-            <p>Configure your report settings and click "Update" to generate the report.</p>
+            <p>
+              Configure your report settings and click "Update" to generate the
+              report.
+            </p>
           </div>
 
           <!-- Table View -->
@@ -311,27 +392,30 @@
               <table class="pivot-table">
                 <thead>
                   <tr>
-                    <th 
-                      v-for="(header, index) in tableHeaders" 
+                    <th
+                      v-for="(header, index) in tableHeaders"
                       :key="`header-${index}`"
                       class="table-header"
                       @click="sortByColumn(index)"
                     >
                       {{ header }}
                       <span v-if="sortColumn === index" class="sort-indicator">
-                        {{ sortDirection === 'asc' ? '▲' : '▼' }}
+                        {{ sortDirection === "asc" ? "▲" : "▼" }}
                       </span>
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr 
-                    v-for="(row, rowIndex) in displayedRows" 
+                  <tr
+                    v-for="(row, rowIndex) in displayedRows"
                     :key="`row-${rowIndex}`"
-                    :class="{ 'subtotal-row': row.isSubtotal, 'total-row': row.isTotal }"
+                    :class="{
+                      'subtotal-row': row.isSubtotal,
+                      'total-row': row.isTotal,
+                    }"
                   >
-                    <td 
-                      v-for="(cell, cellIndex) in row.cells" 
+                    <td
+                      v-for="(cell, cellIndex) in row.cells"
                       :key="`cell-${rowIndex}-${cellIndex}`"
                       :class="cell.class"
                     >
@@ -341,12 +425,12 @@
                 </tbody>
                 <tfoot v-if="config.showTotals && totalsRow">
                   <tr class="totals-footer">
-                    <td 
-                      v-for="(total, index) in totalsRow" 
+                    <td
+                      v-for="(total, index) in totalsRow"
                       :key="`total-${index}`"
                       class="total-cell"
                     >
-                      {{ formatCellValue(total, 'number') }}
+                      {{ formatCellValue(total, "number") }}
                     </td>
                   </tr>
                 </tfoot>
@@ -355,8 +439,8 @@
 
             <!-- Pagination -->
             <div v-if="totalPages > 1" class="pagination">
-              <button 
-                @click="currentPage--" 
+              <button
+                @click="currentPage--"
                 :disabled="currentPage === 1"
                 class="page-btn"
               >
@@ -365,8 +449,8 @@
               <span class="page-info">
                 Page {{ currentPage }} of {{ totalPages }}
               </span>
-              <button 
-                @click="currentPage++" 
+              <button
+                @click="currentPage++"
                 :disabled="currentPage === totalPages"
                 class="page-btn"
               >
@@ -388,13 +472,27 @@
               </select>
             </div>
             <div class="chart-container">
-              <div v-if="reportData && reportData.length > 0" class="chart-data-display">
+              <div
+                v-if="reportData && reportData.length > 0"
+                class="chart-data-display"
+              >
                 <p>📈 Chart data loaded: {{ reportData.length }} data points</p>
-                <p class="chart-hint">Chart visualization coming soon - data is ready!</p>
+                <p class="chart-hint">
+                  Chart visualization coming soon - data is ready!
+                </p>
                 <div class="chart-preview">
-                  <div v-for="(row, idx) in reportData.slice(0, 5)" :key="idx" class="chart-preview-row">
-                    <span class="preview-label">{{ row.cells[0]?.value }}:</span>
-                    <div class="preview-bar" :style="{ width: (row.cells[1]?.value || 0) * 3 + 'px' }">
+                  <div
+                    v-for="(row, idx) in reportData.slice(0, 5)"
+                    :key="idx"
+                    class="chart-preview-row"
+                  >
+                    <span class="preview-label"
+                      >{{ row.cells[0]?.value }}:</span
+                    >
+                    <div
+                      class="preview-bar"
+                      :style="{ width: (row.cells[1]?.value || 0) * 3 + 'px' }"
+                    >
                       {{ row.cells[1]?.value || 0 }}
                     </div>
                   </div>
@@ -402,7 +500,9 @@
               </div>
               <div v-else class="chart-placeholder">
                 <p>📈 Chart visualization will appear here</p>
-                <p class="chart-hint">Select data and click "Update" to generate chart</p>
+                <p class="chart-hint">
+                  Select data and click "Update" to generate chart
+                </p>
               </div>
             </div>
           </div>
@@ -410,9 +510,9 @@
           <!-- Line List View -->
           <div v-else-if="currentView === 'line-list'" class="line-list-view">
             <div class="list-controls">
-              <input 
-                type="text" 
-                v-model="searchQuery" 
+              <input
+                type="text"
+                v-model="searchQuery"
                 placeholder="🔍 Search events..."
                 class="search-input"
               />
@@ -424,7 +524,10 @@
               </select>
             </div>
             <div class="line-list-table">
-              <div v-if="!mockLineListEvents || mockLineListEvents.length === 0" class="empty-list">
+              <div
+                v-if="!mockLineListEvents || mockLineListEvents.length === 0"
+                class="empty-list"
+              >
                 <p>📋 No events found. Click "Update" to load event data.</p>
               </div>
               <table v-else>
@@ -441,7 +544,7 @@
                 <tbody>
                   <tr v-for="event in filteredLineList" :key="event.id">
                     <td>{{ formatDate(event.date) }}</td>
-                    <td>{{ event.childName || 'Unknown' }}</td>
+                    <td>{{ event.childName || "Unknown" }}</td>
                     <td>{{ event.program }}</td>
                     <td>{{ event.orgUnit }}</td>
                     <td>
@@ -450,7 +553,10 @@
                       </span>
                     </td>
                     <td>
-                      <button @click="viewEventDetails(event)" class="action-link">
+                      <button
+                        @click="viewEventDetails(event)"
+                        class="action-link"
+                      >
                         View Details
                       </button>
                     </td>
@@ -464,26 +570,32 @@
     </div>
 
     <!-- Favorites Modal -->
-    <div v-if="showFavoritesModal" class="modal-overlay" @click="showFavoritesModal = false">
+    <div
+      v-if="showFavoritesModal"
+      class="modal-overlay"
+      @click="showFavoritesModal = false"
+    >
       <div class="modal-content" @click.stop>
         <div class="modal-header">
           <h3>⭐ Save Report as Favorite</h3>
-          <button @click="showFavoritesModal = false" class="close-btn">&times;</button>
+          <button @click="showFavoritesModal = false" class="close-btn">
+            &times;
+          </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
             <label>Favorite Name</label>
-            <input 
-              v-model="favoriteName" 
-              type="text" 
+            <input
+              v-model="favoriteName"
+              type="text"
               class="form-input"
               placeholder="e.g., Monthly Assessment Summary"
             />
           </div>
           <div class="form-group">
             <label>Description (Optional)</label>
-            <textarea 
-              v-model="favoriteDescription" 
+            <textarea
+              v-model="favoriteDescription"
               class="form-textarea"
               rows="3"
               placeholder="Brief description of this report..."
@@ -492,7 +604,9 @@
         </div>
         <div class="modal-footer">
           <button @click="confirmSaveFavorite" class="save-btn">💾 Save</button>
-          <button @click="showFavoritesModal = false" class="cancel-btn">Cancel</button>
+          <button @click="showFavoritesModal = false" class="cancel-btn">
+            Cancel
+          </button>
         </div>
       </div>
     </div>
@@ -500,391 +614,412 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useToast } from '../composables/useToast.js'
-import EventReportsService from '../services/eventReportsService.js'
-import AuthService from '../services/auth.js'
+import { ref, computed, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useToast } from "../composables/useToast.js";
+import EventReportsService from "../services/eventReportsService.js";
+import AuthService from "../services/auth.js";
 
-const router = useRouter()
-const toast = useToast()
+const router = useRouter();
+const toast = useToast();
 
 // UI State
-const panelCollapsed = ref(false)
-const currentView = ref('table')
-const loading = ref(false)
-const showDownloadMenu = ref(false)
-const showFavoritesModal = ref(false)
+const panelCollapsed = ref(false);
+const currentView = ref("table");
+const loading = ref(false);
+const showDownloadMenu = ref(false);
+const showFavoritesModal = ref(false);
 
 // Configuration
 const config = ref({
-  program: '',
+  program: "",
   selectedElements: [],
-  periodType: 'monthly',
-  startDate: '',
-  endDate: '',
+  periodType: "monthly",
+  startDate: "",
+  endDate: "",
   selectedPeriods: [],
   selectedOrgUnits: [],
-  columnDimensions: ['data'],
-  rowDimensions: ['period'],
+  columnDimensions: ["data"],
+  rowDimensions: ["period"],
   filterDimensions: [],
   showTotals: true,
   showSubtotals: false,
   hideEmptyRows: true,
   showHierarchy: false,
-  aggregationType: 'sum',
-  outputType: 'event',
-  rowLimit: null
-})
+  aggregationType: "sum",
+  outputType: "event",
+  rowLimit: null,
+});
 
 // Data
 const availableDataElements = ref([
-  { id: 'age', name: 'Age' },
-  { id: 'gender', name: 'Gender' },
-  { id: 'assessment-score', name: 'Assessment Score' },
-  { id: 'attendance', name: 'Attendance' },
-  { id: 'performance', name: 'Performance Level' },
-  { id: 'status', name: 'Status' },
-  { id: 'referral-type', name: 'Referral Type' },
-  { id: 'report-type', name: 'Report Type' }
-])
+  { id: "age", name: "Age" },
+  { id: "gender", name: "Gender" },
+  { id: "pregnant", name: "Pregnant" },
+  { id: "assessment-score", name: "Assessment Score" },
+  { id: "attendance", name: "Attendance" },
+  { id: "performance", name: "Performance Level" },
+  { id: "status", name: "Status" },
+  { id: "referral-type", name: "Referral Type" },
+  { id: "report-type", name: "Report Type" },
+]);
 
 // Watch for program changes to update available data elements
-watch(() => config.value.program, (newProgram) => {
-  if (newProgram) {
-    // You can dynamically update data elements based on program
-    // const elements = EventReportsService.getDataElementsForProgram(newProgram)
-    // availableDataElements.value = elements
+watch(
+  () => config.value.program,
+  (newProgram) => {
+    if (newProgram) {
+      // You can dynamically update data elements based on program
+      const elements =
+        EventReportsService.getDataElementsForProgram(newProgram);
+      availableDataElements.value = elements;
+    }
   }
-})
+);
 
 const organizationUnits = ref([
-  { id: 'unit-1', name: 'Main Center' },
-  { id: 'unit-2', name: 'East Branch' },
-  { id: 'unit-3', name: 'West Branch' },
-  { id: 'unit-4', name: 'North Center' },
-  { id: 'unit-5', name: 'South Center' }
-])
+  { id: "lusaka", name: "Lusaka" },
+  { id: "chongwe", name: "Chongwe" },
+  { id: "kafue", name: "Kafue" },
+]);
 
 const availablePeriods = computed(() => {
-  const periods = []
-  const now = new Date()
-  
-  if (config.value.periodType === 'weekly') {
+  const periods = [];
+  const now = new Date();
+
+  if (config.value.periodType === "weekly") {
     for (let i = 0; i < 12; i++) {
-      const weekStart = new Date(now)
-      weekStart.setDate(now.getDate() - (i * 7))
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - i * 7);
       periods.push({
         id: `week-${i}`,
-        name: `Week ${52 - i}, ${weekStart.getFullYear()}`
-      })
+        name: `Week ${52 - i}, ${weekStart.getFullYear()}`,
+      });
     }
-  } else if (config.value.periodType === 'monthly') {
+  } else if (config.value.periodType === "monthly") {
     for (let i = 0; i < 12; i++) {
-      const month = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
       periods.push({
         id: `month-${i}`,
-        name: month.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-      })
+        name: month.toLocaleDateString("en-US", {
+          month: "long",
+          year: "numeric",
+        }),
+      });
     }
-  } else if (config.value.periodType === 'quarterly') {
+  } else if (config.value.periodType === "quarterly") {
     for (let i = 0; i < 8; i++) {
-      const quarter = Math.floor((now.getMonth() - (i * 3)) / 3) + 1
-      const year = now.getFullYear() - Math.floor(i / 4)
+      const quarter = Math.floor((now.getMonth() - i * 3) / 3) + 1;
+      const year = now.getFullYear() - Math.floor(i / 4);
       periods.push({
         id: `q${quarter}-${year}`,
-        name: `Q${quarter} ${year}`
-      })
+        name: `Q${quarter} ${year}`,
+      });
     }
-  } else if (config.value.periodType === 'yearly') {
+  } else if (config.value.periodType === "yearly") {
     for (let i = 0; i < 5; i++) {
-      const year = now.getFullYear() - i
+      const year = now.getFullYear() - i;
       periods.push({
         id: `year-${year}`,
-        name: `${year}`
-      })
+        name: `${year}`,
+      });
     }
   }
-  
-  return periods
-})
+
+  return periods;
+});
 
 // Report Data
-const reportData = ref([])
-const tableHeaders = ref([])
-const sortColumn = ref(null)
-const sortDirection = ref('asc')
-const currentPage = ref(1)
-const rowsPerPage = ref(50)
-const chartType = ref('bar')
-const searchQuery = ref('')
-const lineListSort = ref('date-desc')
+const reportData = ref([]);
+const tableHeaders = ref([]);
+const sortColumn = ref(null);
+const sortDirection = ref("asc");
+const currentPage = ref(1);
+const rowsPerPage = ref(50);
+const chartType = ref("bar");
+const searchQuery = ref("");
+const lineListSort = ref("date-desc");
 
 // Favorites
-const favoriteName = ref('')
-const favoriteDescription = ref('')
+const favoriteName = ref("");
+const favoriteDescription = ref("");
 
 // Mock line list data - will be replaced with real data when report is generated
-const mockLineListEvents = ref([])
+const mockLineListEvents = ref([]);
 
 // Computed
 const filteredLineList = computed(() => {
-  if (!mockLineListEvents.value || mockLineListEvents.value.length === 0) return []
-  
-  let filtered = [...mockLineListEvents.value]
-  
+  if (!mockLineListEvents.value || mockLineListEvents.value.length === 0)
+    return [];
+
+  let filtered = [...mockLineListEvents.value];
+
   // Apply search filter
   if (searchQuery.value && searchQuery.value.trim()) {
-    const search = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(event => 
-      (event.childName && event.childName.toLowerCase().includes(search)) ||
-      (event.program && event.program.toLowerCase().includes(search)) ||
-      (event.orgUnit && event.orgUnit.toLowerCase().includes(search)) ||
-      (event.status && event.status.toLowerCase().includes(search))
-    )
+    const search = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(
+      (event) =>
+        (event.childName && event.childName.toLowerCase().includes(search)) ||
+        (event.program && event.program.toLowerCase().includes(search)) ||
+        (event.orgUnit && event.orgUnit.toLowerCase().includes(search)) ||
+        (event.status && event.status.toLowerCase().includes(search))
+    );
   }
-  
+
   // Apply sorting
-  if (lineListSort.value === 'date-desc') {
-    filtered.sort((a, b) => new Date(b.date) - new Date(a.date))
-  } else if (lineListSort.value === 'date-asc') {
-    filtered.sort((a, b) => new Date(a.date) - new Date(b.date))
-  } else if (lineListSort.value === 'name-asc') {
-    filtered.sort((a, b) => (a.childName || '').localeCompare(b.childName || ''))
-  } else if (lineListSort.value === 'name-desc') {
-    filtered.sort((a, b) => (b.childName || '').localeCompare(a.childName || ''))
+  if (lineListSort.value === "date-desc") {
+    filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+  } else if (lineListSort.value === "date-asc") {
+    filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+  } else if (lineListSort.value === "name-asc") {
+    filtered.sort((a, b) =>
+      (a.childName || "").localeCompare(b.childName || "")
+    );
+  } else if (lineListSort.value === "name-desc") {
+    filtered.sort((a, b) =>
+      (b.childName || "").localeCompare(a.childName || "")
+    );
   }
-  
-  return filtered
-})
+
+  return filtered;
+});
 
 const displayedRows = computed(() => {
-  if (!reportData.value || reportData.value.length === 0) return []
-  
-  let rows = [...reportData.value]
-  
+  if (!reportData.value || reportData.value.length === 0) return [];
+
+  let rows = [...reportData.value];
+
   // Apply sorting
   if (sortColumn.value !== null) {
     rows.sort((a, b) => {
-      const aVal = a.cells[sortColumn.value]?.value
-      const bVal = b.cells[sortColumn.value]?.value
-      
-      if (sortDirection.value === 'asc') {
-        return aVal > bVal ? 1 : -1
+      const aVal = a.cells[sortColumn.value]?.value;
+      const bVal = b.cells[sortColumn.value]?.value;
+
+      if (sortDirection.value === "asc") {
+        return aVal > bVal ? 1 : -1;
       } else {
-        return aVal < bVal ? 1 : -1
+        return aVal < bVal ? 1 : -1;
       }
-    })
+    });
   }
-  
+
   // Apply pagination
-  const start = (currentPage.value - 1) * rowsPerPage.value
-  const end = start + rowsPerPage.value
-  return rows.slice(start, end)
-})
+  const start = (currentPage.value - 1) * rowsPerPage.value;
+  const end = start + rowsPerPage.value;
+  return rows.slice(start, end);
+});
 
 const totalPages = computed(() => {
-  return Math.ceil((reportData.value?.length || 0) / rowsPerPage.value)
-})
+  return Math.ceil((reportData.value?.length || 0) / rowsPerPage.value);
+});
 
 const totalsRow = computed(() => {
-  if (!reportData.value || reportData.value.length === 0) return null
-  
-  const totals = []
-  const numColumns = tableHeaders.value.length
-  
+  if (!reportData.value || reportData.value.length === 0) return null;
+
+  const totals = [];
+  const numColumns = tableHeaders.value.length;
+
   for (let i = 0; i < numColumns; i++) {
     if (i === 0) {
-      totals.push('Total')
+      totals.push("Total");
     } else {
       const sum = reportData.value.reduce((acc, row) => {
-        const val = parseFloat(row.cells[i]?.value) || 0
-        return acc + val
-      }, 0)
-      totals.push(sum)
+        const val = parseFloat(row.cells[i]?.value) || 0;
+        return acc + val;
+      }, 0);
+      totals.push(sum);
     }
   }
-  
-  return totals
-})
+
+  return totals;
+});
 
 // Methods
 const updateReport = async () => {
   if (!config.value.program) {
-    toast.error('Please select a program')
-    return
+    toast.error("Please select a program");
+    return;
   }
-  
+
   if (config.value.selectedElements.length === 0) {
-    toast.error('Please select at least one data element')
-    return
+    toast.error("Please select at least one data element");
+    return;
   }
-  
-  loading.value = true
-  
+
+  loading.value = true;
+
   try {
-    console.log('Updating report with config:', config.value)
-    
+    console.log("Updating report with config:", config.value);
+
     // If no periods selected, select all available periods automatically
-    if (config.value.selectedPeriods.length === 0 && config.value.periodType !== 'custom') {
-      console.log('No periods selected, auto-selecting all available periods')
-      config.value.selectedPeriods = availablePeriods.value.map(p => p.id)
+    if (
+      config.value.selectedPeriods.length === 0 &&
+      config.value.periodType !== "custom"
+    ) {
+      console.log("No periods selected, auto-selecting all available periods");
+      config.value.selectedPeriods = availablePeriods.value.map((p) => p.id);
     }
-    
+
     // Fetch real data from Firebase
-    const result = await EventReportsService.generateReport(config.value)
-    
+    const result = await EventReportsService.generateReport(config.value);
+
     if (result.success) {
       // Use real data from service
-      tableHeaders.value = result.headers
-      reportData.value = result.rows
-      
+      tableHeaders.value = result.headers;
+      reportData.value = result.rows;
+
       // Update line list data if available
       if (result.lineList && result.lineList.length > 0) {
-        mockLineListEvents.value = result.lineList
+        mockLineListEvents.value = result.lineList;
       }
-      
+
       if (reportData.value.length === 0) {
-        toast.warning('No data found for the selected criteria. Try selecting different periods or adjusting filters.')
+        toast.warning(
+          "No data found for the selected criteria. Try selecting different periods or adjusting filters."
+        );
       } else {
-        toast.success(`Report generated successfully with ${reportData.value.length} rows`)
+        toast.success(
+          `Report generated successfully with ${reportData.value.length} rows`
+        );
       }
     } else {
-      throw new Error(result.error || 'Failed to generate report')
+      throw new Error(result.error || "Failed to generate report");
     }
   } catch (error) {
-    toast.error('Failed to generate report: ' + error.message)
-    console.error('Report generation error:', error)
-    
+    toast.error("Failed to generate report: " + error.message);
+    console.error("Report generation error:", error);
+
     // Fallback to empty data
-    reportData.value = []
-    tableHeaders.value = []
+    reportData.value = [];
+    tableHeaders.value = [];
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // This function is no longer used as we're using real data
 // Kept for reference only
 const generateMockReportData = () => {
-  console.log('Mock data generation is deprecated - using real data from Firebase')
-}
+  console.log(
+    "Mock data generation is deprecated - using real data from Firebase"
+  );
+};
 
 const sortByColumn = (columnIndex) => {
   if (sortColumn.value === columnIndex) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+    sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
   } else {
-    sortColumn.value = columnIndex
-    sortDirection.value = 'asc'
+    sortColumn.value = columnIndex;
+    sortDirection.value = "asc";
   }
-}
+};
 
 const formatCellValue = (value, type) => {
-  if (value === null || value === undefined) return '-'
-  
-  if (type === 'number') {
-    return typeof value === 'number' ? value.toLocaleString() : value
+  if (value === null || value === undefined) return "-";
+
+  if (type === "number") {
+    return typeof value === "number" ? value.toLocaleString() : value;
   }
-  
-  return value
-}
+
+  return value;
+};
 
 const formatDate = (date) => {
-  if (!date) return '-'
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
-}
+  if (!date) return "-";
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 
 const downloadReport = (format) => {
-  toast.info(`Downloading report as ${format.toUpperCase()}...`)
-  showDownloadMenu.value = false
-  
+  toast.info(`Downloading report as ${format.toUpperCase()}...`);
+  showDownloadMenu.value = false;
+
   setTimeout(() => {
-    toast.success('Report downloaded successfully')
-  }, 1000)
-}
+    toast.success("Report downloaded successfully");
+  }, 1000);
+};
 
 const shareReport = () => {
-  toast.success('Share link copied to clipboard')
-}
+  toast.success("Share link copied to clipboard");
+};
 
 const printReport = () => {
-  window.print()
-}
+  window.print();
+};
 
 const saveAsFavorite = () => {
-  favoriteName.value = ''
-  favoriteDescription.value = ''
-  showFavoritesModal.value = true
-}
+  favoriteName.value = "";
+  favoriteDescription.value = "";
+  showFavoritesModal.value = true;
+};
 
 const confirmSaveFavorite = () => {
   if (!favoriteName.value) {
-    toast.error('Please enter a favorite name')
-    return
+    toast.error("Please enter a favorite name");
+    return;
   }
-  
-  toast.success('Report saved as favorite')
-  showFavoritesModal.value = false
-}
+
+  toast.success("Report saved as favorite");
+  showFavoritesModal.value = false;
+};
 
 const resetConfiguration = () => {
   config.value = {
-    program: '',
+    program: "",
     selectedElements: [],
-    periodType: 'monthly',
-    startDate: '',
-    endDate: '',
+    periodType: "monthly",
+    startDate: "",
+    endDate: "",
     selectedPeriods: [],
     selectedOrgUnits: [],
-    columnDimensions: ['data'],
-    rowDimensions: ['period'],
+    columnDimensions: ["data"],
+    rowDimensions: ["period"],
     filterDimensions: [],
     showTotals: true,
     showSubtotals: false,
     hideEmptyRows: true,
     showHierarchy: false,
-    aggregationType: 'sum',
-    outputType: 'event',
-    rowLimit: null
-  }
-  reportData.value = []
-  toast.info('Configuration reset')
-}
+    aggregationType: "sum",
+    outputType: "event",
+    rowLimit: null,
+  };
+  reportData.value = [];
+  toast.info("Configuration reset");
+};
 
 const viewEventDetails = (event) => {
-  toast.info('Opening event details...')
-}
+  toast.info("Opening event details...");
+};
 
 // Navigation methods
 const goBack = () => {
-  router.push('/dashboard')
-}
+  router.push("/dashboard");
+};
 
 const handleLogout = async () => {
-  const result = await AuthService.logout()
+  const result = await AuthService.logout();
   if (result.success) {
-    router.push('/login')
+    router.push("/login");
   }
-}
+};
 
 // Lifecycle
 onMounted(async () => {
-  config.value.selectedOrgUnits = ['unit-1']
-  
+  config.value.selectedOrgUnits = ["unit-1"];
+
   // Optionally load summary statistics on mount
   try {
-    const statsResult = await EventReportsService.getSummaryStatistics()
+    const statsResult = await EventReportsService.getSummaryStatistics();
     if (statsResult.success) {
-      console.log('Event reports statistics:', statsResult.statistics)
+      console.log("Event reports statistics:", statsResult.statistics);
     }
   } catch (error) {
-    console.error('Error loading statistics:', error)
+    console.error("Error loading statistics:", error);
   }
-})
+});
 </script>
 
 <style scoped>
@@ -900,7 +1035,7 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-left {
@@ -982,14 +1117,20 @@ onMounted(async () => {
 }
 
 .indicator-badge.firebase {
-  background: linear-gradient(45deg, #FF6B35, #F7931E);
+  background: linear-gradient(45deg, #ff6b35, #f7931e);
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.7; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .reports-layout {
@@ -1021,7 +1162,7 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  border-bottom: 2px solid #4A148C;
+  border-bottom: 2px solid #4a148c;
   background: #f8f9fa;
   position: sticky;
   top: 0;
@@ -1030,12 +1171,12 @@ onMounted(async () => {
 
 .panel-header h3 {
   font-size: 1.1rem;
-  color: #4A148C;
+  color: #4a148c;
   margin: 0;
 }
 
 .collapse-btn {
-  background: #4A148C;
+  background: #4a148c;
   color: white;
   border: none;
   width: 30px;
@@ -1047,7 +1188,7 @@ onMounted(async () => {
 }
 
 .collapse-btn:hover {
-  background: #6A1B9A;
+  background: #6a1b9a;
 }
 
 .panel-content {
@@ -1066,7 +1207,7 @@ onMounted(async () => {
 
 .section-title {
   font-size: 0.95rem;
-  color: #4A148C;
+  color: #4a148c;
   font-weight: 600;
   margin: 0 0 1rem 0;
 }
@@ -1100,7 +1241,7 @@ onMounted(async () => {
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #4A148C;
+  border-color: #4a148c;
   box-shadow: 0 0 0 2px rgba(74, 20, 140, 0.1);
 }
 
@@ -1197,12 +1338,12 @@ onMounted(async () => {
 }
 
 .update-btn {
-  background: #4A148C;
+  background: #4a148c;
   color: white;
 }
 
 .update-btn:hover:not(:disabled) {
-  background: #6A1B9A;
+  background: #6a1b9a;
   transform: translateY(-1px);
 }
 
@@ -1212,12 +1353,12 @@ onMounted(async () => {
 }
 
 .favorite-btn {
-  background: #FFC107;
+  background: #ffc107;
   color: #333;
 }
 
 .favorite-btn:hover {
-  background: #FFD54F;
+  background: #ffd54f;
 }
 
 .reset-btn {
@@ -1267,9 +1408,9 @@ onMounted(async () => {
 }
 
 .tab-btn.active {
-  background: #4A148C;
+  background: #4a148c;
   color: white;
-  border-color: #4A148C;
+  border-color: #4a148c;
 }
 
 .toolbar-actions {
@@ -1286,7 +1427,7 @@ onMounted(async () => {
   padding: 0.6rem 1rem;
   border: 1px solid #ddd;
   background: white;
-  color: #4A148C;
+  color: #4a148c;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.9rem;
@@ -1296,7 +1437,7 @@ onMounted(async () => {
 
 .action-btn:hover {
   background: #f5f5f5;
-  border-color: #4A148C;
+  border-color: #4a148c;
 }
 
 .download-menu {
@@ -1358,15 +1499,19 @@ onMounted(async () => {
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #4A148C;
+  border-top: 4px solid #4a148c;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-icon {
@@ -1375,7 +1520,7 @@ onMounted(async () => {
 }
 
 .empty-state h3 {
-  color: #4A148C;
+  color: #4a148c;
   margin-bottom: 0.5rem;
 }
 
@@ -1406,8 +1551,8 @@ onMounted(async () => {
   padding: 0.75rem 1rem;
   text-align: left;
   font-weight: 600;
-  color: #4A148C;
-  border-bottom: 2px solid #4A148C;
+  color: #4a148c;
+  border-bottom: 2px solid #4a148c;
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
@@ -1455,8 +1600,8 @@ onMounted(async () => {
 
 .total-cell {
   padding: 0.75rem 1rem;
-  border-top: 2px solid #4A148C;
-  color: #4A148C;
+  border-top: 2px solid #4a148c;
+  color: #4a148c;
 }
 
 .pagination {
@@ -1472,7 +1617,7 @@ onMounted(async () => {
   padding: 0.5rem 1rem;
   border: 1px solid #ddd;
   background: white;
-  color: #4A148C;
+  color: #4a148c;
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
@@ -1480,9 +1625,9 @@ onMounted(async () => {
 }
 
 .page-btn:hover:not(:disabled) {
-  background: #4A148C;
+  background: #4a148c;
   color: white;
-  border-color: #4A148C;
+  border-color: #4a148c;
 }
 
 .page-btn:disabled {
@@ -1511,7 +1656,7 @@ onMounted(async () => {
 
 .chart-options label {
   font-weight: 600;
-  color: #4A148C;
+  color: #4a148c;
 }
 
 .form-select.inline {
@@ -1549,7 +1694,7 @@ onMounted(async () => {
 .chart-data-display > p {
   text-align: center;
   margin-bottom: 1rem;
-  color: #4A148C;
+  color: #4a148c;
   font-weight: 600;
 }
 
@@ -1574,7 +1719,7 @@ onMounted(async () => {
 }
 
 .preview-bar {
-  background: linear-gradient(135deg, #4A148C 0%, #6A1B9A 100%);
+  background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 100%);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -1609,7 +1754,7 @@ onMounted(async () => {
 
 .search-input:focus {
   outline: none;
-  border-color: #4A148C;
+  border-color: #4a148c;
   box-shadow: 0 0 0 2px rgba(74, 20, 140, 0.1);
 }
 
@@ -1633,8 +1778,8 @@ onMounted(async () => {
   padding: 0.75rem 1rem;
   text-align: left;
   font-weight: 600;
-  color: #4A148C;
-  border-bottom: 2px solid #4A148C;
+  color: #4a148c;
+  border-bottom: 2px solid #4a148c;
 }
 
 .line-list-table tbody tr {
@@ -1687,7 +1832,7 @@ onMounted(async () => {
 .action-link {
   background: none;
   border: none;
-  color: #4A148C;
+  color: #4a148c;
   font-weight: 500;
   cursor: pointer;
   text-decoration: underline;
@@ -1695,7 +1840,7 @@ onMounted(async () => {
 }
 
 .action-link:hover {
-  color: #6A1B9A;
+  color: #6a1b9a;
 }
 
 .modal-overlay {
@@ -1732,7 +1877,7 @@ onMounted(async () => {
 }
 
 .modal-header h3 {
-  color: #4A148C;
+  color: #4a148c;
   margin: 0;
   font-size: 1.2rem;
 }
@@ -1775,7 +1920,7 @@ onMounted(async () => {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
-  background: #4A148C;
+  background: #4a148c;
   color: white;
   font-weight: 600;
   cursor: pointer;
@@ -1783,7 +1928,7 @@ onMounted(async () => {
 }
 
 .save-btn:hover {
-  background: #6A1B9A;
+  background: #6a1b9a;
   transform: translateY(-1px);
 }
 
@@ -1808,7 +1953,7 @@ onMounted(async () => {
   .pagination {
     display: none !important;
   }
-  
+
   .content-area {
     width: 100%;
   }
@@ -1818,14 +1963,14 @@ onMounted(async () => {
   .reports-layout {
     flex-direction: column;
   }
-  
+
   .config-panel {
     width: 100%;
     max-height: none;
     border-right: none;
     border-bottom: 1px solid #e0e0e0;
   }
-  
+
   .config-panel.collapsed {
     width: 100%;
     height: 50px;
@@ -1839,7 +1984,9 @@ onMounted(async () => {
     padding: 1rem;
   }
 
-  .header-left, .header-center, .header-right {
+  .header-left,
+  .header-center,
+  .header-right {
     flex: none;
     width: 100%;
   }

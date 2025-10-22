@@ -174,13 +174,9 @@
               <p class="description-text">
                 <strong>The Kukhoma Project Data Management System</strong>
                 provides comprehensive tools for child protection and support
-                services. Use <em>Tracker Capture</em> to monitor individual
-                cases, <em>Data Entry</em> for structured form collection,
-                generate <em>Reports</em> for insights, and track
-                <em>Residents</em> in our care facilities. Advanced
-                <em>Analytics</em> help identify trends and measure impact
-                across all programs. <em>Users</em> module allows administrators
-                to manage system access and user permissions.
+                services. The Kukhoma Project exists for God’s glory to rescue
+                teen mothers in Lusaka, Zambia who have been victims of abuse,
+                to restore, equip and empower these girls and their communities.
               </p>
             </div>
           </div>
@@ -1392,7 +1388,7 @@ onMounted(() => {
 
 .description-text {
   color: #333;
-  font-size: 0.9rem;
+  font-size: 1.5rem;
   line-height: 1.6;
   margin: 0;
   text-align: justify;

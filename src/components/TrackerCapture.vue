@@ -4055,4 +4055,5 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
     margin: 0;
     color: #6c757d;
   }
+}
 </style>
