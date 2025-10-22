@@ -2,9 +2,9 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import {
   getFirestore,
-  enableIndexedDbPersistence,
   disableNetwork,
   enableNetwork,
+  enableMultiTabIndexedDbPersistence,
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -24,7 +24,7 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 
 // Enable offline persistence for Firestore
-enableIndexedDbPersistence(db).catch((err) => {
+enableMultiTabIndexedDbPersistence(db).catch((err) => {
   if (err.code == "failed-precondition") {
     // Multiple tabs open, persistence can only be enabled in one tab at a time
     console.warn("Firebase persistence failed: Multiple tabs open");

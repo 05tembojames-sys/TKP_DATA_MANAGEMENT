@@ -5,9 +5,21 @@
       <!-- User Info -->
       <div class="user-info" v-if="currentUserName">
         <span class="user-name">{{ currentUserName }}</span>
+        <span v-if="!isOnline" class="offline-indicator"> (Offline)</span>
       </div>
       <!-- Logout Button -->
       <button @click="handleLogout" class="logout-button">Logout</button>
+    </div>
+
+    <!-- Offline Banner -->
+    <div v-if="!isOnline" class="offline-banner">
+      <div class="banner-content">
+        <i class="fas fa-cloud-offline"></i>
+        <span
+          >Working in offline mode. Data will sync when connection is
+          restored.</span
+        >
+      </div>
     </div>
 
     <!-- Main Content -->
@@ -590,6 +602,7 @@ const loading = ref(false);
 const showAddUserForm = ref(false);
 const showEditUserForm = ref(false);
 const currentUserName = ref("");
+const isOnline = ref(navigator.onLine); // Track online status
 
 // Summary statistics
 const totalReports = ref(0);
@@ -969,7 +982,29 @@ onMounted(() => {
     // Display user's name if available, otherwise fallback to email
     currentUserName.value =
       currentUser.name || currentUser.fullName || currentUser.email;
+  } else {
+    // Check for offline user data
+    const savedUserData = localStorage.getItem("tkp_user_data");
+    if (savedUserData) {
+      try {
+        const userData = JSON.parse(savedUserData);
+        currentUserName.value =
+          userData.user.name ||
+          userData.user.fullName ||
+          userData.user.email ||
+          "Offline User";
+      } catch (error) {
+        console.error("Error parsing offline user data:", error);
+        currentUserName.value = "Offline User";
+      }
+    } else {
+      currentUserName.value = "User";
+    }
   }
+
+  // Update online status
+  isOnline.value = navigator.onLine;
+
   loadSummaryData();
 
   // Check for query parameters (e.g., from Child Tracker navigation)
@@ -998,18 +1033,6 @@ onMounted(() => {
     currentView.value = "data-entry";
     currentForm.value = query.openForm + "-new"; // e.g., 'child-overview-new'
     selectedFormType.value = query.openForm;
-
-    // Store view mode in sessionStorage if provided
-    if (query.viewMode) {
-      sessionStorage.setItem("formViewMode", query.viewMode);
-    }
-
-    console.log("✅ Switched to form:", currentForm.value);
-  } else if (query.view) {
-    currentView.value = query.view;
-    if (query.form) {
-      currentForm.value = query.form;
-    }
   }
 });
 </script>
@@ -1984,5 +2007,32 @@ tbody tr:hover {
 
 .outreach-btn:hover {
   box-shadow: 0 6px 20px rgba(106, 17, 203, 0.4);
+}
+
+/* Offline Banner */
+.offline-banner {
+  background-color: #ff9800;
+  color: white;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  font-weight: 500;
+  border-bottom: 1px solid #e68a00;
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.offline-banner i {
+  font-size: 1.2rem;
+}
+
+/* Offline Indicator */
+.offline-indicator {
+  color: #ff9800;
+  font-weight: 600;
 }
 </style>

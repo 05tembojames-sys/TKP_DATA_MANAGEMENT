@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-card">
       <h1 class="login-title">LOGIN</h1>
-      
+
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
           <label for="email" class="form-label">Email</label>
@@ -13,6 +13,7 @@
             required
             class="form-input"
             placeholder="Enter your admin email"
+            :disabled="loading"
           />
         </div>
 
@@ -25,84 +26,116 @@
             required
             class="form-input"
             placeholder="Enter your password"
+            :disabled="loading"
           />
         </div>
 
-        <button 
-          type="submit" 
-          :disabled="loading"
-          class="login-button"
-          @click="handleLogin"
-        >
+        <button type="submit" :disabled="loading" class="login-button">
           <span v-if="loading" class="spinner"></span>
-          {{ loading ? 'Logging in...' : 'Login' }}
+          {{ loading ? "Logging in..." : "Login" }}
         </button>
       </form>
 
       <div v-if="error" class="error-message">
         {{ error }}
       </div>
+
+      <div v-if="offlineMode" class="offline-notice">
+        <p>🔒 Offline Mode: Using cached login credentials</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import AuthService from '../services/auth.js'
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import AuthService from "../services/auth.js";
 
-const router = useRouter()
+const router = useRouter();
 
 // Reactive data
-const email = ref('')
-const password = ref('')
-const loading = ref(false)
-const error = ref('')
+const email = ref("");
+const password = ref("");
+const loading = ref(false);
+const error = ref("");
+const offlineMode = ref(false);
+
+// Check if we're in offline mode on component mount
+onMounted(() => {
+  if (!navigator.onLine) {
+    // Check if we have saved user data
+    const savedAuthState = localStorage.getItem("tkp_auth_state");
+    if (savedAuthState === "authenticated") {
+      offlineMode.value = true;
+    }
+  }
+});
 
 // Handle form submission
 const handleLogin = async () => {
-  console.log('Login button clicked') // Debug log
-  
+  console.log("Login button clicked"); // Debug log
+
   if (!email.value || !password.value) {
-    error.value = 'Please fill in all fields'
-    console.log('Validation failed: Missing email or password')
-    return
+    error.value = "Please fill in all fields";
+    console.log("Validation failed: Missing email or password");
+    return;
   }
 
-  console.log('Attempting login with:', email.value) // Debug log
-  loading.value = true
-  error.value = ''
+  console.log("Attempting login with:", email.value); // Debug log
+  loading.value = true;
+  error.value = "";
 
   try {
-    console.log('Calling AuthService.login()...') // Debug log
-    const result = await AuthService.login(email.value, password.value)
-    
-    console.log('Login result:', result) // Debug log
-    
+    console.log("Calling AuthService.login()..."); // Debug log
+
+    // Check if we're offline
+    if (!navigator.onLine) {
+      // Try to load offline user data
+      AuthService.loadOfflineUserData();
+      if (AuthService.isAuthenticated) {
+        console.log("Offline login successful! Redirecting to dashboard...");
+        offlineMode.value = true;
+        // Redirect to dashboard on successful offline login
+        await router.push("/dashboard");
+        console.log("Navigation complete"); // Debug log
+        return;
+      } else {
+        error.value =
+          "No cached credentials found. Please connect to the internet and log in.";
+        return;
+      }
+    }
+
+    const result = await AuthService.login(email.value, password.value);
+
+    console.log("Login result:", result); // Debug log
+
     if (result.success) {
-      console.log('Login successful! Redirecting to dashboard...') // Debug log
+      console.log("Login successful! Redirecting to dashboard..."); // Debug log
       // Redirect to dashboard on successful login
-      await router.push('/dashboard')
-      console.log('Navigation complete') // Debug log
+      await router.push("/dashboard");
+      console.log("Navigation complete"); // Debug log
     } else {
-      console.error('Login failed:', result.error) // Debug log
-      error.value = result.error || 'Login failed. Please try again.'
+      console.error("Login failed:", result.error); // Debug log
+      error.value = result.error || "Login failed. Please try again.";
     }
   } catch (err) {
-    console.error('Login error (catch block):', err) // Debug log
-    error.value = 'An unexpected error occurred: ' + (err.message || 'Unknown error')
+    console.error("Login error (catch block):", err); // Debug log
+    error.value =
+      "An unexpected error occurred: " + (err.message || "Unknown error");
   } finally {
-    loading.value = false
-    console.log('Login process completed, loading set to false') // Debug log
+    loading.value = false;
+    console.log("Login process completed, loading set to false"); // Debug log
   }
-}
+};
 </script>
 
 <style scoped>
 /* Container with light gray background */
 .login-container {
   min-height: 100vh;
-  background-color: #EEEEEE;
+  background-color: #eeeeee;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -125,7 +158,7 @@ const handleLogin = async () => {
   margin-bottom: 2rem;
   font-size: 2rem;
   font-weight: bold;
-  color: #4A148C; /* Dark purple */
+  color: #4a148c; /* Dark purple */
 }
 
 /* Form styling */
@@ -143,7 +176,7 @@ const handleLogin = async () => {
 
 .form-label {
   font-weight: 500;
-  color: #4A148C; /* Dark purple */
+  color: #4a148c; /* Dark purple */
   font-size: 0.9rem;
 }
 
@@ -152,13 +185,18 @@ const handleLogin = async () => {
   border: 2px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-  color: #4A148C; /* Dark purple text */
+  color: #4a148c; /* Dark purple text */
   transition: border-color 0.3s ease;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #4A148C;
+  border-color: #4a148c;
+}
+
+.form-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
 }
 
 .form-input::placeholder {
@@ -167,7 +205,7 @@ const handleLogin = async () => {
 
 /* Login button with orange background */
 .login-button {
-  background-color: #FF5722; /* Orange */
+  background-color: #ff5722; /* Orange */
   color: white;
   padding: 10px 20px; /* As specified */
   border: none;
@@ -184,7 +222,7 @@ const handleLogin = async () => {
 }
 
 .login-button:hover:not(:disabled) {
-  background-color: #FF8A50; /* Lighter orange on hover */
+  background-color: #ff8a50; /* Lighter orange on hover */
 }
 
 .login-button:disabled {
@@ -200,64 +238,37 @@ const handleLogin = async () => {
   border: 2px solid #ffffff;
   border-top: 2px solid transparent;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error message */
 .error-message {
-  margin-top: 1rem;
-  padding: 0.75rem;
+  color: #d32f2f;
   background-color: #ffebee;
-  border: 1px solid #f44336;
+  padding: 0.75rem;
   border-radius: 4px;
-  color: #333333; /* Dark gray as specified */
-  font-size: 0.9rem;
+  margin-top: 1rem;
+  border-left: 4px solid #d32f2f;
+}
+
+/* Offline notice */
+.offline-notice {
+  color: #1976d2;
+  background-color: #e3f2fd;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+  border-left: 4px solid #1976d2;
   text-align: center;
-}
-
-/* Responsive design for mobile (max-width: 600px) */
-@media (max-width: 600px) {
-  .login-container {
-    padding: 0.5rem;
-  }
-
-  .login-card {
-    padding: 1.5rem;
-  }
-
-  .login-title {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .login-form {
-    gap: 1rem;
-  }
-
-  .form-input {
-    padding: 0.625rem;
-  }
-
-  .login-button {
-    padding: 12px 20px;
-    font-size: 1rem;
-  }
-}
-
-/* Extra small screens */
-@media (max-width: 400px) {
-  .login-card {
-    padding: 1rem;
-    margin: 0.5rem;
-  }
-
-  .login-title {
-    font-size: 1.25rem;
-  }
+  font-weight: 500;
 }
 </style>

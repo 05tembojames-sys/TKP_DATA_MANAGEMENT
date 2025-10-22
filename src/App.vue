@@ -1,21 +1,33 @@
 <script setup>
-import { onMounted } from 'vue'
-import AuthService from './services/auth.js'
-import { useRouter } from 'vue-router'
-import Toast from './components/Toast.vue'
+import { onMounted } from "vue";
+import AuthService from "./services/auth.js";
+import { useRouter } from "vue-router";
+import Toast from "./components/Toast.vue";
 
-const router = useRouter()
+const router = useRouter();
 
 // Set up authentication state listener
 onMounted(() => {
   AuthService.onAuthStateChange((user, isAuthenticated) => {
-    if (isAuthenticated && router.currentRoute.value.path === '/login') {
-      router.push('/dashboard')
-    } else if (!isAuthenticated && router.currentRoute.value.path === '/dashboard') {
-      router.push('/login')
+    // Check if we're in offline mode and have saved auth data
+    const savedAuthState = localStorage.getItem("tkp_auth_state");
+    const isOfflineAuthenticated =
+      savedAuthState === "authenticated" && !navigator.onLine;
+
+    if (
+      (isAuthenticated || isOfflineAuthenticated) &&
+      router.currentRoute.value.path === "/login"
+    ) {
+      router.push("/dashboard");
+    } else if (
+      !isAuthenticated &&
+      !isOfflineAuthenticated &&
+      router.currentRoute.value.path === "/dashboard"
+    ) {
+      router.push("/login");
     }
-  })
-})
+  });
+});
 </script>
 
 <template>
@@ -34,7 +46,7 @@ onMounted(() => {
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
 }
 
