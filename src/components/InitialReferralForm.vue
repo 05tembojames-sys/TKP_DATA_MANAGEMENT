@@ -5,9 +5,14 @@
       <p>Complete this form to refer a child to The Kukhoma Project</p>
       <div class="form-progress">
         <div class="progress-bar">
-          <div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div>
+          <div
+            class="progress-fill"
+            :style="{ width: progressPercentage + '%' }"
+          ></div>
         </div>
-        <span class="progress-text">Section {{ currentSection }} of {{ totalSections }}</span>
+        <span class="progress-text"
+          >Section {{ currentSection }} of {{ totalSections }}</span
+        >
       </div>
     </div>
 
@@ -16,103 +21,141 @@
       <div v-show="currentSection === 1" class="form-section">
         <h4>Child Information</h4>
         <!-- Validation Message -->
-        <div v-if="showValidationMessage && Object.keys(validationErrors).length > 0" class="validation-message">
+        <div
+          v-if="
+            showValidationMessage && Object.keys(validationErrors).length > 0
+          "
+          class="validation-message"
+        >
           <div class="validation-header">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             <span>Please complete the following required fields:</span>
           </div>
           <ul class="validation-list">
-            <li v-for="(error, field) in validationErrors" :key="field" class="validation-item">
+            <li
+              v-for="(error, field) in validationErrors"
+              :key="field"
+              class="validation-item"
+            >
               {{ error }}
             </li>
           </ul>
         </div>
 
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors.childFirstName }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.childFirstName }"
+          >
             <label>Child First Name *</label>
-            <input 
-              v-model="formData.childFirstName" 
-              type="text" 
-              required 
+            <input
+              v-model="formData.childFirstName"
+              type="text"
+              required
               @input="clearFieldError('childFirstName')"
-              :class="{ 'error': validationErrors.childFirstName }"
+              :class="{ error: validationErrors.childFirstName }"
             />
             <span v-if="validationErrors.childFirstName" class="error-message">
               {{ validationErrors.childFirstName }}
             </span>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.childLastName }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.childLastName }"
+          >
             <label>Child Last Name *</label>
-            <input 
-              v-model="formData.childLastName" 
-              type="text" 
-              required 
+            <input
+              v-model="formData.childLastName"
+              type="text"
+              required
               @input="clearFieldError('childLastName')"
-              :class="{ 'error': validationErrors.childLastName }"
+              :class="{ error: validationErrors.childLastName }"
             />
             <span v-if="validationErrors.childLastName" class="error-message">
               {{ validationErrors.childLastName }}
             </span>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.dateOfBirth }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.dateOfBirth }"
+          >
             <label>Date of Birth *</label>
-            <input 
-              v-model="formData.dateOfBirth" 
-              type="date" 
-              required 
+            <input
+              v-model="formData.dateOfBirth"
+              type="date"
+              required
               @change="clearFieldError('dateOfBirth')"
-              :class="{ 'error': validationErrors.dateOfBirth }"
+              :class="{ error: validationErrors.dateOfBirth }"
             />
             <span v-if="validationErrors.dateOfBirth" class="error-message">
               {{ validationErrors.dateOfBirth }}
             </span>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.age }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.age }"
+          >
             <label>Age (years) *</label>
-            <input 
-              v-model="formData.age" 
-              type="number" 
-              min="0" 
-              max="18" 
-              required 
+            <input
+              v-model="formData.age"
+              type="number"
+              min="0"
+              max="18"
+              required
               @input="clearFieldError('age')"
-              :class="{ 'error': validationErrors.age }"
+              :class="{ error: validationErrors.age }"
             />
             <span v-if="validationErrors.age" class="error-message">
               {{ validationErrors.age }}
             </span>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.dateOfReferral }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.dateOfReferral }"
+          >
             <label>Date of Referral *</label>
-            <input 
-              v-model="formData.dateOfReferral" 
-              type="date" 
-              required 
+            <input
+              v-model="formData.dateOfReferral"
+              type="date"
+              required
               @change="clearFieldError('dateOfReferral')"
-              :class="{ 'error': validationErrors.dateOfReferral }"
+              :class="{ error: validationErrors.dateOfReferral }"
             />
             <span v-if="validationErrors.dateOfReferral" class="error-message">
               {{ validationErrors.dateOfReferral }}
             </span>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.referralMethod }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.referralMethod }"
+          >
             <label>Referral Method *</label>
-            <select 
-              v-model="formData.referralMethod" 
-              required 
+            <select
+              v-model="formData.referralMethod"
+              required
               @change="clearFieldError('referralMethod')"
-              :class="{ 'error': validationErrors.referralMethod }"
+              :class="{ error: validationErrors.referralMethod }"
             >
               <option value="">Select Method</option>
-              <option value="Department of Social Welfare - Lusaka">Department of Social Welfare - Lusaka</option>
+              <option value="Department of Social Welfare - Lusaka">
+                Department of Social Welfare - Lusaka
+              </option>
               <option value="Coptic Hospital">Coptic Hospital</option>
               <option value="MNK Psychotherapy">MNK Psychotherapy</option>
-              <option value="Department of Social Welfare: Chongwe">Department of Social Welfare: Chongwe</option>
+              <option value="Department of Social Welfare: Chongwe">
+                Department of Social Welfare: Chongwe
+              </option>
               <option value="Other">Other</option>
             </select>
             <span v-if="validationErrors.referralMethod" class="error-message">
@@ -121,7 +164,9 @@
           </div>
         </div>
         <div class="section-navigation">
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
@@ -129,125 +174,189 @@
       <div v-show="currentSection === 2" class="form-section">
         <h4>Home Situation</h4>
         <!-- Validation Message for Section 2 -->
-        <div v-if="showValidationMessage && currentSection === 2 && Object.keys(validationErrors).length > 0" class="validation-message">
+        <div
+          v-if="
+            showValidationMessage &&
+            currentSection === 2 &&
+            Object.keys(validationErrors).length > 0
+          "
+          class="validation-message"
+        >
           <div class="validation-header">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             <span>Please complete the following required fields:</span>
           </div>
           <ul class="validation-list">
-            <li v-for="(error, field) in validationErrors" :key="field" class="validation-item">
+            <li
+              v-for="(error, field) in validationErrors"
+              :key="field"
+              class="validation-item"
+            >
               {{ error }}
             </li>
           </ul>
         </div>
 
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors.primaryCaregiverName }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.primaryCaregiverName }"
+          >
             <label>Primary Caregiver Name *</label>
-            <input 
-              v-model="formData.primaryCaregiverName" 
-              type="text" 
-              required 
+            <input
+              v-model="formData.primaryCaregiverName"
+              type="text"
+              required
               @input="clearFieldError('primaryCaregiverName')"
-              :class="{ 'error': validationErrors.primaryCaregiverName }"
+              :class="{ error: validationErrors.primaryCaregiverName }"
             />
-            <span v-if="validationErrors.primaryCaregiverName" class="error-message">
+            <span
+              v-if="validationErrors.primaryCaregiverName"
+              class="error-message"
+            >
               {{ validationErrors.primaryCaregiverName }}
             </span>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.relationshipToChild }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.relationshipToChild }"
+          >
             <label>Relationship to Child *</label>
-            <input 
-              v-model="formData.relationshipToChild" 
-              type="text" 
-              required 
+            <input
+              v-model="formData.relationshipToChild"
+              type="text"
+              required
               @input="clearFieldError('relationshipToChild')"
-              :class="{ 'error': validationErrors.relationshipToChild }"
+              :class="{ error: validationErrors.relationshipToChild }"
             />
-            <span v-if="validationErrors.relationshipToChild" class="error-message">
+            <span
+              v-if="validationErrors.relationshipToChild"
+              class="error-message"
+            >
               {{ validationErrors.relationshipToChild }}
             </span>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.areaOfTown }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.areaOfTown }"
+          >
             <label>Area of Town *</label>
-            <input 
-              v-model="formData.areaOfTown" 
-              type="text" 
-              required 
+            <input
+              v-model="formData.areaOfTown"
+              type="text"
+              required
               @input="clearFieldError('areaOfTown')"
-              :class="{ 'error': validationErrors.areaOfTown }"
+              :class="{ error: validationErrors.areaOfTown }"
             />
             <span v-if="validationErrors.areaOfTown" class="error-message">
               {{ validationErrors.areaOfTown }}
             </span>
           </div>
         </div>
-        <div class="form-group full-width" :class="{ 'has-error': validationErrors.livingSituation }">
+        <div
+          class="form-group full-width"
+          :class="{ 'has-error': validationErrors.livingSituation }"
+        >
           <label>Describe the Living Situation *</label>
-          <textarea 
-            v-model="formData.livingSituation" 
-            rows="4" 
-            required 
+          <textarea
+            v-model="formData.livingSituation"
+            rows="4"
+            required
             @input="clearFieldError('livingSituation')"
-            :class="{ 'error': validationErrors.livingSituation }"
+            :class="{ error: validationErrors.livingSituation }"
           ></textarea>
           <span v-if="validationErrors.livingSituation" class="error-message">
             {{ validationErrors.livingSituation }}
           </span>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
       <!-- Pregnancy Details Section -->
       <div v-show="currentSection === 3" class="form-section">
         <h4>Pregnancy Details</h4>
-        
+
         <!-- Validation Message for Section 3 -->
-        <div v-if="showValidationMessage && currentSection === 3 && Object.keys(validationErrors).length > 0" class="validation-message">
+        <div
+          v-if="
+            showValidationMessage &&
+            currentSection === 3 &&
+            Object.keys(validationErrors).length > 0
+          "
+          class="validation-message"
+        >
           <div class="validation-header">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             <span>Please complete the following required fields:</span>
           </div>
           <ul class="validation-list">
-            <li v-for="(error, field) in validationErrors" :key="field" class="validation-item">
+            <li
+              v-for="(error, field) in validationErrors"
+              :key="field"
+              class="validation-item"
+            >
               {{ error }}
             </li>
           </ul>
         </div>
-        
+
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors.pregnancyLength }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.pregnancyLength }"
+          >
             <label>Current Length of Pregnancy (weeks/months) *</label>
-            <input 
-              v-model="formData.pregnancyLength" 
-              type="text" 
-              placeholder="e.g., 12 weeks" 
-              required 
+            <input
+              v-model="formData.pregnancyLength"
+              type="text"
+              placeholder="e.g., 12 weeks"
+              required
               @input="clearFieldError('pregnancyLength')"
-              :class="{ 'error': validationErrors.pregnancyLength }"
+              :class="{ error: validationErrors.pregnancyLength }"
             />
             <span v-if="validationErrors.pregnancyLength" class="error-message">
               {{ validationErrors.pregnancyLength }}
             </span>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.visitedClinic }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.visitedClinic }"
+          >
             <label>Has the Girl Visited the Clinic? *</label>
-            <select 
-              v-model="formData.visitedClinic" 
-              required 
+            <select
+              v-model="formData.visitedClinic"
+              required
               @change="clearFieldError('visitedClinic')"
-              :class="{ 'error': validationErrors.visitedClinic }"
+              :class="{ error: validationErrors.visitedClinic }"
             >
               <option value="">Select</option>
               <option value="Y">Yes</option>
@@ -283,134 +392,204 @@
           </div>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
       <!-- Details of Abuse Section -->
       <div v-show="currentSection === 4" class="form-section">
         <h4>Details of Abuse</h4>
-        
+
         <!-- Validation Message for Section 4 -->
-        <div v-if="showValidationMessage && currentSection === 4 && Object.keys(validationErrors).length > 0" class="validation-message">
+        <div
+          v-if="
+            showValidationMessage &&
+            currentSection === 4 &&
+            Object.keys(validationErrors).length > 0
+          "
+          class="validation-message"
+        >
           <div class="validation-header">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             <span>Please complete the following required fields:</span>
           </div>
           <ul class="validation-list">
-            <li v-for="(error, field) in validationErrors" :key="field" class="validation-item">
+            <li
+              v-for="(error, field) in validationErrors"
+              :key="field"
+              class="validation-item"
+            >
               {{ error }}
             </li>
           </ul>
         </div>
-        
+
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors.typeOfAbuse }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.typeOfAbuse }"
+          >
             <label>Type of Abuse *</label>
-            <select 
-              v-model="formData.typeOfAbuse" 
-              required 
+            <select
+              v-model="formData.typeOfAbuse"
+              required
               @change="clearFieldError('typeOfAbuse')"
-              :class="{ 'error': validationErrors.typeOfAbuse }"
+              :class="{ error: validationErrors.typeOfAbuse }"
             >
               <option value="">Select Type</option>
               <option value="Defilement">Defilement</option>
               <option value="Incest">Incest</option>
               <option value="Rape">Rape</option>
               <option value="Sex Trafficking">Sex Trafficking</option>
-              <option value="Survival Prostitution">Survival Prostitution</option>
+              <option value="Survival Prostitution">
+                Survival Prostitution
+              </option>
               <option value="Other">Other</option>
             </select>
             <span v-if="validationErrors.typeOfAbuse" class="error-message">
               {{ validationErrors.typeOfAbuse }}
             </span>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.abuserRelationship }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.abuserRelationship }"
+          >
             <label>Abuser Relationship to Child *</label>
-            <input 
-              v-model="formData.abuserRelationship" 
-              type="text" 
-              required 
+            <input
+              v-model="formData.abuserRelationship"
+              type="text"
+              required
               @input="clearFieldError('abuserRelationship')"
-              :class="{ 'error': validationErrors.abuserRelationship }"
+              :class="{ error: validationErrors.abuserRelationship }"
             />
-            <span v-if="validationErrors.abuserRelationship" class="error-message">
+            <span
+              v-if="validationErrors.abuserRelationship"
+              class="error-message"
+            >
               {{ validationErrors.abuserRelationship }}
             </span>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.estimatedDateOfAbuse }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.estimatedDateOfAbuse }"
+          >
             <label>Estimated Date of Abuse *</label>
-            <input 
-              v-model="formData.estimatedDateOfAbuse" 
-              type="date" 
-              required 
+            <input
+              v-model="formData.estimatedDateOfAbuse"
+              type="date"
+              required
               @change="clearFieldError('estimatedDateOfAbuse')"
-              :class="{ 'error': validationErrors.estimatedDateOfAbuse }"
+              :class="{ error: validationErrors.estimatedDateOfAbuse }"
             />
-            <span v-if="validationErrors.estimatedDateOfAbuse" class="error-message">
+            <span
+              v-if="validationErrors.estimatedDateOfAbuse"
+              class="error-message"
+            >
               {{ validationErrors.estimatedDateOfAbuse }}
             </span>
           </div>
         </div>
-        <div class="form-group full-width" :class="{ 'has-error': validationErrors.detailsOfAbuse }">
+        <div
+          class="form-group full-width"
+          :class="{ 'has-error': validationErrors.detailsOfAbuse }"
+        >
           <label>Details of Abuse *</label>
-          <textarea 
-            v-model="formData.detailsOfAbuse" 
-            rows="4" 
-            required 
+          <textarea
+            v-model="formData.detailsOfAbuse"
+            rows="4"
+            required
             @input="clearFieldError('detailsOfAbuse')"
-            :class="{ 'error': validationErrors.detailsOfAbuse }"
+            :class="{ error: validationErrors.detailsOfAbuse }"
           ></textarea>
           <span v-if="validationErrors.detailsOfAbuse" class="error-message">
             {{ validationErrors.detailsOfAbuse }}
           </span>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
       <!-- Legal Action Section -->
       <div v-show="currentSection === 5" class="form-section">
         <h4>Legal Action</h4>
-        
+
         <!-- Validation Message for Section 5 -->
-        <div v-if="showValidationMessage && currentSection === 5 && Object.keys(validationErrors).length > 0" class="validation-message">
+        <div
+          v-if="
+            showValidationMessage &&
+            currentSection === 5 &&
+            Object.keys(validationErrors).length > 0
+          "
+          class="validation-message"
+        >
           <div class="validation-header">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             <span>Please complete the following required fields:</span>
           </div>
           <ul class="validation-list">
-            <li v-for="(error, field) in validationErrors" :key="field" class="validation-item">
+            <li
+              v-for="(error, field) in validationErrors"
+              :key="field"
+              class="validation-item"
+            >
               {{ error }}
             </li>
           </ul>
         </div>
-        
+
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors.legalActionTaken }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.legalActionTaken }"
+          >
             <label>Has Any Legal Action Been Taken? *</label>
-            <select 
-              v-model="formData.legalActionTaken" 
-              required 
+            <select
+              v-model="formData.legalActionTaken"
+              required
               @change="clearFieldError('legalActionTaken')"
-              :class="{ 'error': validationErrors.legalActionTaken }"
+              :class="{ error: validationErrors.legalActionTaken }"
             >
               <option value="">Select</option>
               <option value="Y">Yes</option>
               <option value="N">No</option>
             </select>
-            <span v-if="validationErrors.legalActionTaken" class="error-message">
+            <span
+              v-if="validationErrors.legalActionTaken"
+              class="error-message"
+            >
               {{ validationErrors.legalActionTaken }}
             </span>
           </div>
@@ -425,15 +604,27 @@
         </div>
         <div class="form-group full-width">
           <label>Description</label>
-          <textarea v-model="formData.legalActionDescription" rows="3"></textarea>
+          <textarea
+            v-model="formData.legalActionDescription"
+            rows="3"
+          ></textarea>
         </div>
         <div class="form-group full-width">
-          <label>If admitted, what additional legal action would be needed?</label>
-          <textarea v-model="formData.additionalLegalAction" rows="3"></textarea>
+          <label
+            >If admitted, what additional legal action would be needed?</label
+          >
+          <textarea
+            v-model="formData.additionalLegalAction"
+            rows="3"
+          ></textarea>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
@@ -442,7 +633,10 @@
         <h4>Mental Health</h4>
         <div class="form-grid">
           <div class="form-group">
-            <label>Have there been any signs of suicidal thinking or attempts? *</label>
+            <label
+              >Have there been any signs of suicidal thinking or attempts?
+              *</label
+            >
             <select v-model="formData.suicidalThinking" required>
               <option value="">Select</option>
               <option value="Y">Yes</option>
@@ -450,7 +644,10 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Has the girl expressed a desire or attempted to have an abortion? *</label>
+            <label
+              >Has the girl expressed a desire or attempted to have an abortion?
+              *</label
+            >
             <select v-model="formData.abortionDesire" required>
               <option value="">Select</option>
               <option value="Y">Yes</option>
@@ -476,11 +673,18 @@
         </div>
         <div class="form-group full-width">
           <label>Description of additional mental health concerns</label>
-          <textarea v-model="formData.mentalHealthDescription" rows="3"></textarea>
+          <textarea
+            v-model="formData.mentalHealthDescription"
+            rows="3"
+          ></textarea>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
@@ -489,7 +693,10 @@
         <h4>Follow-Up Action (To Be Completed by TKP Staff Only)</h4>
         <div class="form-grid">
           <div class="form-group">
-            <label>Does the referred child seem to meet TKP admission criteria?</label>
+            <label
+              >Does the referred child seem to meet TKP admission
+              criteria?</label
+            >
             <select v-model="formData.meetsAdmissionCriteria">
               <option value="">Select</option>
               <option value="Y">Yes</option>
@@ -559,288 +766,366 @@
           </div>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="submit-btn" :disabled="loading" @click="handleSubmit">
-            {{ loading ? 'Saving...' : 'Save Referral' }}
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button
+            type="button"
+            class="submit-btn"
+            :disabled="loading"
+            @click="handleSubmit"
+          >
+            {{ loading ? "Saving..." : "Save Referral" }}
           </button>
         </div>
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { useToast } from '../composables/useToast.js'
+import { ref, reactive, computed } from "vue";
+import { useToast } from "../composables/useToast.js";
 
-const emit = defineEmits(['form-saved'])
-const { success, error } = useToast()
+const emit = defineEmits(["form-saved"]);
+const { success, error } = useToast();
 
-const loading = ref(false)
+const props = defineProps({
+  editData: {
+    type: Object,
+    default: () => ({}),
+  },
+  isEditMode: {
+    type: Boolean,
+    default: false,
+  },
+  isOutreachMode: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const loading = ref(false);
 
 // Section navigation
-const currentSection = ref(1)
-const totalSections = 7
+const currentSection = ref(1);
+const totalSections = 7;
 
 const progressPercentage = computed(() => {
-  return (currentSection.value / totalSections) * 100
-})
+  return (currentSection.value / totalSections) * 100;
+});
 
 // Section validation rules
 const sectionValidationRules = {
-  1: [ // Child Information
-    'childFirstName',
-    'childLastName', 
-    'dateOfBirth',
-    'age',
-    'dateOfReferral',
-    'referralMethod'
+  1: [
+    // Child Information
+    "childFirstName",
+    "childLastName",
+    "dateOfBirth",
+    "age",
+    "dateOfReferral",
+    "referralMethod",
   ],
-  2: [ // Home Situation
-    'primaryCaregiverName',
-    'relationshipToChild',
-    'areaOfTown',
-    'livingSituation'
+  2: [
+    // Home Situation
+    "primaryCaregiverName",
+    "relationshipToChild",
+    "areaOfTown",
+    "livingSituation",
   ],
-  3: [ // Pregnancy Details
-    'pregnancyLength',
-    'visitedClinic'
+  3: [
+    // Pregnancy Details
+    "pregnancyLength",
+    "visitedClinic",
   ],
-  4: [ // Details of Abuse
-    'typeOfAbuse',
-    'abuserRelationship',
-    'estimatedDateOfAbuse',
-    'detailsOfAbuse'
+  4: [
+    // Details of Abuse
+    "typeOfAbuse",
+    "abuserRelationship",
+    "estimatedDateOfAbuse",
+    "detailsOfAbuse",
   ],
-  5: [ // Legal Action
-    'legalActionTaken'
+  5: [
+    // Legal Action
+    "legalActionTaken",
   ],
-  6: [ // Mental Health - all optional fields
+  6: [
+    // Mental Health - all optional fields
   ],
-  7: [ // Follow-Up Action - all optional fields
-  ]
-}
+  7: [
+    // Follow-Up Action - all optional fields
+  ],
+};
 
 // Validation error messages
-const validationErrors = ref({})
-const showValidationMessage = ref(false)
+const validationErrors = ref({});
+const showValidationMessage = ref(false);
 
 // Validate current section
 const validateCurrentSection = () => {
-  const requiredFields = sectionValidationRules[currentSection.value] || []
-  const errors = {}
-  let isValid = true
+  const requiredFields = sectionValidationRules[currentSection.value] || [];
+  const errors = {};
+  let isValid = true;
 
   // Check each required field
-  requiredFields.forEach(fieldName => {
-    const value = formData[fieldName]
-    if (!value || (typeof value === 'string' && value.trim() === '')) {
-      errors[fieldName] = getFieldDisplayName(fieldName) + ' is required'
-      isValid = false
+  requiredFields.forEach((fieldName) => {
+    const value = formData[fieldName];
+    if (!value || (typeof value === "string" && value.trim() === "")) {
+      errors[fieldName] = getFieldDisplayName(fieldName) + " is required";
+      isValid = false;
     }
-  })
+  });
 
-  validationErrors.value = errors
-  return isValid
-}
+  validationErrors.value = errors;
+  return isValid;
+};
 
 // Get user-friendly field names
 const getFieldDisplayName = (fieldName) => {
   const fieldNames = {
-    childFirstName: 'Child First Name',
-    childLastName: 'Child Last Name',
-    dateOfBirth: 'Date of Birth',
-    age: 'Age',
-    dateOfReferral: 'Date of Referral',
-    referralMethod: 'Referral Method',
-    primaryCaregiverName: 'Primary Caregiver Name',
-    relationshipToChild: 'Relationship to Child',
-    areaOfTown: 'Area of Town',
-    livingSituation: 'Living Situation Description',
-    pregnancyLength: 'Current Length of Pregnancy',
-    visitedClinic: 'Has the Girl Visited the Clinic',
-    typeOfAbuse: 'Type of Abuse',
-    abuserRelationship: 'Abuser Relationship to Child',
-    estimatedDateOfAbuse: 'Estimated Date of Abuse',
-    detailsOfAbuse: 'Details of Abuse',
-    legalActionTaken: 'Has Any Legal Action Been Taken'
-  }
-  return fieldNames[fieldName] || fieldName
-}
+    childFirstName: "Child First Name",
+    childLastName: "Child Last Name",
+    dateOfBirth: "Date of Birth",
+    age: "Age",
+    dateOfReferral: "Date of Referral",
+    referralMethod: "Referral Method",
+    primaryCaregiverName: "Primary Caregiver Name",
+    relationshipToChild: "Relationship to Child",
+    areaOfTown: "Area of Town",
+    livingSituation: "Living Situation Description",
+    pregnancyLength: "Current Length of Pregnancy",
+    visitedClinic: "Has the Girl Visited the Clinic",
+    typeOfAbuse: "Type of Abuse",
+    abuserRelationship: "Abuser Relationship to Child",
+    estimatedDateOfAbuse: "Estimated Date of Abuse",
+    detailsOfAbuse: "Details of Abuse",
+    legalActionTaken: "Has Any Legal Action Been Taken",
+  };
+  return fieldNames[fieldName] || fieldName;
+};
 
 // Clear validation error for specific field
 const clearFieldError = (fieldName) => {
   if (validationErrors.value[fieldName]) {
-    delete validationErrors.value[fieldName]
-    validationErrors.value = { ...validationErrors.value }
+    delete validationErrors.value[fieldName];
+    validationErrors.value = { ...validationErrors.value };
   }
-}
+};
 
 // Enhanced nextSection with validation
 const nextSection = () => {
   // Validate current section before proceeding
   if (!validateCurrentSection()) {
-    showValidationMessage.value = true
-    
+    showValidationMessage.value = true;
+
     // Hide validation message after 5 seconds
     setTimeout(() => {
-      showValidationMessage.value = false
-    }, 5000)
-    
-    return
+      showValidationMessage.value = false;
+    }, 5000);
+
+    return;
   }
-  
+
   // Clear any existing validation errors
-  validationErrors.value = {}
-  showValidationMessage.value = false
-  
+  validationErrors.value = {};
+  showValidationMessage.value = false;
+
   if (currentSection.value < totalSections) {
-    currentSection.value++
+    currentSection.value++;
   }
-}
+};
 
 const prevSection = () => {
   // Clear validation errors when going back
-  validationErrors.value = {}
-  showValidationMessage.value = false
-  
+  validationErrors.value = {};
+  showValidationMessage.value = false;
+
   if (currentSection.value > 1) {
-    currentSection.value--
+    currentSection.value--;
   }
-}
+};
 
 // Form data
 const formData = reactive({
   // Child Information
-  childFirstName: '',
-  childLastName: '',
-  dateOfBirth: '',
-  age: '',
-  dateOfReferral: '',
-  referralMethod: '',
-  
+  childFirstName: "",
+  childLastName: "",
+  dateOfBirth: "",
+  age: "",
+  dateOfReferral: "",
+  referralMethod: "",
+
   // Home Situation
-  primaryCaregiverName: '',
-  relationshipToChild: '',
-  areaOfTown: '',
-  livingSituation: '',
-  
+  primaryCaregiverName: "",
+  relationshipToChild: "",
+  areaOfTown: "",
+  livingSituation: "",
+
   // Pregnancy Details
-  pregnancyLength: '',
-  visitedClinic: '',
-  clinicVisitDate: '',
-  clinic: '',
-  clinicDocumentation: '',
-  pregnancyTestDocumentation: '',
-  
+  pregnancyLength: "",
+  visitedClinic: "",
+  clinicVisitDate: "",
+  clinic: "",
+  clinicDocumentation: "",
+  pregnancyTestDocumentation: "",
+
   // Details of Abuse
-  typeOfAbuse: '',
-  abuserRelationship: '',
-  estimatedDateOfAbuse: '',
-  detailsOfAbuse: '',
-  
+  typeOfAbuse: "",
+  abuserRelationship: "",
+  estimatedDateOfAbuse: "",
+  detailsOfAbuse: "",
+
   // Legal Action
-  legalActionTaken: '',
-  legalActionDescription: '',
-  caseActive: '',
-  additionalLegalAction: '',
-  
+  legalActionTaken: "",
+  legalActionDescription: "",
+  caseActive: "",
+  additionalLegalAction: "",
+
   // Mental Health
-  suicidalThinking: '',
-  suicidalDescription: '',
-  abortionDesire: '',
-  abortionDescription: '',
-  additionalMentalHealth: '',
-  mentalHealthDescription: '',
-  
+  suicidalThinking: "",
+  suicidalDescription: "",
+  abortionDesire: "",
+  abortionDescription: "",
+  additionalMentalHealth: "",
+  mentalHealthDescription: "",
+
   // Follow-Up Action
-  meetsAdmissionCriteria: '',
-  pregnant: '',
-  ageRange: '',
-  abuseCause: '',
-  suicideAbortionPotential: '',
-  familyCommitment: '',
-  homeAssessmentDate: '',
-  tkpStaffReceived: '',
-  referrerName: '',
-  contactInfo: ''
-})
+  meetsAdmissionCriteria: "",
+  pregnant: "",
+  ageRange: "",
+  abuseCause: "",
+  suicideAbortionPotential: "",
+  familyCommitment: "",
+  homeAssessmentDate: "",
+  tkpStaffReceived: "",
+  referrerName: "",
+  contactInfo: "",
+});
 
 const handleSubmit = async (event) => {
   // Prevent default form submission
   if (event) {
-    event.preventDefault()
+    event.preventDefault();
   }
-  
-  loading.value = true
+
+  loading.value = true;
   try {
-    // Check for duplicate referrals before saving
-    const { default: DuplicationService } = await import('../services/duplicationService.js')
-    
-    const duplicateCheck = await DuplicationService.checkDuplicateReferral({
-      childFirstName: formData.childFirstName,
-      childLastName: formData.childLastName,
-      dateOfReferral: formData.dateOfReferral
-    })
-    
-    if (duplicateCheck.hasDuplicates) {
-      const highConfidenceDuplicates = duplicateCheck.duplicates.filter(d => d.confidence >= 95)
-      
-      if (highConfidenceDuplicates.length > 0) {
-        // Show exact matches - require confirmation
-        const duplicateInfo = highConfidenceDuplicates.map(dup => {
-          const childName = `${dup.data.childFirstName} ${dup.data.childLastName}`
-          const refDate = dup.data.dateOfReferral || 'Unknown Date'
-          return `• ${childName} (Referral Date: ${refDate}) - ${dup.reason}`
-        }).join('\n')
-        
-        const userConfirmed = confirm(
-          `⚠️ DUPLICATE WARNING
+    // Only check for duplicates if not in outreach mode
+    if (!props.isOutreachMode) {
+      // Check for duplicate referrals before saving
+      const { default: DuplicationService } = await import(
+        "../services/duplicationService.js"
+      );
+
+      const duplicateCheck = await DuplicationService.checkDuplicateReferral({
+        childFirstName: formData.childFirstName,
+        childLastName: formData.childLastName,
+        dateOfReferral: formData.dateOfReferral,
+      });
+
+      if (duplicateCheck.hasDuplicates) {
+        const highConfidenceDuplicates = duplicateCheck.duplicates.filter(
+          (d) => d.confidence >= 95
+        );
+
+        if (highConfidenceDuplicates.length > 0) {
+          // Show exact matches - require confirmation
+          const duplicateInfo = highConfidenceDuplicates
+            .map((dup) => {
+              const childName = `${dup.data.childFirstName} ${dup.data.childLastName}`;
+              const refDate = dup.data.dateOfReferral || "Unknown Date";
+              return `• ${childName} (Referral Date: ${refDate}) - ${dup.reason}`;
+            })
+            .join("\n");
+
+          const userConfirmed = confirm(
+            `⚠️ DUPLICATE WARNING
 
 A referral with similar information already exists:
 
 ${duplicateInfo}
 
 Do you want to continue and create this referral anyway?`
-        )
-        
-        if (!userConfirmed) {
-          loading.value = false
-          error('Form submission cancelled to prevent duplicate referral')
-          return
-        } else {
-          console.warn('User confirmed duplicate referral override:', duplicateInfo)
+          );
+
+          if (!userConfirmed) {
+            loading.value = false;
+            error("Form submission cancelled to prevent duplicate referral");
+            return;
+          } else {
+            console.warn(
+              "User confirmed duplicate referral override:",
+              duplicateInfo
+            );
+          }
         }
       }
     }
-    
-    // Import FormService dynamically to avoid circular imports
-    const { default: FormService } = await import('../services/formService.js')
-    
-    const result = await FormService.saveInitialReferral(formData)
-    
-    if (result.success) {
-      // Emit success event to parent component
-      emit('form-saved', { formType: 'initial-referral', id: result.id })
-      success('Referral form saved successfully!')
-      resetForm()
+
+    // Use EnhancedOutreachService when in outreach mode, otherwise use FormService
+    if (props.isOutreachMode) {
+      // Import EnhancedOutreachService dynamically
+      const { default: EnhancedOutreachService } = await import("../services/enhancedOutreachService.js");
+      
+      // Create form data structure for outreach service
+      const outreachFormData = {
+        formType: "initial-referral",
+        childName: `${formData.childFirstName} ${formData.childLastName}`,
+        caseId: "", // Will be generated by the service
+        status: "completed",
+        synced: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        data: { ...formData }
+      };
+      
+      // Save to local storage via EnhancedOutreachService
+      const result = await EnhancedOutreachService.saveFormLocally(outreachFormData);
+      
+      if (result.success) {
+        // Emit success event to parent component with form data
+        emit("form-saved", {
+          ...outreachFormData,
+          id: outreachFormData.id || Date.now().toString(), // Use existing ID or generate new one
+        });
+        success("Referral form saved successfully!");
+        resetForm();
+      } else {
+        error("Error saving form: " + result.error);
+      }
     } else {
-      error('Error saving form: ' + result.error)
+      // Import FormService dynamically to avoid circular imports
+      const { default: FormService } = await import("../services/formService.js");
+
+      const result = await FormService.saveInitialReferral(formData);
+
+      if (result.success) {
+        // Emit success event to parent component with form data
+        emit("form-saved", {
+          formType: "initial-referral",
+          id: result.id,
+          childName: `${formData.childFirstName} ${formData.childLastName}`,
+          data: { ...formData },
+        });
+        success("Referral form saved successfully!");
+        resetForm();
+      } else {
+        error("Error saving form: " + result.error);
+      }
     }
   } catch (err) {
-    console.error('Error saving form:', err)
-    error('Error saving form. Please try again.')
+    console.error("Error saving form:", err);
+    error("Error saving form. Please try again.");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const resetForm = () => {
-  Object.keys(formData).forEach(key => {
-    formData[key] = ''
-  })
-}
+  Object.keys(formData).forEach((key) => {
+    formData[key] = "";
+  });
+};
 </script>
 
 <style scoped>
@@ -854,11 +1139,11 @@ const resetForm = () => {
   text-align: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #4A148C;
+  border-bottom: 2px solid #4a148c;
 }
 
 .form-header h3 {
-  color: #4A148C;
+  color: #4a148c;
   font-size: 1.8rem;
   margin-bottom: 0.5rem;
 }
@@ -885,13 +1170,13 @@ const resetForm = () => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4A148C, #2D1B69);
+  background: linear-gradient(90deg, #4a148c, #2d1b69);
   transition: width 0.3s ease;
 }
 
 .progress-text {
   font-size: 0.9rem;
-  color: #4A148C;
+  color: #4a148c;
   font-weight: 500;
   text-align: center;
 }
@@ -908,11 +1193,11 @@ const resetForm = () => {
   padding: 1.5rem;
   background: #f8f9fa;
   border-radius: 8px;
-  border-left: 4px solid #4A148C;
+  border-left: 4px solid #4a148c;
 }
 
 .form-section h4 {
-  color: #4A148C;
+  color: #4a148c;
   font-size: 1.3rem;
   margin-bottom: 1.5rem;
   font-weight: 600;
@@ -935,7 +1220,7 @@ const resetForm = () => {
 }
 
 .form-group label {
-  color: #4A148C;
+  color: #4a148c;
   font-weight: 500;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
@@ -962,7 +1247,7 @@ const resetForm = () => {
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #4A148C;
+  border-color: #4a148c;
 }
 
 .form-group textarea {
@@ -1001,12 +1286,12 @@ const resetForm = () => {
 }
 
 .next-btn {
-  background: #4A148C;
+  background: #4a148c;
   color: white;
 }
 
 .next-btn:hover {
-  background: #2D1B69;
+  background: #2d1b69;
 }
 
 .submit-btn {
@@ -1041,7 +1326,7 @@ const resetForm = () => {
 }
 
 .submit-btn {
-  background-color: #4A148C;
+  background-color: #4a148c;
   color: white;
   padding: 12px 30px;
   border: none;
@@ -1053,7 +1338,7 @@ const resetForm = () => {
 }
 
 .submit-btn:hover:not(:disabled) {
-  background-color: #2D1B69;
+  background-color: #2d1b69;
 }
 
 .submit-btn:disabled {
@@ -1141,52 +1426,52 @@ const resetForm = () => {
     max-width: 100%;
     padding: 0 0.5rem;
   }
-  
+
   .form-header {
     padding: 0.75rem 0.5rem;
     margin-bottom: 0.75rem;
   }
-  
+
   .form-header h3 {
     font-size: 1.2rem;
     line-height: 1.3;
   }
-  
+
   .form-header p {
     font-size: 0.85rem;
   }
-  
+
   .referral-form {
     padding: 0.75rem;
     border-radius: 0;
   }
-  
+
   .form-section {
     padding: 0.75rem;
     margin-bottom: 0.75rem;
     border-radius: 6px;
   }
-  
+
   .form-section h4 {
     font-size: 1rem;
     margin-bottom: 0.75rem;
   }
-  
+
   .form-grid {
     grid-template-columns: 1fr;
     gap: 0.5rem;
   }
-  
+
   .form-group {
     margin-bottom: 0;
   }
-  
+
   .form-group label {
     font-size: 0.8rem;
     margin-bottom: 0.3rem;
     font-weight: 600;
   }
-  
+
   .form-group input,
   .form-group select,
   .form-group textarea {
@@ -1195,18 +1480,18 @@ const resetForm = () => {
     border-width: 1px;
     min-height: 40px;
   }
-  
+
   .form-group textarea {
     min-height: 70px;
   }
-  
+
   .section-navigation {
     flex-direction: column;
     gap: 0.5rem;
     padding-top: 0.75rem;
     margin-top: 0.75rem;
   }
-  
+
   .prev-btn,
   .next-btn {
     width: 100%;
@@ -1215,14 +1500,14 @@ const resetForm = () => {
     font-size: 0.875rem;
     min-height: 44px;
   }
-  
+
   .form-actions {
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 0.75rem;
     padding-top: 0.75rem;
   }
-  
+
   .submit-btn,
   .cancel-btn {
     width: 100%;
@@ -1230,30 +1515,30 @@ const resetForm = () => {
     font-size: 0.875rem;
     min-height: 44px;
   }
-  
+
   .validation-message {
     padding: 0.625rem;
     font-size: 0.8rem;
     margin-bottom: 1rem;
   }
-  
+
   .validation-header {
     font-size: 0.8rem;
   }
-  
+
   .validation-list {
     padding-left: 1rem;
     margin-top: 0.5rem;
   }
-  
+
   .validation-item {
     font-size: 0.75rem;
   }
-  
+
   .progress-bar {
     height: 6px;
   }
-  
+
   .progress-text {
     font-size: 0.8rem;
   }
@@ -1263,61 +1548,61 @@ const resetForm = () => {
   .form-wrapper {
     padding: 0 0.25rem;
   }
-  
+
   .form-header {
     padding: 0.5rem 0.25rem;
   }
-  
+
   .form-header h3 {
     font-size: 1rem;
   }
-  
+
   .form-header p {
     font-size: 0.8rem;
   }
-  
+
   .form-section {
     padding: 0.5rem;
   }
-  
+
   .form-section h4 {
     font-size: 0.95rem;
   }
-  
+
   .form-group label {
     font-size: 0.75rem;
   }
-  
+
   .form-group input,
   .form-group select,
   .form-group textarea {
     padding: 0.4rem;
     font-size: 0.8rem;
   }
-  
+
   .progress-text {
     font-size: 0.75rem;
   }
-  
+
   .section-navigation {
     gap: 0.4rem;
     padding-top: 0.5rem;
     margin-top: 0.5rem;
   }
-  
+
   .prev-btn,
   .next-btn {
     padding: 0.5rem 0.8rem;
     font-size: 0.8rem;
     min-height: 40px;
   }
-  
+
   .form-actions {
     gap: 0.4rem;
     margin-top: 0.5rem;
     padding-top: 0.5rem;
   }
-  
+
   .submit-btn,
   .cancel-btn {
     padding: 0.5rem 0.8rem;
@@ -1331,89 +1616,89 @@ const resetForm = () => {
   .form-wrapper {
     padding: 0 0.125rem;
   }
-  
+
   .form-header {
     padding: 0.4rem 0.125rem;
   }
-  
+
   .form-header h3 {
     font-size: 0.9rem;
   }
-  
+
   .form-header p {
     font-size: 0.75rem;
   }
-  
+
   .referral-form {
     padding: 0.5rem;
   }
-  
+
   .form-section {
     padding: 0.4rem;
   }
-  
+
   .form-section h4 {
     font-size: 0.9rem;
   }
-  
+
   .form-grid {
     gap: 0.4rem;
   }
-  
+
   .form-group label {
     font-size: 0.7rem;
   }
-  
+
   .form-group input,
   .form-group select,
   .form-group textarea {
     padding: 0.3rem;
     font-size: 0.75rem;
   }
-  
+
   .form-group textarea {
     min-height: 60px;
   }
-  
+
   .section-navigation {
     gap: 0.3rem;
     padding-top: 0.4rem;
     margin-top: 0.4rem;
   }
-  
+
   .prev-btn,
   .next-btn {
     padding: 0.4rem 0.6rem;
     font-size: 0.75rem;
     min-height: 36px;
   }
-  
+
   .form-actions {
     gap: 0.3rem;
     margin-top: 0.4rem;
     padding-top: 0.4rem;
   }
-  
+
   .submit-btn,
   .cancel-btn {
     padding: 0.4rem 0.6rem;
     font-size: 0.75rem;
     min-height: 36px;
   }
-  
+
   .validation-message {
     padding: 0.5rem;
     font-size: 0.75rem;
   }
-  
+
   .validation-header {
     font-size: 0.75rem;
   }
-  
+
   .validation-item {
     font-size: 0.7rem;
   }
-  
+
   .progress-text {
     font-size: 0.7rem;
   }

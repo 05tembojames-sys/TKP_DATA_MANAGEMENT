@@ -156,6 +156,15 @@
                 <span>Analysis</span>
               </button>
 
+              <!-- Add this new button for Outreach Module -->
+              <button
+                class="dashboard-btn outreach-btn"
+                @click="setCurrentView('outreach')"
+              >
+                <i class="fas fa-route btn-icon"></i>
+                <span>Outreach</span>
+              </button>
+
               <button
                 class="dashboard-btn users-btn"
                 @click="
@@ -513,6 +522,11 @@
         </div>
       </div>
 
+      <!-- New section for the outreach module -->
+      <div v-if="currentView === 'outreach'" class="outreach-section">
+        <OutreachModule @back-to-dashboard="setCurrentView('main')" />
+      </div>
+
       <!-- Other Sections Placeholder -->
       <div
         v-if="
@@ -558,6 +572,7 @@ import DataAnalysis from "./DataAnalysis.vue";
 import Reports from "./Reports.vue";
 import EventReports from "./EventReports.vue";
 import FormService from "../services/formService.js";
+import OutreachModule from "./OutreachModule.vue";
 
 // Import custom SVG icon (uncomment when you add the file)
 // import DataEntryIcon from '../assets/icons/data-entry.svg?url'
@@ -640,6 +655,12 @@ const setCurrentView = async (view) => {
   // Handle navigation to event reports page
   if (view === "event-reports") {
     router.push("/event-reports");
+    return;
+  }
+
+  // Handle navigation to outreach module
+  if (view === "outreach") {
+    router.push("/outreach");
     return;
   }
 
@@ -1953,5 +1974,15 @@ tbody tr:hover {
     font-size: 0.85rem;
     text-align: left;
   }
+}
+
+/* Individual button color schemes */
+.outreach-btn {
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
+}
+
+.outreach-btn:hover {
+  box-shadow: 0 6px 20px rgba(106, 17, 203, 0.4);
 }
 </style>

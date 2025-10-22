@@ -1508,13 +1508,17 @@ import { useToast } from "../composables/useToast.js";
 const props = defineProps({
   editData: {
     type: Object,
-    default: null,
+    default: () => ({}),
   },
   isEditMode: {
     type: Boolean,
     default: false,
   },
-  viewMode: {
+  isViewMode: {
+    type: Boolean,
+    default: false,
+  },
+  isOutreachMode: {
     type: Boolean,
     default: false,
   },
@@ -2085,8 +2089,8 @@ const handleSubmit = async (event) => {
 
   loading.value = true;
   try {
-    // Skip duplicate check if we're in edit mode
-    if (!props.isEditMode) {
+    // Skip duplicate check if we're in edit mode or outreach mode
+    if (!props.isEditMode && !props.isOutreachMode) {
       // Check for duplicate children before saving
       const { default: DuplicationService } = await import(
         "../services/duplicationService.js"
@@ -2150,76 +2154,110 @@ Are you sure you want to create a new record?`
       status: "submitted",
     };
 
-    // Import FormService dynamically to avoid circular imports
-    const { default: FormService } = await import("../services/formService.js");
-
-    let result;
-    if (props.isEditMode && props.editData) {
-      // Get the form ID - prefer formId if it exists, otherwise use id
-      const formIdToUpdate = props.editData.formId || props.editData.id;
-      console.log("Updating form with ID:", formIdToUpdate);
-      console.log("Edit data:", props.editData);
-
-      if (!formIdToUpdate) {
-        error("Cannot update: Form ID is missing");
-        loading.value = false;
-        return;
-      }
-
-      // Update existing record
-      result = await FormService.updateChildOverview(
-        formIdToUpdate,
-        submissionData
+    // Use EnhancedOutreachService when in outreach mode, otherwise use FormService
+    if (props.isOutreachMode) {
+      // Import EnhancedOutreachService dynamically
+      const { default: EnhancedOutreachService } = await import(
+        "../services/enhancedOutreachService.js"
       );
-    } else {
-      // Create new record
-      result = await FormService.saveChildOverview(submissionData);
-    }
 
-    if (result.success) {
-      // Emit success event to parent component
-      emit("form-saved", {
+      // Create form data structure for outreach service
+      const outreachFormData = {
         formType: "child-overview",
-        id: result.id,
         childName: `${formData.childFirstName} ${formData.childSurname}`,
-        uniqueId: generateChildId(formData),
-        isEdit: props.isEditMode,
-      });
+        caseId: formData.id || "", // Use existing ID or empty
+        status: "completed",
+        synced: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        data: { ...submissionData },
+      };
 
-      // Show success message with child information
-      const actionText = props.isEditMode ? "updated" : "saved";
-      success(
-        `Child Overview Form ${actionText} successfully! Child: ${
-          formData.childFirstName
-        } ${formData.childSurname} (ID: ${result.id}) has been ${
-          props.isEditMode ? "updated in" : "added to"
-        } the tracking system.`
+      // If in edit mode, preserve the existing ID
+      if (props.isEditMode && props.editData) {
+        outreachFormData.id = props.editData.id;
+      }
+
+      // Save to local storage via EnhancedOutreachService
+      const result = await EnhancedOutreachService.saveFormLocally(
+        outreachFormData
       );
 
-      // Check if we should navigate back to TrackerCapture
-      const storedChildData = sessionStorage.getItem("selectedChildForForm");
-      if (storedChildData) {
-        try {
-          const childData = JSON.parse(storedChildData);
-          if (childData.returnTo === "tracker-capture") {
-            console.log("🔙 Returning to TrackerCapture...");
-            // Clear sessionStorage
-            sessionStorage.removeItem("selectedChildForForm");
-            // Navigate back to tracker capture
-            router.push("/tracker-capture");
-            return; // Exit early, don't reset form
-          }
-        } catch (error) {
-          console.error("Error checking return destination:", error);
-        }
-      }
-
-      if (!props.isEditMode) {
+      if (result.success) {
+        // Emit success event to parent component with form data
+        emit("form-saved", {
+          ...outreachFormData,
+          id: outreachFormData.id || Date.now().toString(), // Use existing ID or generate new one
+        });
+        success("Child Overview Form saved successfully!");
         resetForm();
-        currentSection.value = 1; // Reset to first section
+      } else {
+        error("Error saving form: " + result.error);
       }
     } else {
-      error("Error saving form: " + result.error);
+      // Import FormService dynamically to avoid circular imports
+      const { default: FormService } = await import(
+        "../services/formService.js"
+      );
+
+      let result;
+      if (props.isEditMode && props.editData) {
+        // Get the form ID - prefer formId if it exists, otherwise use id
+        const formIdToUpdate = props.editData.formId || props.editData.id;
+        console.log("Updating form with ID:", formIdToUpdate);
+        console.log("Edit data:", props.editData);
+
+        if (!formIdToUpdate) {
+          error("Cannot update: Form ID is missing");
+          loading.value = false;
+          return;
+        }
+
+        // Update existing record
+        result = await FormService.updateChildOverview(
+          formIdToUpdate,
+          submissionData
+        );
+      } else {
+        // Create new record
+        result = await FormService.saveChildOverview(submissionData);
+      }
+
+      if (result.success) {
+        // Emit success event to parent component with form data
+        emit("form-saved", {
+          formType: "child-overview",
+          id: result.id,
+          childName: `${formData.childFirstName} ${formData.childSurname}`,
+          uniqueId: generateChildId(formData),
+          isEdit: props.isEditMode,
+          data: { ...formData },
+        });
+
+        // Show success message with child information
+        const actionText = props.isEditMode ? "updated" : "saved";
+        success(
+          `Child Overview Form ${actionText} successfully! Child: ${
+            formData.childFirstName
+          } ${formData.childSurname} (ID: ${result.id}) has been ${
+            props.isEditMode ? "updated in" : "added to"
+          } the tracking system.`
+        );
+
+        // Check if we should navigate back to TrackerCapture
+        const storedChildData = sessionStorage.getItem("selectedChildForForm");
+        if (storedChildData) {
+          // Clear the session storage
+          sessionStorage.removeItem("selectedChildForForm");
+          // Navigate back to TrackerCapture
+          router.push("/tracker-capture");
+        } else {
+          // Reset form for new entry
+          resetForm();
+        }
+      } else {
+        error("Error saving form: " + result.error);
+      }
     }
   } catch (err) {
     console.error("Error saving form:", err);

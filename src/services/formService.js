@@ -41,6 +41,14 @@ class FormService {
       };
     } catch (error) {
       console.error("Error saving initial referral form:", error);
+      // Check if it's a network error
+      if (!navigator.onLine) {
+        return {
+          success: false,
+          error:
+            "No internet connection. Please check your network and try again.",
+        };
+      }
       return {
         success: false,
         error: error.message,
@@ -70,29 +78,14 @@ class FormService {
       };
     } catch (error) {
       console.error("Error saving child overview form:", error);
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  }
-
-  // Update Child Overview and Background Form
-  async updateChildOverview(formId, formData) {
-    try {
-      const formRef = doc(db, this.formsCollection, formId);
-      await updateDoc(formRef, {
-        ...formData,
-        updatedAt: new Date(),
-      });
-
-      return {
-        success: true,
-        id: formId,
-        message: "Child overview form updated successfully",
-      };
-    } catch (error) {
-      console.error("Error updating child overview form:", error);
+      // Check if it's a network error
+      if (!navigator.onLine) {
+        return {
+          success: false,
+          error:
+            "No internet connection. Please check your network and try again.",
+        };
+      }
       return {
         success: false,
         error: error.message,
@@ -178,6 +171,14 @@ class FormService {
       };
     } catch (error) {
       console.error("Error updating child overview form:", error);
+      // Check if it's a network error
+      if (!navigator.onLine) {
+        return {
+          success: false,
+          error:
+            "No internet connection. Please check your network and try again.",
+        };
+      }
       return {
         success: false,
         error: error.message,
@@ -207,6 +208,14 @@ class FormService {
       };
     } catch (error) {
       console.error("Error saving initial assessment form:", error);
+      // Check if it's a network error
+      if (!navigator.onLine) {
+        return {
+          success: false,
+          error:
+            "No internet connection. Please check your network and try again.",
+        };
+      }
       return {
         success: false,
         error: error.message,
