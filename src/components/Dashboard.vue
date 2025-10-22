@@ -945,7 +945,9 @@ onMounted(() => {
   // Set current user name
   const currentUser = AuthService.getCurrentUser();
   if (currentUser) {
-    currentUserName.value = currentUser.email;
+    // Display user's name if available, otherwise fallback to email
+    currentUserName.value =
+      currentUser.name || currentUser.fullName || currentUser.email;
   }
   loadSummaryData();
 

@@ -4,7 +4,14 @@
     <div class="user-management-header">
       <div class="header-left">
         <button @click="goBack" class="back-button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="m12 19-7-7 7-7" />
             <path d="m19 12H5" />
           </svg>
@@ -16,14 +23,28 @@
       </div>
       <div class="header-right">
         <button @click="showAddUserModal = true" class="add-user-button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="M12 5v14" />
             <path d="m5 12 14 0" />
           </svg>
           Add User
         </button>
         <button @click="handleLogout" class="logout-button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
             <polyline points="16 17 21 12 16 7" />
             <line x1="21" y1="12" x2="9" y2="12" />
@@ -38,7 +59,14 @@
       <!-- Setup Information Banner -->
       <div v-if="allUsers.length === 0 && !loading" class="info-banner">
         <div class="banner-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <circle cx="12" cy="12" r="10" />
             <path d="M12 16v-4" />
             <path d="M12 8h.01" />
@@ -46,28 +74,51 @@
         </div>
         <div class="banner-content">
           <strong>Setting up User Management</strong>
-          <p>If this is your first time using the user management system, Firebase indexes may still be building. 
-             This can take 5-10 minutes. You can create users, but some features like login history may be limited until setup completes.</p>
+          <p>
+            If this is your first time using the user management system,
+            Firebase indexes may still be building. This can take 5-10 minutes.
+            You can create users, but some features like login history may be
+            limited until setup completes.
+          </p>
         </div>
       </div>
-      
+
       <!-- Filters and Search -->
       <div class="filters-panel">
         <div class="search-section">
           <div class="search-input-group">
-            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="search-icon"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.35-4.35" />
             </svg>
-            <input 
-              type="text" 
-              v-model="searchQuery" 
+            <input
+              type="text"
+              v-model="searchQuery"
               @input="performSearch"
               placeholder="Search users by name, email, or role..."
               class="search-input"
             />
-            <button v-if="searchQuery" @click="clearSearch" class="clear-search">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button
+              v-if="searchQuery"
+              @click="clearSearch"
+              class="clear-search"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path d="m18 6-12 12" />
                 <path d="m6 6 12 12" />
               </svg>
@@ -78,7 +129,11 @@
         <div class="filter-controls">
           <div class="filter-group">
             <label class="filter-label">Status</label>
-            <select v-model="selectedStatus" @change="applyFilters" class="filter-select">
+            <select
+              v-model="selectedStatus"
+              @change="applyFilters"
+              class="filter-select"
+            >
               <option value="">All Status</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -88,7 +143,11 @@
 
           <div class="filter-group">
             <label class="filter-label">Role</label>
-            <select v-model="selectedRole" @change="applyFilters" class="filter-select">
+            <select
+              v-model="selectedRole"
+              @change="applyFilters"
+              class="filter-select"
+            >
               <option value="">All Roles</option>
               <option value="admin">Administrator</option>
               <option value="manager">Manager</option>
@@ -99,23 +158,23 @@
 
           <div class="filter-group">
             <label class="filter-label">Organization Unit</label>
-                  <select v-model="selectedOrgUnit" @change="applyFilters" class="filter-select">
-                    <option value="">All Units</option>
-                    <option value="Main Center">Main Center</option>
-                    <option value="Outreach - Lusaka">Outreach - Lusaka</option>
-                    <option value="Outreach - Chongwe">Outreach - Chongwe</option>
-                    <option value="Education Unit">Education Unit</option>
-                    <option value="Health Unit">Health Unit</option>
-                  </select>
+            <select
+              v-model="selectedOrgUnit"
+              @change="applyFilters"
+              class="filter-select"
+            >
+              <option value="">All Units</option>
+              <option value="Main Center">Main Center</option>
+              <option value="Outreach - Lusaka">Outreach - Lusaka</option>
+              <option value="Outreach - Chongwe">Outreach - Chongwe</option>
+              <option value="Education Unit">Education Unit</option>
+              <option value="Health Unit">Health Unit</option>
+            </select>
           </div>
 
           <div class="filter-actions">
-            <button @click="applyFilters" class="filter-button">
-              Filter
-            </button>
-            <button @click="resetFilters" class="reset-button">
-              Reset
-            </button>
+            <button @click="applyFilters" class="filter-button">Filter</button>
+            <button @click="resetFilters" class="reset-button">Reset</button>
           </div>
         </div>
 
@@ -146,7 +205,14 @@
           <h3>Users ({{ filteredUsers.length }})</h3>
           <div class="table-controls">
             <button @click="exportUsers" class="export-button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="7,10 12,15 17,10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
@@ -154,7 +220,14 @@
               Export
             </button>
             <button @click="refreshUsers" class="refresh-button">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
                 <path d="M21 3v5h-5" />
                 <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
@@ -172,7 +245,15 @@
                 <th @click="sortBy('name')" class="sortable">
                   <div class="th-content">
                     Name
-                    <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                      class="sort-icon"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <path d="M7 10l5-5 5 5" />
                       <path d="M7 14l5 5 5-5" />
                     </svg>
@@ -180,8 +261,16 @@
                 </th>
                 <th @click="sortBy('email')" class="sortable">
                   <div class="th-content">
-                    Email
-                    <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    Display Name
+                    <svg
+                      class="sort-icon"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <path d="M7 10l5-5 5 5" />
                       <path d="M7 14l5 5 5-5" />
                     </svg>
@@ -190,7 +279,15 @@
                 <th @click="sortBy('role')" class="sortable">
                   <div class="th-content">
                     Role
-                    <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                      class="sort-icon"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <path d="M7 10l5-5 5 5" />
                       <path d="M7 14l5 5 5-5" />
                     </svg>
@@ -199,7 +296,15 @@
                 <th @click="sortBy('orgUnit')" class="sortable">
                   <div class="th-content">
                     Organization Unit
-                    <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                      class="sort-icon"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <path d="M7 10l5-5 5 5" />
                       <path d="M7 14l5 5 5-5" />
                     </svg>
@@ -208,7 +313,15 @@
                 <th @click="sortBy('status')" class="sortable">
                   <div class="th-content">
                     Status
-                    <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                      class="sort-icon"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <path d="M7 10l5-5 5 5" />
                       <path d="M7 14l5 5 5-5" />
                     </svg>
@@ -217,7 +330,15 @@
                 <th @click="sortBy('lastLogin')" class="sortable">
                   <div class="th-content">
                     Last Login
-                    <svg class="sort-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg
+                      class="sort-icon"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
                       <path d="M7 10l5-5 5 5" />
                       <path d="M7 14l5 5 5-5" />
                     </svg>
@@ -227,16 +348,20 @@
               </tr>
             </thead>
             <tbody>
-              <tr 
-                v-for="user in paginatedUsers" 
-                :key="user.id" 
+              <tr
+                v-for="user in paginatedUsers"
+                :key="user.id"
                 class="user-row"
-                :class="{ 'online': user.isOnline }"
+                :class="{ online: user.isOnline }"
               >
                 <td class="user-name-cell">
                   <div class="user-info">
                     <div class="user-avatar">
-                      <img v-if="user.avatar" :src="user.avatar" :alt="user.name" />
+                      <img
+                        v-if="user.avatar"
+                        :src="user.avatar"
+                        :alt="user.name"
+                      />
                       <div v-else class="avatar-placeholder">
                         {{ getInitials(user.name) }}
                       </div>
@@ -248,8 +373,11 @@
                     </div>
                   </div>
                 </td>
-                <td class="user-email">
-                  <a :href="'mailto:' + user.email" class="email-link">{{ user.email }}</a>
+                <td class="user-display-name">
+                  <div class="name-display">
+                    <div class="full-name">{{ user.name }}</div>
+                    <div class="email-link">{{ user.email }}</div>
+                  </div>
                 </td>
                 <td class="user-role">
                   <span class="role-badge" :class="user.role">
@@ -263,35 +391,98 @@
                     {{ formatStatus(user.status) }}
                   </span>
                 </td>
-                <td class="user-last-login">{{ formatDate(user.lastLogin) }}</td>
+                <td class="user-last-login">
+                  {{ formatDate(user.lastLogin) }}
+                </td>
                 <td class="user-actions">
                   <div class="action-buttons">
-                    <button @click="viewUser(user)" class="action-button view-btn" title="View Details">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <button
+                      @click="viewUser(user)"
+                      class="action-button view-btn"
+                      title="View Details"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                        />
                         <circle cx="12" cy="12" r="3" />
                       </svg>
                     </button>
-                    <button @click="editUser(user)" class="action-button edit-btn" title="Edit User">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <button
+                      @click="editUser(user)"
+                      class="action-button edit-btn"
+                      title="Edit User"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <path d="M12 20h9" />
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                        <path
+                          d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+                        />
                       </svg>
                     </button>
-                    <button @click="toggleUserStatus(user)" class="action-button toggle-btn" :title="user.status === 'active' ? 'Deactivate' : 'Activate'">
-                      <svg v-if="user.status === 'active'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <button
+                      @click="toggleUserStatus(user)"
+                      class="action-button toggle-btn"
+                      :title="
+                        user.status === 'active' ? 'Deactivate' : 'Activate'
+                      "
+                    >
+                      <svg
+                        v-if="user.status === 'active'"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <circle cx="12" cy="12" r="10" />
                         <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
                       </svg>
-                      <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg
+                        v-else
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                         <polyline points="22,4 12,14.01 9,11.01" />
                       </svg>
                     </button>
-                    <button @click="deleteUser(user)" class="action-button delete-btn" title="Delete User">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <button
+                      @click="deleteUser(user)"
+                      class="action-button delete-btn"
+                      title="Delete User"
+                    >
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
                         <polyline points="3,6 5,6 21,6" />
-                        <path d="m19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2" />
+                        <path
+                          d="m19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -304,26 +495,29 @@
         <!-- Pagination -->
         <div class="pagination-container" v-if="totalPages > 1">
           <div class="pagination-info">
-            Showing {{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, filteredUsers.length) }} of {{ filteredUsers.length }} users
+            Showing {{ (currentPage - 1) * pageSize + 1 }}-{{
+              Math.min(currentPage * pageSize, filteredUsers.length)
+            }}
+            of {{ filteredUsers.length }} users
           </div>
           <div class="pagination">
-            <button 
-              @click="currentPage = 1" 
+            <button
+              @click="currentPage = 1"
               :disabled="currentPage === 1"
               class="pagination-button"
             >
               First
             </button>
-            <button 
-              @click="currentPage--" 
+            <button
+              @click="currentPage--"
               :disabled="currentPage === 1"
               class="pagination-button"
             >
               Previous
             </button>
             <div class="page-numbers">
-              <button 
-                v-for="page in visiblePages" 
+              <button
+                v-for="page in visiblePages"
                 :key="page"
                 @click="currentPage = page"
                 class="page-number"
@@ -332,15 +526,15 @@
                 {{ page }}
               </button>
             </div>
-            <button 
-              @click="currentPage++" 
+            <button
+              @click="currentPage++"
               :disabled="currentPage === totalPages"
               class="pagination-button"
             >
               Next
             </button>
-            <button 
-              @click="currentPage = totalPages" 
+            <button
+              @click="currentPage = totalPages"
               :disabled="currentPage === totalPages"
               class="pagination-button"
             >
@@ -352,12 +546,23 @@
     </div>
 
     <!-- Add/Edit User Modal -->
-    <div v-if="showAddUserModal || showEditUserModal" class="modal-overlay" @click="closeModal">
+    <div
+      v-if="showAddUserModal || showEditUserModal"
+      class="modal-overlay"
+      @click="closeModal"
+    >
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>{{ showAddUserModal ? 'Add New User' : 'Edit User' }}</h3>
+          <h3>{{ showAddUserModal ? "Add New User" : "Edit User" }}</h3>
           <button @click="closeModal" class="close-button">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="m18 6-12 12" />
               <path d="m6 6 12 12" />
             </svg>
@@ -401,8 +606,17 @@
                     <option value="user">User</option>
                     <option value="viewer">Viewer</option>
                   </select>
-                  <small style="color: #28a745; font-size: 0.85rem; margin-top: 0.25rem; display: block; font-weight: 500;">
-                    ✓ All roles can log in. Permissions are controlled via role & permissions.
+                  <small
+                    style="
+                      color: #28a745;
+                      font-size: 0.85rem;
+                      margin-top: 0.25rem;
+                      display: block;
+                      font-weight: 500;
+                    "
+                  >
+                    ✓ All roles can log in. Permissions are controlled via role
+                    & permissions.
                   </small>
                 </div>
                 <div class="form-group">
@@ -411,7 +625,9 @@
                     <option value="">Select Unit</option>
                     <option value="Main Center">Main Center</option>
                     <option value="Outreach - Lusaka">Outreach - Lusaka</option>
-                    <option value="Outreach - Chongwe">Outreach - Chongwe</option>
+                    <option value="Outreach - Chongwe">
+                      Outreach - Chongwe
+                    </option>
                     <option value="Education Unit">Education Unit</option>
                     <option value="Health Unit">Health Unit</option>
                   </select>
@@ -428,7 +644,12 @@
                 </div>
                 <div class="form-group" v-if="showAddUserModal">
                   <label>Temporary Password *</label>
-                  <input v-model="userForm.password" type="password" :required="showAddUserModal" minlength="8" />
+                  <input
+                    v-model="userForm.password"
+                    type="password"
+                    :required="showAddUserModal"
+                    minlength="8"
+                  />
                 </div>
               </div>
             </div>
@@ -436,24 +657,41 @@
             <div class="form-section">
               <h4>Permissions</h4>
               <div class="permissions-instruction">
-                <p>Select specific permissions for this user. Administrators have all permissions by default.</p>
+                <p>
+                  Select specific permissions for this user. Administrators have
+                  all permissions by default.
+                </p>
               </div>
               <div class="permissions-grid">
-                <div class="permission-category" v-for="category in permissionCategories" :key="category.id">
+                <div
+                  class="permission-category"
+                  v-for="category in permissionCategories"
+                  :key="category.id"
+                >
                   <div class="category-header">
                     <h5>{{ category.name }}</h5>
-                    <button 
-                      @click="toggleCategory(category.id)" 
+                    <button
+                      @click="toggleCategory(category.id)"
                       class="toggle-category"
-                      :class="{ 'all-selected': isCategoryFullySelected(category) }"
+                      :class="{
+                        'all-selected': isCategoryFullySelected(category),
+                      }"
                     >
-                      {{ isCategoryFullySelected(category) ? 'Deselect All' : 'Select All' }}
+                      {{
+                        isCategoryFullySelected(category)
+                          ? "Deselect All"
+                          : "Select All"
+                      }}
                     </button>
                   </div>
                   <div class="category-permissions">
-                    <label class="permission-item" v-for="permission in category.permissions" :key="permission.id">
-                      <input 
-                        type="checkbox" 
+                    <label
+                      class="permission-item"
+                      v-for="permission in category.permissions"
+                      :key="permission.id"
+                    >
+                      <input
+                        type="checkbox"
                         :value="permission.id"
                         v-model="userForm.permissions"
                         :disabled="userForm.role === 'admin'"
@@ -461,18 +699,27 @@
                       <span class="checkmark"></span>
                       <div class="permission-info">
                         <div class="permission-name">{{ permission.name }}</div>
-                        <div class="permission-description">{{ permission.description }}</div>
+                        <div class="permission-description">
+                          {{ permission.description }}
+                        </div>
                       </div>
                     </label>
                   </div>
                 </div>
               </div>
-              <div class="permissions-summary" v-if="userForm.permissions.length > 0">
-                <strong>Selected Permissions ({{ userForm.permissions.length }}):</strong>
+              <div
+                class="permissions-summary"
+                v-if="userForm.permissions.length > 0"
+              >
+                <strong
+                  >Selected Permissions ({{
+                    userForm.permissions.length
+                  }}):</strong
+                >
                 <div class="selected-permissions">
-                  <span 
-                    v-for="permission in getSelectedPermissionNames()" 
-                    :key="permission.id" 
+                  <span
+                    v-for="permission in getSelectedPermissionNames()"
+                    :key="permission.id"
                     class="permission-tag"
                   >
                     {{ permission.name }}
@@ -486,7 +733,13 @@
                 Cancel
               </button>
               <button type="submit" class="save-button" :disabled="userLoading">
-                {{ userLoading ? 'Saving...' : (showAddUserModal ? 'Create User' : 'Update User') }}
+                {{
+                  userLoading
+                    ? "Saving..."
+                    : showAddUserModal
+                    ? "Create User"
+                    : "Update User"
+                }}
               </button>
             </div>
           </form>
@@ -495,12 +748,23 @@
     </div>
 
     <!-- User Details Modal -->
-    <div v-if="showUserDetailsModal" class="modal-overlay" @click="showUserDetailsModal = false">
+    <div
+      v-if="showUserDetailsModal"
+      class="modal-overlay"
+      @click="showUserDetailsModal = false"
+    >
       <div class="modal-content large-modal" @click.stop>
         <div class="modal-header">
           <h3>User Details - {{ selectedUser?.name }}</h3>
           <button @click="showUserDetailsModal = false" class="close-button">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="m18 6-12 12" />
               <path d="m6 6 12 12" />
             </svg>
@@ -522,7 +786,8 @@
                     <strong>Email:</strong> {{ selectedUser.email }}
                   </div>
                   <div class="detail-item">
-                    <strong>Phone:</strong> {{ selectedUser.phone || 'Not provided' }}
+                    <strong>Phone:</strong>
+                    {{ selectedUser.phone || "Not provided" }}
                   </div>
                 </div>
               </div>
@@ -531,18 +796,24 @@
                 <h4>System Access</h4>
                 <div class="detail-grid">
                   <div class="detail-item">
-                    <strong>Role:</strong> 
-                    <span class="role-badge" :class="selectedUser.role">{{ formatRole(selectedUser.role) }}</span>
+                    <strong>Role:</strong>
+                    <span class="role-badge" :class="selectedUser.role">{{
+                      formatRole(selectedUser.role)
+                    }}</span>
                   </div>
                   <div class="detail-item">
-                    <strong>Organization Unit:</strong> {{ selectedUser.orgUnit }}
+                    <strong>Organization Unit:</strong>
+                    {{ selectedUser.orgUnit }}
                   </div>
                   <div class="detail-item">
-                    <strong>Status:</strong> 
-                    <span class="status-badge" :class="selectedUser.status">{{ formatStatus(selectedUser.status) }}</span>
+                    <strong>Status:</strong>
+                    <span class="status-badge" :class="selectedUser.status">{{
+                      formatStatus(selectedUser.status)
+                    }}</span>
                   </div>
                   <div class="detail-item">
-                    <strong>Last Login:</strong> {{ formatDate(selectedUser.lastLogin) }}
+                    <strong>Last Login:</strong>
+                    {{ formatDate(selectedUser.lastLogin) }}
                   </div>
                 </div>
               </div>
@@ -551,18 +822,25 @@
                 <h4>Activity</h4>
                 <div class="detail-grid">
                   <div class="detail-item">
-                    <strong>Created:</strong> {{ formatDate(selectedUser.createdAt) }}
+                    <strong>Created:</strong>
+                    {{ formatDate(selectedUser.createdAt) }}
                   </div>
                   <div class="detail-item">
-                    <strong>Updated:</strong> {{ formatDate(selectedUser.updatedAt) }}
+                    <strong>Updated:</strong>
+                    {{ formatDate(selectedUser.updatedAt) }}
                   </div>
                   <div class="detail-item">
-                    <strong>Login Count:</strong> {{ selectedUser.loginCount || 0 }}
+                    <strong>Login Count:</strong>
+                    {{ selectedUser.loginCount || 0 }}
                   </div>
                   <div class="detail-item">
-                    <strong>Online:</strong> 
-                    <span :class="selectedUser.isOnline ? 'text-success' : 'text-muted'">
-                      {{ selectedUser.isOnline ? 'Yes' : 'No' }}
+                    <strong>Online:</strong>
+                    <span
+                      :class="
+                        selectedUser.isOnline ? 'text-success' : 'text-muted'
+                      "
+                    >
+                      {{ selectedUser.isOnline ? "Yes" : "No" }}
                     </span>
                   </div>
                 </div>
@@ -584,354 +862,445 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useToast } from '../composables/useToast.js'
-import UserService from '../services/userService.js'
-import AuthService from '../services/auth.js'
+import { ref, computed, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useToast } from "../composables/useToast.js";
+import UserService from "../services/userService.js";
+import AuthService from "../services/auth.js";
 
-const router = useRouter()
-const { success, error, confirm } = useToast()
+const router = useRouter();
+const { success, error, confirm } = useToast();
 
 // Reactive data
-const loading = ref(false)
-const userLoading = ref(false)
-const loadingMessage = ref('')
-const searchQuery = ref('')
-const selectedStatus = ref('')
-const selectedRole = ref('')
-const selectedOrgUnit = ref('')
-const sortField = ref('name')
-const sortOrder = ref('asc')
-const currentPage = ref(1)
-const pageSize = ref(10)
+const loading = ref(false);
+const userLoading = ref(false);
+const loadingMessage = ref("");
+const searchQuery = ref("");
+const selectedStatus = ref("");
+const selectedRole = ref("");
+const selectedOrgUnit = ref("");
+const sortField = ref("name");
+const sortOrder = ref("asc");
+const currentPage = ref(1);
+const pageSize = ref(10);
 
 // Modals
-const showAddUserModal = ref(false)
-const showEditUserModal = ref(false)
-const showUserDetailsModal = ref(false)
+const showAddUserModal = ref(false);
+const showEditUserModal = ref(false);
+const showUserDetailsModal = ref(false);
 
 // Data
-const allUsers = ref([])
-const selectedUser = ref(null)
+const allUsers = ref([]);
+const selectedUser = ref(null);
 
 // Form data
 const userForm = ref({
-  name: '',
-  username: '',
-  email: '',
-  phone: '',
-  role: '',
-  orgUnit: '',
-  status: 'active',
-  password: '',
-  permissions: []
-})
+  name: "",
+  username: "",
+  email: "",
+  phone: "",
+  role: "",
+  orgUnit: "",
+  status: "active",
+  password: "",
+  permissions: [],
+});
 
 const availablePermissions = ref([
-  { id: 'users_read', name: 'View Users', description: 'Can view user information', category: 'users' },
-  { id: 'users_write', name: 'Manage Users', description: 'Can create, edit, and delete users', category: 'users' },
-  { id: 'forms_read', name: 'View Forms', description: 'Can view form data', category: 'forms' },
-  { id: 'forms_write', name: 'Manage Forms', description: 'Can create and edit forms', category: 'forms' },
-  { id: 'reports_read', name: 'View Reports', description: 'Can view reports', category: 'reports' },
-  { id: 'reports_write', name: 'Manage Reports', description: 'Can create and manage reports', category: 'reports' },
-  { id: 'analytics_read', name: 'View Analytics', description: 'Can view analytics and dashboards', category: 'analytics' },
-  { id: 'system_admin', name: 'System Administration', description: 'Full system administration access', category: 'system' }
-])
+  {
+    id: "users_read",
+    name: "View Users",
+    description: "Can view user information",
+    category: "users",
+  },
+  {
+    id: "users_write",
+    name: "Manage Users",
+    description: "Can create, edit, and delete users",
+    category: "users",
+  },
+  {
+    id: "forms_read",
+    name: "View Forms",
+    description: "Can view form data",
+    category: "forms",
+  },
+  {
+    id: "forms_write",
+    name: "Manage Forms",
+    description: "Can create and edit forms",
+    category: "forms",
+  },
+  {
+    id: "reports_read",
+    name: "View Reports",
+    description: "Can view reports",
+    category: "reports",
+  },
+  {
+    id: "reports_write",
+    name: "Manage Reports",
+    description: "Can create and manage reports",
+    category: "reports",
+  },
+  {
+    id: "analytics_read",
+    name: "View Analytics",
+    description: "Can view analytics and dashboards",
+    category: "analytics",
+  },
+  {
+    id: "system_admin",
+    name: "System Administration",
+    description: "Full system administration access",
+    category: "system",
+  },
+]);
 
 const permissionCategories = ref([
   {
-    id: 'users',
-    name: 'User Management',
+    id: "users",
+    name: "User Management",
     permissions: [
-      { id: 'users_read', name: 'View Users', description: 'Can view user information' },
-      { id: 'users_write', name: 'Manage Users', description: 'Can create, edit, and delete users' }
-    ]
+      {
+        id: "users_read",
+        name: "View Users",
+        description: "Can view user information",
+      },
+      {
+        id: "users_write",
+        name: "Manage Users",
+        description: "Can create, edit, and delete users",
+      },
+    ],
   },
   {
-    id: 'forms',
-    name: 'Form Management',
+    id: "forms",
+    name: "Form Management",
     permissions: [
-      { id: 'forms_read', name: 'View Forms', description: 'Can view form data' },
-      { id: 'forms_write', name: 'Manage Forms', description: 'Can create and edit forms' }
-    ]
+      {
+        id: "forms_read",
+        name: "View Forms",
+        description: "Can view form data",
+      },
+      {
+        id: "forms_write",
+        name: "Manage Forms",
+        description: "Can create and edit forms",
+      },
+    ],
   },
   {
-    id: 'reports',
-    name: 'Report Management',
+    id: "reports",
+    name: "Report Management",
     permissions: [
-      { id: 'reports_read', name: 'View Reports', description: 'Can view reports' },
-      { id: 'reports_write', name: 'Manage Reports', description: 'Can create and manage reports' }
-    ]
+      {
+        id: "reports_read",
+        name: "View Reports",
+        description: "Can view reports",
+      },
+      {
+        id: "reports_write",
+        name: "Manage Reports",
+        description: "Can create and manage reports",
+      },
+    ],
   },
   {
-    id: 'analytics',
-    name: 'Analytics & Dashboards',
+    id: "analytics",
+    name: "Analytics & Dashboards",
     permissions: [
-      { id: 'analytics_read', name: 'View Analytics', description: 'Can view analytics and dashboards' }
-    ]
+      {
+        id: "analytics_read",
+        name: "View Analytics",
+        description: "Can view analytics and dashboards",
+      },
+    ],
   },
   {
-    id: 'system',
-    name: 'System Administration',
+    id: "system",
+    name: "System Administration",
     permissions: [
-      { id: 'system_admin', name: 'System Administration', description: 'Full system administration access' }
-    ]
-  }
-])
+      {
+        id: "system_admin",
+        name: "System Administration",
+        description: "Full system administration access",
+      },
+    ],
+  },
+]);
 
 // Computed properties
 const filteredUsers = computed(() => {
-  let filtered = allUsers.value
+  let filtered = allUsers.value;
 
   // Search filter
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(user => 
-      user.name.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query) ||
-      user.username.toLowerCase().includes(query) ||
-      user.role.toLowerCase().includes(query)
-    )
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(
+      (user) =>
+        user.name.toLowerCase().includes(query) ||
+        user.email.toLowerCase().includes(query) ||
+        user.username.toLowerCase().includes(query) ||
+        user.role.toLowerCase().includes(query)
+    );
   }
 
   // Status filter
   if (selectedStatus.value) {
-    filtered = filtered.filter(user => user.status === selectedStatus.value)
+    filtered = filtered.filter((user) => user.status === selectedStatus.value);
   }
 
   // Role filter
   if (selectedRole.value) {
-    filtered = filtered.filter(user => user.role === selectedRole.value)
+    filtered = filtered.filter((user) => user.role === selectedRole.value);
   }
 
   // Org unit filter
   if (selectedOrgUnit.value) {
-    filtered = filtered.filter(user => user.orgUnit === selectedOrgUnit.value)
+    filtered = filtered.filter(
+      (user) => user.orgUnit === selectedOrgUnit.value
+    );
   }
 
   // Sort
   filtered.sort((a, b) => {
-    const aVal = a[sortField.value]
-    const bVal = b[sortField.value]
-    
-    if (sortOrder.value === 'asc') {
-      return aVal > bVal ? 1 : -1
-    } else {
-      return aVal < bVal ? 1 : -1
-    }
-  })
+    const aVal = a[sortField.value];
+    const bVal = b[sortField.value];
 
-  return filtered
-})
+    if (sortOrder.value === "asc") {
+      return aVal > bVal ? 1 : -1;
+    } else {
+      return aVal < bVal ? 1 : -1;
+    }
+  });
+
+  return filtered;
+});
 
 const paginatedUsers = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  return filteredUsers.value.slice(start, end)
-})
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return filteredUsers.value.slice(start, end);
+});
 
-const totalPages = computed(() => 
+const totalPages = computed(() =>
   Math.ceil(filteredUsers.value.length / pageSize.value)
-)
+);
 
 const visiblePages = computed(() => {
-  const pages = []
-  const start = Math.max(1, currentPage.value - 2)
-  const end = Math.min(totalPages.value, start + 4)
-  
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-  
-  return pages
-})
+  const pages = [];
+  const start = Math.max(1, currentPage.value - 2);
+  const end = Math.min(totalPages.value, start + 4);
 
-const totalUsers = computed(() => allUsers.value.length)
-const activeUsers = computed(() => allUsers.value.filter(u => u.status === 'active').length)
-const inactiveUsers = computed(() => allUsers.value.filter(u => u.status === 'inactive').length)
-const onlineUsers = computed(() => allUsers.value.filter(u => u.isOnline).length)
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  return pages;
+});
+
+const totalUsers = computed(() => allUsers.value.length);
+const activeUsers = computed(
+  () => allUsers.value.filter((u) => u.status === "active").length
+);
+const inactiveUsers = computed(
+  () => allUsers.value.filter((u) => u.status === "inactive").length
+);
+const onlineUsers = computed(
+  () => allUsers.value.filter((u) => u.isOnline).length
+);
 
 // Methods
 const goBack = () => {
-  router.push('/dashboard')
-}
+  router.push("/dashboard");
+};
 
 const handleLogout = async () => {
-  const result = await AuthService.logout()
+  const result = await AuthService.logout();
   if (result.success) {
-    router.push('/login')
+    router.push("/login");
   }
-}
+};
 
 const performSearch = () => {
-  currentPage.value = 1
-}
+  currentPage.value = 1;
+};
 
 const clearSearch = () => {
-  searchQuery.value = ''
-  currentPage.value = 1
-}
+  searchQuery.value = "";
+  currentPage.value = 1;
+};
 
 const applyFilters = () => {
-  currentPage.value = 1
-}
+  currentPage.value = 1;
+};
 
 const resetFilters = () => {
-  searchQuery.value = ''
-  selectedStatus.value = ''
-  selectedRole.value = ''
-  selectedOrgUnit.value = ''
-  currentPage.value = 1
-}
+  searchQuery.value = "";
+  selectedStatus.value = "";
+  selectedRole.value = "";
+  selectedOrgUnit.value = "";
+  currentPage.value = 1;
+};
 
 const sortBy = (field) => {
   if (sortField.value === field) {
-    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+    sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
   } else {
-    sortField.value = field
-    sortOrder.value = 'asc'
+    sortField.value = field;
+    sortOrder.value = "asc";
   }
-}
+};
 
 const exportUsers = async () => {
   try {
-    loading.value = true
-    loadingMessage.value = 'Exporting users...'
-    
-    const result = await UserService.exportUsers('csv')
-    
+    loading.value = true;
+    loadingMessage.value = "Exporting users...";
+
+    const result = await UserService.exportUsers("csv");
+
     if (result.success) {
       // Create and download CSV file
-      const blob = new Blob([result.data], { type: 'text/csv' })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `kukhoma-users-${new Date().toISOString().split('T')[0]}.csv`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      window.URL.revokeObjectURL(url)
-      
-      alert('Users exported successfully')
+      const blob = new Blob([result.data], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `kukhoma-users-${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      alert("Users exported successfully");
     } else {
-      alert('Failed to export users: ' + result.error)
+      alert("Failed to export users: " + result.error);
     }
   } catch (error) {
-    alert('An error occurred while exporting users')
+    alert("An error occurred while exporting users");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const refreshUsers = () => {
-  loadUsers()
-}
+  loadUsers();
+};
 
 const getInitials = (name) => {
-  if (!name || typeof name !== 'string') {
-    return 'U'
+  if (!name || typeof name !== "string") {
+    return "U";
   }
-  return name
-    .split(' ')
-    .filter(word => word.length > 0)
-    .map(word => word[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) || 'U'
-}
+  return (
+    name
+      .split(" ")
+      .filter((word) => word.length > 0)
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "U"
+  );
+};
 
 const formatRole = (role) => {
   const roleMap = {
-    admin: 'Administrator',
-    manager: 'Manager',
-    user: 'User',
-    viewer: 'Viewer'
-  }
-  return roleMap[role] || role
-}
+    admin: "Administrator",
+    manager: "Manager",
+    user: "User",
+    viewer: "Viewer",
+  };
+  return roleMap[role] || role;
+};
 
 const formatStatus = (status) => {
   const statusMap = {
-    active: 'Active',
-    inactive: 'Inactive',
-    suspended: 'Suspended'
-  }
-  return statusMap[status] || status
-}
+    active: "Active",
+    inactive: "Inactive",
+    suspended: "Suspended",
+  };
+  return statusMap[status] || status;
+};
 
 const formatDate = (date) => {
-  if (!date) return 'Never'
-  return new Date(date).toLocaleDateString() + ' ' + new Date(date).toLocaleTimeString()
-}
+  if (!date) return "Never";
+  return (
+    new Date(date).toLocaleDateString() +
+    " " +
+    new Date(date).toLocaleTimeString()
+  );
+};
 
 const viewUser = (user) => {
-  selectedUser.value = user
-  showUserDetailsModal.value = true
-}
+  selectedUser.value = user;
+  showUserDetailsModal.value = true;
+};
 
 const editUser = (user) => {
-  selectedUser.value = user
+  selectedUser.value = user;
   userForm.value = {
     ...user,
-    permissions: user.permissions || []
-  }
-  showEditUserModal.value = true
-}
+    permissions: user.permissions || [],
+  };
+  showEditUserModal.value = true;
+};
 
 const toggleUserStatus = async (user) => {
-  const newStatus = user.status === 'active' ? 'inactive' : 'active'
-  const confirmMessage = `Are you sure you want to ${newStatus === 'active' ? 'activate' : 'deactivate'} ${user.name}?`
-  
-  const confirmed = await confirm(confirmMessage, 'Update User Status')
+  const newStatus = user.status === "active" ? "inactive" : "active";
+  const confirmMessage = `Are you sure you want to ${
+    newStatus === "active" ? "activate" : "deactivate"
+  } ${user.name}?`;
+
+  const confirmed = await confirm(confirmMessage, "Update User Status");
   if (confirmed) {
     try {
-      userLoading.value = true
-      const result = await UserService.updateUserStatus(user.id, newStatus)
-      
+      userLoading.value = true;
+      const result = await UserService.updateUserStatus(user.id, newStatus);
+
       if (result.success) {
-        user.status = newStatus
-        success(result.message)
+        user.status = newStatus;
+        success(result.message);
       } else {
-        error('Failed to update user status: ' + result.error)
+        error("Failed to update user status: " + result.error);
       }
     } catch (err) {
-      error('An error occurred while updating user status')
+      error("An error occurred while updating user status");
     } finally {
-      userLoading.value = false
+      userLoading.value = false;
     }
   }
-}
+};
 
 const deleteUser = async (user) => {
-  const confirmMessage = `Are you sure you want to delete ${user.name}? This action cannot be undone.`
-  
-  const confirmed = await confirm(confirmMessage, 'Delete User')
+  const confirmMessage = `Are you sure you want to delete ${user.name}? This action cannot be undone.`;
+
+  const confirmed = await confirm(confirmMessage, "Delete User");
   if (confirmed) {
     try {
-      userLoading.value = true
-      const result = await UserService.deleteUser(user.id)
-      
+      userLoading.value = true;
+      const result = await UserService.deleteUser(user.id);
+
       if (result.success) {
-        allUsers.value = allUsers.value.filter(u => u.id !== user.id)
-        success(result.message)
+        allUsers.value = allUsers.value.filter((u) => u.id !== user.id);
+        success(result.message);
       } else {
-        error('Failed to delete user: ' + result.error)
+        error("Failed to delete user: " + result.error);
       }
     } catch (err) {
-      error('An error occurred while deleting user')
+      error("An error occurred while deleting user");
     } finally {
-      userLoading.value = false
+      userLoading.value = false;
     }
   }
-}
+};
 
 const saveUser = async () => {
-  userLoading.value = true
-  
+  userLoading.value = true;
+
   try {
     if (showAddUserModal.value) {
-      const result = await UserService.addUser(userForm.value)
+      const result = await UserService.addUser(userForm.value);
       if (result.success) {
         allUsers.value.push({
           id: result.id,
@@ -939,148 +1308,167 @@ const saveUser = async () => {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           isOnline: false,
-          loginCount: 0
-        })
-        success('User created successfully')
+          loginCount: 0,
+        });
+        success("User created successfully");
       } else {
-        error('Failed to create user: ' + result.error)
+        error("Failed to create user: " + result.error);
       }
     } else {
-      const result = await UserService.updateUser(selectedUser.value.id, userForm.value)
+      const result = await UserService.updateUser(
+        selectedUser.value.id,
+        userForm.value
+      );
       if (result.success) {
-        const userIndex = allUsers.value.findIndex(u => u.id === selectedUser.value.id)
+        const userIndex = allUsers.value.findIndex(
+          (u) => u.id === selectedUser.value.id
+        );
         if (userIndex !== -1) {
           allUsers.value[userIndex] = {
             ...allUsers.value[userIndex],
             ...userForm.value,
-            updatedAt: new Date().toISOString()
-          }
+            updatedAt: new Date().toISOString(),
+          };
         }
-        success('User updated successfully')
+        success("User updated successfully");
       } else {
-        error('Failed to update user: ' + result.error)
+        error("Failed to update user: " + result.error);
       }
     }
-    
-    closeModal()
-    
+
+    closeModal();
   } catch (error) {
-    error('An error occurred while saving the user')
+    error("An error occurred while saving the user");
   } finally {
-    userLoading.value = false
+    userLoading.value = false;
   }
-}
+};
 
 const closeModal = () => {
-  showAddUserModal.value = false
-  showEditUserModal.value = false
-  showUserDetailsModal.value = false
-  selectedUser.value = null
-  resetUserForm()
-}
+  showAddUserModal.value = false;
+  showEditUserModal.value = false;
+  showUserDetailsModal.value = false;
+  selectedUser.value = null;
+  resetUserForm();
+};
 
 const resetUserForm = () => {
   userForm.value = {
-    name: '',
-    username: '',
-    email: '',
-    phone: '',
-    role: '',
-    orgUnit: '',
-    status: 'active',
-    password: '',
-    permissions: []
-  }
-}
+    name: "",
+    username: "",
+    email: "",
+    phone: "",
+    role: "",
+    orgUnit: "",
+    status: "active",
+    password: "",
+    permissions: [],
+  };
+};
 
 const loadUsers = async () => {
-  loading.value = true
-  loadingMessage.value = 'Loading users...'
-  
+  loading.value = true;
+  loadingMessage.value = "Loading users...";
+
   try {
-    const result = await UserService.getAllUsers()
+    const result = await UserService.getAllUsers();
     if (result.success) {
-      allUsers.value = result.users || []
+      allUsers.value = result.users || [];
       if (result.users.length === 0) {
-        console.log('No users found in the system')
+        console.log("No users found in the system");
       }
     } else {
-      console.error('Failed to load users:', result.error)
-      
+      console.error("Failed to load users:", result.error);
+
       // Check if it's an index error
-      if (result.error.includes('index') || result.error.includes('Index')) {
-        error('Database indexes are being built. Some features may be limited. Please wait a few minutes and refresh the page.')
+      if (result.error.includes("index") || result.error.includes("Index")) {
+        error(
+          "Database indexes are being built. Some features may be limited. Please wait a few minutes and refresh the page."
+        );
       } else {
-        error('Failed to load users: ' + result.error)
+        error("Failed to load users: " + result.error);
       }
-      
-      allUsers.value = []
+
+      allUsers.value = [];
     }
   } catch (error) {
-    console.error('Error loading users:', error)
-    
-    // Check if it's a Firebase index error
-    if (error.message && (error.message.includes('index') || error.message.includes('Index'))) {
-      error('Database indexes are still being created. The system will work normally once they are ready. Please refresh in a few minutes.')
-    } else {
-      error('An error occurred while loading users. Please check your internet connection and try again.')
-    }
-    
-    allUsers.value = []
-  } finally {
-    loading.value = false
-  }
-}
+    console.error("Error loading users:", error);
 
+    // Check if it's a Firebase index error
+    if (
+      error.message &&
+      (error.message.includes("index") || error.message.includes("Index"))
+    ) {
+      error(
+        "Database indexes are still being created. The system will work normally once they are ready. Please refresh in a few minutes."
+      );
+    } else {
+      error(
+        "An error occurred while loading users. Please check your internet connection and try again."
+      );
+    }
+
+    allUsers.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
 
 // Initialize component
 onMounted(() => {
-  loadUsers()
-})
+  loadUsers();
+});
 
 // Watch for role changes to handle admin role
-watch(() => userForm.value.role, (newRole) => {
-  if (newRole === 'admin') {
-    // Auto-select all permissions for admin
-    userForm.value.permissions = availablePermissions.value.map(p => p.id)
+watch(
+  () => userForm.value.role,
+  (newRole) => {
+    if (newRole === "admin") {
+      // Auto-select all permissions for admin
+      userForm.value.permissions = availablePermissions.value.map((p) => p.id);
+    }
   }
-})
+);
 
 const isCategoryFullySelected = (category) => {
-  return category.permissions.every(permission => userForm.value.permissions.includes(permission.id))
-}
+  return category.permissions.every((permission) =>
+    userForm.value.permissions.includes(permission.id)
+  );
+};
 
 const toggleCategory = (categoryId) => {
-  const category = permissionCategories.value.find(cat => cat.id === categoryId)
-  if (!category) return
-  
-  const allSelected = isCategoryFullySelected(category)
-  
+  const category = permissionCategories.value.find(
+    (cat) => cat.id === categoryId
+  );
+  if (!category) return;
+
+  const allSelected = isCategoryFullySelected(category);
+
   if (allSelected) {
     // Deselect all in category
     userForm.value.permissions = userForm.value.permissions.filter(
-      permId => !category.permissions.some(p => p.id === permId)
-    )
+      (permId) => !category.permissions.some((p) => p.id === permId)
+    );
   } else {
     // Select all in category
-    category.permissions.forEach(permission => {
+    category.permissions.forEach((permission) => {
       if (!userForm.value.permissions.includes(permission.id)) {
-        userForm.value.permissions.push(permission.id)
+        userForm.value.permissions.push(permission.id);
       }
-    })
+    });
   }
-}
+};
 
 const getSelectedPermissionNames = () => {
-  return availablePermissions.value.filter(
-    perm => userForm.value.permissions.includes(perm.id)
-  )
-}
+  return availablePermissions.value.filter((perm) =>
+    userForm.value.permissions.includes(perm.id)
+  );
+};
 
 // Watch for filter changes
 watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
-  currentPage.value = 1
-})
+  currentPage.value = 1;
+});
 </script>
 
 <style scoped>
@@ -1098,7 +1486,7 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-left {
@@ -1233,7 +1621,7 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
   border-radius: 0.5rem;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .search-section {
@@ -1265,7 +1653,7 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
 .search-input:focus {
   outline: none;
   border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .clear-search {
@@ -1315,7 +1703,7 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
 .filter-select:focus {
   outline: none;
   border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .filter-actions {
@@ -1323,7 +1711,8 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
   gap: 0.5rem;
 }
 
-.filter-button, .reset-button {
+.filter-button,
+.reset-button {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 0.25rem;
@@ -1384,7 +1773,7 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
 .users-table-container {
   background: white;
   border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
@@ -1408,7 +1797,8 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
   gap: 0.5rem;
 }
 
-.export-button, .refresh-button {
+.export-button,
+.refresh-button {
   background: white;
   border: 1px solid #ced4da;
   padding: 0.5rem 0.75rem;
@@ -1421,7 +1811,8 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
   transition: all 0.2s;
 }
 
-.export-button:hover, .refresh-button:hover {
+.export-button:hover,
+.refresh-button:hover {
   background: #f8f9fa;
 }
 
@@ -1758,7 +2149,7 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1772,7 +2163,7 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
   max-width: 700px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .large-modal {
@@ -1856,7 +2247,7 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
 .form-group select:focus {
   outline: none;
   border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .permissions-instruction {
@@ -2087,7 +2478,7 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -2099,7 +2490,7 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
   padding: 2rem;
   border-radius: 0.5rem;
   text-align: center;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .spinner {
@@ -2113,8 +2504,12 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-spinner p {
@@ -2131,7 +2526,9 @@ watch([selectedStatus, selectedRole, selectedOrgUnit, searchQuery], () => {
     gap: 1rem;
   }
 
-  .header-left, .header-center, .header-right {
+  .header-left,
+  .header-center,
+  .header-right {
     flex: none;
     width: 100%;
   }
