@@ -2,18 +2,29 @@
   <div class="form-wrapper">
     <div class="form-header">
       <h3>Child Overview and Background (TKP Care Plan)</h3>
-      <p>Complete this form to document child information and background details</p>
+      <p>
+        Complete this form to document child information and background details
+      </p>
       <div class="form-progress">
         <div class="progress-bar">
-          <div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div>
+          <div
+            class="progress-fill"
+            :style="{ width: progressPercentage + '%' }"
+          ></div>
         </div>
         <div class="progress-info">
-          <span class="progress-text">Section {{ currentSection }} of {{ totalSections }} • {{ overallCompletion }}% Complete</span>
+          <span class="progress-text"
+            >Section {{ currentSection }} of {{ totalSections }} •
+            {{ overallCompletion }}% Complete</span
+          >
           <span class="section-title">{{ currentSectionName }}</span>
           <div class="section-status">
-            <span class="status-indicator" :class="{ 'complete': sectionCompletionStatus[currentSection - 1] }">
-              {{ sectionCompletionStatus[currentSection - 1] ? '✓' : '○' }} 
-              {{ currentSection <= 5 ? 'Required' : 'Optional' }}
+            <span
+              class="status-indicator"
+              :class="{ complete: sectionCompletionStatus[currentSection - 1] }"
+            >
+              {{ sectionCompletionStatus[currentSection - 1] ? "✓" : "○" }}
+              {{ currentSection <= 5 ? "Required" : "Optional" }}
             </span>
           </div>
         </div>
@@ -21,17 +32,31 @@
     </div>
 
     <!-- Validation Message -->
-    <div v-if="showValidationMessage && Object.keys(validationErrors).length > 0" class="validation-message">
+    <div
+      v-if="showValidationMessage && Object.keys(validationErrors).length > 0"
+      class="validation-message"
+    >
       <div class="validation-header">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
         <span>Please complete the following required fields:</span>
       </div>
       <ul class="validation-list">
-        <li v-for="(error, field) in validationErrors" :key="field" class="validation-item">
+        <li
+          v-for="(error, field) in validationErrors"
+          :key="field"
+          class="validation-item"
+        >
           {{ error }}
         </li>
       </ul>
@@ -42,100 +67,277 @@
       <div v-show="currentSection === 1" class="form-section">
         <h4>Child Information</h4>
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors.childFirstName }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.childFirstName }"
+          >
             <label>Child First Name *</label>
-            <input v-model="formData.childFirstName" type="text" required @input="clearFieldError('childFirstName')" />
-            <div v-if="validationErrors.childFirstName" class="error-message">{{ validationErrors.childFirstName }}</div>
+            <input
+              v-model="formData.childFirstName"
+              type="text"
+              required
+              @input="clearFieldError('childFirstName')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.childFirstName" class="error-message">
+              {{ validationErrors.childFirstName }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.childMiddleName }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.childMiddleName }"
+          >
             <label>Child Middle Name</label>
-            <input v-model="formData.childMiddleName" type="text" />
+            <input
+              v-model="formData.childMiddleName"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.childSurname }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.childSurname }"
+          >
             <label>Child Surname *</label>
-            <input v-model="formData.childSurname" type="text" required @input="clearFieldError('childSurname')" />
-            <div v-if="validationErrors.childSurname" class="error-message">{{ validationErrors.childSurname }}</div>
+            <input
+              v-model="formData.childSurname"
+              type="text"
+              required
+              @input="clearFieldError('childSurname')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.childSurname" class="error-message">
+              {{ validationErrors.childSurname }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.otherFirstName }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.otherFirstName }"
+          >
             <label>Other First Name</label>
-            <input v-model="formData.otherFirstName" type="text" />
+            <input
+              v-model="formData.otherFirstName"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.otherMiddleName }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.otherMiddleName }"
+          >
             <label>Other Middle Name</label>
-            <input v-model="formData.otherMiddleName" type="text" />
+            <input
+              v-model="formData.otherMiddleName"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.otherSurname }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.otherSurname }"
+          >
             <label>Other Surname</label>
-            <input v-model="formData.otherSurname" type="text" />
+            <input
+              v-model="formData.otherSurname"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
           <div class="form-group" :class="{ 'has-error': validationErrors.id }">
             <label>ID *</label>
-            <input v-model="formData.id" type="text" required @input="clearFieldError('id')" />
-            <div v-if="validationErrors.id" class="error-message">{{ validationErrors.id }}</div>
+            <input
+              v-model="formData.id"
+              type="text"
+              required
+              @input="clearFieldError('id')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.id" class="error-message">
+              {{ validationErrors.id }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.dateOfAdmission }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.dateOfAdmission }"
+          >
             <label>Date of Admission *</label>
-            <input v-model="formData.dateOfAdmission" type="date" required @input="clearFieldError('dateOfAdmission')" />
-            <div v-if="validationErrors.dateOfAdmission" class="error-message">{{ validationErrors.dateOfAdmission }}</div>
+            <input
+              v-model="formData.dateOfAdmission"
+              type="date"
+              required
+              @input="clearFieldError('dateOfAdmission')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.dateOfAdmission" class="error-message">
+              {{ validationErrors.dateOfAdmission }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.gender }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.gender }"
+          >
             <label>Gender *</label>
-            <select v-model="formData.gender" required @change="clearFieldError('gender')">
+            <select
+              v-model="formData.gender"
+              required
+              @change="clearFieldError('gender')"
+              :disabled="isViewMode"
+            >
               <option value="">Select Gender</option>
               <option value="Female">Female</option>
               <option value="Male">Male</option>
             </select>
-            <div v-if="validationErrors.gender" class="error-message">{{ validationErrors.gender }}</div>
+            <div v-if="validationErrors.gender" class="error-message">
+              {{ validationErrors.gender }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.dateOfBirth }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.dateOfBirth }"
+          >
             <label>Date of Birth *</label>
-            <input v-model="formData.dateOfBirth" type="date" required @input="clearFieldError('dateOfBirth')" />
-            <div v-if="validationErrors.dateOfBirth" class="error-message">{{ validationErrors.dateOfBirth }}</div>
+            <input
+              v-model="formData.dateOfBirth"
+              type="date"
+              required
+              @input="clearFieldError('dateOfBirth')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.dateOfBirth" class="error-message">
+              {{ validationErrors.dateOfBirth }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.ageAtIntake }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.ageAtIntake }"
+          >
             <label>Age at Intake (years) *</label>
-            <input v-model="formData.ageAtIntake" type="number" min="0" max="18" required @input="clearFieldError('ageAtIntake')" />
-            <div v-if="validationErrors.ageAtIntake" class="error-message">{{ validationErrors.ageAtIntake }}</div>
+            <input
+              v-model="formData.ageAtIntake"
+              type="number"
+              min="0"
+              max="18"
+              required
+              @input="clearFieldError('ageAtIntake')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.ageAtIntake" class="error-message">
+              {{ validationErrors.ageAtIntake }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.placeOfBirth }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.placeOfBirth }"
+          >
             <label>Place of Birth *</label>
-            <input v-model="formData.placeOfBirth" type="text" required @input="clearFieldError('placeOfBirth')" />
-            <div v-if="validationErrors.placeOfBirth" class="error-message">{{ validationErrors.placeOfBirth }}</div>
+            <input
+              v-model="formData.placeOfBirth"
+              type="text"
+              required
+              @input="clearFieldError('placeOfBirth')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.placeOfBirth" class="error-message">
+              {{ validationErrors.placeOfBirth }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.residentArea }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.residentArea }"
+          >
             <label>Resident Area at Intake *</label>
-            <input v-model="formData.residentArea" type="text" required @input="clearFieldError('residentArea')" />
-            <div v-if="validationErrors.residentArea" class="error-message">{{ validationErrors.residentArea }}</div>
+            <input
+              v-model="formData.residentArea"
+              type="text"
+              required
+              @input="clearFieldError('residentArea')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.residentArea" class="error-message">
+              {{ validationErrors.residentArea }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.village }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.village }"
+          >
             <label>Village</label>
-            <input v-model="formData.village" type="text" />
+            <input
+              v-model="formData.village"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.chief }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.chief }"
+          >
             <label>Chief</label>
-            <input v-model="formData.chief" type="text" />
+            <input
+              v-model="formData.chief"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.district }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.district }"
+          >
             <label>District *</label>
-            <input v-model="formData.district" type="text" required @input="clearFieldError('district')" />
-            <div v-if="validationErrors.district" class="error-message">{{ validationErrors.district }}</div>
+            <input
+              v-model="formData.district"
+              type="text"
+              required
+              @input="clearFieldError('district')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.district" class="error-message">
+              {{ validationErrors.district }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.tribe }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.tribe }"
+          >
             <label>Tribe</label>
-            <input v-model="formData.tribe" type="text" />
+            <input
+              v-model="formData.tribe"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.denomination }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.denomination }"
+          >
             <label>Denomination</label>
-            <input v-model="formData.denomination" type="text" />
+            <input
+              v-model="formData.denomination"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.nationality }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.nationality }"
+          >
             <label>Nationality *</label>
-            <input v-model="formData.nationality" type="text" required @input="clearFieldError('nationality')" />
-            <div v-if="validationErrors.nationality" class="error-message">{{ validationErrors.nationality }}</div>
+            <input
+              v-model="formData.nationality"
+              type="text"
+              required
+              @input="clearFieldError('nationality')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.nationality" class="error-message">
+              {{ validationErrors.nationality }}
+            </div>
           </div>
         </div>
         <div class="section-navigation">
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
@@ -143,24 +345,44 @@
       <div v-show="currentSection === 2" class="form-section">
         <h4>Vulnerability Status</h4>
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors.ovcStatus }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.ovcStatus }"
+          >
             <label>OVC Status *</label>
-            <select v-model="formData.ovcStatus" required @change="clearFieldError('ovcStatus')">
+            <select
+              v-model="formData.ovcStatus"
+              required
+              @change="clearFieldError('ovcStatus')"
+              :disabled="isViewMode"
+            >
               <option value="">Select Status</option>
               <option value="Vulnerable">Vulnerable</option>
               <option value="Single Orphan">Single Orphan</option>
               <option value="Double Orphan">Double Orphan</option>
               <option value="Serial Orphan">Serial Orphan</option>
             </select>
-            <div v-if="validationErrors.ovcStatus" class="error-message">{{ validationErrors.ovcStatus }}</div>
+            <div v-if="validationErrors.ovcStatus" class="error-message">
+              {{ validationErrors.ovcStatus }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.ovcDateEffective }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.ovcDateEffective }"
+          >
             <label>Date Effective</label>
-            <input v-model="formData.ovcDateEffective" type="date" />
+            <input
+              v-model="formData.ovcDateEffective"
+              type="date"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.parentDeceased }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.parentDeceased }"
+          >
             <label>Parent Deceased</label>
-            <select v-model="formData.parentDeceased">
+            <select v-model="formData.parentDeceased" :disabled="isViewMode">
               <option value="">Select</option>
               <option value="Father">Father</option>
               <option value="Mother">Mother</option>
@@ -168,26 +390,47 @@
               <option value="Neither">Neither</option>
             </select>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.parentDeathDate }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.parentDeathDate }"
+          >
             <label>Date of Death</label>
-            <input v-model="formData.parentDeathDate" type="date" />
+            <input
+              v-model="formData.parentDeathDate"
+              type="date"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.guardianDeceased }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.guardianDeceased }"
+          >
             <label>Guardian Deceased</label>
-            <select v-model="formData.guardianDeceased">
+            <select v-model="formData.guardianDeceased" :disabled="isViewMode">
               <option value="">Select</option>
               <option value="Y">Yes</option>
               <option value="N">No</option>
             </select>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.guardianDeathDate }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.guardianDeathDate }"
+          >
             <label>Guardian Date of Death</label>
-            <input v-model="formData.guardianDeathDate" type="date" />
+            <input
+              v-model="formData.guardianDeathDate"
+              type="date"
+              :disabled="isViewMode"
+            />
           </div>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
@@ -195,75 +438,148 @@
       <div v-show="currentSection === 3" class="form-section">
         <h4>Referral Method</h4>
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors.referralMethod }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.referralMethod }"
+          >
             <label>Select One *</label>
-            <select v-model="formData.referralMethod" required @change="clearFieldError('referralMethod')">
+            <select
+              v-model="formData.referralMethod"
+              required
+              @change="clearFieldError('referralMethod')"
+              :disabled="isViewMode"
+            >
               <option value="">Select Method</option>
               <option value="Family Legacy">Family Legacy</option>
               <option value="Coptic Hospital">Coptic Hospital</option>
-              <option value="Department of Social Welfare - Lusaka">Department of Social Welfare - Lusaka</option>
-              <option value="Department of Social Welfare - Chongwe">Department of Social Welfare - Chongwe</option>
+              <option value="Department of Social Welfare - Lusaka">
+                Department of Social Welfare - Lusaka
+              </option>
+              <option value="Department of Social Welfare - Chongwe">
+                Department of Social Welfare - Chongwe
+              </option>
               <option value="Other">Other</option>
             </select>
-            <div v-if="validationErrors.referralMethod" class="error-message">{{ validationErrors.referralMethod }}</div>
+            <div v-if="validationErrors.referralMethod" class="error-message">
+              {{ validationErrors.referralMethod }}
+            </div>
           </div>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
       <!-- Reason for Admission Section -->
       <div v-show="currentSection === 4" class="form-section">
         <h4>Reason(s) for Admission</h4>
-        <div class="form-group" :class="{ 'has-error': validationErrors.reasons }">
+        <div
+          class="form-group"
+          :class="{ 'has-error': validationErrors.reasons }"
+        >
           <label>Select All That Apply *</label>
           <div class="checkbox-group">
             <label class="checkbox-item">
-              <input type="checkbox" v-model="formData.reasons.attemptedAbortion" />
+              <input
+                type="checkbox"
+                v-model="formData.reasons.attemptedAbortion"
+                :disabled="isViewMode"
+              />
               Attempted/Considered Abortion
             </label>
             <label class="checkbox-item">
-              <input type="checkbox" v-model="formData.reasons.attemptedSuicide" />
+              <input
+                type="checkbox"
+                v-model="formData.reasons.attemptedSuicide"
+                :disabled="isViewMode"
+              />
               Attempted/Considered Suicide
             </label>
             <label class="checkbox-item">
-              <input type="checkbox" v-model="formData.reasons.pregnant" />
+              <input
+                type="checkbox"
+                v-model="formData.reasons.pregnant"
+                :disabled="isViewMode"
+              />
               Pregnant
             </label>
             <label class="checkbox-item">
-              <input type="checkbox" v-model="formData.reasons.rapeDefilement" />
+              <input
+                type="checkbox"
+                v-model="formData.reasons.rapeDefilement"
+                :disabled="isViewMode"
+              />
               Rape/Defilement
             </label>
             <label class="checkbox-item">
-              <input type="checkbox" v-model="formData.reasons.survivalProstitution" />
+              <input
+                type="checkbox"
+                v-model="formData.reasons.survivalProstitution"
+                :disabled="isViewMode"
+              />
               Survival Prostitution
             </label>
             <label class="checkbox-item">
-              <input type="checkbox" v-model="formData.reasons.other" />
+              <input
+                type="checkbox"
+                v-model="formData.reasons.other"
+                :disabled="isViewMode"
+              />
               Other
             </label>
           </div>
-          <div v-if="validationErrors.reasons" class="error-message">{{ validationErrors.reasons }}</div>
+          <div v-if="validationErrors.reasons" class="error-message">
+            {{ validationErrors.reasons }}
+          </div>
         </div>
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors.estimatedConceptionDate }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.estimatedConceptionDate }"
+          >
             <label>Estimated Date of Conception</label>
-            <input v-model="formData.estimatedConceptionDate" type="date" />
+            <input
+              v-model="formData.estimatedConceptionDate"
+              type="date"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.pregnancyDuration }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.pregnancyDuration }"
+          >
             <label>Current Duration of Pregnancy (Months/weeks)</label>
-            <input v-model="formData.pregnancyDuration" type="text" placeholder="e.g., 12 weeks" />
+            <input
+              v-model="formData.pregnancyDuration"
+              type="text"
+              placeholder="e.g., 12 weeks"
+              :disabled="isViewMode"
+            />
           </div>
         </div>
-        <div class="form-group full-width" :class="{ 'has-error': validationErrors.abuseDetails }">
+        <div
+          class="form-group full-width"
+          :class="{ 'has-error': validationErrors.abuseDetails }"
+        >
           <label>Additional Details of Abuse Situation</label>
-          <textarea v-model="formData.abuseDetails" rows="4"></textarea>
+          <textarea
+            v-model="formData.abuseDetails"
+            rows="4"
+            :disabled="isViewMode"
+          ></textarea>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
@@ -271,244 +587,637 @@
       <div v-show="currentSection === 5" class="form-section">
         <h4>Caregiver/Guardian Information</h4>
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors.dateCompiled }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.dateCompiled }"
+          >
             <label>Date Compiled *</label>
-            <input v-model="formData.dateCompiled" type="date" required @input="clearFieldError('dateCompiled')" />
-            <div v-if="validationErrors.dateCompiled" class="error-message">{{ validationErrors.dateCompiled }}</div>
+            <input
+              v-model="formData.dateCompiled"
+              type="date"
+              required
+              @input="clearFieldError('dateCompiled')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.dateCompiled" class="error-message">
+              {{ validationErrors.dateCompiled }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.childName }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.childName }"
+          >
             <label>Child Name *</label>
-            <input v-model="formData.childName" type="text" required @input="clearFieldError('childName')" />
-            <div v-if="validationErrors.childName" class="error-message">{{ validationErrors.childName }}</div>
+            <input
+              v-model="formData.childName"
+              type="text"
+              required
+              @input="clearFieldError('childName')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.childName" class="error-message">
+              {{ validationErrors.childName }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.childId }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors.childId }"
+          >
             <label>Child ID *</label>
-            <input v-model="formData.childId" type="text" required @input="clearFieldError('childId')" />
-            <div v-if="validationErrors.childId" class="error-message">{{ validationErrors.childId }}</div>
+            <input
+              v-model="formData.childId"
+              type="text"
+              required
+              @input="clearFieldError('childId')"
+              :disabled="isViewMode"
+            />
+            <div v-if="validationErrors.childId" class="error-message">
+              {{ validationErrors.childId }}
+            </div>
           </div>
         </div>
 
         <!-- Primary Caregiver -->
         <h5>Primary Caregiver/Guardian</h5>
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors['primaryCaregiver.name'] }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors['primaryCaregiver.name'] }"
+          >
             <label>Name *</label>
-            <input v-model="formData.primaryCaregiver.name" type="text" required @input="clearFieldError('primaryCaregiver.name')" />
-            <div v-if="validationErrors['primaryCaregiver.name']" class="error-message">{{ validationErrors['primaryCaregiver.name'] }}</div>
+            <input
+              v-model="formData.primaryCaregiver.name"
+              type="text"
+              required
+              @input="clearFieldError('primaryCaregiver.name')"
+              :disabled="isViewMode"
+            />
+            <div
+              v-if="validationErrors['primaryCaregiver.name']"
+              class="error-message"
+            >
+              {{ validationErrors["primaryCaregiver.name"] }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['primaryCaregiver.relationship'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['primaryCaregiver.relationship'],
+            }"
+          >
             <label>Relationship to Child *</label>
-            <input v-model="formData.primaryCaregiver.relationship" type="text" required @input="clearFieldError('primaryCaregiver.relationship')" />
-            <div v-if="validationErrors['primaryCaregiver.relationship']" class="error-message">{{ validationErrors['primaryCaregiver.relationship'] }}</div>
+            <input
+              v-model="formData.primaryCaregiver.relationship"
+              type="text"
+              required
+              @input="clearFieldError('primaryCaregiver.relationship')"
+              :disabled="isViewMode"
+            />
+            <div
+              v-if="validationErrors['primaryCaregiver.relationship']"
+              class="error-message"
+            >
+              {{ validationErrors["primaryCaregiver.relationship"] }}
+            </div>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['primaryCaregiver.phone1'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['primaryCaregiver.phone1'],
+            }"
+          >
             <label>Phone #1</label>
-            <input v-model="formData.primaryCaregiver.phone1" type="tel" />
+            <input
+              v-model="formData.primaryCaregiver.phone1"
+              type="tel"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['primaryCaregiver.phone2'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['primaryCaregiver.phone2'],
+            }"
+          >
             <label>Phone #2</label>
-            <input v-model="formData.primaryCaregiver.phone2" type="tel" />
+            <input
+              v-model="formData.primaryCaregiver.phone2"
+              type="tel"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['primaryCaregiver.occupation'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['primaryCaregiver.occupation'],
+            }"
+          >
             <label>Occupation</label>
-            <input v-model="formData.primaryCaregiver.occupation" type="text" />
+            <input
+              v-model="formData.primaryCaregiver.occupation"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['primaryCaregiver.area'] }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors['primaryCaregiver.area'] }"
+          >
             <label>Area of Town</label>
-            <input v-model="formData.primaryCaregiver.area" type="text" />
+            <input
+              v-model="formData.primaryCaregiver.area"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['primaryCaregiver.age'] }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors['primaryCaregiver.age'] }"
+          >
             <label>Age</label>
-            <input v-model="formData.primaryCaregiver.age" type="number" min="0" />
+            <input
+              v-model="formData.primaryCaregiver.age"
+              type="number"
+              min="0"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['primaryCaregiver.nrcNumber'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['primaryCaregiver.nrcNumber'],
+            }"
+          >
             <label>NRC Number</label>
-            <input v-model="formData.primaryCaregiver.nrcNumber" type="text" />
+            <input
+              v-model="formData.primaryCaregiver.nrcNumber"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
         </div>
-        <div class="form-group full-width" :class="{ 'has-error': validationErrors['primaryCaregiver.notes'] }">
+        <div
+          class="form-group full-width"
+          :class="{ 'has-error': validationErrors['primaryCaregiver.notes'] }"
+        >
           <label>Additional Notes</label>
-          <textarea v-model="formData.primaryCaregiver.notes" rows="3"></textarea>
+          <textarea
+            v-model="formData.primaryCaregiver.notes"
+            rows="3"
+            :disabled="isViewMode"
+          ></textarea>
         </div>
 
         <!-- Secondary Caregiver -->
         <h5>Secondary Caregiver/Guardian</h5>
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors['secondaryCaregiver.name'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['secondaryCaregiver.name'],
+            }"
+          >
             <label>Name</label>
-            <input v-model="formData.secondaryCaregiver.name" type="text" />
+            <input
+              v-model="formData.secondaryCaregiver.name"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['secondaryCaregiver.relationship'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['secondaryCaregiver.relationship'],
+            }"
+          >
             <label>Relationship to Child</label>
-            <input v-model="formData.secondaryCaregiver.relationship" type="text" />
+            <input
+              v-model="formData.secondaryCaregiver.relationship"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['secondaryCaregiver.phone1'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['secondaryCaregiver.phone1'],
+            }"
+          >
             <label>Phone #1</label>
-            <input v-model="formData.secondaryCaregiver.phone1" type="tel" />
+            <input
+              v-model="formData.secondaryCaregiver.phone1"
+              type="tel"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['secondaryCaregiver.phone2'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['secondaryCaregiver.phone2'],
+            }"
+          >
             <label>Phone #2</label>
-            <input v-model="formData.secondaryCaregiver.phone2" type="tel" />
+            <input
+              v-model="formData.secondaryCaregiver.phone2"
+              type="tel"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['secondaryCaregiver.occupation'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['secondaryCaregiver.occupation'],
+            }"
+          >
             <label>Occupation</label>
-            <input v-model="formData.secondaryCaregiver.occupation" type="text" />
+            <input
+              v-model="formData.secondaryCaregiver.occupation"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['secondaryCaregiver.area'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['secondaryCaregiver.area'],
+            }"
+          >
             <label>Area of Town</label>
-            <input v-model="formData.secondaryCaregiver.area" type="text" />
+            <input
+              v-model="formData.secondaryCaregiver.area"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['secondaryCaregiver.age'] }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors['secondaryCaregiver.age'] }"
+          >
             <label>Age</label>
-            <input v-model="formData.secondaryCaregiver.age" type="number" min="0" />
+            <input
+              v-model="formData.secondaryCaregiver.age"
+              type="number"
+              min="0"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['secondaryCaregiver.nrcNumber'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['secondaryCaregiver.nrcNumber'],
+            }"
+          >
             <label>NRC Number</label>
-            <input v-model="formData.secondaryCaregiver.nrcNumber" type="text" />
+            <input
+              v-model="formData.secondaryCaregiver.nrcNumber"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
         </div>
-        <div class="form-group full-width" :class="{ 'has-error': validationErrors['secondaryCaregiver.notes'] }">
+        <div
+          class="form-group full-width"
+          :class="{ 'has-error': validationErrors['secondaryCaregiver.notes'] }"
+        >
           <label>Additional Notes</label>
-          <textarea v-model="formData.secondaryCaregiver.notes" rows="3"></textarea>
+          <textarea
+            v-model="formData.secondaryCaregiver.notes"
+            rows="3"
+            :disabled="isViewMode"
+          ></textarea>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
       <!-- General Family Information Section -->
       <div v-show="currentSection === 6" class="form-section">
         <h4>General Family Information</h4>
-        
+
         <!-- Biological Father -->
         <h5>Biological Father</h5>
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalFather.name'] }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors['biologicalFather.name'] }"
+          >
             <label>Name</label>
-            <input v-model="formData.biologicalFather.name" type="text" />
+            <input
+              v-model="formData.biologicalFather.name"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalFather.age'] }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors['biologicalFather.age'] }"
+          >
             <label>Age</label>
-            <input v-model="formData.biologicalFather.age" type="number" min="0" />
+            <input
+              v-model="formData.biologicalFather.age"
+              type="number"
+              min="0"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalFather.status'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['biologicalFather.status'],
+            }"
+          >
             <label>Alive / Deceased</label>
-            <select v-model="formData.biologicalFather.status">
+            <select
+              v-model="formData.biologicalFather.status"
+              :disabled="isViewMode"
+            >
               <option value="">Select</option>
               <option value="Alive">Alive</option>
               <option value="Deceased">Deceased</option>
             </select>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalFather.deathDate'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['biologicalFather.deathDate'],
+            }"
+          >
             <label>If deceased, date of death</label>
-            <input v-model="formData.biologicalFather.deathDate" type="date" />
+            <input
+              v-model="formData.biologicalFather.deathDate"
+              type="date"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalFather.causeOfDeath'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['biologicalFather.causeOfDeath'],
+            }"
+          >
             <label>Cause of death</label>
-            <input v-model="formData.biologicalFather.causeOfDeath" type="text" />
+            <input
+              v-model="formData.biologicalFather.causeOfDeath"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalFather.location'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['biologicalFather.location'],
+            }"
+          >
             <label>Location</label>
-            <input v-model="formData.biologicalFather.location" type="text" />
+            <input
+              v-model="formData.biologicalFather.location"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalFather.profession'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['biologicalFather.profession'],
+            }"
+          >
             <label>Profession</label>
-            <input v-model="formData.biologicalFather.profession" type="text" />
+            <input
+              v-model="formData.biologicalFather.profession"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
         </div>
 
         <!-- Biological Mother -->
         <h5>Biological Mother</h5>
         <div class="form-grid">
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalMother.name'] }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors['biologicalMother.name'] }"
+          >
             <label>Name</label>
-            <input v-model="formData.biologicalMother.name" type="text" />
+            <input
+              v-model="formData.biologicalMother.name"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalMother.age'] }">
+          <div
+            class="form-group"
+            :class="{ 'has-error': validationErrors['biologicalMother.age'] }"
+          >
             <label>Age</label>
-            <input v-model="formData.biologicalMother.age" type="number" min="0" />
+            <input
+              v-model="formData.biologicalMother.age"
+              type="number"
+              min="0"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalMother.status'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['biologicalMother.status'],
+            }"
+          >
             <label>Alive / Deceased</label>
-            <select v-model="formData.biologicalMother.status">
+            <select
+              v-model="formData.biologicalMother.status"
+              :disabled="isViewMode"
+            >
               <option value="">Select</option>
               <option value="Alive">Alive</option>
               <option value="Deceased">Deceased</option>
             </select>
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalMother.deathDate'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['biologicalMother.deathDate'],
+            }"
+          >
             <label>If deceased, date of death</label>
-            <input v-model="formData.biologicalMother.deathDate" type="date" />
+            <input
+              v-model="formData.biologicalMother.deathDate"
+              type="date"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalMother.causeOfDeath'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['biologicalMother.causeOfDeath'],
+            }"
+          >
             <label>Cause of death</label>
-            <input v-model="formData.biologicalMother.causeOfDeath" type="text" />
+            <input
+              v-model="formData.biologicalMother.causeOfDeath"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalMother.location'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['biologicalMother.location'],
+            }"
+          >
             <label>Location</label>
-            <input v-model="formData.biologicalMother.location" type="text" />
+            <input
+              v-model="formData.biologicalMother.location"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors['biologicalMother.profession'] }">
+          <div
+            class="form-group"
+            :class="{
+              'has-error': validationErrors['biologicalMother.profession'],
+            }"
+          >
             <label>Profession</label>
-            <input v-model="formData.biologicalMother.profession" type="text" />
+            <input
+              v-model="formData.biologicalMother.profession"
+              type="text"
+              :disabled="isViewMode"
+            />
           </div>
         </div>
 
         <!-- Biological Siblings -->
         <h5>Biological Siblings</h5>
-        <div v-for="(sibling, index) in formData.siblings" :key="index" class="sibling-section">
+        <div
+          v-for="(sibling, index) in formData.siblings"
+          :key="index"
+          class="sibling-section"
+        >
           <h6>Sibling {{ index + 1 }}</h6>
           <div class="form-grid">
-            <div class="form-group" :class="{ 'has-error': validationErrors[`siblings[${index}].name`] }">
+            <div
+              class="form-group"
+              :class="{
+                'has-error': validationErrors[`siblings[${index}].name`],
+              }"
+            >
               <label>Name</label>
-              <input v-model="sibling.name" type="text" />
+              <input
+                v-model="sibling.name"
+                type="text"
+                :disabled="isViewMode"
+              />
             </div>
-            <div class="form-group" :class="{ 'has-error': validationErrors[`siblings[${index}].age`] }">
+            <div
+              class="form-group"
+              :class="{
+                'has-error': validationErrors[`siblings[${index}].age`],
+              }"
+            >
               <label>Age</label>
-              <input v-model="sibling.age" type="number" min="0" />
+              <input
+                v-model="sibling.age"
+                type="number"
+                min="0"
+                :disabled="isViewMode"
+              />
             </div>
-            <div class="form-group" :class="{ 'has-error': validationErrors[`siblings[${index}].ageRelation`] }">
+            <div
+              class="form-group"
+              :class="{
+                'has-error': validationErrors[`siblings[${index}].ageRelation`],
+              }"
+            >
               <label>Older / Younger</label>
-              <select v-model="sibling.ageRelation">
+              <select v-model="sibling.ageRelation" :disabled="isViewMode">
                 <option value="">Select</option>
                 <option value="Older">Older</option>
                 <option value="Younger">Younger</option>
               </select>
             </div>
-            <div class="form-group" :class="{ 'has-error': validationErrors[`siblings[${index}].status`] }">
+            <div
+              class="form-group"
+              :class="{
+                'has-error': validationErrors[`siblings[${index}].status`],
+              }"
+            >
               <label>Alive / Deceased</label>
-              <select v-model="sibling.status">
+              <select v-model="sibling.status" :disabled="isViewMode">
                 <option value="">Select</option>
                 <option value="Alive">Alive</option>
                 <option value="Deceased">Deceased</option>
               </select>
             </div>
-            <div class="form-group" :class="{ 'has-error': validationErrors[`siblings[${index}].deathDate`] }">
+            <div
+              class="form-group"
+              :class="{
+                'has-error': validationErrors[`siblings[${index}].deathDate`],
+              }"
+            >
               <label>If deceased, date of death</label>
-              <input v-model="sibling.deathDate" type="date" />
+              <input
+                v-model="sibling.deathDate"
+                type="date"
+                :disabled="isViewMode"
+              />
             </div>
-            <div class="form-group" :class="{ 'has-error': validationErrors[`siblings[${index}].profession`] }">
+            <div
+              class="form-group"
+              :class="{
+                'has-error': validationErrors[`siblings[${index}].profession`],
+              }"
+            >
               <label>Profession</label>
-              <input v-model="sibling.profession" type="text" />
+              <input
+                v-model="sibling.profession"
+                type="text"
+                :disabled="isViewMode"
+              />
             </div>
-            <div class="form-group" :class="{ 'has-error': validationErrors[`siblings[${index}].potentialGuardian`] }">
+            <div
+              class="form-group"
+              :class="{
+                'has-error':
+                  validationErrors[`siblings[${index}].potentialGuardian`],
+              }"
+            >
               <label>Potential Guardian for Program</label>
-              <select v-model="sibling.potentialGuardian">
+              <select
+                v-model="sibling.potentialGuardian"
+                :disabled="isViewMode"
+              >
                 <option value="">Select</option>
                 <option value="YES">YES</option>
                 <option value="NO">NO</option>
               </select>
             </div>
             <div class="form-group">
-              <button type="button" class="remove-btn" @click="removeSibling(index)">Remove</button>
+              <button
+                type="button"
+                class="remove-btn"
+                @click="removeSibling(index)"
+              >
+                Remove
+              </button>
             </div>
           </div>
         </div>
-        <button type="button" class="add-btn" @click="addSibling">Add Sibling</button>
+        <button type="button" class="add-btn" @click="addSibling">
+          Add Sibling
+        </button>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
@@ -529,53 +1238,194 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(member, index) in formData.additionalFamily" :key="index">
-                <td :class="{ 'has-error': validationErrors[`additionalFamily[${index}].relation`] }">
-                  <input v-model="member.relation" type="text" />
-                  <div v-if="validationErrors[`additionalFamily[${index}].relation`]" class="error-message">{{ validationErrors[`additionalFamily[${index}].relation`] }}</div>
+              <tr
+                v-for="(member, index) in formData.additionalFamily"
+                :key="index"
+              >
+                <td
+                  :class="{
+                    'has-error':
+                      validationErrors[`additionalFamily[${index}].relation`],
+                  }"
+                >
+                  <input
+                    v-model="member.relation"
+                    type="text"
+                    :disabled="isViewMode"
+                  />
+                  <div
+                    v-if="
+                      validationErrors[`additionalFamily[${index}].relation`]
+                    "
+                    class="error-message"
+                  >
+                    {{
+                      validationErrors[`additionalFamily[${index}].relation`]
+                    }}
+                  </div>
                 </td>
-                <td :class="{ 'has-error': validationErrors[`additionalFamily[${index}].fullName`] }">
-                  <input v-model="member.fullName" type="text" />
-                  <div v-if="validationErrors[`additionalFamily[${index}].fullName`]" class="error-message">{{ validationErrors[`additionalFamily[${index}].fullName`] }}</div>
+                <td
+                  :class="{
+                    'has-error':
+                      validationErrors[`additionalFamily[${index}].fullName`],
+                  }"
+                >
+                  <input
+                    v-model="member.fullName"
+                    type="text"
+                    :disabled="isViewMode"
+                  />
+                  <div
+                    v-if="
+                      validationErrors[`additionalFamily[${index}].fullName`]
+                    "
+                    class="error-message"
+                  >
+                    {{
+                      validationErrors[`additionalFamily[${index}].fullName`]
+                    }}
+                  </div>
                 </td>
-                <td :class="{ 'has-error': validationErrors[`additionalFamily[${index}].age`] }">
-                  <input v-model="member.age" type="number" min="0" />
-                  <div v-if="validationErrors[`additionalFamily[${index}].age`]" class="error-message">{{ validationErrors[`additionalFamily[${index}].age`] }}</div>
+                <td
+                  :class="{
+                    'has-error':
+                      validationErrors[`additionalFamily[${index}].age`],
+                  }"
+                >
+                  <input
+                    v-model="member.age"
+                    type="number"
+                    min="0"
+                    :disabled="isViewMode"
+                  />
+                  <div
+                    v-if="validationErrors[`additionalFamily[${index}].age`]"
+                    class="error-message"
+                  >
+                    {{ validationErrors[`additionalFamily[${index}].age`] }}
+                  </div>
                 </td>
-                <td :class="{ 'has-error': validationErrors[`additionalFamily[${index}].profession`] }">
-                  <input v-model="member.profession" type="text" />
-                  <div v-if="validationErrors[`additionalFamily[${index}].profession`]" class="error-message">{{ validationErrors[`additionalFamily[${index}].profession`] }}</div>
+                <td
+                  :class="{
+                    'has-error':
+                      validationErrors[`additionalFamily[${index}].profession`],
+                  }"
+                >
+                  <input
+                    v-model="member.profession"
+                    type="text"
+                    :disabled="isViewMode"
+                  />
+                  <div
+                    v-if="
+                      validationErrors[`additionalFamily[${index}].profession`]
+                    "
+                    class="error-message"
+                  >
+                    {{
+                      validationErrors[`additionalFamily[${index}].profession`]
+                    }}
+                  </div>
                 </td>
-                <td :class="{ 'has-error': validationErrors[`additionalFamily[${index}].location`] }">
-                  <input v-model="member.location" type="text" />
-                  <div v-if="validationErrors[`additionalFamily[${index}].location`]" class="error-message">{{ validationErrors[`additionalFamily[${index}].location`] }}</div>
+                <td
+                  :class="{
+                    'has-error':
+                      validationErrors[`additionalFamily[${index}].location`],
+                  }"
+                >
+                  <input
+                    v-model="member.location"
+                    type="text"
+                    :disabled="isViewMode"
+                  />
+                  <div
+                    v-if="
+                      validationErrors[`additionalFamily[${index}].location`]
+                    "
+                    class="error-message"
+                  >
+                    {{
+                      validationErrors[`additionalFamily[${index}].location`]
+                    }}
+                  </div>
                 </td>
-                <td :class="{ 'has-error': validationErrors[`additionalFamily[${index}].potentialGuardian`] }">
-                  <select v-model="member.potentialGuardian">
+                <td
+                  :class="{
+                    'has-error':
+                      validationErrors[
+                        `additionalFamily[${index}].potentialGuardian`
+                      ],
+                  }"
+                >
+                  <select
+                    v-model="member.potentialGuardian"
+                    :disabled="isViewMode"
+                  >
                     <option value="">Select</option>
                     <option value="Y">Y</option>
                     <option value="N">N</option>
                   </select>
-                  <div v-if="validationErrors[`additionalFamily[${index}].potentialGuardian`]" class="error-message">{{ validationErrors[`additionalFamily[${index}].potentialGuardian`] }}</div>
+                  <div
+                    v-if="
+                      validationErrors[
+                        `additionalFamily[${index}].potentialGuardian`
+                      ]
+                    "
+                    class="error-message"
+                  >
+                    {{
+                      validationErrors[
+                        `additionalFamily[${index}].potentialGuardian`
+                      ]
+                    }}
+                  </div>
                 </td>
-                <td><button type="button" class="remove-btn" @click="removeFamilyMember(index)">Remove</button></td>
+                <td>
+                  <button
+                    type="button"
+                    class="remove-btn"
+                    @click="removeFamilyMember(index)"
+                  >
+                    Remove
+                  </button>
+                </td>
               </tr>
             </tbody>
           </table>
-          <button type="button" class="add-btn" @click="addFamilyMember">Add Family Member</button>
+          <button type="button" class="add-btn" @click="addFamilyMember">
+            Add Family Member
+          </button>
         </div>
-        <div class="form-group" :class="{ 'has-error': validationErrors.potentialGuardiansAvailable }">
-          <label>Are there 2-3 potential guardians/caretakers who would be willing and able to participate in the program?</label>
-          <select v-model="formData.potentialGuardiansAvailable">
+        <div
+          class="form-group"
+          :class="{ 'has-error': validationErrors.potentialGuardiansAvailable }"
+        >
+          <label
+            >Are there 2-3 potential guardians/caretakers who would be willing
+            and able to participate in the program?</label
+          >
+          <select
+            v-model="formData.potentialGuardiansAvailable"
+            :disabled="isViewMode"
+          >
             <option value="">Select</option>
             <option value="YES">YES</option>
             <option value="NO">NO</option>
           </select>
-          <div v-if="validationErrors.potentialGuardiansAvailable" class="error-message">{{ validationErrors.potentialGuardiansAvailable }}</div>
+          <div
+            v-if="validationErrors.potentialGuardiansAvailable"
+            class="error-message"
+          >
+            {{ validationErrors.potentialGuardiansAvailable }}
+          </div>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="next-btn" @click="nextSection">Next Section ›</button>
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
         </div>
       </div>
 
@@ -584,34 +1434,65 @@
         <h4>Documents Included Upon Admission</h4>
         <div class="checkbox-group">
           <label class="checkbox-item">
-            <input type="checkbox" v-model="formData.documents.tkpReferralForm" />
+            <input
+              type="checkbox"
+              v-model="formData.documents.tkpReferralForm"
+              :disabled="isViewMode"
+            />
             TKP Referral Form
           </label>
           <label class="checkbox-item">
-            <input type="checkbox" v-model="formData.documents.carePlanAssessment" />
+            <input
+              type="checkbox"
+              v-model="formData.documents.carePlanAssessment"
+              :disabled="isViewMode"
+            />
             Care Plan Assessment Form
           </label>
           <label class="checkbox-item">
-            <input type="checkbox" v-model="formData.documents.birthRecord" />
+            <input
+              type="checkbox"
+              v-model="formData.documents.birthRecord"
+              :disabled="isViewMode"
+            />
             Copy of Birth Record
           </label>
           <label class="checkbox-item">
-            <input type="checkbox" v-model="formData.documents.policeRecord" />
+            <input
+              type="checkbox"
+              v-model="formData.documents.policeRecord"
+              :disabled="isViewMode"
+            />
             Copy of Police Record
           </label>
           <label class="checkbox-item">
-            <input type="checkbox" v-model="formData.documents.dswAdmissionLetter" />
+            <input
+              type="checkbox"
+              v-model="formData.documents.dswAdmissionLetter"
+              :disabled="isViewMode"
+            />
             DSW Admission Letter
           </label>
           <label class="checkbox-item">
-            <input type="checkbox" v-model="formData.documents.medicalRecords" />
+            <input
+              type="checkbox"
+              v-model="formData.documents.medicalRecords"
+              :disabled="isViewMode"
+            />
             Medical Records
           </label>
         </div>
         <div class="section-navigation">
-          <button type="button" class="prev-btn" @click="prevSection">‹ Previous Section</button>
-          <button type="button" class="submit-btn" :disabled="loading" @click="handleSubmit">
-            {{ loading ? 'Saving...' : 'Save Care Plan' }}
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button
+            type="button"
+            class="submit-btn"
+            :disabled="loading"
+            @click="handleSubmit"
+          >
+            {{ loading ? "Saving..." : "Save Care Plan" }}
           </button>
         </div>
       </div>
@@ -620,258 +1501,324 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { useToast } from '../composables/useToast.js'
+import { ref, reactive, computed, watch, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useToast } from "../composables/useToast.js";
 
-const emit = defineEmits(['form-saved'])
-const { success, error } = useToast()
+const props = defineProps({
+  editData: {
+    type: Object,
+    default: null,
+  },
+  isEditMode: {
+    type: Boolean,
+    default: false,
+  },
+  viewMode: {
+    type: Boolean,
+    default: false,
+  },
+});
 
-const loading = ref(false)
+const emit = defineEmits(["form-saved"]);
+const { success, error } = useToast();
+const router = useRouter();
+
+// Computed property to determine if form is in view-only mode
+const isViewMode = computed(() => {
+  // Check if explicitly in view mode via props
+  if (props.viewMode) return true;
+
+  // Check if in view mode via sessionStorage
+  const storedChildData = sessionStorage.getItem("selectedChildForForm");
+  if (storedChildData) {
+    try {
+      const childData = JSON.parse(storedChildData);
+      if (childData.viewMode === true) return true;
+    } catch (error) {
+      console.error("Error parsing child data from sessionStorage:", error);
+    }
+  }
+
+  // Check if view mode is set in sessionStorage
+  return sessionStorage.getItem("formViewMode") === "true";
+});
+
+const loading = ref(false);
 
 // Section navigation
-const currentSection = ref(1)
-const totalSections = 8
+const currentSection = ref(1);
+const totalSections = 8;
 
 const progressPercentage = computed(() => {
-  return (currentSection.value / totalSections) * 100
-})
+  return (currentSection.value / totalSections) * 100;
+});
 
 const sectionNames = [
-  'Child Information',
-  'Vulnerability Status', 
-  'Referral Method',
-  'Reason for Admission',
-  'Caregiver Information',
-  'General Family Information',
-  'Additional Family Members',
-  'Documents Included'
-]
+  "Child Information",
+  "Vulnerability Status",
+  "Referral Method",
+  "Reason for Admission",
+  "Caregiver Information",
+  "General Family Information",
+  "Additional Family Members",
+  "Documents Included",
+];
 
 const currentSectionName = computed(() => {
-  return sectionNames[currentSection.value - 1] || 'Unknown Section'
-})
+  return sectionNames[currentSection.value - 1] || "Unknown Section";
+});
 
 const sectionCompletionStatus = computed(() => {
-  const status = []
-  
+  const status = [];
+
   // Section 1: Child Information
-  const section1Complete = formData.childFirstName && formData.childSurname && 
-    formData.id && formData.dateOfAdmission && formData.gender && 
-    formData.dateOfBirth && formData.ageAtIntake && formData.placeOfBirth && 
-    formData.residentArea && formData.district && formData.nationality
-  status.push(section1Complete)
-  
+  const section1Complete =
+    formData.childFirstName &&
+    formData.childSurname &&
+    formData.id &&
+    formData.dateOfAdmission &&
+    formData.gender &&
+    formData.dateOfBirth &&
+    formData.ageAtIntake &&
+    formData.placeOfBirth &&
+    formData.residentArea &&
+    formData.district &&
+    formData.nationality;
+  status.push(section1Complete);
+
   // Section 2: Vulnerability Status
-  const section2Complete = formData.ovcStatus
-  status.push(section2Complete)
-  
+  const section2Complete = formData.ovcStatus;
+  status.push(section2Complete);
+
   // Section 3: Referral Method
-  const section3Complete = formData.referralMethod
-  status.push(section3Complete)
-  
+  const section3Complete = formData.referralMethod;
+  status.push(section3Complete);
+
   // Section 4: Reasons for Admission
-  const section4Complete = Object.values(formData.reasons).some(reason => reason === true)
-  status.push(section4Complete)
-  
+  const section4Complete = Object.values(formData.reasons).some(
+    (reason) => reason === true
+  );
+  status.push(section4Complete);
+
   // Section 5: Caregiver Information
-  const section5Complete = formData.dateCompiled && formData.childName && 
-    formData.childId && formData.primaryCaregiver.name && 
-    formData.primaryCaregiver.relationship
-  status.push(section5Complete)
-  
+  const section5Complete =
+    formData.dateCompiled &&
+    formData.childName &&
+    formData.childId &&
+    formData.primaryCaregiver.name &&
+    formData.primaryCaregiver.relationship;
+  status.push(section5Complete);
+
   // Sections 6-8 are optional
-  status.push(true) // General Family Information
-  status.push(true) // Additional Family Members
-  status.push(true) // Documents
-  
-  return status
-})
+  status.push(true); // General Family Information
+  status.push(true); // Additional Family Members
+  status.push(true); // Documents
+
+  return status;
+});
 
 const completedSections = computed(() => {
-  return sectionCompletionStatus.value.filter(status => status).length
-})
+  return sectionCompletionStatus.value.filter((status) => status).length;
+});
 
 const overallCompletion = computed(() => {
-  const requiredSections = 5 // Only first 5 sections are required
-  const completedRequired = sectionCompletionStatus.value.slice(0, 5).filter(status => status).length
-  return Math.round((completedRequired / requiredSections) * 100)
-})
+  const requiredSections = 5; // Only first 5 sections are required
+  const completedRequired = sectionCompletionStatus.value
+    .slice(0, 5)
+    .filter((status) => status).length;
+  return Math.round((completedRequired / requiredSections) * 100);
+});
 
 // Section validation rules
 const sectionValidationRules = {
-  1: [ // Child Information - required fields
-    'childFirstName',
-    'childSurname',
-    'id',
-    'dateOfAdmission',
-    'gender',
-    'dateOfBirth',
-    'ageAtIntake',
-    'placeOfBirth',
-    'residentArea',
-    'district',
-    'nationality'
+  1: [
+    // Child Information - required fields
+    "childFirstName",
+    "childSurname",
+    "id",
+    "dateOfAdmission",
+    "gender",
+    "dateOfBirth",
+    "ageAtIntake",
+    "placeOfBirth",
+    "residentArea",
+    "district",
+    "nationality",
   ],
-  2: [ // Vulnerability Status
-    'ovcStatus'
+  2: [
+    // Vulnerability Status
+    "ovcStatus",
   ],
-  3: [ // Referral Method
-    'referralMethod'
+  3: [
+    // Referral Method
+    "referralMethod",
   ],
-  4: [ // Reasons for Admission - at least one reason must be selected
+  4: [
+    // Reasons for Admission - at least one reason must be selected
   ],
-  5: [ // Caregiver Information
-    'dateCompiled',
-    'childName',
-    'childId'
+  5: [
+    // Caregiver Information
+    "dateCompiled",
+    "childName",
+    "childId",
   ],
   6: [], // General Family Information - optional
   7: [], // Additional Family Members - optional
-  8: []  // Documents - optional
-}
+  8: [], // Documents - optional
+};
 
 // Validation error messages
-const validationErrors = ref({})
-const showValidationMessage = ref(false)
+const validationErrors = ref({});
+const showValidationMessage = ref(false);
 
 // Validate current section
 const validateCurrentSection = () => {
-  const requiredFields = sectionValidationRules[currentSection.value] || []
-  const errors = {}
-  let isValid = true
+  const requiredFields = sectionValidationRules[currentSection.value] || [];
+  const errors = {};
+  let isValid = true;
 
   // Special validation for section 4 (Reasons for Admission)
   if (currentSection.value === 4) {
-    const hasSelectedReason = Object.values(formData.reasons).some(reason => reason === true)
+    const hasSelectedReason = Object.values(formData.reasons).some(
+      (reason) => reason === true
+    );
     if (!hasSelectedReason) {
-      errors.reasons = 'Please select at least one reason for admission'
-      isValid = false
+      errors.reasons = "Please select at least one reason for admission";
+      isValid = false;
     }
   }
 
   // Validate primary caregiver fields for section 5
   if (currentSection.value === 5) {
-    if (!formData.primaryCaregiver.name || formData.primaryCaregiver.name.trim() === '') {
-      errors['primaryCaregiver.name'] = 'Primary Caregiver Name is required'
-      isValid = false
+    if (
+      !formData.primaryCaregiver.name ||
+      formData.primaryCaregiver.name.trim() === ""
+    ) {
+      errors["primaryCaregiver.name"] = "Primary Caregiver Name is required";
+      isValid = false;
     }
-    if (!formData.primaryCaregiver.relationship || formData.primaryCaregiver.relationship.trim() === '') {
-      errors['primaryCaregiver.relationship'] = 'Relationship to Child is required'
-      isValid = false
+    if (
+      !formData.primaryCaregiver.relationship ||
+      formData.primaryCaregiver.relationship.trim() === ""
+    ) {
+      errors["primaryCaregiver.relationship"] =
+        "Relationship to Child is required";
+      isValid = false;
     }
   }
 
   // Check regular required fields
-  requiredFields.forEach(fieldName => {
-    const value = formData[fieldName]
-    if (!value || (typeof value === 'string' && value.trim() === '')) {
-      errors[fieldName] = getFieldDisplayName(fieldName) + ' is required'
-      isValid = false
+  requiredFields.forEach((fieldName) => {
+    const value = formData[fieldName];
+    if (!value || (typeof value === "string" && value.trim() === "")) {
+      errors[fieldName] = getFieldDisplayName(fieldName) + " is required";
+      isValid = false;
     }
-  })
+  });
 
-  validationErrors.value = errors
-  return isValid
-}
+  validationErrors.value = errors;
+  return isValid;
+};
 
 // Get user-friendly field names
 const getFieldDisplayName = (fieldName) => {
   const fieldNames = {
-    childFirstName: 'Child First Name',
-    childSurname: 'Child Surname',
-    id: 'Child ID',
-    dateOfAdmission: 'Date of Admission',
-    gender: 'Gender',
-    dateOfBirth: 'Date of Birth',
-    ageAtIntake: 'Age at Intake',
-    placeOfBirth: 'Place of Birth',
-    residentArea: 'Resident Area at Intake',
-    district: 'District',
-    nationality: 'Nationality',
-    ovcStatus: 'OVC Status',
-    referralMethod: 'Referral Method',
-    dateCompiled: 'Date Compiled',
-    childName: 'Child Name',
-    childId: 'Child ID'
-  }
-  return fieldNames[fieldName] || fieldName
-}
+    childFirstName: "Child First Name",
+    childSurname: "Child Surname",
+    id: "Child ID",
+    dateOfAdmission: "Date of Admission",
+    gender: "Gender",
+    dateOfBirth: "Date of Birth",
+    ageAtIntake: "Age at Intake",
+    placeOfBirth: "Place of Birth",
+    residentArea: "Resident Area at Intake",
+    district: "District",
+    nationality: "Nationality",
+    ovcStatus: "OVC Status",
+    referralMethod: "Referral Method",
+    dateCompiled: "Date Compiled",
+    childName: "Child Name",
+    childId: "Child ID",
+  };
+  return fieldNames[fieldName] || fieldName;
+};
 
 // Clear validation error for specific field
 const clearFieldError = (fieldName) => {
   if (validationErrors.value[fieldName]) {
-    delete validationErrors.value[fieldName]
-    validationErrors.value = { ...validationErrors.value }
+    delete validationErrors.value[fieldName];
+    validationErrors.value = { ...validationErrors.value };
   }
-}
+};
 
 // Enhanced nextSection with validation
 const nextSection = () => {
   // Validate current section before proceeding
   if (!validateCurrentSection()) {
-    showValidationMessage.value = true
-    
+    showValidationMessage.value = true;
+
     // Hide validation message after 5 seconds
     setTimeout(() => {
-      showValidationMessage.value = false
-    }, 5000)
-    
-    return
+      showValidationMessage.value = false;
+    }, 5000);
+
+    return;
   }
-  
+
   // Clear any existing validation errors
-  validationErrors.value = {}
-  showValidationMessage.value = false
-  
+  validationErrors.value = {};
+  showValidationMessage.value = false;
+
   if (currentSection.value < totalSections) {
-    currentSection.value++
+    currentSection.value++;
   }
-}
+};
 
 const prevSection = () => {
   // Clear validation errors when going back
-  validationErrors.value = {}
-  showValidationMessage.value = false
-  
+  validationErrors.value = {};
+  showValidationMessage.value = false;
+
   if (currentSection.value > 1) {
-    currentSection.value--
+    currentSection.value--;
   }
-}
+};
 
 // Form data
 const formData = reactive({
   // Child Information
-  childFirstName: '',
-  childMiddleName: '',
-  childSurname: '',
-  otherFirstName: '',
-  otherMiddleName: '',
-  otherSurname: '',
-  id: '',
-  dateOfAdmission: '',
-  gender: '',
-  dateOfBirth: '',
-  ageAtIntake: '',
-  placeOfBirth: '',
-  residentArea: '',
-  village: '',
-  chief: '',
-  district: '',
-  tribe: '',
-  denomination: '',
-  nationality: '',
-  
+  childFirstName: "",
+  childMiddleName: "",
+  childSurname: "",
+  otherFirstName: "",
+  otherMiddleName: "",
+  otherSurname: "",
+  id: "",
+  dateOfAdmission: "",
+  gender: "",
+  dateOfBirth: "",
+  ageAtIntake: "",
+  placeOfBirth: "",
+  residentArea: "",
+  village: "",
+  chief: "",
+  district: "",
+  tribe: "",
+  denomination: "",
+  nationality: "",
+
   // Vulnerability Status
-  ovcStatus: '',
-  ovcDateEffective: '',
-  parentDeceased: '',
-  parentDeathDate: '',
-  guardianDeceased: '',
-  guardianDeathDate: '',
-  
+  ovcStatus: "",
+  ovcDateEffective: "",
+  parentDeceased: "",
+  parentDeathDate: "",
+  guardianDeceased: "",
+  guardianDeathDate: "",
+
   // Referral Method
-  referralMethod: '',
-  
+  referralMethod: "",
+
   // Reasons for Admission
   reasons: {
     attemptedAbortion: false,
@@ -879,69 +1826,69 @@ const formData = reactive({
     pregnant: false,
     rapeDefilement: false,
     survivalProstitution: false,
-    other: false
+    other: false,
   },
-  estimatedConceptionDate: '',
-  pregnancyDuration: '',
-  abuseDetails: '',
-  
+  estimatedConceptionDate: "",
+  pregnancyDuration: "",
+  abuseDetails: "",
+
   // Caregiver Information
-  dateCompiled: '',
-  childName: '',
-  childId: '',
-  
+  dateCompiled: "",
+  childName: "",
+  childId: "",
+
   primaryCaregiver: {
-    name: '',
-    relationship: '',
-    phone1: '',
-    phone2: '',
-    occupation: '',
-    area: '',
-    age: '',
-    nrcNumber: '',
-    notes: ''
+    name: "",
+    relationship: "",
+    phone1: "",
+    phone2: "",
+    occupation: "",
+    area: "",
+    age: "",
+    nrcNumber: "",
+    notes: "",
   },
-  
+
   secondaryCaregiver: {
-    name: '',
-    relationship: '',
-    phone1: '',
-    phone2: '',
-    occupation: '',
-    area: '',
-    age: '',
-    nrcNumber: '',
-    notes: ''
+    name: "",
+    relationship: "",
+    phone1: "",
+    phone2: "",
+    occupation: "",
+    area: "",
+    age: "",
+    nrcNumber: "",
+    notes: "",
   },
-  
+
   // Biological Parents
   biologicalFather: {
-    name: '',
-    age: '',
-    status: '',
-    deathDate: '',
-    causeOfDeath: '',
-    location: '',
-    profession: ''
+    name: "",
+    age: "",
+    status: "",
+    deathDate: "",
+    causeOfDeath: "",
+    location: "",
+    profession: "",
   },
-  
+
   biologicalMother: {
-    name: '',
-    age: '',
-    status: '',
-    deathDate: '',
-    causeOfDeath: '',
-    location: '',
-    profession: ''
+    name: "",
+    age: "",
+    status: "",
+    deathDate: "",
+    causeOfDeath: "",
+    location: "",
+    profession: "",
   },
-  
+
   // Siblings
   siblings: [],
-  
+
   // Additional Family Members
   additionalFamily: [],
-  potentialGuardiansAvailable: '',
-  
+  potentialGuardiansAvailable: "",
+
   // Documents
   documents: {
     tkpReferralForm: false,
@@ -949,208 +1896,379 @@ const formData = reactive({
     birthRecord: false,
     policeRecord: false,
     dswAdmissionLetter: false,
-    medicalRecords: false
+    medicalRecords: false,
+  },
+});
+
+// Watch for editData changes and populate formData
+watch(
+  () => props.editData,
+  (newEditData) => {
+    if (newEditData && props.isEditMode) {
+      // Populate all form fields from editData
+      Object.keys(formData).forEach((key) => {
+        if (newEditData[key] !== undefined) {
+          // Handle nested objects separately
+          if (
+            key === "reasons" ||
+            key === "primaryCaregiver" ||
+            key === "secondaryCaregiver" ||
+            key === "biologicalFather" ||
+            key === "biologicalMother" ||
+            key === "documents"
+          ) {
+            formData[key] = { ...newEditData[key] };
+          } else if (key === "siblings" || key === "additionalFamily") {
+            // Handle arrays
+            formData[key] = [...newEditData[key]];
+          } else {
+            formData[key] = newEditData[key];
+          }
+        }
+      });
+      console.log("Form populated with edit data:", newEditData);
+    }
+  },
+  { immediate: true }
+);
+
+// Check for child data from sessionStorage when form loads
+onMounted(() => {
+  console.log("📋 ChildOverviewForm mounted, checking for child data...");
+
+  // Only pre-populate if NOT in edit mode
+  if (!props.isEditMode) {
+    const storedChildData = sessionStorage.getItem("selectedChildForForm");
+
+    if (storedChildData) {
+      try {
+        const childData = JSON.parse(storedChildData);
+        console.log("👶 Found child data in sessionStorage:", childData);
+
+        // Check if we're in view mode
+        const viewMode =
+          sessionStorage.getItem("formViewMode") === "true" ||
+          childData.viewMode === true;
+        if (viewMode) {
+          console.log("👀 Form is in view-only mode");
+        }
+
+        // Only populate if this is a child-overview form
+        if (childData.formType === "child-overview") {
+          // Pre-populate basic child information
+          if (childData.childFirstName) {
+            formData.childFirstName = childData.childFirstName;
+            formData.childName =
+              childData.childName || childData.childFirstName;
+          }
+          if (childData.childSurname) {
+            formData.childSurname = childData.childSurname;
+          }
+          if (childData.dateOfBirth) {
+            formData.dateOfBirth = childData.dateOfBirth;
+          }
+          if (childData.age) {
+            formData.ageAtIntake = childData.age;
+          }
+          if (childData.gender) {
+            formData.gender = childData.gender;
+          }
+          if (childData.caseId) {
+            formData.id = childData.caseId;
+            formData.childId = childData.caseId;
+          }
+
+          // Set current date as admission date if not already set
+          if (!formData.dateOfAdmission) {
+            formData.dateOfAdmission = new Date().toISOString().split("T")[0];
+          }
+
+          console.log("✅ Form pre-populated with child data");
+          success(`Form pre-populated for ${childData.childName}`);
+        }
+      } catch (error) {
+        console.error("Error parsing child data from sessionStorage:", error);
+      }
+    }
   }
-})
+});
 
 const addSibling = () => {
   formData.siblings.push({
-    name: '',
-    age: '',
-    ageRelation: '',
-    status: '',
-    deathDate: '',
-    profession: '',
-    potentialGuardian: ''
-  })
-}
+    name: "",
+    age: "",
+    ageRelation: "",
+    status: "",
+    deathDate: "",
+    profession: "",
+    potentialGuardian: "",
+  });
+};
 
 const removeSibling = (index) => {
-  formData.siblings.splice(index, 1)
-}
+  formData.siblings.splice(index, 1);
+};
 
 const addFamilyMember = () => {
   formData.additionalFamily.push({
-    relation: '',
-    fullName: '',
-    age: '',
-    profession: '',
-    location: '',
-    potentialGuardian: ''
-  })
-}
+    relation: "",
+    fullName: "",
+    age: "",
+    profession: "",
+    location: "",
+    potentialGuardian: "",
+  });
+};
 
 const removeFamilyMember = (index) => {
-  formData.additionalFamily.splice(index, 1)
-}
+  formData.additionalFamily.splice(index, 1);
+};
 
 const validateRequiredFields = () => {
-  const errors = []
-  
+  const errors = [];
+
   // Section 1: Child Information - Required fields
-  if (!formData.childFirstName.trim()) errors.push('Child First Name is required')
-  if (!formData.childSurname.trim()) errors.push('Child Surname is required')
-  if (!formData.id.trim()) errors.push('ID is required')
-  if (!formData.dateOfAdmission) errors.push('Date of Admission is required')
-  if (!formData.gender) errors.push('Gender is required')
-  if (!formData.dateOfBirth) errors.push('Date of Birth is required')
-  if (!formData.ageAtIntake) errors.push('Age at Intake is required')
-  if (!formData.placeOfBirth.trim()) errors.push('Place of Birth is required')
-  if (!formData.residentArea.trim()) errors.push('Resident Area at Intake is required')
-  if (!formData.district.trim()) errors.push('District is required')
-  if (!formData.nationality.trim()) errors.push('Nationality is required')
-  
+  if (!formData.childFirstName.trim())
+    errors.push("Child First Name is required");
+  if (!formData.childSurname.trim()) errors.push("Child Surname is required");
+  if (!formData.id.trim()) errors.push("ID is required");
+  if (!formData.dateOfAdmission) errors.push("Date of Admission is required");
+  if (!formData.gender) errors.push("Gender is required");
+  if (!formData.dateOfBirth) errors.push("Date of Birth is required");
+  if (!formData.ageAtIntake) errors.push("Age at Intake is required");
+  if (!formData.placeOfBirth.trim()) errors.push("Place of Birth is required");
+  if (!formData.residentArea.trim())
+    errors.push("Resident Area at Intake is required");
+  if (!formData.district.trim()) errors.push("District is required");
+  if (!formData.nationality.trim()) errors.push("Nationality is required");
+
   // Section 2: Vulnerability Status - Required fields
-  if (!formData.ovcStatus) errors.push('OVC Status is required')
-  
+  if (!formData.ovcStatus) errors.push("OVC Status is required");
+
   // Section 3: Referral Method - Required field
-  if (!formData.referralMethod) errors.push('Referral Method is required')
-  
+  if (!formData.referralMethod) errors.push("Referral Method is required");
+
   // Section 4: Reasons for Admission - At least one reason must be selected
-  const hasReason = Object.values(formData.reasons).some(reason => reason === true)
-  if (!hasReason) errors.push('At least one reason for admission must be selected')
-  
+  const hasReason = Object.values(formData.reasons).some(
+    (reason) => reason === true
+  );
+  if (!hasReason)
+    errors.push("At least one reason for admission must be selected");
+
   // Section 5: Caregiver Information - Required fields
-  if (!formData.dateCompiled) errors.push('Date Compiled is required')
-  if (!formData.childName.trim()) errors.push('Child Name is required')
-  if (!formData.childId.trim()) errors.push('Child ID is required')
-  if (!formData.primaryCaregiver.name.trim()) errors.push('Primary Caregiver Name is required')
-  if (!formData.primaryCaregiver.relationship.trim()) errors.push('Primary Caregiver Relationship is required')
-  
-  return errors
-}
+  if (!formData.dateCompiled) errors.push("Date Compiled is required");
+  if (!formData.childName.trim()) errors.push("Child Name is required");
+  if (!formData.childId.trim()) errors.push("Child ID is required");
+  if (!formData.primaryCaregiver.name.trim())
+    errors.push("Primary Caregiver Name is required");
+  if (!formData.primaryCaregiver.relationship.trim())
+    errors.push("Primary Caregiver Relationship is required");
+
+  return errors;
+};
 
 const handleSubmit = async (event) => {
   // Prevent default form submission
   if (event) {
-    event.preventDefault()
+    event.preventDefault();
   }
-  
+
   // Validate required fields before submission
-  const validationErrors = validateRequiredFields()
+  const validationErrors = validateRequiredFields();
   if (validationErrors.length > 0) {
-    error('Please complete the following required fields: ' + validationErrors.join(', '))
-    return
+    error(
+      "Please complete the following required fields: " +
+        validationErrors.join(", ")
+    );
+    return;
   }
-  
-  loading.value = true
+
+  loading.value = true;
   try {
-    // Check for duplicate children before saving
-    const { default: DuplicationService } = await import('../services/duplicationService.js')
-    
-    const duplicateCheck = await DuplicationService.checkDuplicateChild(formData)
-    
-    if (duplicateCheck.hasDuplicates) {
-      const highConfidenceDuplicates = duplicateCheck.duplicates.filter(d => d.confidence >= 95)
-      
-      if (highConfidenceDuplicates.length > 0) {
-        // Show exact matches - require confirmation
-        const duplicateInfo = highConfidenceDuplicates.map(dup => {
-          const childName = `${dup.data.childFirstName} ${dup.data.childSurname}`
-          const dob = dup.data.dateOfBirth || 'Unknown DOB'
-          return `• ${childName} (DOB: ${dob}) - ${dup.reason}`
-        }).join('\n')
-        
-        const userConfirmed = confirm(
-          `⚠️ DUPLICATE WARNING
+    // Skip duplicate check if we're in edit mode
+    if (!props.isEditMode) {
+      // Check for duplicate children before saving
+      const { default: DuplicationService } = await import(
+        "../services/duplicationService.js"
+      );
+
+      const duplicateCheck = await DuplicationService.checkDuplicateChild(
+        formData
+      );
+
+      if (duplicateCheck.hasDuplicates) {
+        const highConfidenceDuplicates = duplicateCheck.duplicates.filter(
+          (d) => d.confidence >= 95
+        );
+
+        if (highConfidenceDuplicates.length > 0) {
+          // Show exact matches - require confirmation
+          const duplicateInfo = highConfidenceDuplicates
+            .map((dup) => {
+              const childName = `${dup.data.childFirstName} ${dup.data.childSurname}`;
+              const dob = dup.data.dateOfBirth || "Unknown DOB";
+              return `• ${childName} (DOB: ${dob}) - ${dup.reason}`;
+            })
+            .join("\n");
+
+          const userConfirmed = confirm(
+            `⚠️ DUPLICATE WARNING
 
 A child with similar information already exists in the system:
 
 ${duplicateInfo}
 
 Are you sure you want to create a new record?`
-        )
-        
-        if (!userConfirmed) {
-          loading.value = false
-          error('Form submission cancelled to prevent duplicate entry')
-          return
+          );
+
+          if (!userConfirmed) {
+            loading.value = false;
+            error("Form submission cancelled to prevent duplicate entry");
+            return;
+          }
+        } else {
+          // Show potential duplicates as warning
+          const warningInfo = duplicateCheck.duplicates
+            .map((dup) => {
+              const childName = `${dup.data.childFirstName} ${dup.data.childSurname}`;
+              return `• ${childName} - ${dup.reason}`;
+            })
+            .join("\n");
+
+          console.warn("Potential duplicates found:", warningInfo);
+          // Allow submission to continue with warning logged
         }
-      } else {
-        // Show potential duplicates as warning
-        const warningInfo = duplicateCheck.duplicates.map(dup => {
-          const childName = `${dup.data.childFirstName} ${dup.data.childSurname}`
-          return `• ${childName} - ${dup.reason}`
-        }).join('\n')
-        
-        console.warn('Potential duplicates found:', warningInfo)
-        // Allow submission to continue with warning logged
       }
     }
-    
+
     // Prepare form data with additional metadata
     const submissionData = {
       ...formData,
       submittedAt: new Date(),
-      formVersion: '1.0',
+      formVersion: "1.0",
       completedSections: totalSections,
-      status: 'submitted'
-    }
-    
+      status: "submitted",
+    };
+
     // Import FormService dynamically to avoid circular imports
-    const { default: FormService } = await import('../services/formService.js')
-    
-    const result = await FormService.saveChildOverview(submissionData)
-    
+    const { default: FormService } = await import("../services/formService.js");
+
+    let result;
+    if (props.isEditMode && props.editData) {
+      // Get the form ID - prefer formId if it exists, otherwise use id
+      const formIdToUpdate = props.editData.formId || props.editData.id;
+      console.log("Updating form with ID:", formIdToUpdate);
+      console.log("Edit data:", props.editData);
+
+      if (!formIdToUpdate) {
+        error("Cannot update: Form ID is missing");
+        loading.value = false;
+        return;
+      }
+
+      // Update existing record
+      result = await FormService.updateChildOverview(
+        formIdToUpdate,
+        submissionData
+      );
+    } else {
+      // Create new record
+      result = await FormService.saveChildOverview(submissionData);
+    }
+
     if (result.success) {
       // Emit success event to parent component
-      emit('form-saved', { 
-        formType: 'child-overview', 
-        id: result.id, 
+      emit("form-saved", {
+        formType: "child-overview",
+        id: result.id,
         childName: `${formData.childFirstName} ${formData.childSurname}`,
-        uniqueId: generateChildId(formData)
-      })
-      
+        uniqueId: generateChildId(formData),
+        isEdit: props.isEditMode,
+      });
+
       // Show success message with child information
-      success(`Child Overview Form saved successfully! Child: ${formData.childFirstName} ${formData.childSurname} (ID: ${result.id}) has been added to the tracking system.`)
-      
-      resetForm()
-      currentSection.value = 1 // Reset to first section
+      const actionText = props.isEditMode ? "updated" : "saved";
+      success(
+        `Child Overview Form ${actionText} successfully! Child: ${
+          formData.childFirstName
+        } ${formData.childSurname} (ID: ${result.id}) has been ${
+          props.isEditMode ? "updated in" : "added to"
+        } the tracking system.`
+      );
+
+      // Check if we should navigate back to TrackerCapture
+      const storedChildData = sessionStorage.getItem("selectedChildForForm");
+      if (storedChildData) {
+        try {
+          const childData = JSON.parse(storedChildData);
+          if (childData.returnTo === "tracker-capture") {
+            console.log("🔙 Returning to TrackerCapture...");
+            // Clear sessionStorage
+            sessionStorage.removeItem("selectedChildForForm");
+            // Navigate back to tracker capture
+            router.push("/tracker-capture");
+            return; // Exit early, don't reset form
+          }
+        } catch (error) {
+          console.error("Error checking return destination:", error);
+        }
+      }
+
+      if (!props.isEditMode) {
+        resetForm();
+        currentSection.value = 1; // Reset to first section
+      }
     } else {
-      error('Error saving form: ' + result.error)
+      error("Error saving form: " + result.error);
     }
   } catch (err) {
-    console.error('Error saving form:', err)
-    error('Error saving form. Please try again.')
+    console.error("Error saving form:", err);
+    error("Error saving form. Please try again.");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const generateChildId = (data) => {
   // Generate the unique ID pattern for display
-  const firstName = (data.childFirstName || '').toUpperCase()
-  const lastName = (data.childSurname || '').toUpperCase()
-  const tribe = (data.tribe || '').toUpperCase()
-  
-  const firstNamePrefix = firstName.substring(0, 2).padEnd(2, 'X')
-  const lastNamePrefix = lastName.substring(0, 2).padEnd(2, 'X')
-  const locationCode = '03' // Lusaka code
-  const currentYear = new Date().getFullYear().toString().slice(-2)
-  const tribePrefix = tribe.substring(0, 2).padEnd(2, 'X')
-  const sequence = '001'
-  
-  return `${firstNamePrefix}${lastNamePrefix}${locationCode}${currentYear}${tribePrefix}${sequence}`
-}
+  const firstName = (data.childFirstName || "").toUpperCase();
+  const lastName = (data.childSurname || "").toUpperCase();
+  const tribe = (data.tribe || "").toUpperCase();
+
+  const firstNamePrefix = firstName.substring(0, 2).padEnd(2, "X");
+  const lastNamePrefix = lastName.substring(0, 2).padEnd(2, "X");
+  const locationCode = "03"; // Lusaka code
+  const currentYear = new Date().getFullYear().toString().slice(-2);
+  const tribePrefix = tribe.substring(0, 2).padEnd(2, "X");
+  const sequence = "001";
+
+  return `${firstNamePrefix}${lastNamePrefix}${locationCode}${currentYear}${tribePrefix}${sequence}`;
+};
 
 const resetForm = () => {
-  Object.keys(formData).forEach(key => {
-    if (key === 'reasons' || key === 'primaryCaregiver' || key === 'secondaryCaregiver' || 
-        key === 'biologicalFather' || key === 'biologicalMother' || key === 'documents') {
-      Object.keys(formData[key]).forEach(subKey => {
-        if (typeof formData[key][subKey] === 'boolean') {
-          formData[key][subKey] = false
+  Object.keys(formData).forEach((key) => {
+    if (
+      key === "reasons" ||
+      key === "primaryCaregiver" ||
+      key === "secondaryCaregiver" ||
+      key === "biologicalFather" ||
+      key === "biologicalMother" ||
+      key === "documents"
+    ) {
+      Object.keys(formData[key]).forEach((subKey) => {
+        if (typeof formData[key][subKey] === "boolean") {
+          formData[key][subKey] = false;
         } else {
-          formData[key][subKey] = ''
+          formData[key][subKey] = "";
         }
-      })
-    } else if (key === 'siblings' || key === 'additionalFamily') {
-      formData[key] = []
+      });
+    } else if (key === "siblings" || key === "additionalFamily") {
+      formData[key] = [];
     } else {
-      formData[key] = ''
+      formData[key] = "";
     }
-  })
-}
+  });
+};
 </script>
 
 <style scoped>
@@ -1164,11 +2282,11 @@ const resetForm = () => {
   text-align: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #4A148C;
+  border-bottom: 2px solid #4a148c;
 }
 
 .form-header h3 {
-  color: #4A148C;
+  color: #4a148c;
   font-size: 1.8rem;
   margin-bottom: 0.5rem;
 }
@@ -1195,7 +2313,7 @@ const resetForm = () => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4A148C, #2D1B69);
+  background: linear-gradient(90deg, #4a148c, #2d1b69);
   transition: width 0.3s ease;
 }
 
@@ -1208,13 +2326,13 @@ const resetForm = () => {
 
 .progress-text {
   font-size: 0.9rem;
-  color: #4A148C;
+  color: #4a148c;
   font-weight: 500;
 }
 
 .section-title {
   font-size: 1.1rem;
-  color: #FF5722;
+  color: #ff5722;
   font-weight: 600;
 }
 
@@ -1249,18 +2367,18 @@ const resetForm = () => {
   padding: 1.5rem;
   background: #f8f9fa;
   border-radius: 8px;
-  border-left: 4px solid #4A148C;
+  border-left: 4px solid #4a148c;
 }
 
 .form-section h4 {
-  color: #4A148C;
+  color: #4a148c;
   font-size: 1.3rem;
   margin-bottom: 1.5rem;
   font-weight: 600;
 }
 
 .form-section h5 {
-  color: #4A148C;
+  color: #4a148c;
   font-size: 1.1rem;
   margin: 1.5rem 0 1rem 0;
   font-weight: 500;
@@ -1290,7 +2408,7 @@ const resetForm = () => {
 }
 
 .form-group label {
-  color: #4A148C;
+  color: #4a148c;
   font-weight: 500;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
@@ -1317,7 +2435,7 @@ const resetForm = () => {
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #4A148C;
+  border-color: #4a148c;
 }
 
 .form-group textarea {
@@ -1374,7 +2492,7 @@ const resetForm = () => {
 }
 
 .family-table th {
-  background-color: #4A148C;
+  background-color: #4a148c;
   color: white;
   font-weight: 600;
   font-size: 0.8rem;
@@ -1407,7 +2525,7 @@ const resetForm = () => {
 }
 
 .add-btn:before {
-  content: '+';
+  content: "+";
   font-size: 1.2rem;
   font-weight: bold;
 }
@@ -1457,7 +2575,7 @@ const resetForm = () => {
 
 .prev-btn,
 .next-btn {
-  background-color: #4A148C;
+  background-color: #4a148c;
   color: white;
   padding: 12px 20px;
   border: none;
@@ -1475,13 +2593,13 @@ const resetForm = () => {
 
 .prev-btn:hover,
 .next-btn:hover {
-  background-color: #2D1B69;
+  background-color: #2d1b69;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(74, 20, 140, 0.3);
 }
 
 .submit-btn {
-  background-color: #FF5722;
+  background-color: #ff5722;
   color: white;
   padding: 12px 24px;
   border: none;
@@ -1494,7 +2612,7 @@ const resetForm = () => {
 }
 
 .submit-btn:hover:not(:disabled) {
-  background-color: #2D1B69;
+  background-color: #2d1b69;
 }
 
 .submit-btn:disabled {
@@ -1549,12 +2667,12 @@ const resetForm = () => {
 }
 
 .next-btn {
-  background: #4A148C;
+  background: #4a148c;
   color: white;
 }
 
 .next-btn:hover {
-  background: #2D1B69;
+  background: #2d1b69;
 }
 
 .submit-btn {
@@ -1585,67 +2703,67 @@ const resetForm = () => {
     max-width: 100%;
     padding: 0 0.5rem;
   }
-  
+
   .form-header {
     padding: 0.75rem 0.5rem;
     margin-bottom: 0.75rem;
   }
-  
+
   .form-header h3 {
     font-size: 1.2rem;
     line-height: 1.3;
   }
-  
+
   .form-header p {
     font-size: 0.85rem;
   }
-  
+
   .overview-form {
     padding: 0.75rem;
     border-radius: 0;
   }
-  
+
   .form-section {
     padding: 0.75rem;
     margin-bottom: 0.75rem;
     border-radius: 6px;
   }
-  
+
   .form-section h4 {
     font-size: 1rem;
     margin-bottom: 0.75rem;
   }
-  
+
   .form-section h5 {
     font-size: 0.95rem;
     margin: 1rem 0 0.5rem 0;
   }
-  
+
   .form-grid {
     grid-template-columns: 1fr;
     gap: 0.5rem;
   }
-  
+
   .checkbox-group {
     grid-template-columns: 1fr;
     gap: 0.4rem;
   }
-  
+
   .checkbox-item {
     padding: 0.5rem;
     font-size: 0.8rem;
   }
-  
+
   .form-group {
     margin-bottom: 0;
   }
-  
+
   .form-group label {
     font-size: 0.8rem;
     margin-bottom: 0.3rem;
     font-weight: 600;
   }
-  
+
   .form-group input,
   .form-group select,
   .form-group textarea {
@@ -1654,34 +2772,34 @@ const resetForm = () => {
     border-width: 1px;
     min-height: 40px;
   }
-  
+
   .form-group textarea {
     min-height: 70px;
   }
-  
+
   .family-table {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     margin: 0.5rem -0.75rem;
     padding: 0 0.75rem;
   }
-  
+
   .family-table table {
     min-width: 700px;
     font-size: 0.75rem;
   }
-  
+
   .family-table th,
   .family-table td {
     padding: 0.4rem 0.3rem;
   }
-  
+
   .family-table input,
   .family-table select {
     padding: 0.3rem;
     font-size: 0.75rem;
   }
-  
+
   .add-btn {
     width: 100%;
     padding: 0.625rem 1rem;
@@ -1689,19 +2807,19 @@ const resetForm = () => {
     margin-top: 0.5rem;
     justify-content: center;
   }
-  
+
   .remove-btn {
     padding: 0.3rem 0.5rem;
     font-size: 0.7rem;
   }
-  
+
   .section-navigation {
     flex-direction: column;
     gap: 0.5rem;
     padding-top: 0.75rem;
     margin-top: 0.75rem;
   }
-  
+
   .prev-btn,
   .next-btn,
   .submit-btn {
@@ -1711,14 +2829,14 @@ const resetForm = () => {
     font-size: 0.875rem;
     min-height: 44px;
   }
-  
+
   .form-actions {
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 0.75rem;
     padding-top: 0.75rem;
   }
-  
+
   .submit-btn,
   .cancel-btn {
     width: 100%;
@@ -1726,20 +2844,20 @@ const resetForm = () => {
     font-size: 0.875rem;
     min-height: 44px;
   }
-  
+
   .progress-info {
     font-size: 0.8rem;
   }
-  
+
   .section-title {
     font-size: 0.85rem;
   }
-  
+
   .status-indicator {
     font-size: 0.75rem;
     padding: 0.2rem 0.5rem;
   }
-  
+
   .progress-bar {
     height: 6px;
   }
@@ -1749,60 +2867,60 @@ const resetForm = () => {
   .form-wrapper {
     padding: 0 0.25rem;
   }
-  
+
   .form-header {
     padding: 0.5rem 0.25rem;
   }
-  
+
   .form-header h3 {
     font-size: 1rem;
   }
-  
+
   .form-header p {
     font-size: 0.8rem;
   }
-  
+
   .form-section {
     padding: 0.5rem;
   }
-  
+
   .form-section h4 {
     font-size: 0.95rem;
   }
-  
+
   .form-section h5 {
     font-size: 0.9rem;
   }
-  
+
   .form-group label {
     font-size: 0.75rem;
   }
-  
+
   .form-group input,
   .form-group select,
   .form-group textarea {
     padding: 0.4rem;
     font-size: 0.8rem;
   }
-  
+
   .checkbox-item {
     padding: 0.4rem;
     font-size: 0.75rem;
   }
-  
+
   .progress-text {
     font-size: 0.7rem;
   }
-  
+
   .section-title {
     font-size: 0.8rem;
   }
-  
+
   .family-table table {
     min-width: 650px;
     font-size: 0.7rem;
   }
-  
+
   .add-btn {
     font-size: 0.75rem;
     padding: 0.5rem 0.75rem;

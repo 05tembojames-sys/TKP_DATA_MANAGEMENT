@@ -4,24 +4,44 @@
     <div class="capture-header">
       <div class="header-left">
         <button @click="goBack" class="back-button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="m12 19-7-7 7-7" />
             <path d="m19 12H5" />
           </svg>
-          Back to Dashboard
+          {{
+            route.query.returnTo === "tracker-capture"
+              ? "Back to Tracker Capture"
+              : "Back to Dashboard"
+          }}
         </button>
       </div>
       <div class="header-center">
         <h1 class="capture-title">Data Capture</h1>
       </div>
       <div class="header-right">
-        <button 
-          @click="showInitialReferral" 
+        <button
+          @click="showInitialReferral"
           class="referral-button"
           :class="{ active: activeTab === 'referral' }"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            />
             <polyline points="14,2 14,8 20,8" />
             <line x1="16" y1="13" x2="8" y2="13" />
             <line x1="16" y1="17" x2="8" y2="17" />
@@ -29,13 +49,22 @@
           </svg>
           New Referral
         </button>
-        <button 
-          @click="showCustomReportsTab" 
+        <button
+          @click="showCustomReportsTab"
           class="reports-button"
           :class="{ active: activeTab === 'reports' }"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            />
             <polyline points="14,2 14,8 20,8" />
             <line x1="16" y1="13" x2="8" y2="13" />
             <line x1="16" y1="17" x2="8" y2="17" />
@@ -44,7 +73,14 @@
           Reports
         </button>
         <button @click="handleLogout" class="logout-button">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
             <polyline points="16 17 21 12 16 7" />
             <line x1="21" y1="12" x2="9" y2="12" />
@@ -62,9 +98,17 @@
           <!-- Data Set Selection -->
           <div class="selection-item">
             <label class="selection-label">Data Set</label>
-            <select v-model="selectedDataSet" @change="onDataSetChange" class="selection-dropdown">
+            <select
+              v-model="selectedDataSet"
+              @change="onDataSetChange"
+              class="selection-dropdown"
+            >
               <option value="">Select Data Set</option>
-              <option v-for="dataSet in dataSets" :key="dataSet.id" :value="dataSet.id">
+              <option
+                v-for="dataSet in dataSets"
+                :key="dataSet.id"
+                :value="dataSet.id"
+              >
                 {{ dataSet.name }}
               </option>
             </select>
@@ -73,9 +117,17 @@
           <!-- Organisation Unit Selection -->
           <div class="selection-item">
             <label class="selection-label">Organisation Unit</label>
-            <select v-model="selectedOrgUnit" @change="onOrgUnitChange" class="selection-dropdown">
+            <select
+              v-model="selectedOrgUnit"
+              @change="onOrgUnitChange"
+              class="selection-dropdown"
+            >
               <option value="">Select Organisation Unit</option>
-              <option v-for="orgUnit in orgUnits" :key="orgUnit.id" :value="orgUnit.id">
+              <option
+                v-for="orgUnit in orgUnits"
+                :key="orgUnit.id"
+                :value="orgUnit.id"
+              >
                 {{ orgUnit.name }}
               </option>
             </select>
@@ -84,9 +136,17 @@
           <!-- Period Selection -->
           <div class="selection-item">
             <label class="selection-label">Period</label>
-            <select v-model="selectedPeriod" @change="onPeriodChange" class="selection-dropdown">
+            <select
+              v-model="selectedPeriod"
+              @change="onPeriodChange"
+              class="selection-dropdown"
+            >
               <option value="">Select Period</option>
-              <option v-for="period in periods" :key="period.id" :value="period.id">
+              <option
+                v-for="period in periods"
+                :key="period.id"
+                :value="period.id"
+              >
                 {{ period.name }}
               </option>
             </select>
@@ -105,8 +165,8 @@
 
           <!-- Load Data Button -->
           <div class="selection-item">
-            <button 
-              @click="loadDataEntry" 
+            <button
+              @click="loadDataEntry"
               :disabled="!canLoadData"
               class="load-button"
             >
@@ -116,34 +176,47 @@
         </div>
 
         <!-- Status Bar -->
-        <div class="status-bar" v-if="selectedDataSet && selectedOrgUnit && selectedPeriod">
+        <div
+          class="status-bar"
+          v-if="selectedDataSet && selectedOrgUnit && selectedPeriod"
+        >
           <div class="status-info">
             <span class="status-label">Selected:</span>
-            <span class="status-value">{{ getSelectedDataSetName() }} - {{ getSelectedOrgUnitName() }} - {{ getSelectedPeriodName() }}</span>
+            <span class="status-value"
+              >{{ getSelectedDataSetName() }} - {{ getSelectedOrgUnitName() }} -
+              {{ getSelectedPeriodName() }}</span
+            >
           </div>
           <div class="status-completion" v-if="completionStatus">
             <span class="completion-label">Completion:</span>
-            <span class="completion-percentage" :class="getCompletionClass()">{{ completionStatus }}%</span>
+            <span class="completion-percentage" :class="getCompletionClass()"
+              >{{ completionStatus }}%</span
+            >
           </div>
         </div>
       </div>
 
       <!-- Data Entry Section -->
-      <div class="data-entry-section" v-if="activeTab === 'referral' && showDataEntry">
+      <div
+        class="data-entry-section"
+        v-if="activeTab === 'referral' && showDataEntry"
+      >
         <!-- Initial Referral Form -->
         <div v-if="selectedDataSet === 'initial-referral'">
-          <InitialReferralForm 
+          <InitialReferralForm
             ref="referralForm"
             @form-saved="handleReferralFormSaved"
           />
         </div>
-        
+
         <!-- Standard Data Entry Form -->
         <div v-else>
           <div class="data-entry-header">
             <h2>{{ getSelectedDataSetName() }} - Data Entry</h2>
             <div class="entry-actions">
-              <button @click="validateData" class="validate-button">Validate</button>
+              <button @click="validateData" class="validate-button">
+                Validate
+              </button>
               <button @click="clearData" class="clear-button">Clear</button>
             </div>
           </div>
@@ -151,79 +224,101 @@
           <!-- Data Entry Form -->
           <div class="data-entry-form">
             <div class="form-sections">
-              <div v-for="section in formSections" :key="section.id" class="form-section">
+              <div
+                v-for="section in formSections"
+                :key="section.id"
+                class="form-section"
+              >
                 <h3 class="section-title">{{ section.name }}</h3>
-                
+
                 <div class="data-elements-grid">
-                  <div 
-                    v-for="element in section.dataElements" 
-                    :key="element.id" 
+                  <div
+                    v-for="element in section.dataElements"
+                    :key="element.id"
                     class="data-element"
                   >
                     <label class="element-label">{{ element.name }}</label>
-                    
+
                     <!-- Number Input -->
-                    <input 
+                    <input
                       v-if="element.valueType === 'NUMBER'"
-                      type="number" 
+                      type="number"
                       v-model="dataValues[element.id]"
-                      @input="onDataValueChange(element.id, $event.target.value)"
+                      @input="
+                        onDataValueChange(element.id, $event.target.value)
+                      "
                       class="element-input"
                       :placeholder="element.placeholder || '0'"
                       :min="element.min"
                       :max="element.max"
                     />
-                    
+
                     <!-- Text Input -->
-                    <input 
+                    <input
                       v-else-if="element.valueType === 'TEXT'"
-                      type="text" 
+                      type="text"
                       v-model="dataValues[element.id]"
-                      @input="onDataValueChange(element.id, $event.target.value)"
+                      @input="
+                        onDataValueChange(element.id, $event.target.value)
+                      "
                       class="element-input"
                       :placeholder="element.placeholder || 'Enter text'"
                     />
-                    
+
                     <!-- Date Input -->
-                    <input 
+                    <input
                       v-else-if="element.valueType === 'DATE'"
-                      type="date" 
+                      type="date"
                       v-model="dataValues[element.id]"
-                      @change="onDataValueChange(element.id, $event.target.value)"
+                      @change="
+                        onDataValueChange(element.id, $event.target.value)
+                      "
                       class="element-input"
                     />
-                    
+
                     <!-- Select/Dropdown -->
-                    <select 
+                    <select
                       v-else-if="element.valueType === 'SELECT'"
                       v-model="dataValues[element.id]"
-                      @change="onDataValueChange(element.id, $event.target.value)"
+                      @change="
+                        onDataValueChange(element.id, $event.target.value)
+                      "
                       class="element-input"
                     >
                       <option value="">Select {{ element.name }}</option>
-                      <option 
-                        v-for="option in element.options" 
-                        :key="option" 
+                      <option
+                        v-for="option in element.options"
+                        :key="option"
                         :value="option"
                       >
                         {{ option }}
                       </option>
                     </select>
-                    
+
                     <!-- Boolean/Checkbox -->
-                    <div v-else-if="element.valueType === 'BOOLEAN'" class="checkbox-container">
-                      <input 
-                        type="checkbox" 
+                    <div
+                      v-else-if="element.valueType === 'BOOLEAN'"
+                      class="checkbox-container"
+                    >
+                      <input
+                        type="checkbox"
                         v-model="dataValues[element.id]"
-                        @change="onDataValueChange(element.id, $event.target.checked)"
+                        @change="
+                          onDataValueChange(element.id, $event.target.checked)
+                        "
                         class="element-checkbox"
                         :id="element.id"
                       />
-                      <label :for="element.id" class="checkbox-label">Yes</label>
+                      <label :for="element.id" class="checkbox-label"
+                        >Yes</label
+                      >
                     </div>
 
                     <!-- Validation Error -->
-                    <div v-if="validationErrors[element.id]" class="validation-error">
+                    <div
+                      v-if="validationErrors[element.id]"
+                      class="validation-error"
+                    >
                       {{ validationErrors[element.id] }}
                     </div>
                   </div>
@@ -238,15 +333,27 @@
               <span class="last-updated" v-if="lastSaved">
                 Last saved: {{ formatDate(lastSaved) }}
               </span>
-              <span class="save-status" v-if="saveStatusMessage" :class="saveStatusClass">
+              <span
+                class="save-status"
+                v-if="saveStatusMessage"
+                :class="saveStatusClass"
+              >
                 {{ saveStatusMessage }}
               </span>
             </div>
             <div class="footer-right">
-              <button @click="saveAsDraft" class="draft-button" :disabled="isSaving">
-                {{ isSaving ? 'Saving...' : 'Save as Draft' }}
+              <button
+                @click="saveAsDraft"
+                class="draft-button"
+                :disabled="isSaving"
+              >
+                {{ isSaving ? "Saving..." : "Save as Draft" }}
               </button>
-              <button @click="completeEntry" class="complete-button" :disabled="!isValid || isSaving">
+              <button
+                @click="completeEntry"
+                class="complete-button"
+                :disabled="!isValid || isSaving"
+              >
                 Complete
               </button>
             </div>
@@ -255,29 +362,43 @@
       </div>
 
       <!-- No Data Message -->
-      <div v-if="activeTab === 'referral' && !showDataEntry" class="no-data-message">
+      <div
+        v-if="activeTab === 'referral' && !showDataEntry"
+        class="no-data-message"
+      >
         <div class="no-data-content">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            />
             <polyline points="14,2 14,8 20,8" />
             <line x1="16" y1="13" x2="8" y2="13" />
             <line x1="16" y1="17" x2="8" y2="17" />
             <polyline points="10,9 9,9 8,9" />
           </svg>
           <h3>No Data Entry Form Available</h3>
-          <p>Click "Load" to load the data entry form for the selected criteria.</p>
+          <p>
+            Click "Load" to load the data entry form for the selected criteria.
+          </p>
         </div>
       </div>
 
       <!-- Custom Reports Component -->
       <div v-if="activeTab === 'reports'" class="custom-reports-section">
-        <CustomReports 
-          :can-approve="true" 
+        <CustomReports
+          :can-approve="true"
           @back-to-dashboard="showCustomReports = false"
         />
       </div>
     </div>
-    
+
     <!-- Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-spinner">
@@ -289,111 +410,130 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import CaptureService from '../services/captureService.js'
-import FormService from '../services/formService.js'
-import AuthService from '../services/auth.js'
-import TrackerService from '../services/trackerService.js'
-import InitialReferralForm from './InitialReferralForm.vue'
-import CustomReports from './CustomReports.vue'
+import { ref, computed, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import CaptureService from "../services/captureService.js";
+import FormService from "../services/formService.js";
+import AuthService from "../services/auth.js";
+import TrackerService from "../services/trackerService.js";
+import InitialReferralForm from "./InitialReferralForm.vue";
+import CustomReports from "./CustomReports.vue";
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
 // Ref for accessing the InitialReferralForm component
-const referralForm = ref(null)
+const referralForm = ref(null);
 
 // Reactive data
-const selectedDataSet = ref('')
-const selectedOrgUnit = ref('')
-const selectedPeriod = ref('')
-const showDataEntry = ref(false)
-const showCustomReports = ref(false)
-const loading = ref(false)
-const loadingMessage = ref('')
-const hasUnsavedChanges = ref(false)
-const lastSaved = ref(null)
-const completionStatus = ref(0)
-const isValid = ref(false)
-const isSaving = ref(false)
-const saveStatusMessage = ref('')
-const saveStatusClass = ref('')
-const activeTab = ref('data-entry') // 'data-entry', 'referral', or 'reports'
+const selectedDataSet = ref("");
+const selectedOrgUnit = ref("");
+const selectedPeriod = ref("");
+const showDataEntry = ref(false);
+const showCustomReports = ref(false);
+const loading = ref(false);
+const loadingMessage = ref("");
+const hasUnsavedChanges = ref(false);
+const lastSaved = ref(null);
+const completionStatus = ref(0);
+const isValid = ref(false);
+const isSaving = ref(false);
+const saveStatusMessage = ref("");
+const saveStatusClass = ref("");
+const activeTab = ref("data-entry"); // 'data-entry', 'referral', or 'reports'
 
 // Data arrays
-const dataSets = ref([])
-const orgUnits = ref([])
-const periods = ref([])
-const formSections = ref([])
-const dataValues = ref({})
-const validationErrors = ref({})
-const forms = ref([])
-const selectedFormId = ref('')
+const dataSets = ref([]);
+const orgUnits = ref([]);
+const periods = ref([]);
+const formSections = ref([]);
+const dataValues = ref({});
+const validationErrors = ref({});
+const forms = ref([]);
+const selectedFormId = ref("");
 
 // Computed properties
 const selectedDataSetName = computed(() => {
-  const dataSet = dataSets.value.find(ds => ds.id === selectedDataSet.value)
-  return dataSet ? dataSet.name : ''
-})
+  const dataSet = dataSets.value.find((ds) => ds.id === selectedDataSet.value);
+  return dataSet ? dataSet.name : "";
+});
 
 const canLoadData = computed(() => {
-  return selectedDataSet.value && selectedOrgUnit.value && selectedPeriod.value
-})
+  return selectedDataSet.value && selectedOrgUnit.value && selectedPeriod.value;
+});
 
 // Methods
 const goBack = () => {
+  // Check if we should return to TrackerCapture
+  const shouldReturnToTracker =
+    route.query.returnTo === "tracker-capture" ||
+    (sessionStorage.getItem("selectedChildForForm") &&
+      JSON.parse(sessionStorage.getItem("selectedChildForForm") || "{}")
+        .returnTo === "tracker-capture");
+
   if (hasUnsavedChanges.value) {
-    if (confirm('You have unsaved changes. Are you sure you want to leave?')) {
-      router.push('/dashboard')
+    if (confirm("You have unsaved changes. Are you sure you want to leave?")) {
+      if (shouldReturnToTracker) {
+        router.push("/tracker-capture");
+      } else {
+        router.push("/dashboard");
+      }
     }
   } else {
-    router.push('/dashboard')
+    if (shouldReturnToTracker) {
+      router.push("/tracker-capture");
+    } else {
+      router.push("/dashboard");
+    }
   }
-}
+};
 
 const handleLogout = async () => {
   if (hasUnsavedChanges.value) {
-    if (!confirm('You have unsaved changes. Are you sure you want to logout?')) {
-      return
+    if (
+      !confirm("You have unsaved changes. Are you sure you want to logout?")
+    ) {
+      return;
     }
   }
-  const result = await AuthService.logout()
+  const result = await AuthService.logout();
   if (result.success) {
-    router.push('/login')
+    router.push("/login");
   }
-}
+};
 
 const onDataSetChange = async () => {
-  showDataEntry.value = false
-  clearDataValues()
-  selectedFormId.value = ''
-  await loadFormsForSelectedDataSet()
-}
+  showDataEntry.value = false;
+  clearDataValues();
+  selectedFormId.value = "";
+  await loadFormsForSelectedDataSet();
+};
 
 const onOrgUnitChange = () => {
-  showDataEntry.value = false
-  clearDataValues()
-}
+  showDataEntry.value = false;
+  clearDataValues();
+};
 
 const onPeriodChange = () => {
-  showDataEntry.value = false
-  clearDataValues()
-}
+  showDataEntry.value = false;
+  clearDataValues();
+};
 
 const loadDataEntry = async () => {
-  loading.value = true
-  loadingMessage.value = 'Loading data entry form...'
-  
+  loading.value = true;
+  loadingMessage.value = "Loading data entry form...";
+
   try {
     // Special handling for Initial Referral Form
-    if (selectedDataSet.value === 'initial-referral') {
+    if (selectedDataSet.value === "initial-referral") {
       // For Initial Referral Form, we directly show the form component
-      showDataEntry.value = true
-      activeTab.value = 'referral'
+      showDataEntry.value = true;
+      activeTab.value = "referral";
       // Pre-populate with case data if available
       if (route.query.caseId) {
-        const caseResult = await TrackerService.getCaseDetails(route.query.caseId)
+        const caseResult = await TrackerService.getCaseDetails(
+          route.query.caseId
+        );
         if (caseResult.success && referralForm.value) {
           // Pass case data to the referral form if needed
           // This would require exposing a method in InitialReferralForm to accept pre-populated data
@@ -404,545 +544,608 @@ const loadDataEntry = async () => {
       const formData = await CaptureService.loadDataEntryForm({
         dataSetId: selectedDataSet.value,
         orgUnitId: selectedOrgUnit.value,
-        periodId: selectedPeriod.value
-      })
-      
-      formSections.value = formData.sections
+        periodId: selectedPeriod.value,
+      });
+
+      formSections.value = formData.sections;
 
       // If a specific saved form is selected, load its values from Forms collection
       if (selectedFormId.value) {
-        const result = await FormService.getFormById(selectedFormId.value)
+        const result = await FormService.getFormById(selectedFormId.value);
         if (result.success) {
           // Exclude metadata fields not part of data elements
-          const { id, formType, createdAt, updatedAt, status, ...rest } = result.form
-          dataValues.value = rest || {}
+          const { id, formType, createdAt, updatedAt, status, ...rest } =
+            result.form;
+          dataValues.value = rest || {};
         } else {
-          dataValues.value = formData.dataValues || {}
+          dataValues.value = formData.dataValues || {};
         }
       } else {
-        dataValues.value = formData.dataValues || {}
+        dataValues.value = formData.dataValues || {};
       }
 
-      updateCompletionStatus()
-      completionStatus.value = formData.completionStatus || completionStatus.value
-      showDataEntry.value = true
-      activeTab.value = 'referral'
+      updateCompletionStatus();
+      completionStatus.value =
+        formData.completionStatus || completionStatus.value;
+      showDataEntry.value = true;
+      activeTab.value = "referral";
     }
-    
   } catch (error) {
-    console.error('Error loading data entry form:', error)
-    alert('Failed to load data entry form')
+    console.error("Error loading data entry form:", error);
+    alert("Failed to load data entry form");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 // Handle route query parameters
 const handleRouteQuery = async () => {
   // Handle preset parameter
   if (route.query.preset) {
-    selectedDataSet.value = route.query.preset
+    selectedDataSet.value = route.query.preset;
     // Set default org unit and period for preset forms
-    selectedOrgUnit.value = 'kukhoma-main'
-    selectedPeriod.value = '202510' // Default to current period
-    
+    selectedOrgUnit.value = "kukhoma-main";
+    selectedPeriod.value = "202510"; // Default to current period
+
     // Auto-load the form if all required parameters are present
-    if (selectedDataSet.value && selectedOrgUnit.value && selectedPeriod.value) {
-      await loadDataEntry()
-      
+    if (
+      selectedDataSet.value &&
+      selectedOrgUnit.value &&
+      selectedPeriod.value
+    ) {
+      await loadDataEntry();
+
       // Pre-populate form data if caseId is provided
       if (route.query.caseId) {
-        const caseResult = await TrackerService.getCaseDetails(route.query.caseId)
+        const caseResult = await TrackerService.getCaseDetails(
+          route.query.caseId
+        );
         if (caseResult.success) {
-          const caseData = caseResult.details
-          
+          const caseData = caseResult.details;
+
           // Pre-populate child information
           if (caseData.childFirstName) {
-            dataValues.value.childFirstName = caseData.childFirstName
+            dataValues.value.childFirstName = caseData.childFirstName;
           }
           if (caseData.childLastName) {
-            dataValues.value.childLastName = caseData.childLastName
+            dataValues.value.childLastName = caseData.childLastName;
           }
           if (caseData.childSurname) {
-            dataValues.value.childSurname = caseData.childSurname
+            dataValues.value.childSurname = caseData.childSurname;
           }
           if (caseData.dateOfBirth) {
-            dataValues.value.dateOfBirth = formatDateForInput(caseData.dateOfBirth)
+            dataValues.value.dateOfBirth = formatDateForInput(
+              caseData.dateOfBirth
+            );
           }
           if (caseData.gender) {
-            dataValues.value.gender = caseData.gender
+            dataValues.value.gender = caseData.gender;
           }
           if (caseData.age) {
-            dataValues.value.age = caseData.age
+            dataValues.value.age = caseData.age;
           }
-          
+
           // Set default dates based on form type
-          const today = new Date().toISOString().split('T')[0]
-          if (selectedDataSet.value === 'initial-referral' && !dataValues.value.dateOfReferral) {
-            dataValues.value.dateOfReferral = today
+          const today = new Date().toISOString().split("T")[0];
+          if (
+            selectedDataSet.value === "initial-referral" &&
+            !dataValues.value.dateOfReferral
+          ) {
+            dataValues.value.dateOfReferral = today;
           }
-          
-          if (selectedDataSet.value === 'initial-assessment' && !dataValues.value.assessmentDate) {
-            dataValues.value.assessmentDate = today
+
+          if (
+            selectedDataSet.value === "initial-assessment" &&
+            !dataValues.value.assessmentDate
+          ) {
+            dataValues.value.assessmentDate = today;
           }
-          
-          if (selectedDataSet.value === 'child-overview' && !dataValues.value.dateOfAdmission) {
-            dataValues.value.dateOfAdmission = today
+
+          if (
+            selectedDataSet.value === "child-overview" &&
+            !dataValues.value.dateOfAdmission
+          ) {
+            dataValues.value.dateOfAdmission = today;
           }
         }
       }
     }
   }
-  
+
   // Handle view parameter
   if (route.query.view) {
     // Load specific form for viewing
-    const result = await FormService.getFormById(route.query.view)
+    const result = await FormService.getFormById(route.query.view);
     if (result.success) {
-      selectedDataSet.value = result.form.formType
-      selectedOrgUnit.value = 'kukhoma-main'
-      selectedPeriod.value = '202510'
-      
-      if (selectedDataSet.value && selectedOrgUnit.value && selectedPeriod.value) {
-        await loadDataEntry()
+      selectedDataSet.value = result.form.formType;
+      selectedOrgUnit.value = "kukhoma-main";
+      selectedPeriod.value = "202510";
+
+      if (
+        selectedDataSet.value &&
+        selectedOrgUnit.value &&
+        selectedPeriod.value
+      ) {
+        await loadDataEntry();
         // Load the form data for viewing
-        const { id, formType, createdAt, updatedAt, status, ...rest } = result.form
-        dataValues.value = rest || {}
+        const { id, formType, createdAt, updatedAt, status, ...rest } =
+          result.form;
+        dataValues.value = rest || {};
         // Store the form ID for updates
-        dataValues.value.formId = id
+        dataValues.value.formId = id;
       }
     }
   }
-  
+
   // Handle edit parameter (similar to view but for editing)
   if (route.query.edit) {
     // Load specific form for editing
-    const result = await FormService.getFormById(route.query.edit)
+    const result = await FormService.getFormById(route.query.edit);
     if (result.success) {
-      selectedDataSet.value = result.form.formType
-      selectedOrgUnit.value = 'kukhoma-main'
-      selectedPeriod.value = '202510'
-      
-      if (selectedDataSet.value && selectedOrgUnit.value && selectedPeriod.value) {
-        await loadDataEntry()
+      selectedDataSet.value = result.form.formType;
+      selectedOrgUnit.value = "kukhoma-main";
+      selectedPeriod.value = "202510";
+
+      if (
+        selectedDataSet.value &&
+        selectedOrgUnit.value &&
+        selectedPeriod.value
+      ) {
+        await loadDataEntry();
         // Load the form data for editing
-        const { id, formType, createdAt, updatedAt, status, ...rest } = result.form
-        dataValues.value = rest || {}
+        const { id, formType, createdAt, updatedAt, status, ...rest } =
+          result.form;
+        dataValues.value = rest || {};
         // Store the form ID for updates
-        dataValues.value.formId = id
+        dataValues.value.formId = id;
       }
     }
   }
-}
+};
 
 // Handle when the Initial Referral Form is saved
 const handleReferralFormSaved = (data) => {
   // Show success message
-  alert('Initial Referral Form saved successfully!')
-  
+  alert("Initial Referral Form saved successfully!");
+
   // Reset the form selection
-  showDataEntry.value = false
-  selectedDataSet.value = ''
-  selectedOrgUnit.value = ''
-  selectedPeriod.value = ''
-  activeTab.value = 'data-entry'
-  
-  // Go back to dashboard
-  router.push('/dashboard')
-}
+  showDataEntry.value = false;
+  selectedDataSet.value = "";
+  selectedOrgUnit.value = "";
+  selectedPeriod.value = "";
+  activeTab.value = "data-entry";
+
+  // Check if we should return to TrackerCapture
+  const shouldReturnToTracker =
+    route.query.returnTo === "tracker-capture" ||
+    (sessionStorage.getItem("selectedChildForForm") &&
+      JSON.parse(sessionStorage.getItem("selectedChildForForm") || "{}")
+        .returnTo === "tracker-capture");
+
+  // Go back to dashboard or tracker capture
+  if (shouldReturnToTracker) {
+    router.push("/tracker-capture");
+  } else {
+    router.push("/dashboard");
+  }
+};
 
 // Show Initial Referral Form
 const showInitialReferral = () => {
-  selectedDataSet.value = 'initial-referral'
-  selectedOrgUnit.value = 'kukhoma-main'
-  selectedPeriod.value = '202510' // Default to current period
-  showDataEntry.value = true
-  activeTab.value = 'referral'
-}
+  selectedDataSet.value = "initial-referral";
+  selectedOrgUnit.value = "kukhoma-main";
+  selectedPeriod.value = "202510"; // Default to current period
+  showDataEntry.value = true;
+  activeTab.value = "referral";
+};
 
 // Show Custom Reports tab
 const showCustomReportsTab = () => {
-  activeTab.value = 'reports'
-}
+  activeTab.value = "reports";
+};
 
 // Helper function to format date for input fields
 const formatDateForInput = (dateString) => {
-  if (!dateString) return ''
+  if (!dateString) return "";
   try {
-    const date = new Date(dateString)
-    return date.toISOString().split('T')[0]
+    const date = new Date(dateString);
+    return date.toISOString().split("T")[0];
   } catch (e) {
-    return ''
+    return "";
   }
-}
+};
 
 const onDataValueChange = (elementId, value) => {
-  dataValues.value[elementId] = value
-  hasUnsavedChanges.value = true
-  
+  dataValues.value[elementId] = value;
+  hasUnsavedChanges.value = true;
+
   // Clear validation error for this element
   if (validationErrors.value[elementId]) {
-    delete validationErrors.value[elementId]
+    delete validationErrors.value[elementId];
   }
-  
-  updateCompletionStatus()
-}
+
+  updateCompletionStatus();
+};
 
 const updateCompletionStatus = () => {
-  const allElementIds = formSections.value.flatMap(section => section.dataElements.map(de => de.id))
-  const totalElements = allElementIds.length
-  const filledElements = allElementIds.filter(id => {
-    const v = dataValues.value[id]
-    return v !== '' && v !== null && v !== undefined
-  }).length
-  completionStatus.value = totalElements > 0 ? Math.round((filledElements / totalElements) * 100) : 0
-}
+  const allElementIds = formSections.value.flatMap((section) =>
+    section.dataElements.map((de) => de.id)
+  );
+  const totalElements = allElementIds.length;
+  const filledElements = allElementIds.filter((id) => {
+    const v = dataValues.value[id];
+    return v !== "" && v !== null && v !== undefined;
+  }).length;
+  completionStatus.value =
+    totalElements > 0 ? Math.round((filledElements / totalElements) * 100) : 0;
+};
 
 const validateData = () => {
-  validationErrors.value = {}
-  let valid = true
-  
-  formSections.value.forEach(section => {
-    section.dataElements.forEach(element => {
-      const value = dataValues.value[element.id]
-      
+  validationErrors.value = {};
+  let valid = true;
+
+  formSections.value.forEach((section) => {
+    section.dataElements.forEach((element) => {
+      const value = dataValues.value[element.id];
+
       // Required field validation
-      if (element.required && (!value || value === '')) {
-        validationErrors.value[element.id] = 'This field is required'
-        valid = false
+      if (element.required && (!value || value === "")) {
+        validationErrors.value[element.id] = "This field is required";
+        valid = false;
       }
-      
+
       // Number validation
-      if (element.valueType === 'NUMBER' && value && isNaN(value)) {
-        validationErrors.value[element.id] = 'Please enter a valid number'
-        valid = false
+      if (element.valueType === "NUMBER" && value && isNaN(value)) {
+        validationErrors.value[element.id] = "Please enter a valid number";
+        valid = false;
       }
-      
+
       // Range validation
-      if (element.valueType === 'NUMBER' && value) {
+      if (element.valueType === "NUMBER" && value) {
         if (element.min !== undefined && value < element.min) {
-          validationErrors.value[element.id] = `Value must be at least ${element.min}`
-          valid = false
+          validationErrors.value[
+            element.id
+          ] = `Value must be at least ${element.min}`;
+          valid = false;
         }
         if (element.max !== undefined && value > element.max) {
-          validationErrors.value[element.id] = `Value must be at most ${element.max}`
-          valid = false
+          validationErrors.value[
+            element.id
+          ] = `Value must be at most ${element.max}`;
+          valid = false;
         }
       }
-    })
-  })
-  
-  isValid.value = valid
-  
+    });
+  });
+
+  isValid.value = valid;
+
   if (valid) {
-    alert('Data validation passed!')
+    alert("Data validation passed!");
   } else {
-    alert('Please fix the validation errors before proceeding')
+    alert("Please fix the validation errors before proceeding");
   }
-}
+};
 
 const saveData = async () => {
   // Special handling for Initial Referral Form
-  if (selectedDataSet.value === 'initial-referral' && referralForm.value) {
+  if (selectedDataSet.value === "initial-referral" && referralForm.value) {
     // Trigger the save method of the InitialReferralForm component
     // This would require exposing a save method in InitialReferralForm
-    alert('Please use the Save button in the Initial Referral Form')
-    return
+    alert("Please use the Save button in the Initial Referral Form");
+    return;
   }
-  
-  loading.value = true
-  loadingMessage.value = 'Saving data...'
-  
+
+  loading.value = true;
+  loadingMessage.value = "Saving data...";
+
   try {
     // Include caseId in the data if present in route
-    const saveData = { ...dataValues.value }
-    
+    const saveData = { ...dataValues.value };
+
     // Only include caseId if it exists
     if (route.query.caseId) {
-      saveData.caseId = route.query.caseId
+      saveData.caseId = route.query.caseId;
     }
-    
+
     await CaptureService.saveDataValues({
       dataSetId: selectedDataSet.value,
       orgUnitId: selectedOrgUnit.value,
       periodId: selectedPeriod.value,
-      dataValues: saveData
-    })
-    
-    hasUnsavedChanges.value = false
-    lastSaved.value = new Date()
-    saveStatusMessage.value = 'Data saved successfully!'
-    saveStatusClass.value = 'success'
-    
+      dataValues: saveData,
+    });
+
+    hasUnsavedChanges.value = false;
+    lastSaved.value = new Date();
+    saveStatusMessage.value = "Data saved successfully!";
+    saveStatusClass.value = "success";
+
     // Clear status message after 3 seconds
     setTimeout(() => {
-      saveStatusMessage.value = ''
-      saveStatusClass.value = ''
-    }, 3000)
-    
+      saveStatusMessage.value = "";
+      saveStatusClass.value = "";
+    }, 3000);
   } catch (error) {
-    console.error('Error saving data:', error)
-    saveStatusMessage.value = 'Failed to save data'
-    saveStatusClass.value = 'error'
-    
+    console.error("Error saving data:", error);
+    saveStatusMessage.value = "Failed to save data";
+    saveStatusClass.value = "error";
+
     // Clear error message after 5 seconds
     setTimeout(() => {
-      saveStatusMessage.value = ''
-      saveStatusClass.value = ''
-    }, 5000)
+      saveStatusMessage.value = "";
+      saveStatusClass.value = "";
+    }, 5000);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const saveAsDraft = async () => {
   // Special handling for Initial Referral Form
-  if (selectedDataSet.value === 'initial-referral' && referralForm.value) {
+  if (selectedDataSet.value === "initial-referral" && referralForm.value) {
     // Trigger the save draft method of the InitialReferralForm component
     // This would require exposing a save draft method in InitialReferralForm
-    alert('Please use the Save as Draft button in the Initial Referral Form')
-    return
+    alert("Please use the Save as Draft button in the Initial Referral Form");
+    return;
   }
-  
-  isSaving.value = true
-  saveStatusMessage.value = 'Saving draft...'
-  saveStatusClass.value = 'saving'
-  
+
+  isSaving.value = true;
+  saveStatusMessage.value = "Saving draft...";
+  saveStatusClass.value = "saving";
+
   try {
     // Include caseId in the data if present in route
-    const saveData = { ...dataValues.value }
-    
+    const saveData = { ...dataValues.value };
+
     // Only include caseId if it exists
     if (route.query.caseId) {
-      saveData.caseId = route.query.caseId
+      saveData.caseId = route.query.caseId;
     }
-    
+
     const result = await CaptureService.saveAsDraft({
       dataSetId: selectedDataSet.value,
       orgUnitId: selectedOrgUnit.value,
       periodId: selectedPeriod.value,
-      dataValues: saveData
-    })
-    
+      dataValues: saveData,
+    });
+
     if (result.success) {
-      hasUnsavedChanges.value = false
-      lastSaved.value = new Date()
-      saveStatusMessage.value = 'Draft saved successfully!'
-      saveStatusClass.value = 'success'
-      
+      hasUnsavedChanges.value = false;
+      lastSaved.value = new Date();
+      saveStatusMessage.value = "Draft saved successfully!";
+      saveStatusClass.value = "success";
+
       // Auto-refresh the form list to show the new draft
-      await loadFormsForSelectedDataSet()
-      
+      await loadFormsForSelectedDataSet();
+
       // Clear status message after 3 seconds
       setTimeout(() => {
-        saveStatusMessage.value = ''
-        saveStatusClass.value = ''
-      }, 3000)
+        saveStatusMessage.value = "";
+        saveStatusClass.value = "";
+      }, 3000);
     } else {
-      saveStatusMessage.value = 'Failed to save draft: ' + result.error
-      saveStatusClass.value = 'error'
-      
+      saveStatusMessage.value = "Failed to save draft: " + result.error;
+      saveStatusClass.value = "error";
+
       // Clear error message after 5 seconds
       setTimeout(() => {
-        saveStatusMessage.value = ''
-        saveStatusClass.value = ''
-      }, 5000)
+        saveStatusMessage.value = "";
+        saveStatusClass.value = "";
+      }, 5000);
     }
-    
   } catch (error) {
-    console.error('Error saving draft:', error)
-    saveStatusMessage.value = 'Failed to save draft'
-    saveStatusClass.value = 'error'
-    
+    console.error("Error saving draft:", error);
+    saveStatusMessage.value = "Failed to save draft";
+    saveStatusClass.value = "error";
+
     // Clear error message after 5 seconds
     setTimeout(() => {
-      saveStatusMessage.value = ''
-      saveStatusClass.value = ''
-    }, 5000)
+      saveStatusMessage.value = "";
+      saveStatusClass.value = "";
+    }, 5000);
   } finally {
-    isSaving.value = false
+    isSaving.value = false;
   }
-}
+};
 
 const completeEntry = async () => {
   // Special handling for Initial Referral Form
-  if (selectedDataSet.value === 'initial-referral' && referralForm.value) {
+  if (selectedDataSet.value === "initial-referral" && referralForm.value) {
     // Trigger the complete method of the InitialReferralForm component
     // This would require exposing a complete method in InitialReferralForm
-    alert('Please use the Complete button in the Initial Referral Form')
-    return
+    alert("Please use the Complete button in the Initial Referral Form");
+    return;
   }
-  
-  validateData()
-  
+
+  validateData();
+
   if (!isValid.value) {
-    return
+    return;
   }
-  
-  loading.value = true
-  loadingMessage.value = 'Completing data entry...'
-  
+
+  loading.value = true;
+  loadingMessage.value = "Completing data entry...";
+
   try {
     // Include caseId in the data if present in route
-    const saveData = { ...dataValues.value }
-    
+    const saveData = { ...dataValues.value };
+
     // Only include caseId if it exists
     if (route.query.caseId) {
-      saveData.caseId = route.query.caseId
+      saveData.caseId = route.query.caseId;
     }
-    
+
     await CaptureService.completeDataEntry({
       dataSetId: selectedDataSet.value,
       orgUnitId: selectedOrgUnit.value,
       periodId: selectedPeriod.value,
-      dataValues: saveData
-    })
-    
-    hasUnsavedChanges.value = false
-    lastSaved.value = new Date()
-    completionStatus.value = 100
-    saveStatusMessage.value = 'Data entry completed successfully!'
-    saveStatusClass.value = 'success'
-    
+      dataValues: saveData,
+    });
+
+    hasUnsavedChanges.value = false;
+    lastSaved.value = new Date();
+    completionStatus.value = 100;
+    saveStatusMessage.value = "Data entry completed successfully!";
+    saveStatusClass.value = "success";
+
     // Clear status message after 3 seconds
     setTimeout(() => {
-      saveStatusMessage.value = ''
-      saveStatusClass.value = ''
-    }, 3000)
-    
+      saveStatusMessage.value = "";
+      saveStatusClass.value = "";
+    }, 3000);
+
     // If this was opened from TrackerCapture, go back to the case details
     if (route.query.caseId) {
-      router.push(`/tracker-capture`)
+      router.push(`/tracker-capture`);
     } else {
-      router.push('/dashboard')
+      router.push("/dashboard");
     }
-    
   } catch (error) {
-    console.error('Error completing data entry:', error)
-    saveStatusMessage.value = 'Failed to complete data entry'
-    saveStatusClass.value = 'error'
-    
+    console.error("Error completing data entry:", error);
+    saveStatusMessage.value = "Failed to complete data entry";
+    saveStatusClass.value = "error";
+
     // Clear error message after 5 seconds
     setTimeout(() => {
-      saveStatusMessage.value = ''
-      saveStatusClass.value = ''
-    }, 5000)
+      saveStatusMessage.value = "";
+      saveStatusClass.value = "";
+    }, 5000);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const clearData = () => {
   // Special handling for Initial Referral Form
-  if (selectedDataSet.value === 'initial-referral' && referralForm.value) {
-    if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+  if (selectedDataSet.value === "initial-referral" && referralForm.value) {
+    if (
+      confirm(
+        "Are you sure you want to clear all data? This action cannot be undone."
+      )
+    ) {
       // Reset the InitialReferralForm component
       // This would require exposing a reset method in InitialReferralForm
-      alert('Form cleared')
+      alert("Form cleared");
     }
-    return
+    return;
   }
-  
-  if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-    clearDataValues()
-    hasUnsavedChanges.value = false
-    completionStatus.value = 0
+
+  if (
+    confirm(
+      "Are you sure you want to clear all data? This action cannot be undone."
+    )
+  ) {
+    clearDataValues();
+    hasUnsavedChanges.value = false;
+    completionStatus.value = 0;
   }
-}
+};
 
 const clearDataValues = () => {
-  dataValues.value = {}
-  validationErrors.value = {}
-  updateCompletionStatus()
-}
+  dataValues.value = {};
+  validationErrors.value = {};
+  updateCompletionStatus();
+};
 
 const getSelectedDataSetName = () => {
-  const dataSet = dataSets.value.find(ds => ds.id === selectedDataSet.value)
-  return dataSet ? dataSet.name : ''
-}
+  const dataSet = dataSets.value.find((ds) => ds.id === selectedDataSet.value);
+  return dataSet ? dataSet.name : "";
+};
 
 const getSelectedOrgUnitName = () => {
-  const orgUnit = orgUnits.value.find(ou => ou.id === selectedOrgUnit.value)
-  return orgUnit ? orgUnit.name : ''
-}
+  const orgUnit = orgUnits.value.find((ou) => ou.id === selectedOrgUnit.value);
+  return orgUnit ? orgUnit.name : "";
+};
 
 const getSelectedPeriodName = () => {
-  const period = periods.value.find(p => p.id === selectedPeriod.value)
-  return period ? period.name : ''
-}
+  const period = periods.value.find((p) => p.id === selectedPeriod.value);
+  return period ? period.name : "";
+};
 
 const getCompletionClass = () => {
-  if (completionStatus.value === 100) return 'completion-complete'
-  if (completionStatus.value >= 50) return 'completion-partial'
-  return 'completion-low'
-}
+  if (completionStatus.value === 100) return "completion-complete";
+  if (completionStatus.value >= 50) return "completion-partial";
+  return "completion-low";
+};
 
 const formatDate = (date) => {
-  return date.toLocaleString()
-}
+  return date.toLocaleString();
+};
 
 const formatFormOption = (form) => {
-  const d = form.createdAt?.toDate ? form.createdAt.toDate() : (form.createdAt ? new Date(form.createdAt) : null)
-  const dateStr = d ? d.toLocaleDateString() : 'Unknown date'
-  const name = form.childFirstName || form.childSurname || form.childLastName || 'Unnamed'
-  return `${name} • ${dateStr}`
-}
+  const d = form.createdAt?.toDate
+    ? form.createdAt.toDate()
+    : form.createdAt
+    ? new Date(form.createdAt)
+    : null;
+  const dateStr = d ? d.toLocaleDateString() : "Unknown date";
+  const name =
+    form.childFirstName || form.childSurname || form.childLastName || "Unnamed";
+  return `${name} • ${dateStr}`;
+};
 
 // Initialize component
 onMounted(async () => {
-  loading.value = true
-  loadingMessage.value = 'Loading capture interface...'
-  
+  loading.value = true;
+  loadingMessage.value = "Loading capture interface...";
+
   try {
     const [dataSetsData, orgUnitsData, periodsData] = await Promise.all([
       CaptureService.getDataSets(),
       CaptureService.getOrgUnits(),
-      CaptureService.getPeriods()
-    ])
-    
-    dataSets.value = dataSetsData
-    orgUnits.value = orgUnitsData
-    periods.value = periodsData
-    
+      CaptureService.getPeriods(),
+    ]);
+
+    dataSets.value = dataSetsData;
+    orgUnits.value = orgUnitsData;
+    periods.value = periodsData;
+
     // Handle route query parameters
-    await handleRouteQuery()
-    
+    await handleRouteQuery();
+
     if (selectedDataSet.value) {
-      await loadFormsForSelectedDataSet()
+      await loadFormsForSelectedDataSet();
     }
   } catch (error) {
-    console.error('Error initializing capture interface:', error)
-    alert('Failed to load capture interface')
+    console.error("Error initializing capture interface:", error);
+    alert("Failed to load capture interface");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 
 // Load forms for the selected dataset from Forms collection
 const loadFormsForSelectedDataSet = async () => {
   if (!selectedDataSet.value) {
-    forms.value = []
-    return
+    forms.value = [];
+    return;
   }
   try {
-    const result = await FormService.getForms(selectedDataSet.value, 50)
-    forms.value = result.success ? result.forms : []
+    const result = await FormService.getForms(selectedDataSet.value, 50);
+    forms.value = result.success ? result.forms : [];
   } catch (e) {
-    forms.value = []
+    forms.value = [];
   }
-}
+};
 
 // Watch for unsaved changes
-watch(dataValues, () => {
-  hasUnsavedChanges.value = true
-}, { deep: true })
+watch(
+  dataValues,
+  () => {
+    hasUnsavedChanges.value = true;
+  },
+  { deep: true }
+);
 
 // Watch for route changes
-watch(() => route.query, async (newQuery, oldQuery) => {
-  if (JSON.stringify(newQuery) !== JSON.stringify(oldQuery)) {
-    await handleRouteQuery()
+watch(
+  () => route.query,
+  async (newQuery, oldQuery) => {
+    if (JSON.stringify(newQuery) !== JSON.stringify(oldQuery)) {
+      await handleRouteQuery();
+    }
   }
-})
+);
 </script>
 
 <style scoped>
@@ -960,7 +1163,7 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-left {
@@ -1171,7 +1374,7 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   border-radius: 0.5rem;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .selection-grid {
@@ -1206,7 +1409,7 @@ watch(() => route.query, async (newQuery, oldQuery) => {
 .selection-dropdown:focus {
   outline: none;
   border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
   min-height: 44px;
 }
 
@@ -1248,7 +1451,8 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   align-items: center;
 }
 
-.status-label, .completion-label {
+.status-label,
+.completion-label {
   font-weight: 600;
   color: #6c757d;
 }
@@ -1282,7 +1486,7 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   background: white;
   border-radius: 0.5rem;
   padding: 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .data-entry-header {
@@ -1386,7 +1590,7 @@ watch(() => route.query, async (newQuery, oldQuery) => {
 .element-input:focus {
   outline: none;
   border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .checkbox-container {
@@ -1411,12 +1615,12 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   .checkbox-container {
     gap: 0.75rem;
   }
-  
+
   .element-checkbox {
     width: 1.5rem;
     height: 1.5rem;
   }
-  
+
   .checkbox-label {
     font-size: 1rem;
   }
@@ -1426,12 +1630,12 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   .checkbox-container {
     gap: 0.5rem;
   }
-  
+
   .element-checkbox {
     width: 1.25rem;
     height: 1.25rem;
   }
-  
+
   .checkbox-label {
     font-size: 0.9rem;
   }
@@ -1441,12 +1645,12 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   .checkbox-container {
     gap: 0.4rem;
   }
-  
+
   .element-checkbox {
     width: 1.1rem;
     height: 1.1rem;
   }
-  
+
   .checkbox-label {
     font-size: 0.85rem;
   }
@@ -1526,7 +1730,7 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   min-height: 300px;
   background: white;
   border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .no-data-content {
@@ -1555,7 +1759,7 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1567,7 +1771,7 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   padding: 2rem;
   border-radius: 0.5rem;
   text-align: center;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   max-width: 90%;
   width: 300px;
   margin: 0 auto;
@@ -1584,8 +1788,12 @@ watch(() => route.query, async (newQuery, oldQuery) => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-spinner p {
@@ -1600,12 +1808,12 @@ watch(() => route.query, async (newQuery, oldQuery) => {
     width: auto;
     max-width: 95%;
   }
-  
+
   .spinner {
     width: 36px;
     height: 36px;
   }
-  
+
   .loading-spinner p {
     font-size: 0.9rem;
   }
@@ -1615,12 +1823,12 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   .loading-spinner {
     padding: 1rem;
   }
-  
+
   .spinner {
     width: 32px;
     height: 32px;
   }
-  
+
   .loading-spinner p {
     font-size: 0.85rem;
   }
@@ -1630,12 +1838,12 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   .loading-spinner {
     padding: 0.75rem;
   }
-  
+
   .spinner {
     width: 28px;
     height: 28px;
   }
-  
+
   .loading-spinner p {
     font-size: 0.8rem;
   }
@@ -1663,7 +1871,6 @@ watch(() => route.query, async (newQuery, oldQuery) => {
   color: #721c24;
   background-color: #f8d7da;
 }
-
 
 .custom-reports-section {
   margin-top: 2rem;
@@ -1730,7 +1937,9 @@ watch(() => route.query, async (newQuery, oldQuery) => {
     gap: 1rem;
   }
 
-  .header-left, .header-center, .header-right {
+  .header-left,
+  .header-center,
+  .header-right {
     flex: none;
     width: 100%;
   }

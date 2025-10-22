@@ -7,9 +7,7 @@
         <span class="user-name">{{ currentUserName }}</span>
       </div>
       <!-- Logout Button -->
-      <button @click="handleLogout" class="logout-button">
-        Logout
-      </button>
+      <button @click="handleLogout" class="logout-button">Logout</button>
     </div>
 
     <!-- Main Content -->
@@ -17,17 +15,34 @@
       <div v-if="currentView === 'main'">
         <!-- Two Column Layout -->
         <div class="dashboard-layout">
-          
           <!-- Left Section - Logo and Summary -->
           <div class="left-section">
             <!-- Logo Card -->
             <div class="logo-card">
               <div class="logo-container">
-                <img src="//images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png" alt="The Kukhoma Project" sizes="240px" class="Mobile-bar-branding-logo" style="display:block" srcset="//images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=100w 100w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=300w 300w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=500w 500w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=750w 750w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=1000w 1000w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=1500w 1500w, //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=2500w 2500w" loading="lazy" decoding="async" data-loader="sqs">
+                <img
+                  src="//images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png"
+                  alt="The Kukhoma Project"
+                  sizes="240px"
+                  class="Mobile-bar-branding-logo"
+                  style="display: block"
+                  srcset="
+                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=100w   100w,
+                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=300w   300w,
+                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=500w   500w,
+                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=750w   750w,
+                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=1000w 1000w,
+                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=1500w 1500w,
+                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=2500w 2500w
+                  "
+                  loading="lazy"
+                  decoding="async"
+                  data-loader="sqs"
+                />
               </div>
               <h1 class="project-title">THE KUKHOMA PROJECT</h1>
             </div>
-            
+
             <!-- Summary Section -->
             <div class="summary-section">
               <h3>Summary of the data in the system</h3>
@@ -66,57 +81,86 @@
             <div class="section-title">
               <h2>The khukoma project data management system</h2>
             </div>
-            
+
             <!-- Dashboard Buttons Grid (3x3) -->
             <div class="dashboard-buttons-grid">
-              <button class="dashboard-btn tracker-btn" @click="setCurrentView('tracker-capture')">
+              <button
+                class="dashboard-btn tracker-btn"
+                @click="setCurrentView('tracker-capture')"
+              >
                 <i class="fas fa-search-location btn-icon"></i>
                 <span>Tracker Capture</span>
               </button>
-              
-              <button class="dashboard-btn reports-btn" @click="setCurrentView('reports')">
+
+              <button
+                class="dashboard-btn reports-btn"
+                @click="setCurrentView('reports')"
+              >
                 <i class="fas fa-chart-bar btn-icon"></i>
                 <span>Reports</span>
               </button>
-              
-              <button class="dashboard-btn data-entry-btn" @click="setCurrentView('data-entry')">
+
+              <button
+                class="dashboard-btn data-entry-btn"
+                @click="setCurrentView('data-entry')"
+              >
                 <i class="fas fa-keyboard btn-icon"></i>
                 <span>Data Entry</span>
               </button>
-              
-              <button class="dashboard-btn child-tracker-btn" @click="setCurrentView('child-tracker')">
+
+              <button
+                class="dashboard-btn child-tracker-btn"
+                @click="setCurrentView('child-tracker')"
+              >
                 <i class="fas fa-baby btn-icon"></i>
                 <span>Child Tracker</span>
               </button>
-              
-              <button class="dashboard-btn analytics-btn" @click="setCurrentView('visualization')">
+
+              <button
+                class="dashboard-btn analytics-btn"
+                @click="setCurrentView('visualization')"
+              >
                 <i class="fas fa-chart-line btn-icon"></i>
                 <span>Analytics</span>
               </button>
-              
-              <button class="dashboard-btn events-btn" @click="setCurrentView('event-reports')">
+
+              <button
+                class="dashboard-btn events-btn"
+                @click="setCurrentView('event-reports')"
+              >
                 <i class="fas fa-calendar-alt btn-icon"></i>
                 <span>Events</span>
               </button>
-              
-              <button class="dashboard-btn capture-btn" @click="setCurrentView('capture')">
+
+              <button
+                class="dashboard-btn capture-btn"
+                @click="setCurrentView('capture')"
+              >
                 <i class="fas fa-camera btn-icon"></i>
                 <span>Capture</span>
               </button>
-              
-              <button class="dashboard-btn residents-btn" @click="setCurrentView('child-tracker-2')">
+
+              <button
+                class="dashboard-btn residents-btn"
+                @click="setCurrentView('child-tracker-2')"
+              >
                 <i class="fas fa-home btn-icon"></i>
                 <span>In Housed Girls</span>
               </button>
-              
-              <button class="dashboard-btn analysis-btn" @click="setCurrentView('data-analysis')">
+
+              <button
+                class="dashboard-btn analysis-btn"
+                @click="setCurrentView('data-analysis')"
+              >
                 <i class="fas fa-microscope btn-icon"></i>
                 <span>Analysis</span>
               </button>
-              
-              <button 
-                class="dashboard-btn users-btn" 
-                @click="canManageUsers ? $router.push('/user-management') : null"
+
+              <button
+                class="dashboard-btn users-btn"
+                @click="
+                  canManageUsers ? $router.push('/user-management') : null
+                "
                 :disabled="!canManageUsers"
                 :class="{ 'btn-disabled': !canManageUsers }"
               >
@@ -124,18 +168,22 @@
                 <span>Users</span>
               </button>
             </div>
-            
+
             <!-- Dashboard Description -->
             <div class="dashboard-description">
               <p class="description-text">
-                <strong>The Kukhoma Project Data Management System</strong> provides comprehensive tools for child protection and support services. 
-                Use <em>Tracker Capture</em> to monitor individual cases, <em>Data Entry</em> for structured form collection, generate <em>Reports</em> for insights, 
-                and track <em>Residents</em> in our care facilities. Advanced <em>Analytics</em> help identify trends and measure impact across all programs. 
-                <em>Users</em> module allows administrators to manage system access and user permissions.
+                <strong>The Kukhoma Project Data Management System</strong>
+                provides comprehensive tools for child protection and support
+                services. Use <em>Tracker Capture</em> to monitor individual
+                cases, <em>Data Entry</em> for structured form collection,
+                generate <em>Reports</em> for insights, and track
+                <em>Residents</em> in our care facilities. Advanced
+                <em>Analytics</em> help identify trends and measure impact
+                across all programs. <em>Users</em> module allows administrators
+                to manage system access and user permissions.
               </p>
             </div>
           </div>
-          
         </div>
       </div>
 
@@ -170,7 +218,12 @@
             <div class="form-row">
               <div class="form-group">
                 <label>Password</label>
-                <input v-model="newUser.password" type="password" required minlength="6" />
+                <input
+                  v-model="newUser.password"
+                  type="password"
+                  required
+                  minlength="6"
+                />
               </div>
               <div class="form-group">
                 <label>Phone Number</label>
@@ -186,14 +239,22 @@
                   <option value="manager">Manager</option>
                   <option value="viewer">Viewer</option>
                 </select>
-                <small style="color: #28a745; font-size: 0.85rem; margin-top: 0.25rem; display: block;">
-                  ✓ All roles can log in. Permissions are based on role selection.
+                <small
+                  style="
+                    color: #28a745;
+                    font-size: 0.85rem;
+                    margin-top: 0.25rem;
+                    display: block;
+                  "
+                >
+                  ✓ All roles can log in. Permissions are based on role
+                  selection.
                 </small>
               </div>
             </div>
             <div class="form-actions">
               <button type="submit" class="dashboard-btn" :disabled="loading">
-                {{ loading ? 'Creating...' : 'Create User' }}
+                {{ loading ? "Creating..." : "Create User" }}
               </button>
               <button type="button" class="cancel-btn" @click="cancelAddUser">
                 Cancel
@@ -224,7 +285,7 @@
             </div>
             <div class="form-actions">
               <button type="submit" class="dashboard-btn" :disabled="loading">
-                {{ loading ? 'Updating...' : 'Update User' }}
+                {{ loading ? "Updating..." : "Update User" }}
               </button>
               <button type="button" class="cancel-btn" @click="cancelEditUser">
                 Cancel
@@ -283,8 +344,8 @@
         <!-- Forms Navigation -->
         <div class="forms-navigation">
           <div class="form-tabs">
-            <button 
-              v-for="form in availableForms" 
+            <button
+              v-for="form in availableForms"
               :key="form.id"
               @click="setCurrentForm(form.id)"
               :class="['form-tab', { active: currentForm === form.id }]"
@@ -297,37 +358,64 @@
         <!-- Form Content -->
         <div class="form-content">
           <!-- Initial Child Referral Forms List -->
-          <div v-if="currentForm === 'initial-referral-list'" class="forms-list-container">
-            <FormsList 
-              :form-type="'initial-referral'" 
+          <div
+            v-if="currentForm === 'initial-referral-list'"
+            class="forms-list-container"
+          >
+            <FormsList
+              :form-type="'initial-referral'"
               @form-edit="handleFormEdit"
               @add-new-form="handleAddNewForm"
             />
           </div>
 
           <!-- Child Overview Forms List -->
-          <div v-else-if="currentForm === 'child-overview-list'" class="forms-list-container">
-            <FormsList 
-              :form-type="'child-overview'" 
+          <div
+            v-else-if="currentForm === 'child-overview-list'"
+            class="forms-list-container"
+          >
+            <FormsList
+              :form-type="'child-overview'"
               @form-edit="handleFormEdit"
               @add-new-form="handleAddNewForm"
             />
           </div>
 
           <!-- TKP Initial Assessment Forms List -->
-          <div v-else-if="currentForm === 'initial-assessment-list'" class="forms-list-container">
-            <FormsList 
-              :form-type="'initial-assessment'" 
+          <div
+            v-else-if="currentForm === 'initial-assessment-list'"
+            class="forms-list-container"
+          >
+            <FormsList
+              :form-type="'initial-assessment'"
+              @form-edit="handleFormEdit"
+              @add-new-form="handleAddNewForm"
+            />
+          </div>
+
+          <!-- Medical Intake Assessment Forms List -->
+          <div
+            v-else-if="currentForm === 'medical-intake-list'"
+            class="forms-list-container"
+          >
+            <FormsList
+              :form-type="'medical-intake'"
               @form-edit="handleFormEdit"
               @add-new-form="handleAddNewForm"
             />
           </div>
 
           <!-- Initial Child Referral Form -->
-          <div v-else-if="currentForm === 'initial-referral-new'" class="form-container">
+          <div
+            v-else-if="currentForm === 'initial-referral-new'"
+            class="form-container"
+          >
             <div class="form-header">
               <h3>New Initial Child Referral Form</h3>
-              <button @click="backToFormsList('initial-referral')" class="back-to-list-btn">
+              <button
+                @click="backToFormsList('initial-referral')"
+                class="back-to-list-btn"
+              >
                 ← Back to Forms List
               </button>
             </div>
@@ -335,10 +423,16 @@
           </div>
 
           <!-- Child Overview and Background Form -->
-          <div v-else-if="currentForm === 'child-overview-new'" class="form-container">
+          <div
+            v-else-if="currentForm === 'child-overview-new'"
+            class="form-container"
+          >
             <div class="form-header">
               <h3>New Child Overview and Background Form</h3>
-              <button @click="backToFormsList('child-overview')" class="back-to-list-btn">
+              <button
+                @click="backToFormsList('child-overview')"
+                class="back-to-list-btn"
+              >
                 ← Back to Forms List
               </button>
             </div>
@@ -346,23 +440,52 @@
           </div>
 
           <!-- TKP Initial Assessment Form -->
-          <div v-else-if="currentForm === 'initial-assessment-new'" class="form-container">
+          <div
+            v-else-if="currentForm === 'initial-assessment-new'"
+            class="form-container"
+          >
             <div class="form-header">
               <h3>New TKP Initial Assessment Form</h3>
-              <button @click="backToFormsList('initial-assessment')" class="back-to-list-btn">
+              <button
+                @click="backToFormsList('initial-assessment')"
+                class="back-to-list-btn"
+              >
                 ← Back to Forms List
               </button>
             </div>
             <InitialAssessmentForm @form-saved="handleFormSaved" />
           </div>
+
+          <!-- Medical Intake Assessment Form -->
+          <div
+            v-else-if="currentForm === 'medical-intake-new'"
+            class="form-container"
+          >
+            <div class="form-header">
+              <h3>New Medical Intake Assessment Form</h3>
+              <button
+                @click="backToFormsList('medical-intake')"
+                class="back-to-list-btn"
+              >
+                ← Back to Forms List
+              </button>
+            </div>
+            <MedicalIntakeForm @form-saved="handleFormSaved" />
+          </div>
         </div>
       </div>
 
       <!-- Child Tracker Section -->
-      <div v-if="currentView === 'child-tracker' || currentView === 'child-tracker-2'" class="child-tracker-section">
-        <ChildTracker 
-          :show-only-complete="currentView === 'child-tracker-2'" 
-          @back-to-dashboard="setCurrentView('main')" 
+      <div
+        v-if="
+          currentView === 'child-tracker' || currentView === 'child-tracker-2'
+        "
+        class="child-tracker-section"
+      >
+        <ChildTracker
+          :show-only-complete="currentView === 'child-tracker-2'"
+          @back-to-dashboard="setCurrentView('main')"
+          @navigate-to-medical-intake="handleNavigateToMedicalIntake"
         />
       </div>
 
@@ -378,7 +501,10 @@
 
       <!-- Reports Section -->
       <div v-if="currentView === 'reports'" class="reports-section">
-        <Reports :can-approve="canApproveReports" @back-to-dashboard="setCurrentView('main')" />
+        <Reports
+          :can-approve="canApproveReports"
+          @back-to-dashboard="setCurrentView('main')"
+        />
       </div>
 
       <!-- Event Reports Section -->
@@ -392,318 +518,357 @@
       </div>
 
       <!-- Other Sections Placeholder -->
-      <div v-if="!['main', 'manage-users', 'data-entry', 'child-tracker', 'child-tracker-2', 'visualization', 'data-analysis', 'reports', 'event-reports'].includes(currentView)" class="section-placeholder">
+      <div
+        v-if="
+          ![
+            'main',
+            'manage-users',
+            'data-entry',
+            'child-tracker',
+            'child-tracker-2',
+            'visualization',
+            'data-analysis',
+            'reports',
+            'event-reports',
+          ].includes(currentView)
+        "
+        class="section-placeholder"
+      >
         <h2>{{ getSectionTitle(currentView) }}</h2>
         <p>This section is under development.</p>
         <button class="back-btn" @click="setCurrentView('main')">
           Back to Dashboard
         </button>
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useToast } from '../composables/useToast.js'
-import AuthService from '../services/auth.js'
-import UserService from '../services/userService.js'
-import KLogo from './KLogo.vue'
-import InitialReferralForm from './InitialReferralForm.vue'
-import ChildOverviewForm from './ChildOverviewForm.vue'
-import InitialAssessmentForm from './InitialAssessmentForm.vue'
-import FormsList from './FormsList.vue'
-import ChildTracker from './ChildTracker.vue'
-import DataVisualization from './DataVisualization.vue'
-import DataAnalysis from './DataAnalysis.vue'
-import Reports from './Reports.vue'
-import EventReports from './EventReports.vue'
-import FormService from '../services/formService.js'
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useToast } from "../composables/useToast.js";
+import AuthService from "../services/auth.js";
+import UserService from "../services/userService.js";
+import KLogo from "./KLogo.vue";
+import InitialReferralForm from "./InitialReferralForm.vue";
+import ChildOverviewForm from "./ChildOverviewForm.vue";
+import InitialAssessmentForm from "./InitialAssessmentForm.vue";
+import MedicalIntakeForm from "./MedicalIntakeForm.vue";
+import FormsList from "./FormsList.vue";
+import ChildTracker from "./ChildTracker.vue";
+import DataVisualization from "./DataVisualization.vue";
+import DataAnalysis from "./DataAnalysis.vue";
+import Reports from "./Reports.vue";
+import EventReports from "./EventReports.vue";
+import FormService from "../services/formService.js";
 
 // Import custom SVG icon (uncomment when you add the file)
 // import DataEntryIcon from '../assets/icons/data-entry.svg?url'
 
-const router = useRouter()
-const { success, error, confirm } = useToast()
+const router = useRouter();
+const { success, error, confirm } = useToast();
 
 // View management
-const currentView = ref('main')
+const currentView = ref("main");
 
 // User management
-const users = ref([])
-const loadingUsers = ref(false)
-const loading = ref(false)
-const showAddUserForm = ref(false)
-const showEditUserForm = ref(false)
-const currentUserName = ref('')
+const users = ref([]);
+const loadingUsers = ref(false);
+const loading = ref(false);
+const showAddUserForm = ref(false);
+const showEditUserForm = ref(false);
+const currentUserName = ref("");
 
 // Summary statistics
-const totalReports = ref(0)
-const totalChildren = ref(0)
-const totalEvents = ref(0)
-const totalDataEntries = ref(0)
+const totalReports = ref(0);
+const totalChildren = ref(0);
+const totalEvents = ref(0);
+const totalDataEntries = ref(0);
 
 // Forms management
-const currentForm = ref('initial-referral-list')
-const selectedFormType = ref('initial-referral')
+const currentForm = ref("initial-referral-list");
+const selectedFormType = ref("initial-referral");
 const availableForms = ref([
-  { id: 'initial-referral-list', name: 'Initial Child Referral Forms' },
-  { id: 'child-overview-list', name: 'Child Overview Forms' },
-  { id: 'initial-assessment-list', name: 'TKP Initial Assessment Forms' }
-])
+  { id: "initial-referral-list", name: "Initial Child Referral Forms" },
+  { id: "child-overview-list", name: "Child Overview Forms" },
+  { id: "initial-assessment-list", name: "TKP Initial Assessment Forms" },
+  { id: "medical-intake-list", name: "Medical Intake Assessment Forms" },
+]);
 
 // Form data
 const newUser = ref({
-  fullName: '',
-  email: '',
-  password: '',
-  phoneNumber: ''
-})
+  fullName: "",
+  email: "",
+  password: "",
+  phoneNumber: "",
+});
 
 const editUser = ref({
-  id: '',
-  uid: '',
-  fullName: '',
-  email: '',
-  phoneNumber: ''
-})
+  id: "",
+  uid: "",
+  fullName: "",
+  email: "",
+  phoneNumber: "",
+});
 
 // Permission checking computed properties
 const canManageUsers = computed(() => {
-  const role = AuthService.getUserRoleInfo()
-  return role === 'admin' || role === 'manager' || AuthService.hasPermission('users_write')
-})
+  const role = AuthService.getUserRoleInfo();
+  return (
+    role === "admin" ||
+    role === "manager" ||
+    AuthService.hasPermission("users_write")
+  );
+});
 
 const canApproveReports = computed(() => {
-  const role = AuthService.getUserRoleInfo()
-  return role === 'admin' || role === 'manager'
-})
-
+  const role = AuthService.getUserRoleInfo();
+  return role === "admin" || role === "manager";
+});
 
 // View management functions
 const setCurrentView = async (view) => {
   // Handle navigation to capture page
-  if (view === 'capture') {
-    router.push('/capture')
-    return
+  if (view === "capture") {
+    router.push("/capture");
+    return;
   }
-  
+
   // Handle navigation to tracker capture page
-  if (view === 'tracker-capture') {
-    router.push('/tracker-capture')
-    return
+  if (view === "tracker-capture") {
+    router.push("/tracker-capture");
+    return;
   }
-  
+
   // Handle navigation to event reports page
-  if (view === 'event-reports') {
-    router.push('/event-reports')
-    return
+  if (view === "event-reports") {
+    router.push("/event-reports");
+    return;
   }
-  
-  currentView.value = view
-  
-  if (view === 'manage-users') {
-    await loadUsers()
+
+  currentView.value = view;
+
+  if (view === "manage-users") {
+    await loadUsers();
   }
-}
+};
 
 // Form management functions
 const setCurrentForm = (formId) => {
-  currentForm.value = formId
+  currentForm.value = formId;
   // Extract form type from the form ID for list views
-  if (formId.endsWith('-list')) {
-    selectedFormType.value = formId.replace('-list', '')
-  } else if (formId.endsWith('-new')) {
-    selectedFormType.value = formId.replace('-new', '')
+  if (formId.endsWith("-list")) {
+    selectedFormType.value = formId.replace("-list", "");
+  } else if (formId.endsWith("-new")) {
+    selectedFormType.value = formId.replace("-new", "");
   }
-}
+};
 
 const handleFormSaved = (formData) => {
-  success('Form saved successfully!')
+  success("Form saved successfully!");
   // Switch back to the corresponding forms list after saving
-  if (currentForm.value === 'initial-referral-new') {
-    currentForm.value = 'initial-referral-list'
-  } else if (currentForm.value === 'child-overview-new') {
-    currentForm.value = 'child-overview-list'
-  } else if (currentForm.value === 'initial-assessment-new') {
-    currentForm.value = 'initial-assessment-list'
+  if (currentForm.value === "initial-referral-new") {
+    currentForm.value = "initial-referral-list";
+  } else if (currentForm.value === "child-overview-new") {
+    currentForm.value = "child-overview-list";
+  } else if (currentForm.value === "initial-assessment-new") {
+    currentForm.value = "initial-assessment-list";
+  } else if (currentForm.value === "medical-intake-new") {
+    currentForm.value = "medical-intake-list";
   }
-}
+};
 
 const handleFormEdit = (form) => {
   // Switch to the appropriate form and populate with data
-  currentForm.value = form.formType + '-new'
-  selectedFormType.value = form.formType
-  success('Form loaded for editing')
-}
+  currentForm.value = form.formType + "-new";
+  selectedFormType.value = form.formType;
+  success("Form loaded for editing");
+};
 
 const handleAddNewForm = (formType) => {
   // Switch to the new form creation view
-  currentForm.value = formType + '-new'
-  selectedFormType.value = formType
-}
+  currentForm.value = formType + "-new";
+  selectedFormType.value = formType;
+};
 
 const backToFormsList = (formType) => {
   // Return to the forms list view
-  currentForm.value = formType + '-list'
-  selectedFormType.value = formType
-}
+  currentForm.value = formType + "-list";
+  selectedFormType.value = formType;
+};
+
+// Handle navigation from Child Tracker to Medical Intake Forms
+const handleNavigateToMedicalIntake = () => {
+  // Switch to data entry view
+  currentView.value = "data-entry";
+  // Set to medical intake forms list
+  currentForm.value = "medical-intake-list";
+  selectedFormType.value = "medical-intake";
+};
 
 // Load summary data
 const loadSummaryData = async () => {
   try {
     // Load users count
-    const usersResult = await UserService.getAllUsers()
+    const usersResult = await UserService.getAllUsers();
     if (usersResult.success) {
-      users.value = usersResult.users || []
+      users.value = usersResult.users || [];
     }
-    
+
     // Load form statistics
-    const formStatsResult = await FormService.getFormStatistics()
+    const formStatsResult = await FormService.getFormStatistics();
     if (formStatsResult.success) {
-      totalReports.value = formStatsResult.statistics.totalReferrals
-      totalChildren.value = formStatsResult.statistics.totalOverviews
-      totalEvents.value = formStatsResult.statistics.totalAssessments
-      totalDataEntries.value = formStatsResult.statistics.totalForms
+      totalReports.value = formStatsResult.statistics.totalReferrals;
+      totalChildren.value = formStatsResult.statistics.totalOverviews;
+      totalEvents.value = formStatsResult.statistics.totalAssessments;
+      totalDataEntries.value = formStatsResult.statistics.totalForms;
     } else {
       // Fallback to mock data if form stats fail
-      totalReports.value = 24
-      totalChildren.value = 156
-      totalEvents.value = 89
-      totalDataEntries.value = 1247
+      totalReports.value = 24;
+      totalChildren.value = 156;
+      totalEvents.value = 89;
+      totalDataEntries.value = 1247;
     }
   } catch (error) {
-    console.error('Error loading summary data:', error)
+    console.error("Error loading summary data:", error);
     // Fallback to mock data
-    totalReports.value = 24
-    totalChildren.value = 156
-    totalEvents.value = 89
-    totalDataEntries.value = 1247
+    totalReports.value = 24;
+    totalChildren.value = 156;
+    totalEvents.value = 89;
+    totalDataEntries.value = 1247;
   }
-}
+};
 
 const getSectionTitle = (view) => {
   const titles = {
-    'tracker-capture': 'Tracker Capture/outreach',
-    'reports': 'Reports - Weekly',
-    'data-entry': 'Data Entry / Forms',
-    'event-reports': 'Event Reports',
-    'child-tracker': 'Child Tracker - In-house/children',
-    'child-tracker-2': 'In Housed Girls - Complete Forms Only',
-    'visualization': 'Visualization',
-    'data-analysis': 'Data Analysis',
-    'capture': 'Capture'
-  }
-  return titles[view] || 'Section'
-}
+    "tracker-capture": "Tracker Capture/outreach",
+    reports: "Reports - Weekly",
+    "data-entry": "Data Entry / Forms",
+    "event-reports": "Event Reports",
+    "child-tracker": "Child Tracker - In-house/children",
+    "child-tracker-2": "In Housed Girls - Complete Forms Only",
+    visualization: "Visualization",
+    "data-analysis": "Data Analysis",
+    capture: "Capture",
+  };
+  return titles[view] || "Section";
+};
 
 // User management functions
 const loadUsers = async () => {
-  loadingUsers.value = true
+  loadingUsers.value = true;
   try {
-    const result = await UserService.getAllUsers()
+    const result = await UserService.getAllUsers();
     if (result.success) {
-      users.value = result.users || []
+      users.value = result.users || [];
     } else {
-      error(result.error || 'Failed to load users')
+      error(result.error || "Failed to load users");
     }
   } catch (err) {
-    console.error('Error loading users:', err)
-    error('An unexpected error occurred while loading users')
+    console.error("Error loading users:", err);
+    error("An unexpected error occurred while loading users");
   } finally {
-    loadingUsers.value = false
+    loadingUsers.value = false;
   }
-}
+};
 
 const handleAddUser = async () => {
-  loading.value = true
+  loading.value = true;
   try {
     // Validate form data
     if (!newUser.value.fullName.trim()) {
-      error('Full name is required')
-      return
+      error("Full name is required");
+      return;
     }
     if (!newUser.value.email.trim()) {
-      error('Email is required')
-      return
+      error("Email is required");
+      return;
     }
     if (!newUser.value.password || newUser.value.password.length < 6) {
-      error('Password must be at least 6 characters')
-      return
+      error("Password must be at least 6 characters");
+      return;
     }
     if (!newUser.value.phoneNumber.trim()) {
-      error('Phone number is required')
-      return
+      error("Phone number is required");
+      return;
     }
 
     // Check for duplicate email/username
-    const { default: DuplicationService } = await import('../services/duplicationService.js')
-    
+    const { default: DuplicationService } = await import(
+      "../services/duplicationService.js"
+    );
+
     const duplicateCheck = await DuplicationService.checkDuplicateUser({
       email: newUser.value.email,
-      username: newUser.value.fullName // Using fullName as username for now
-    })
-    
+      username: newUser.value.fullName, // Using fullName as username for now
+    });
+
     if (duplicateCheck.hasDuplicates) {
-      const duplicateFields = duplicateCheck.duplicates.map(dup => {
-        return `${dup.field}: ${dup.value}`
-      }).join(', ')
-      
-      error(`User already exists with ${duplicateFields}. Please use different credentials.`)
-      loading.value = false
-      return
+      const duplicateFields = duplicateCheck.duplicates
+        .map((dup) => {
+          return `${dup.field}: ${dup.value}`;
+        })
+        .join(", ");
+
+      error(
+        `User already exists with ${duplicateFields}. Please use different credentials.`
+      );
+      loading.value = false;
+      return;
     }
 
-    const result = await UserService.addUser(newUser.value)
+    const result = await UserService.addUser(newUser.value);
     if (result.success) {
-      success('User created successfully!')
-      resetAddUserForm()
-      await loadUsers()
+      success("User created successfully!");
+      resetAddUserForm();
+      await loadUsers();
     } else {
-      error(result.error || 'Failed to create user')
+      error(result.error || "Failed to create user");
     }
   } catch (err) {
-    console.error('Error adding user:', err)
-    error('An unexpected error occurred while creating user')
+    console.error("Error adding user:", err);
+    error("An unexpected error occurred while creating user");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handleUpdateUser = async () => {
-  loading.value = true
+  loading.value = true;
   try {
     // Validate form data
     if (!editUser.value.fullName.trim()) {
-      error('Full name is required')
-      return
+      error("Full name is required");
+      return;
     }
     if (!editUser.value.email.trim()) {
-      error('Email is required')
-      return
+      error("Email is required");
+      return;
     }
     if (!editUser.value.phoneNumber.trim()) {
-      error('Phone number is required')
-      return
+      error("Phone number is required");
+      return;
     }
 
-    const result = await UserService.updateUser(editUser.value.uid, editUser.value)
+    const result = await UserService.updateUser(
+      editUser.value.uid,
+      editUser.value
+    );
     if (result.success) {
-      success('User updated successfully!')
-      cancelEditUser()
-      await loadUsers()
+      success("User updated successfully!");
+      cancelEditUser();
+      await loadUsers();
     } else {
-      error(result.error || 'Failed to update user')
+      error(result.error || "Failed to update user");
     }
   } catch (err) {
-    console.error('Error updating user:', err)
-    error('An unexpected error occurred while updating user')
+    console.error("Error updating user:", err);
+    error("An unexpected error occurred while updating user");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const startEditUser = (user) => {
   editUser.value = {
@@ -711,91 +876,130 @@ const startEditUser = (user) => {
     uid: user.uid,
     fullName: user.fullName,
     email: user.email,
-    phoneNumber: user.phoneNumber
-  }
-  showEditUserForm.value = true
-  showAddUserForm.value = false
-}
+    phoneNumber: user.phoneNumber,
+  };
+  showEditUserForm.value = true;
+  showAddUserForm.value = false;
+};
 
 const confirmDeleteUser = async (user) => {
   const confirmed = await confirm(
     `Are you sure you want to delete ${user.fullName}? This action cannot be undone.`,
-    'Delete User'
-  )
-  
+    "Delete User"
+  );
+
   if (confirmed) {
     try {
-      const result = await UserService.deleteUser(user.uid)
+      const result = await UserService.deleteUser(user.uid);
       if (result.success) {
-        success('User deleted successfully!')
-        await loadUsers()
+        success("User deleted successfully!");
+        await loadUsers();
       } else {
-        error(result.error || 'Failed to delete user')
+        error(result.error || "Failed to delete user");
       }
     } catch (err) {
-      console.error('Error deleting user:', err)
-      error('An unexpected error occurred while deleting user')
+      console.error("Error deleting user:", err);
+      error("An unexpected error occurred while deleting user");
     }
   }
-}
+};
 
 const resetAddUserForm = () => {
   newUser.value = {
-    fullName: '',
-    email: '',
-    password: '',
-    phoneNumber: '',
-    role: 'admin' // Default to admin role for dashboard users
-  }
-  showAddUserForm.value = false
-}
+    fullName: "",
+    email: "",
+    password: "",
+    phoneNumber: "",
+    role: "admin", // Default to admin role for dashboard users
+  };
+  showAddUserForm.value = false;
+};
 
 const cancelAddUser = () => {
-  resetAddUserForm()
-}
+  resetAddUserForm();
+};
 
 const cancelEditUser = () => {
-  showEditUserForm.value = false
+  showEditUserForm.value = false;
   editUser.value = {
-    id: '',
-    uid: '',
-    fullName: '',
-    email: '',
-    phoneNumber: ''
-  }
-}
+    id: "",
+    uid: "",
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+  };
+};
 
 // Utility functions
 const formatDate = (timestamp) => {
-  if (!timestamp) return 'N/A'
-  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
-  return date.toLocaleDateString()
-}
-
+  if (!timestamp) return "N/A";
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  return date.toLocaleDateString();
+};
 
 const handleLogout = async () => {
-  const result = await AuthService.logout()
+  const result = await AuthService.logout();
   if (result.success) {
-    router.push('/login')
+    router.push("/login");
   }
-}
+};
 
 // Load summary data when component mounts
 onMounted(() => {
   // Set current user name
-  const currentUser = AuthService.getCurrentUser()
+  const currentUser = AuthService.getCurrentUser();
   if (currentUser) {
-    currentUserName.value = currentUser.email
+    currentUserName.value = currentUser.email;
   }
-  loadSummaryData()
-})
+  loadSummaryData();
+
+  // Check for query parameters (e.g., from Child Tracker navigation)
+  const query = router.currentRoute.value.query;
+
+  // Handle openForm query parameter from TrackerCapture
+  if (query.openForm) {
+    console.log("📋 Dashboard received openForm query:", query.openForm);
+
+    // Decode child data from query parameter
+    if (query.childData) {
+      try {
+        const decodedChildData = JSON.parse(atob(query.childData));
+        console.log("👶 Child data decoded:", decodedChildData);
+        // Store in sessionStorage for form access
+        sessionStorage.setItem(
+          "selectedChildForForm",
+          JSON.stringify(decodedChildData)
+        );
+      } catch (error) {
+        console.error("Error decoding child data:", error);
+      }
+    }
+
+    // Switch to data-entry view and open the specific form
+    currentView.value = "data-entry";
+    currentForm.value = query.openForm + "-new"; // e.g., 'child-overview-new'
+    selectedFormType.value = query.openForm;
+
+    // Store view mode in sessionStorage if provided
+    if (query.viewMode) {
+      sessionStorage.setItem("formViewMode", query.viewMode);
+    }
+
+    console.log("✅ Switched to form:", currentForm.value);
+  } else if (query.view) {
+    currentView.value = query.view;
+    if (query.form) {
+      currentForm.value = query.form;
+    }
+  }
+});
 </script>
 
 <style scoped>
 /* Dashboard Layout */
 .dashboard {
   min-height: 100vh;
-  background-color: #EEEEEE; /* Light gray background */
+  background-color: #eeeeee; /* Light gray background */
 }
 
 /* Top Section */
@@ -804,7 +1008,7 @@ onMounted(() => {
   justify-content: flex-end;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: #EEEEEE;
+  background-color: #eeeeee;
 }
 
 .logo-card {
@@ -833,7 +1037,7 @@ onMounted(() => {
 }
 
 .project-title {
-  color: #4A148C; /* Dark purple */
+  color: #4a148c; /* Dark purple */
   font-weight: bold;
   font-size: 1.5rem;
   margin: 0;
@@ -841,7 +1045,7 @@ onMounted(() => {
 }
 
 .logout-button {
-  background-color: #4A148C; /* Dark purple - same as logo */
+  background-color: #4a148c; /* Dark purple - same as logo */
   color: white;
   padding: 10px 20px;
   border: none;
@@ -852,7 +1056,7 @@ onMounted(() => {
 }
 
 .logout-button:hover {
-  background-color: #2D1B69; /* Darker purple on hover */
+  background-color: #2d1b69; /* Darker purple on hover */
 }
 
 /* User Info */
@@ -863,7 +1067,7 @@ onMounted(() => {
 }
 
 .user-name {
-  color: #4A148C;
+  color: #4a148c;
   font-weight: 500;
   font-size: 1rem;
 }
@@ -917,7 +1121,7 @@ onMounted(() => {
 }
 
 .project-title {
-  color: #4A148C; /* Dark purple */
+  color: #4a148c; /* Dark purple */
   font-weight: bold;
   font-size: 1.2rem;
   margin: 0;
@@ -933,7 +1137,7 @@ onMounted(() => {
 }
 
 .summary-section h3 {
-  color: #4A148C;
+  color: #4a148c;
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 1.5rem 0;
@@ -954,7 +1158,7 @@ onMounted(() => {
 .stat-number {
   font-size: 1.8rem;
   font-weight: bold;
-  color: #4A148C;
+  color: #4a148c;
   margin-bottom: 0.25rem;
 }
 
@@ -989,8 +1193,8 @@ onMounted(() => {
 }
 
 .dashboard-btn {
-  background: linear-gradient(135deg, #4A148C 0%, #2D1B69 100%);
-  color: #FFFFFF;
+  background: linear-gradient(135deg, #4a148c 0%, #2d1b69 100%);
+  color: #ffffff;
   padding: 18px 14px;
   border: none;
   border-radius: 12px;
@@ -1014,13 +1218,17 @@ onMounted(() => {
 }
 
 .dashboard-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -1040,7 +1248,7 @@ onMounted(() => {
 
 /* Individual button color schemes */
 .tracker-btn {
-  background: linear-gradient(135deg, #FF6B6B 0%, #EE5A6F 100%);
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
   box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
 }
 
@@ -1049,7 +1257,7 @@ onMounted(() => {
 }
 
 .reports-btn {
-  background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
   box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
 }
 
@@ -1058,7 +1266,7 @@ onMounted(() => {
 }
 
 .data-entry-btn {
-  background: linear-gradient(135deg, #FFD93D 0%, #FFC53D 100%);
+  background: linear-gradient(135deg, #ffd93d 0%, #ffc53d 100%);
   box-shadow: 0 4px 15px rgba(255, 217, 61, 0.3);
   color: #333;
 }
@@ -1068,7 +1276,7 @@ onMounted(() => {
 }
 
 .child-tracker-btn {
-  background: linear-gradient(135deg, #A8E6CF 0%, #7BDCB5 100%);
+  background: linear-gradient(135deg, #a8e6cf 0%, #7bdcb5 100%);
   box-shadow: 0 4px 15px rgba(168, 230, 207, 0.3);
   color: #333;
 }
@@ -1078,7 +1286,7 @@ onMounted(() => {
 }
 
 .analytics-btn {
-  background: linear-gradient(135deg, #95E1D3 0%, #38A3A5 100%);
+  background: linear-gradient(135deg, #95e1d3 0%, #38a3a5 100%);
   box-shadow: 0 4px 15px rgba(149, 225, 211, 0.3);
 }
 
@@ -1087,7 +1295,7 @@ onMounted(() => {
 }
 
 .events-btn {
-  background: linear-gradient(135deg, #FAA43A 0%, #F77F00 100%);
+  background: linear-gradient(135deg, #faa43a 0%, #f77f00 100%);
   box-shadow: 0 4px 15px rgba(250, 164, 58, 0.3);
 }
 
@@ -1096,7 +1304,7 @@ onMounted(() => {
 }
 
 .capture-btn {
-  background: linear-gradient(135deg, #B983FF 0%, #8C5EFF 100%);
+  background: linear-gradient(135deg, #b983ff 0%, #8c5eff 100%);
   box-shadow: 0 4px 15px rgba(185, 131, 255, 0.3);
 }
 
@@ -1105,7 +1313,7 @@ onMounted(() => {
 }
 
 .residents-btn {
-  background: linear-gradient(135deg, #FD79A8 0%, #E84393 100%);
+  background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
   box-shadow: 0 4px 15px rgba(253, 121, 168, 0.3);
 }
 
@@ -1114,7 +1322,7 @@ onMounted(() => {
 }
 
 .analysis-btn {
-  background: linear-gradient(135deg, #74B9FF 0%, #0984E3 100%);
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
   box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
 }
 
@@ -1123,7 +1331,7 @@ onMounted(() => {
 }
 
 .users-btn {
-  background: linear-gradient(135deg, #A29BFE 0%, #6C5CE7 100%);
+  background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
   box-shadow: 0 4px 15px rgba(162, 155, 254, 0.3);
 }
 
@@ -1149,7 +1357,7 @@ onMounted(() => {
 .dashboard-btn.btn-disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: linear-gradient(135deg, #9E9E9E 0%, #757575 100%);
+  background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
   box-shadow: 0 2px 8px rgba(158, 158, 158, 0.2);
 }
 
@@ -1179,7 +1387,7 @@ onMounted(() => {
   padding: 1.5rem;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  border-left: 4px solid #4A148C;
+  border-left: 4px solid #4a148c;
 }
 
 .description-text {
@@ -1191,12 +1399,12 @@ onMounted(() => {
 }
 
 .description-text strong {
-  color: #4A148C;
+  color: #4a148c;
   font-weight: 600;
 }
 
 .description-text em {
-  color: #2D1B69;
+  color: #2d1b69;
   font-style: normal;
   font-weight: 500;
   background: rgba(74, 20, 140, 0.1);
@@ -1218,11 +1426,11 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #EEEEEE;
+  border-bottom: 2px solid #eeeeee;
 }
 
 .section-header h2 {
-  color: #4A148C; /* Dark purple */
+  color: #4a148c; /* Dark purple */
   margin: 0;
   font-size: 2rem;
 }
@@ -1257,7 +1465,7 @@ onMounted(() => {
 }
 
 .user-form h3 {
-  color: #4A148C;
+  color: #4a148c;
   margin: 0 0 1.5rem 0;
 }
 
@@ -1275,7 +1483,7 @@ onMounted(() => {
 }
 
 .form-group label {
-  color: #4A148C; /* Dark purple */
+  color: #4a148c; /* Dark purple */
   font-weight: 500;
   font-size: 0.9rem;
 }
@@ -1285,13 +1493,13 @@ onMounted(() => {
   border: 2px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-  color: #4A148C;
+  color: #4a148c;
   transition: border-color 0.3s ease;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #4A148C;
+  border-color: #4a148c;
 }
 
 .form-actions {
@@ -1321,7 +1529,8 @@ onMounted(() => {
   margin-top: 2rem;
 }
 
-.loading, .no-users {
+.loading,
+.no-users {
   text-align: center;
   padding: 2rem;
   color: #666;
@@ -1337,14 +1546,15 @@ table {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-th, td {
+th,
+td {
   text-align: left;
   padding: 1rem;
   border-bottom: 1px solid #dee2e6;
 }
 
 th {
-  background-color: #4A148C; /* Dark purple */
+  background-color: #4a148c; /* Dark purple */
   color: white;
   font-weight: bold;
 }
@@ -1398,7 +1608,7 @@ tbody tr:hover {
 
 .forms-navigation {
   margin-bottom: 2rem;
-  border-bottom: 2px solid #EEEEEE;
+  border-bottom: 2px solid #eeeeee;
   padding-bottom: 1rem;
 }
 
@@ -1410,7 +1620,7 @@ tbody tr:hover {
 
 .form-tab {
   background-color: #f8f9fa;
-  color: #4A148C;
+  color: #4a148c;
   padding: 12px 20px;
   border: 2px solid #e9ecef;
   border-radius: 8px;
@@ -1422,13 +1632,13 @@ tbody tr:hover {
 
 .form-tab:hover {
   background-color: #e9ecef;
-  border-color: #4A148C;
+  border-color: #4a148c;
 }
 
 .form-tab.active {
-  background-color: #4A148C;
+  background-color: #4a148c;
   color: white;
-  border-color: #4A148C;
+  border-color: #4a148c;
 }
 
 .form-content {
@@ -1450,7 +1660,7 @@ tbody tr:hover {
   padding: 2rem;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 12px;
-  border-left: 6px solid #4A148C;
+  border-left: 6px solid #4a148c;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border: 1px solid #e9ecef;
   position: relative;
@@ -1458,17 +1668,17 @@ tbody tr:hover {
 }
 
 .form-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, #4A148C 0%, #FF5722 100%);
+  background: linear-gradient(90deg, #4a148c 0%, #ff5722 100%);
 }
 
 .form-header h3 {
-  color: #4A148C;
+  color: #4a148c;
   margin: 0;
   font-size: 1.4rem;
   font-weight: 600;
@@ -1479,12 +1689,12 @@ tbody tr:hover {
 }
 
 .form-header h3::before {
-  content: '📋';
+  content: "📋";
   font-size: 1.5rem;
 }
 
 .back-to-list-btn {
-  background-color: #4A148C;
+  background-color: #4a148c;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -1500,7 +1710,7 @@ tbody tr:hover {
 }
 
 .back-to-list-btn:hover {
-  background-color: #2D1B69;
+  background-color: #2d1b69;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(74, 20, 140, 0.4);
 }
@@ -1561,7 +1771,7 @@ tbody tr:hover {
 }
 
 .section-placeholder h2 {
-  color: #4A148C;
+  color: #4a148c;
   margin-bottom: 1rem;
 }
 
@@ -1569,7 +1779,6 @@ tbody tr:hover {
   color: #666;
   margin-bottom: 2rem;
 }
-
 
 /* Responsive Design */
 @media (max-width: 1200px) {
@@ -1583,12 +1792,12 @@ tbody tr:hover {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-  
+
   .dashboard-buttons-grid {
     grid-template-columns: repeat(2, minmax(140px, 1fr));
     justify-items: center;
   }
-  
+
   .dashboard-btn {
     width: 140px;
     max-width: 140px;
@@ -1602,78 +1811,78 @@ tbody tr:hover {
     align-items: center;
     padding: 1rem;
   }
-  
+
   .dashboard-content {
     padding: 1rem;
   }
-  
+
   .dashboard-buttons-grid {
     grid-template-columns: repeat(2, minmax(130px, 1fr));
     justify-items: center;
     max-width: none;
   }
-  
+
   .dashboard-btn {
     width: 130px;
     max-width: 130px;
   }
-  
+
   .section-header {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
   }
-  
+
   .header-actions {
     justify-content: center;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .form-header {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
     padding: 1.5rem;
   }
-  
+
   .form-header h3 {
     font-size: 1.2rem;
     text-align: center;
   }
-  
+
   .back-to-list-btn {
     width: 100%;
     justify-content: center;
   }
-  
+
   .actions {
     flex-direction: column;
     gap: 0.25rem;
   }
-  
+
   .logo-card {
     max-width: none;
     width: 100%;
   }
-  
+
   .logo-container {
     width: 60px;
     height: 60px;
   }
-  
+
   .logo-image {
     width: 100%;
     height: 100%;
     object-fit: contain;
   }
-  
+
   .summary-stats {
     grid-template-columns: 1fr;
   }
@@ -1686,42 +1895,43 @@ tbody tr:hover {
     justify-items: center;
     gap: 0.5rem;
   }
-  
+
   .project-title {
     font-size: 1.1rem;
   }
-  
+
   .section-title h2 {
     font-size: 1.3rem;
   }
-  
+
   .user-management {
     padding: 1rem;
   }
-  
+
   table {
     font-size: 0.8rem;
   }
-  
-  th, td {
+
+  th,
+  td {
     padding: 0.5rem;
   }
-  
+
   .message {
     right: 10px;
     left: 10px;
     min-width: auto;
   }
-  
+
   .logo-card {
     padding: 1.5rem;
   }
-  
+
   .logo-container {
     width: 60px;
     height: 60px;
   }
-  
+
   .dashboard-btn {
     font-size: 0.8rem;
     padding: 14px 10px;
@@ -1730,17 +1940,17 @@ tbody tr:hover {
     max-width: 120px;
     gap: 6px;
   }
-  
+
   .dashboard-btn span {
     font-size: 0.75rem;
-    line-height: 1.0;
+    line-height: 1;
   }
-  
+
   .btn-icon {
     width: 18px;
     height: 18px;
   }
-  
+
   .description-text {
     font-size: 0.85rem;
     text-align: left;

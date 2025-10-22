@@ -20,7 +20,9 @@
       </div>
       <div class="header-center">
         <h1 class="tracker-title">Tracker Capture - Child Cases</h1>
-        <div class="data-source-indicator"></div>
+        <div class="data-source-indicator">
+          <span class="indicator-badge firebase">📡 Live Firebase Data</span>
+        </div>
       </div>
       <div class="header-right">
         <button
@@ -222,1170 +224,1069 @@
         <!-- Quick Stats -->
         <div class="quick-stats">
           <div class="stat-card">
-            ``
-
-            <!-- Quick Stats -->
-            <div class="quick-stats">
-              <div class="stat-card">
-                <div class="stat-number">{{ totalCases }}</div>
-                <div class="stat-label">Total Cases</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">{{ activeCases }}</div>
-                <div class="stat-label">Active Cases</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">{{ completedCases }}</div>
-                <div class="stat-label">Completed</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">{{ newThisMonth }}</div>
-                <div class="stat-label">New This Month</div>
-              </div>
-            </div>
+            <div class="stat-number">{{ totalCases }}</div>
+            <div class="stat-label">Total Cases</div>
           </div>
-
-          <!-- Cases List or Selected Case View -->
-          <div class="tracker-main">
-            <!-- Cases List View -->
-            <div v-if="!selectedCase" class="cases-list-view">
-              <div class="list-header">
-                <h3>Tracked Cases ({{ filteredCases.length }})</h3>
-                <div class="list-controls">
-                  <button
-                    @click="viewMode = 'table'"
-                    :class="{ active: viewMode === 'table' }"
-                    class="view-toggle"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <rect x="3" y="3" width="7" height="7" />
-                      <rect x="14" y="3" width="7" height="7" />
-                      <rect x="14" y="14" width="7" height="7" />
-                      <rect x="3" y="14" width="7" height="7" />
-                    </svg>
-                    Table
-                  </button>
-                  <button
-                    @click="viewMode = 'cards'"
-                    :class="{ active: viewMode === 'cards' }"
-                    class="view-toggle"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <rect x="3" y="3" width="18" height="4" />
-                      <rect x="3" y="9" width="18" height="4" />
-                      <rect x="3" y="15" width="18" height="4" />
-                    </svg>
-                    Cards
-                  </button>
-                </div>
-              </div>
-
-              <!-- Table View -->
-              <div v-if="viewMode === 'table'" class="cases-table-container">
-                <table class="cases-table">
-                  <thead>
-                    <tr>
-                      <th @click="sortBy('childName')" class="sortable">
-                        Child Name
-                        <svg
-                          class="sort-icon"
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                        >
-                          <path d="M7 10l5-5 5 5" />
-                          <path d="M7 14l5 5 5-5" />
-                        </svg>
-                      </th>
-                      <th @click="sortBy('caseId')" class="sortable">
-                        Case ID
-                      </th>
-                      <th @click="sortBy('age')" class="sortable">Age</th>
-                      <th @click="sortBy('status')" class="sortable">Status</th>
-                      <th @click="sortBy('currentStage')" class="sortable">
-                        Current Stage
-                      </th>
-                      <th @click="sortBy('lastActivity')" class="sortable">
-                        Last Activity
-                      </th>
-                      <th @click="sortBy('assignedWorker')" class="sortable">
-                        Assigned Worker
-                      </th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="case_ in paginatedCases"
-                      :key="case_.id"
-                      @click="selectCase(case_)"
-                      class="case-row"
-                    >
-                      <td class="child-name-cell">
-                        <div class="child-info">
-                          <div class="child-name">{{ case_.childName }}</div>
-                          <div class="child-id">ID: {{ case_.childId }}</div>
-                        </div>
-                      </td>
-                      <td>{{ case_.caseId }}</td>
-                      <td>{{ case_.age }} years</td>
-                      <td>
-                        <span class="status-badge" :class="case_.status">
-                          {{ formatStatus(case_.status) }}
-                        </span>
-                      </td>
-                      <td>{{ case_.currentStage }}</td>
-                      <td>{{ formatDate(case_.lastActivity) }}</td>
-                      <td>{{ case_.assignedWorker }}</td>
-                      <td class="actions-cell">
-                        <button
-                          @click.stop="selectCase(case_)"
-                          class="action-button view-button"
-                        >
-                          View
-                        </button>
-                        <button
-                          @click.stop="editCase(case_)"
-                          class="action-button edit-button"
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-
-                <!-- Pagination -->
-                <div class="pagination" v-if="totalPages > 1">
-                  <button
-                    @click="currentPage = 1"
-                    :disabled="currentPage === 1"
-                    class="pagination-button"
-                  >
-                    First
-                  </button>
-                  <button
-                    @click="currentPage--"
-                    :disabled="currentPage === 1"
-                    class="pagination-button"
-                  >
-                    Previous
-                  </button>
-                  <span class="pagination-info">
-                    Page {{ currentPage }} of {{ totalPages }} ({{
-                      filteredCases.length
-                    }}
-                    cases)
-                  </span>
-                  <button
-                    @click="currentPage++"
-                    :disabled="currentPage === totalPages"
-                    class="pagination-button"
-                  >
-                    Next
-                  </button>
-                  <button
-                    @click="currentPage = totalPages"
-                    :disabled="currentPage === totalPages"
-                    class="pagination-button"
-                  >
-                    Last
-                  </button>
-                </div>
-              </div>
-
-              <!-- Cards View -->
-              <div v-if="viewMode === 'cards'" class="cases-cards-container">
-                <div class="cases-cards-grid">
-                  <div
-                    v-for="case_ in paginatedCases"
-                    :key="case_.id"
-                    @click="selectCase(case_)"
-                    class="case-card"
-                  >
-                    <div class="card-header">
-                      <div class="child-info">
-                        <h4 class="child-name">{{ case_.childName }}</h4>
-                        <div class="child-details">
-                          <span class="child-age"
-                            >{{ case_.age }} years old</span
-                          >
-                          <span class="case-id"
-                            >Case ID: {{ case_.caseId }}</span
-                          >
-                        </div>
-                      </div>
-                      <span class="status-badge" :class="case_.status">
-                        {{ formatStatus(case_.status) }}
-                      </span>
-                    </div>
-                    <div class="card-content">
-                      <div class="stage-info">
-                        <strong>Current Stage:</strong> {{ case_.currentStage }}
-                      </div>
-                      <div class="worker-info">
-                        <strong>Assigned Worker:</strong>
-                        {{ case_.assignedWorker }}
-                      </div>
-                      <div class="activity-info">
-                        <strong>Last Activity:</strong>
-                        {{ formatDate(case_.lastActivity) }}
-                      </div>
-                    </div>
-                    <div class="card-footer">
-                      <button
-                        @click.stop="selectCase(case_)"
-                        class="card-action-button primary"
-                      >
-                        View Case
-                      </button>
-                      <button
-                        @click.stop="editCase(case_)"
-                        class="card-action-button secondary"
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Pagination for Cards -->
-                <div class="pagination" v-if="totalPages > 1">
-                  <button
-                    @click="currentPage = 1"
-                    :disabled="currentPage === 1"
-                    class="pagination-button"
-                  >
-                    First
-                  </button>
-                  <button
-                    @click="currentPage--"
-                    :disabled="currentPage === 1"
-                    class="pagination-button"
-                  >
-                    Previous
-                  </button>
-                  <span class="pagination-info">
-                    Page {{ currentPage }} of {{ totalPages }} ({{
-                      filteredCases.length
-                    }}
-                    cases)
-                  </span>
-                  <button
-                    @click="currentPage++"
-                    :disabled="currentPage === totalPages"
-                    class="pagination-button"
-                  >
-                    Next
-                  </button>
-                  <button
-                    @click="currentPage = totalPages"
-                    :disabled="currentPage === totalPages"
-                    class="pagination-button"
-                  >
-                    Last
-                  </button>
-                </div>
-              </div>
-
-              <!-- No Cases Message -->
-              <div v-if="filteredCases.length === 0" class="no-cases-message">
-                <div class="no-cases-content">
-                  <svg
-                    width="48"
-                    height="48"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="m22 21-3-3m0-6a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
-                  </svg>
-                  <h3>No Cases Found</h3>
-                  <p>
-                    {{
-                      searchQuery
-                        ? "No cases match your search criteria."
-                        : "No cases have been enrolled yet."
-                    }}
-                  </p>
-                  <button
-                    @click="showNewEnrollmentModal = true"
-                    class="primary-button"
-                  >
-                    Enroll New Case
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Selected Case Detail View -->
-            <div v-if="selectedCase" class="case-detail-view">
-              <div class="case-detail-header">
-                <div class="case-info">
-                  <button
-                    @click="selectedCase = null"
-                    class="back-to-list-button"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path d="m12 19-7-7 7-7" />
-                      <path d="m19 12H5" />
-                    </svg>
-                    Back to Cases List
-                  </button>
-                  <h2>{{ selectedCase.childName }}</h2>
-                  <div class="case-meta">
-                    <span class="case-id"
-                      >Case ID: {{ selectedCase.caseId }}</span
-                    >
-                    <span class="status-badge" :class="selectedCase.status">
-                      {{ formatStatus(selectedCase.status) }}
-                    </span>
-                  </div>
-                </div>
-                <div class="case-actions">
-                  <button @click="addEvent" class="add-event-button">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path d="M12 5v14" />
-                      <path d="m5 12 14 0" />
-                    </svg>
-                    Add Event
-                  </button>
-                  <button
-                    @click="editCase(selectedCase)"
-                    class="edit-case-button"
-                  >
-                    Edit Case
-                  </button>
-                </div>
-              </div>
-
-              <!-- Case Timeline and Forms -->
-              <div class="case-detail-content">
-                <div class="case-summary-panel">
-                  <div class="summary-cards">
-                    <div class="summary-card">
-                      <div class="card-title">Basic Information</div>
-                      <div class="card-content">
-                        <div class="info-item">
-                          <strong>Age:</strong> {{ selectedCase.age }} years
-                        </div>
-                        <div class="info-item">
-                          <strong>Gender:</strong> {{ selectedCase.gender }}
-                        </div>
-                        <div class="info-item">
-                          <strong>Date of Birth:</strong>
-                          {{ formatDate(selectedCase.dateOfBirth) }}
-                        </div>
-                        <div class="info-item">
-                          <strong>Enrollment Date:</strong>
-                          {{ formatDate(selectedCase.enrollmentDate) }}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="summary-card">
-                      <div class="card-title">Case Management</div>
-                      <div class="card-content">
-                        <div class="info-item">
-                          <strong>Current Stage:</strong>
-                          {{ selectedCase.currentStage }}
-                        </div>
-                        <div class="info-item">
-                          <strong>Assigned Worker:</strong>
-                          {{ selectedCase.assignedWorker }}
-                        </div>
-                        <div class="info-item">
-                          <strong>Last Activity:</strong>
-                          {{ formatDate(selectedCase.lastActivity) }}
-                        </div>
-                        <div class="info-item">
-                          <strong>Total Events:</strong>
-                          {{ selectedCase.events.length }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Program Stages and Events -->
-                <div class="program-stages">
-                  <h3>Program Timeline</h3>
-                  <div class="timeline">
-                    <div
-                      v-for="(stage, index) in programStages"
-                      :key="stage.id"
-                      class="timeline-stage"
-                      :class="{
-                        completed: stage.completed,
-                        active: stage.active,
-                        upcoming: !stage.completed && !stage.active,
-                      }"
-                    >
-                      <div class="stage-indicator">
-                        <div class="stage-number">{{ index + 1 }}</div>
-                      </div>
-                      <div class="stage-content">
-                        <h4 class="stage-title">{{ stage.name }}</h4>
-                        <div class="stage-description">
-                          {{ stage.description }}
-                        </div>
-                        <div class="stage-events">
-                          <div
-                            v-for="event in getStageEvents(stage.id)"
-                            :key="event.id"
-                            class="event-item"
-                            @click="viewEvent(event)"
-                          >
-                            <div class="event-info">
-                              <div class="event-title">
-                                {{ event.formType }}
-                              </div>
-                              <div class="event-date">
-                                {{ formatDate(event.date) }}
-                              </div>
-                            </div>
-                            <div class="event-status">
-                              <span class="status-badge" :class="event.status">
-                                {{ formatStatus(event.status) }}
-                              </span>
-                            </div>
-                          </div>
-                          <!-- Show "No events" message when there are no events for this stage -->
-                          <div
-                            v-if="getStageEvents(stage.id).length === 0"
-                            class="no-events-message"
-                          >
-                            No events recorded
-                          </div>
-                        </div>
-                        <button
-                          v-if="stage.completed"
-                          @click="viewStageInfo(stage)"
-                          class="add-stage-event-button"
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                          >
-                            <path
-                              d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                            />
-                            <circle cx="12" cy="12" r="3" />
-                          </svg>
-                          View {{ stage.name }} Information
-                        </button>
-                        <button
-                          v-else-if="stage.active"
-                          @click="addStageEvent(stage)"
-                          class="add-stage-event-button"
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                          >
-                            <path d="M12 5v14" />
-                            <path d="m5 12 14 0" />
-                          </svg>
-                          Complete {{ stage.name }} Form
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ activeCases }}</div>
+            <div class="stat-label">Active Cases</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ completedCases }}</div>
+            <div class="stat-label">Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">{{ newThisMonth }}</div>
+            <div class="stat-label">New This Month</div>
           </div>
         </div>
       </div>
 
-      <!-- New Enrollment Modal -->
-      <div
-        v-if="showNewEnrollmentModal"
-        class="modal-overlay"
-        @click="showNewEnrollmentModal = false"
-      >
-        <div class="modal-content" @click.stop>
-          <div class="modal-header">
-            <h3>Enroll New Case</h3>
-            <button
-              @click="showNewEnrollmentModal = false"
-              class="close-button"
-            >
+      <!-- Cases List or Selected Case View -->
+      <div class="tracker-main">
+        <!-- Cases List View -->
+        <div v-if="!selectedCase" class="cases-list-view">
+          <div class="list-header">
+            <h3>Tracked Cases ({{ filteredCases.length }})</h3>
+            <div class="list-controls">
+              <button
+                @click="viewMode = 'table'"
+                :class="{ active: viewMode === 'table' }"
+                class="view-toggle"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                </svg>
+                Table
+              </button>
+              <button
+                @click="viewMode = 'cards'"
+                :class="{ active: viewMode === 'cards' }"
+                class="view-toggle"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="3" y="3" width="18" height="4" />
+                  <rect x="3" y="9" width="18" height="4" />
+                  <rect x="3" y="15" width="18" height="4" />
+                </svg>
+                Cards
+              </button>
+            </div>
+          </div>
+
+          <!-- Table View -->
+          <div v-if="viewMode === 'table'" class="cases-table-container">
+            <table class="cases-table">
+              <thead>
+                <tr>
+                  <th @click="sortBy('childName')" class="sortable">
+                    Child Name
+                    <svg
+                      class="sort-icon"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M7 10l5-5 5 5" />
+                      <path d="M7 14l5 5 5-5" />
+                    </svg>
+                  </th>
+                  <th @click="sortBy('caseId')" class="sortable">Case ID</th>
+                  <th @click="sortBy('age')" class="sortable">Age</th>
+                  <th @click="sortBy('status')" class="sortable">Status</th>
+                  <th @click="sortBy('currentStage')" class="sortable">
+                    Current Stage
+                  </th>
+                  <th @click="sortBy('lastActivity')" class="sortable">
+                    Last Activity
+                  </th>
+                  <th @click="sortBy('assignedWorker')" class="sortable">
+                    Assigned Worker
+                  </th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="case_ in paginatedCases"
+                  :key="case_.id"
+                  @click="selectCase(case_)"
+                  class="case-row"
+                >
+                  <td class="child-name-cell">
+                    <div class="child-info">
+                      <div class="child-name">{{ case_.childName }}</div>
+                      <div class="child-id">ID: {{ case_.childId }}</div>
+                    </div>
+                  </td>
+                  <td>{{ case_.caseId }}</td>
+                  <td>{{ case_.age }} years</td>
+                  <td>
+                    <span class="status-badge" :class="case_.status">
+                      {{ formatStatus(case_.status) }}
+                    </span>
+                  </td>
+                  <td>{{ case_.currentStage }}</td>
+                  <td>{{ formatDate(case_.lastActivity) }}</td>
+                  <td>{{ case_.assignedWorker }}</td>
+                  <td class="actions-cell">
+                    <button
+                      @click.stop="selectCase(case_)"
+                      class="action-button view-button"
+                    >
+                      View
+                    </button>
+                    <button
+                      @click.stop="editCase(case_)"
+                      class="action-button edit-button"
+                    >
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination" v-if="totalPages > 1">
+              <button
+                @click="currentPage = 1"
+                :disabled="currentPage === 1"
+                class="pagination-button"
+              >
+                First
+              </button>
+              <button
+                @click="currentPage--"
+                :disabled="currentPage === 1"
+                class="pagination-button"
+              >
+                Previous
+              </button>
+              <span class="pagination-info">
+                Page {{ currentPage }} of {{ totalPages }} ({{
+                  filteredCases.length
+                }}
+                cases)
+              </span>
+              <button
+                @click="currentPage++"
+                :disabled="currentPage === totalPages"
+                class="pagination-button"
+              >
+                Next
+              </button>
+              <button
+                @click="currentPage = totalPages"
+                :disabled="currentPage === totalPages"
+                class="pagination-button"
+              >
+                Last
+              </button>
+            </div>
+          </div>
+
+          <!-- Cards View -->
+          <div v-if="viewMode === 'cards'" class="cases-cards-container">
+            <div class="cases-cards-grid">
+              <div
+                v-for="case_ in paginatedCases"
+                :key="case_.id"
+                @click="selectCase(case_)"
+                class="case-card"
+              >
+                <div class="card-header">
+                  <div class="child-info">
+                    <h4 class="child-name">{{ case_.childName }}</h4>
+                    <div class="child-details">
+                      <span class="child-age">{{ case_.age }} years old</span>
+                      <span class="case-id">Case ID: {{ case_.caseId }}</span>
+                    </div>
+                  </div>
+                  <span class="status-badge" :class="case_.status">
+                    {{ formatStatus(case_.status) }}
+                  </span>
+                </div>
+                <div class="card-content">
+                  <div class="stage-info">
+                    <strong>Current Stage:</strong> {{ case_.currentStage }}
+                  </div>
+                  <div class="worker-info">
+                    <strong>Assigned Worker:</strong> {{ case_.assignedWorker }}
+                  </div>
+                  <div class="activity-info">
+                    <strong>Last Activity:</strong>
+                    {{ formatDate(case_.lastActivity) }}
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <button
+                    @click.stop="selectCase(case_)"
+                    class="card-action-button primary"
+                  >
+                    View Case
+                  </button>
+                  <button
+                    @click.stop="editCase(case_)"
+                    class="card-action-button secondary"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pagination for Cards -->
+            <div class="pagination" v-if="totalPages > 1">
+              <button
+                @click="currentPage = 1"
+                :disabled="currentPage === 1"
+                class="pagination-button"
+              >
+                First
+              </button>
+              <button
+                @click="currentPage--"
+                :disabled="currentPage === 1"
+                class="pagination-button"
+              >
+                Previous
+              </button>
+              <span class="pagination-info">
+                Page {{ currentPage }} of {{ totalPages }} ({{
+                  filteredCases.length
+                }}
+                cases)
+              </span>
+              <button
+                @click="currentPage++"
+                :disabled="currentPage === totalPages"
+                class="pagination-button"
+              >
+                Next
+              </button>
+              <button
+                @click="currentPage = totalPages"
+                :disabled="currentPage === totalPages"
+                class="pagination-button"
+              >
+                Last
+              </button>
+            </div>
+          </div>
+
+          <!-- No Cases Message -->
+          <div v-if="filteredCases.length === 0" class="no-cases-message">
+            <div class="no-cases-content">
               <svg
-                width="20"
-                height="20"
+                width="48"
+                height="48"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="1"
               >
-                <path d="m18 6-12 12" />
-                <path d="m6 6 12 12" />
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="m22 21-3-3m0-6a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
               </svg>
-            </button>
+              <h3>No Cases Found</h3>
+              <p>
+                {{
+                  searchQuery
+                    ? "No cases match your search criteria."
+                    : "No cases have been enrolled yet."
+                }}
+              </p>
+              <button
+                @click="showNewEnrollmentModal = true"
+                class="primary-button"
+              >
+                Enroll New Case
+              </button>
+            </div>
           </div>
-          <div class="modal-body">
-            <form @submit.prevent="createNewEnrollment">
-              <!-- Loading Overlay -->
-              <div v-if="loading" class="loading-overlay">
-                <div class="loading-spinner">
-                  <div class="spinner"></div>
-                  <p>{{ loadingMessage }}</p>
+        </div>
+
+        <!-- Selected Case Detail View -->
+        <div v-if="selectedCase" class="case-detail-view">
+          <div class="case-detail-header">
+            <div class="case-info">
+              <button @click="selectedCase = null" class="back-to-list-button">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="m12 19-7-7 7-7" />
+                  <path d="m19 12H5" />
+                </svg>
+                Back to Cases List
+              </button>
+              <h2>{{ selectedCase.childName }}</h2>
+              <div class="case-meta">
+                <span class="case-id">Case ID: {{ selectedCase.caseId }}</span>
+                <span class="status-badge" :class="selectedCase.status">
+                  {{ formatStatus(selectedCase.status) }}
+                </span>
+              </div>
+            </div>
+            <div class="case-actions">
+              <button @click="addEvent" class="add-event-button">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M12 5v14" />
+                  <path d="m5 12 14 0" />
+                </svg>
+                Add Event
+              </button>
+              <button @click="editCase(selectedCase)" class="edit-case-button">
+                Edit Case
+              </button>
+            </div>
+          </div>
+
+          <!-- Case Timeline and Forms -->
+          <div class="case-detail-content">
+            <div class="case-summary-panel">
+              <div class="summary-cards">
+                <div class="summary-card">
+                  <div class="card-title">Basic Information</div>
+                  <div class="card-content">
+                    <div class="info-item">
+                      <strong>Age:</strong> {{ selectedCase.age }} years
+                    </div>
+                    <div class="info-item">
+                      <strong>Gender:</strong> {{ selectedCase.gender }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Date of Birth:</strong>
+                      {{ formatDate(selectedCase.dateOfBirth) }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Enrollment Date:</strong>
+                      {{ formatDate(selectedCase.enrollmentDate) }}
+                    </div>
+                  </div>
+                </div>
+                <div class="summary-card">
+                  <div class="card-title">Case Management</div>
+                  <div class="card-content">
+                    <div class="info-item">
+                      <strong>Current Stage:</strong>
+                      {{ selectedCase.currentStage }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Assigned Worker:</strong>
+                      {{ selectedCase.assignedWorker }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Last Activity:</strong>
+                      {{ formatDate(selectedCase.lastActivity) }}
+                    </div>
+                    <div class="info-item">
+                      <strong>Total Events:</strong>
+                      {{ selectedCase.events.length }}
+                    </div>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Stage Information Modal -->
-              <div
-                v-if="showStageInfoModal"
-                class="modal-overlay"
-                @click="closeStageInfoModal"
-              >
-                <div class="modal-content stage-info-modal" @click.stop>
-                  <div class="modal-header">
-                    <h3>Stage Information</h3>
-                    <button @click="closeStageInfoModal" class="close-button">
+            <!-- Program Stages and Events -->
+            <div class="program-stages">
+              <h3>Program Timeline</h3>
+              <div class="timeline">
+                <div
+                  v-for="(stage, index) in programStages"
+                  :key="stage.id"
+                  class="timeline-stage"
+                  :class="{
+                    completed: stage.completed,
+                    active: stage.active,
+                    upcoming: !stage.completed && !stage.active,
+                  }"
+                >
+                  <div class="stage-indicator">
+                    <div class="stage-number">{{ index + 1 }}</div>
+                  </div>
+                  <div class="stage-content">
+                    <h4 class="stage-title">{{ stage.name }}</h4>
+                    <div class="stage-description">{{ stage.description }}</div>
+                    <div class="stage-events">
+                      <div
+                        v-for="event in getStageEvents(stage.id)"
+                        :key="event.id"
+                        class="event-item"
+                        @click="viewEvent(event)"
+                      >
+                        <div class="event-info">
+                          <div class="event-title">{{ event.formType }}</div>
+                          <div class="event-date">
+                            {{ formatDate(event.date) }}
+                          </div>
+                        </div>
+                        <div class="event-status">
+                          <span class="status-badge" :class="event.status">
+                            {{ formatStatus(event.status) }}
+                          </span>
+                        </div>
+                      </div>
+                      <!-- Show "No events" message when there are no events for this stage -->
+                      <div
+                        v-if="getStageEvents(stage.id).length === 0"
+                        class="no-events-message"
+                      >
+                        No events recorded
+                      </div>
+                    </div>
+                    <button
+                      v-if="stage.completed"
+                      @click="viewStageInfo(stage)"
+                      class="add-stage-event-button"
+                    >
                       <svg
-                        width="20"
-                        height="20"
+                        width="16"
+                        height="16"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
                         stroke-width="2"
                       >
-                        <path d="m18 6-12 12" />
-                        <path d="m6 6 12 12" />
+                        <path
+                          d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
+                        />
+                        <circle cx="12" cy="12" r="3" />
                       </svg>
+                      View {{ stage.name }} Information
+                    </button>
+                    <button
+                      v-else-if="stage.active"
+                      @click="addStageEvent(stage)"
+                      class="add-stage-event-button"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path d="M12 5v14" />
+                        <path d="m5 12 14 0" />
+                      </svg>
+                      Complete {{ stage.name }} Form
                     </button>
                   </div>
-                  <div class="modal-body">
-                    <div v-if="stageInfoLoading" class="loading-info">
-                      <div class="spinner"></div>
-                      <p>Loading stage information...</p>
-                    </div>
-                    <div
-                      v-else-if="stageInfoData && !stageInfoData.error"
-                      class="stage-info-content"
-                    >
-                      <div class="info-section">
-                        <h4>Basic Information</h4>
-                        <div class="info-grid">
-                          <div class="info-item">
-                            <strong>Child Name:</strong>
-                            <span
-                              >{{ stageInfoData.childFirstName }}
-                              {{ stageInfoData.childSurname }}</span
-                            >
-                          </div>
-                          <div class="info-item">
-                            <strong>Child ID:</strong>
-                            <span>{{
-                              stageInfoData.id || stageInfoData.childId
-                            }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Gender:</strong>
-                            <span>{{ stageInfoData.gender }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Date of Birth:</strong>
-                            <span>{{
-                              formatDate(stageInfoData.dateOfBirth)
-                            }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Age at Intake:</strong>
-                            <span>{{ stageInfoData.ageAtIntake }}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="info-section" v-if="stageInfoData.ovcStatus">
-                        <h4>Vulnerability Status</h4>
-                        <div class="info-grid">
-                          <div class="info-item">
-                            <strong>OVC Status:</strong>
-                            <span>{{ stageInfoData.ovcStatus }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Date Effective:</strong>
-                            <span>{{
-                              formatDate(stageInfoData.ovcDateEffective)
-                            }}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="info-section" v-if="stageInfoData.reasons">
-                        <h4>Reasons for Admission</h4>
-                        <div class="reasons-list">
-                          <div
-                            v-for="(value, key) in stageInfoData.reasons"
-                            :key="key"
-                            class="reason-item"
-                            v-if="value"
-                          >
-                            {{ formatReasonKey(key) }}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        class="info-section"
-                        v-if="stageInfoData.primaryCaregiver"
-                      >
-                        <h4>Primary Caregiver</h4>
-                        <div class="info-grid">
-                          <div class="info-item">
-                            <strong>Name:</strong>
-                            <span>{{
-                              stageInfoData.primaryCaregiver.name
-                            }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Relationship:</strong>
-                            <span>{{
-                              stageInfoData.primaryCaregiver.relationship
-                            }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Phone:</strong>
-                            <span>{{
-                              stageInfoData.primaryCaregiver.phone1
-                            }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Occupation:</strong>
-                            <span>{{
-                              stageInfoData.primaryCaregiver.occupation
-                            }}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="info-section" v-if="stageInfoData.documents">
-                        <h4>Documents Included</h4>
-                        <div class="documents-list">
-                          <div
-                            v-for="(value, key) in stageInfoData.documents"
-                            :key="key"
-                            class="document-item"
-                            v-if="value"
-                          >
-                            {{ formatDocumentKey(key) }}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      v-else-if="stageInfoData && stageInfoData.error"
-                      class="error-info"
-                    >
-                      <p>{{ stageInfoData.error }}</p>
-                    </div>
-                    <div v-else class="no-info">
-                      <p>No information available for this stage.</p>
-                    </div>
-                  </div>
                 </div>
               </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Child First Name *</label>
-                  <input
-                    v-model="newEnrollment.childFirstName"
-                    type="text"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Child Last Name *</label>
-                  <input
-                    v-model="newEnrollment.childLastName"
-                    type="text"
-                    required
-                  />
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Date of Birth *</label>
-                  <input
-                    v-model="newEnrollment.dateOfBirth"
-                    type="date"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Gender *</label>
-                  <select v-model="newEnrollment.gender" required>
-                    <option value="">Select Gender</option>
-                    <option value="Female">Female</option>
-                    <option value="Male">Male</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Enrollment Program *</label>
-                <select v-model="newEnrollment.program" required>
-                  <option value="">Select Program</option>
-                  <option value="child-protection">
-                    Child Protection Program
-                  </option>
-                  <option value="pregnancy-support">
-                    Pregnancy Support Program
-                  </option>
-                  <option value="family-support">Family Support Program</option>
-                </select>
-              </div>
-
-              <!-- Dynamic form fields based on selected form type -->
-              <div class="form-group">
-                <label>Initial Form Type *</label>
-                <select
-                  v-model="newEnrollment.initialFormType"
-                  required
-                  @change="handleFormTypeChange"
-                >
-                  <option value="">Select Form Type</option>
-                  <option value="initial-referral">Initial Referral</option>
-                  <option value="child-overview">
-                    Child Overview & Background
-                  </option>
-                  <option value="initial-assessment">
-                    TKP Initial Assessment
-                  </option>
-                  <option value="medical-intake">
-                    Medical Intake Assessment
-                  </option>
-                  <option value="academics-literacy">
-                    Academics & Literacy
-                  </option>
-                  <option value="psychological-assessment">
-                    Psychological Assessment
-                  </option>
-                  <option value="life-skills-survey">Life Skills Survey</option>
-                  <option value="birth-delivery">
-                    Birth & Delivery Report
-                  </option>
-                  <option value="care-plan-summary">Care Plan Summary</option>
-                  <option value="care-plan-baby">Care Plan (Baby)</option>
-                  <option value="care-plan-ongoing-life-skills">
-                    Care Plan - Ongoing Life Skills
-                  </option>
-                </select>
-              </div>
-
-              <!-- Additional fields for Initial Referral -->
-              <div
-                v-if="newEnrollment.initialFormType === 'initial-referral'"
-                class="form-group"
-              >
-                <label>Referral Date *</label>
-                <input
-                  v-model="newEnrollment.referralDate"
-                  type="date"
-                  required
-                />
-              </div>
-
-              <div
-                v-if="newEnrollment.initialFormType === 'initial-referral'"
-                class="form-group"
-              >
-                <label>Referral Method *</label>
-                <select v-model="newEnrollment.referralMethod" required>
-                  <option value="">Select Method</option>
-                  <option value="Department of Social Welfare - Lusaka">
-                    Department of Social Welfare - Lusaka
-                  </option>
-                  <option value="Coptic Hospital">Coptic Hospital</option>
-                  <option value="MNK Psychotherapy">MNK Psychotherapy</option>
-                  <option value="Department of Social Welfare: Chongwe">
-                    Department of Social Welfare: Chongwe
-                  </option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              <!-- Additional fields for Initial Assessment -->
-              <div
-                v-if="newEnrollment.initialFormType === 'initial-assessment'"
-                class="form-group"
-              >
-                <label>Assessment Date *</label>
-                <input
-                  v-model="newEnrollment.assessmentDate"
-                  type="date"
-                  required
-                />
-              </div>
-
-              <div
-                v-if="newEnrollment.initialFormType === 'initial-assessment'"
-                class="form-group"
-              >
-                <label>Assessment Type *</label>
-                <select v-model="newEnrollment.assessmentType" required>
-                  <option value="">Select Type</option>
-                  <option value="Initial">Initial Assessment</option>
-                  <option value="Follow-up">Follow-up Assessment</option>
-                </select>
-              </div>
-
-              <!-- Additional fields for Program Enrollment -->
-              <div
-                v-if="newEnrollment.initialFormType === 'program-enrollment'"
-                class="form-group"
-              >
-                <label>Enrollment Date *</label>
-                <input
-                  v-model="newEnrollment.enrollmentDate"
-                  type="date"
-                  required
-                />
-              </div>
-
-              <!-- Additional fields for Care Plan Development -->
-              <div
-                v-if="newEnrollment.initialFormType === 'care-plan'"
-                class="form-group"
-              >
-                <label>Care Plan Date *</label>
-                <input
-                  v-model="newEnrollment.carePlanDate"
-                  type="date"
-                  required
-                />
-              </div>
-
-              <!-- Additional fields for Regular Follow-up -->
-              <div
-                v-if="newEnrollment.initialFormType === 'regular-follow-up'"
-                class="form-group"
-              >
-                <label>Follow-up Date *</label>
-                <input
-                  v-model="newEnrollment.followUpDate"
-                  type="date"
-                  required
-                />
-              </div>
-
-              <div class="modal-actions">
-                <button
-                  type="button"
-                  @click="showNewEnrollmentModal = false"
-                  class="cancel-button"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  class="create-button"
-                  :disabled="enrollmentLoading"
-                >
-                  {{
-                    enrollmentLoading ? "Creating..." : "Create & Start Form"
-                  }}
-                </button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Event Type Selection Modal -->
-      <div
-        v-if="showEventTypeModal"
-        class="modal-overlay"
-        @click="cancelEventTypeSelection"
-      >
-        <div class="modal-content" @click.stop>
-          <div class="modal-header">
-            <h3>Select Event Type</h3>
-            <button @click="cancelEventTypeSelection" class="close-button">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="m18 6-12 12" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
+    <!-- New Enrollment Modal -->
+    <div
+      v-if="showNewEnrollmentModal"
+      class="modal-overlay"
+      @click="showNewEnrollmentModal = false"
+    >
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Enroll New Case</h3>
+          <button @click="showNewEnrollmentModal = false" class="close-button">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="m18 6-12 12" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="createNewEnrollment">
+    <!-- Loading Overlay -->
+    <div v-if="loading" class="loading-overlay">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>{{ loadingMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Stage Information Modal -->
+    <div v-if="showStageInfoModal" class="modal-overlay" @click="closeStageInfoModal">
+      <div class="modal-content stage-info-modal" @click.stop>
+        <div class="modal-header">
+          <h3>Stage Information</h3>
+          <button @click="closeStageInfoModal" class="close-button">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="m18 6-12 12" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div v-if="stageInfoLoading" class="loading-info">
+            <div class="spinner"></div>
+            <p>Loading stage information...</p>
           </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label>Choose the type of event you want to add:</label>
-              <div class="event-type-options">
-                <button
-                  @click="selectEventType('initial-referral')"
-                  class="event-type-button"
-                >
-                  Initial Referral
-                </button>
-                <button
-                  @click="selectEventType('child-overview')"
-                  class="event-type-button"
-                >
-                  Child Overview & Background
-                </button>
-                <button
-                  @click="selectEventType('initial-assessment')"
-                  class="event-type-button"
-                >
-                  TKP Initial Assessment
-                </button>
-                <button
-                  @click="selectEventType('medical-intake')"
-                  class="event-type-button"
-                >
-                  Medical Intake Assessment
-                </button>
-                <button
-                  @click="selectEventType('academics-literacy')"
-                  class="event-type-button"
-                >
-                  Academics & Literacy
-                </button>
-                <button
-                  @click="selectEventType('psychological-assessment')"
-                  class="event-type-button"
-                >
-                  Psychological Assessment
-                </button>
-                <button
-                  @click="selectEventType('life-skills-survey')"
-                  class="event-type-button"
-                >
-                  Life Skills Survey
-                </button>
-                <button
-                  @click="selectEventType('birth-delivery')"
-                  class="event-type-button"
-                >
-                  Birth & Delivery Report
-                </button>
-                <button
-                  @click="selectEventType('care-plan-summary')"
-                  class="event-type-button"
-                >
-                  Care Plan Summary
-                </button>
-                <button
-                  @click="selectEventType('care-plan-baby')"
-                  class="event-type-button"
-                >
-                  Care Plan (Baby)
-                </button>
-                <button
-                  @click="selectEventType('care-plan-ongoing-life-skills')"
-                  class="event-type-button"
-                >
-                  Care Plan - Ongoing Life Skills
-                </button>
+          <div v-else-if="stageInfoData && !stageInfoData.error" class="stage-info-content">
+            <div class="info-section">
+              <h4>Basic Information</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <strong>Child Name:</strong>
+                  <span>{{ stageInfoData.childFirstName }} {{ stageInfoData.childSurname }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Child ID:</strong>
+                  <span>{{ stageInfoData.id || stageInfoData.childId }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Gender:</strong>
+                  <span>{{ stageInfoData.gender }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Date of Birth:</strong>
+                  <span>{{ formatDate(stageInfoData.dateOfBirth) }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Age at Intake:</strong>
+                  <span>{{ stageInfoData.ageAtIntake }}</span>
+                </div>
               </div>
             </div>
+
+            <div class="info-section" v-if="stageInfoData.ovcStatus">
+              <h4>Vulnerability Status</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <strong>OVC Status:</strong>
+                  <span>{{ stageInfoData.ovcStatus }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Date Effective:</strong>
+                  <span>{{ formatDate(stageInfoData.ovcDateEffective) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-section" v-if="stageInfoData.reasons">
+              <h4>Reasons for Admission</h4>
+              <div class="reasons-list">
+                <div v-for="(value, key) in stageInfoData.reasons" :key="key" class="reason-item" v-if="value">
+                  {{ formatReasonKey(key) }}
+                </div>
+              </div>
+            </div>
+
+            <div class="info-section" v-if="stageInfoData.primaryCaregiver">
+              <h4>Primary Caregiver</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <strong>Name:</strong>
+                  <span>{{ stageInfoData.primaryCaregiver.name }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Relationship:</strong>
+                  <span>{{ stageInfoData.primaryCaregiver.relationship }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Phone:</strong>
+                  <span>{{ stageInfoData.primaryCaregiver.phone1 }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Occupation:</strong>
+                  <span>{{ stageInfoData.primaryCaregiver.occupation }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-section" v-if="stageInfoData.documents">
+              <h4>Documents Included</h4>
+              <div class="documents-list">
+                <div v-for="(value, key) in stageInfoData.documents" :key="key" class="document-item" v-if="value">
+                  {{ formatDocumentKey(key) }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else-if="stageInfoData && stageInfoData.error" class="error-info">
+            <p>{{ stageInfoData.error }}</p>
+          </div>
+          <div v-else class="no-info">
+            <p>No information available for this stage.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Child First Name *</label>
+                <input
+                  v-model="newEnrollment.childFirstName"
+                  type="text"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Child Last Name *</label>
+                <input
+                  v-model="newEnrollment.childLastName"
+                  type="text"
+                  required
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Date of Birth *</label>
+                <input
+                  v-model="newEnrollment.dateOfBirth"
+                  type="date"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Gender *</label>
+                <select v-model="newEnrollment.gender" required>
+                  <option value="">Select Gender</option>
+                  <option value="Female">Female</option>
+                  <option value="Male">Male</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Enrollment Program *</label>
+              <select v-model="newEnrollment.program" required>
+                <option value="">Select Program</option>
+                <option value="child-protection">
+                  Child Protection Program
+                </option>
+                <option value="pregnancy-support">
+                  Pregnancy Support Program
+                </option>
+                <option value="family-support">Family Support Program</option>
+              </select>
+            </div>
+
+            <!-- Dynamic form fields based on selected form type -->
+            <div class="form-group">
+              <label>Initial Form Type *</label>
+              <select
+                v-model="newEnrollment.initialFormType"
+                required
+                @change="handleFormTypeChange"
+              >
+                <option value="">Select Form Type</option>
+                <option value="initial-referral">Initial Referral</option>
+                <option value="child-overview">
+                  Child Overview & Background
+                </option>
+                <option value="initial-assessment">
+                  TKP Initial Assessment
+                </option>
+                <option value="medical-intake">
+                  Medical Intake Assessment
+                </option>
+                <option value="academics-literacy">Academics & Literacy</option>
+                <option value="psychological-assessment">
+                  Psychological Assessment
+                </option>
+                <option value="life-skills-survey">Life Skills Survey</option>
+                <option value="birth-delivery">Birth & Delivery Report</option>
+                <option value="care-plan-summary">Care Plan Summary</option>
+                <option value="care-plan-baby">Care Plan (Baby)</option>
+                <option value="care-plan-ongoing-life-skills">
+                  Care Plan - Ongoing Life Skills
+                </option>
+              </select>
+            </div>
+
+            <!-- Additional fields for Initial Referral -->
+            <div
+              v-if="newEnrollment.initialFormType === 'initial-referral'"
+              class="form-group"
+            >
+              <label>Referral Date *</label>
+              <input
+                v-model="newEnrollment.referralDate"
+                type="date"
+                required
+              />
+            </div>
+
+            <div
+              v-if="newEnrollment.initialFormType === 'initial-referral'"
+              class="form-group"
+            >
+              <label>Referral Method *</label>
+              <select v-model="newEnrollment.referralMethod" required>
+                <option value="">Select Method</option>
+                <option value="Department of Social Welfare - Lusaka">
+                  Department of Social Welfare - Lusaka
+                </option>
+                <option value="Coptic Hospital">Coptic Hospital</option>
+                <option value="MNK Psychotherapy">MNK Psychotherapy</option>
+                <option value="Department of Social Welfare: Chongwe">
+                  Department of Social Welfare: Chongwe
+                </option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <!-- Additional fields for Initial Assessment -->
+            <div
+              v-if="newEnrollment.initialFormType === 'initial-assessment'"
+              class="form-group"
+            >
+              <label>Assessment Date *</label>
+              <input
+                v-model="newEnrollment.assessmentDate"
+                type="date"
+                required
+              />
+            </div>
+
+            <div
+              v-if="newEnrollment.initialFormType === 'initial-assessment'"
+              class="form-group"
+            >
+              <label>Assessment Type *</label>
+              <select v-model="newEnrollment.assessmentType" required>
+                <option value="">Select Type</option>
+                <option value="Initial">Initial Assessment</option>
+                <option value="Follow-up">Follow-up Assessment</option>
+              </select>
+            </div>
+
+            <!-- Additional fields for Program Enrollment -->
+            <div
+              v-if="newEnrollment.initialFormType === 'program-enrollment'"
+              class="form-group"
+            >
+              <label>Enrollment Date *</label>
+              <input
+                v-model="newEnrollment.enrollmentDate"
+                type="date"
+                required
+              />
+            </div>
+
+            <!-- Additional fields for Care Plan Development -->
+            <div
+              v-if="newEnrollment.initialFormType === 'care-plan'"
+              class="form-group"
+            >
+              <label>Care Plan Date *</label>
+              <input
+                v-model="newEnrollment.carePlanDate"
+                type="date"
+                required
+              />
+            </div>
+
+            <!-- Additional fields for Regular Follow-up -->
+            <div
+              v-if="newEnrollment.initialFormType === 'regular-follow-up'"
+              class="form-group"
+            >
+              <label>Follow-up Date *</label>
+              <input
+                v-model="newEnrollment.followUpDate"
+                type="date"
+                required
+              />
+            </div>
+
             <div class="modal-actions">
-              <button @click="cancelEventTypeSelection" class="cancel-button">
+              <button
+                type="button"
+                @click="showNewEnrollmentModal = false"
+                class="cancel-button"
+              >
                 Cancel
+              </button>
+              <button
+                type="submit"
+                class="create-button"
+                :disabled="enrollmentLoading"
+              >
+                {{ enrollmentLoading ? "Creating..." : "Create & Start Form" }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Type Selection Modal -->
+    <div
+      v-if="showEventTypeModal"
+      class="modal-overlay"
+      @click="cancelEventTypeSelection"
+    >
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Select Event Type</h3>
+          <button @click="cancelEventTypeSelection" class="close-button">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="m18 6-12 12" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Choose the type of event you want to add:</label>
+            <div class="event-type-options">
+              <button
+                @click="selectEventType('initial-referral')"
+                class="event-type-button"
+              >
+                Initial Referral
+              </button>
+              <button
+                @click="selectEventType('child-overview')"
+                class="event-type-button"
+              >
+                Child Overview & Background
+              </button>
+              <button
+                @click="selectEventType('initial-assessment')"
+                class="event-type-button"
+              >
+                TKP Initial Assessment
+              </button>
+              <button
+                @click="selectEventType('medical-intake')"
+                class="event-type-button"
+              >
+                Medical Intake Assessment
+              </button>
+              <button
+                @click="selectEventType('academics-literacy')"
+                class="event-type-button"
+              >
+                Academics & Literacy
+              </button>
+              <button
+                @click="selectEventType('psychological-assessment')"
+                class="event-type-button"
+              >
+                Psychological Assessment
+              </button>
+              <button
+                @click="selectEventType('life-skills-survey')"
+                class="event-type-button"
+              >
+                Life Skills Survey
+              </button>
+              <button
+                @click="selectEventType('birth-delivery')"
+                class="event-type-button"
+              >
+                Birth & Delivery Report
+              </button>
+              <button
+                @click="selectEventType('care-plan-summary')"
+                class="event-type-button"
+              >
+                Care Plan Summary
+              </button>
+              <button
+                @click="selectEventType('care-plan-baby')"
+                class="event-type-button"
+              >
+                Care Plan (Baby)
+              </button>
+              <button
+                @click="selectEventType('care-plan-ongoing-life-skills')"
+                class="event-type-button"
+              >
+                Care Plan - Ongoing Life Skills
               </button>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Loading Overlay -->
-      <div v-if="loading" class="loading-overlay">
-        <div class="loading-spinner">
-          <div class="spinner"></div>
-          <p>{{ loadingMessage }}</p>
-        </div>
-      </div>
-
-      <!-- Stage Information Modal -->
-      <div
-        v-if="showStageInfoModal"
-        class="modal-overlay"
-        @click="closeStageInfoModal"
-      >
-        <div class="modal-content stage-info-modal" @click.stop>
-          <div class="modal-header">
-            <h3>Stage Information</h3>
-            <button @click="closeStageInfoModal" class="close-button">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="m18 6-12 12" />
-                <path d="m6 6 12 12" />
-              </svg>
+          <div class="modal-actions">
+            <button @click="cancelEventTypeSelection" class="cancel-button">
+              Cancel
             </button>
           </div>
-          <div class="modal-body">
-            <div v-if="stageInfoLoading" class="loading-info">
-              <div class="spinner"></div>
-              <p>Loading stage information...</p>
-            </div>
-            <div
-              v-else-if="stageInfoData && !stageInfoData.error"
-              class="stage-info-content"
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div v-if="loading" class="loading-overlay">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>{{ loadingMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Stage Information Modal -->
+    <div v-if="showStageInfoModal" class="modal-overlay" @click="closeStageInfoModal">
+      <div class="modal-content stage-info-modal" @click.stop>
+        <div class="modal-header">
+          <h3>Stage Information</h3>
+          <button @click="closeStageInfoModal" class="close-button">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
             >
-              <div class="info-section">
-                <h4>Basic Information</h4>
-                <div class="info-grid">
-                  <div class="info-item">
-                    <strong>Child Name:</strong>
-                    <span
-                      >{{ stageInfoData.childFirstName }}
-                      {{ stageInfoData.childSurname }}</span
-                    >
-                  </div>
-                  <div class="info-item">
-                    <strong>Child ID:</strong>
-                    <span>{{ stageInfoData.id || stageInfoData.childId }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Gender:</strong>
-                    <span>{{ stageInfoData.gender }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Date of Birth:</strong>
-                    <span>{{ formatDate(stageInfoData.dateOfBirth) }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Age at Intake:</strong>
-                    <span>{{ stageInfoData.ageAtIntake }}</span>
-                  </div>
+              <path d="m18 6-12 12" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div v-if="stageInfoLoading" class="loading-info">
+            <div class="spinner"></div>
+            <p>Loading stage information...</p>
+          </div>
+          <div v-else-if="stageInfoData && !stageInfoData.error" class="stage-info-content">
+            <div class="info-section">
+              <h4>Basic Information</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <strong>Child Name:</strong>
+                  <span>{{ stageInfoData.childFirstName }} {{ stageInfoData.childSurname }}</span>
                 </div>
-              </div>
-
-              <div class="info-section" v-if="stageInfoData.ovcStatus">
-                <h4>Vulnerability Status</h4>
-                <div class="info-grid">
-                  <div class="info-item">
-                    <strong>OVC Status:</strong>
-                    <span>{{ stageInfoData.ovcStatus }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Date Effective:</strong>
-                    <span>{{
-                      formatDate(stageInfoData.ovcDateEffective)
-                    }}</span>
-                  </div>
+                <div class="info-item">
+                  <strong>Child ID:</strong>
+                  <span>{{ stageInfoData.id || stageInfoData.childId }}</span>
                 </div>
-              </div>
-
-              <div class="info-section" v-if="stageInfoData.reasons">
-                <h4>Reasons for Admission</h4>
-                <div class="reasons-list">
-                  <div
-                    v-for="(value, key) in stageInfoData.reasons"
-                    :key="key"
-                    class="reason-item"
-                    v-if="value"
-                  >
-                    {{ formatReasonKey(key) }}
-                  </div>
+                <div class="info-item">
+                  <strong>Gender:</strong>
+                  <span>{{ stageInfoData.gender }}</span>
                 </div>
-              </div>
-
-              <div class="info-section" v-if="stageInfoData.primaryCaregiver">
-                <h4>Primary Caregiver</h4>
-                <div class="info-grid">
-                  <div class="info-item">
-                    <strong>Name:</strong>
-                    <span>{{ stageInfoData.primaryCaregiver.name }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Relationship:</strong>
-                    <span>{{
-                      stageInfoData.primaryCaregiver.relationship
-                    }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Phone:</strong>
-                    <span>{{ stageInfoData.primaryCaregiver.phone1 }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Occupation:</strong>
-                    <span>{{ stageInfoData.primaryCaregiver.occupation }}</span>
-                  </div>
+                <div class="info-item">
+                  <strong>Date of Birth:</strong>
+                  <span>{{ formatDate(stageInfoData.dateOfBirth) }}</span>
                 </div>
-              </div>
-
-              <div class="info-section" v-if="stageInfoData.documents">
-                <h4>Documents Included</h4>
-                <div class="documents-list">
-                  <div
-                    v-for="(value, key) in stageInfoData.documents"
-                    :key="key"
-                    class="document-item"
-                    v-if="value"
-                  >
-                    {{ formatDocumentKey(key) }}
-                  </div>
+                <div class="info-item">
+                  <strong>Age at Intake:</strong>
+                  <span>{{ stageInfoData.ageAtIntake }}</span>
                 </div>
               </div>
             </div>
-            <div
-              v-else-if="stageInfoData && stageInfoData.error"
-              class="error-info"
-            >
-              <p>{{ stageInfoData.error }}</p>
+
+            <div class="info-section" v-if="stageInfoData.ovcStatus">
+              <h4>Vulnerability Status</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <strong>OVC Status:</strong>
+                  <span>{{ stageInfoData.ovcStatus }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Date Effective:</strong>
+                  <span>{{ formatDate(stageInfoData.ovcDateEffective) }}</span>
+                </div>
+              </div>
             </div>
-            <div v-else class="no-info">
-              <p>No information available for this stage.</p>
+
+            <div class="info-section" v-if="stageInfoData.reasons">
+              <h4>Reasons for Admission</h4>
+              <div class="reasons-list">
+                <div v-for="(value, key) in stageInfoData.reasons" :key="key" class="reason-item" v-if="value">
+                  {{ formatReasonKey(key) }}
+                </div>
+              </div>
             </div>
+
+            <div class="info-section" v-if="stageInfoData.primaryCaregiver">
+              <h4>Primary Caregiver</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <strong>Name:</strong>
+                  <span>{{ stageInfoData.primaryCaregiver.name }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Relationship:</strong>
+                  <span>{{ stageInfoData.primaryCaregiver.relationship }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Phone:</strong>
+                  <span>{{ stageInfoData.primaryCaregiver.phone1 }}</span>
+                </div>
+                <div class="info-item">
+                  <strong>Occupation:</strong>
+                  <span>{{ stageInfoData.primaryCaregiver.occupation }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-section" v-if="stageInfoData.documents">
+              <h4>Documents Included</h4>
+              <div class="documents-list">
+                <div v-for="(value, key) in stageInfoData.documents" :key="key" class="document-item" v-if="value">
+                  {{ formatDocumentKey(key) }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else-if="stageInfoData && stageInfoData.error" class="error-info">
+            <p>{{ stageInfoData.error }}</p>
+          </div>
+          <div v-else class="no-info">
+            <p>No information available for this stage.</p>
           </div>
         </div>
       </div>
@@ -1394,7 +1295,6 @@
 </template>
 
 <script setup>
-// Stage information modal enhancement
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import FormService from "../services/formService.js";
@@ -1754,31 +1654,8 @@ const editCase = (case_) => {
 const addEvent = () => {
   if (!selectedCase.value) return;
 
-  // Instead of showing modal, directly open the initial-referral form
-  // Store child info in sessionStorage so the form can pre-populate
-  const childData = {
-    childFirstName: selectedCase.value.childName.split(" ")[0] || "",
-    childSurname: selectedCase.value.childName.split(" ").slice(-1)[0] || "",
-    childName: selectedCase.value.childName,
-    dateOfBirth: selectedCase.value.dateOfBirth,
-    age: selectedCase.value.age,
-    gender: selectedCase.value.gender,
-    caseId: selectedCase.value.caseId || selectedCase.value.id,
-    formType: "initial-referral",
-    returnTo: "tracker-capture",
-  };
-
-  sessionStorage.setItem("selectedChildForForm", JSON.stringify(childData));
-
-  // Navigate directly to the capture page with the form preset
-  router.push({
-    path: "/capture",
-    query: {
-      preset: "initial-referral",
-      childData: btoa(JSON.stringify(childData)), // Base64 encode for URL safety
-      returnTo: "tracker-capture",
-    },
-  });
+  // Show modal to select event type instead of prompt
+  showEventTypeModal.value = true;
 };
 
 const selectEventType = (formType) => {
@@ -1802,6 +1679,10 @@ const selectEventType = (formType) => {
     // Navigate to dashboard with the form to open
     router.push({
       path: "/dashboard",
+      query: {
+        openForm: formType,
+        childData: btoa(JSON.stringify(childData)),
+      },
     });
   }
 };
@@ -1821,10 +1702,28 @@ const addStageEvent = (stage) => {
   // Get the form type from the stage
   const formType = stage.formType || stage.id;
 
+  // Map form types to their component routes in the dashboard
+  const formComponentMap = {
+    "initial-referral": "initial-referral",
+    "child-overview": "child-overview",
+    "initial-assessment": "initial-assessment",
+    "medical-intake": "medical-intake",
+    "academics-literacy": "academics-literacy",
+    "psychological-assessment": "psychological-assessment",
+    "life-skills-survey": "life-skills-survey",
+    "birth-delivery": "birth-delivery",
+    "care-plan-summary": "care-plan-summary",
+    "care-plan-baby": "care-plan-baby",
+    "care-plan-ongoing-life-skills": "care-plan-ongoing-life-skills",
+  };
+
+  const formComponent = formComponentMap[formType];
+
   console.log("Adding stage event:", {
     stageName: stage.name,
     formType: formType,
     childName: selectedCase.value.childName,
+    formComponent: formComponent,
   });
 
   // Store child info in sessionStorage so the form can pre-populate
@@ -1843,13 +1742,13 @@ const addStageEvent = (stage) => {
 
   sessionStorage.setItem("selectedChildForForm", JSON.stringify(childData));
 
-  // Navigate directly to the capture page with the form preset
+  // Navigate to the dashboard with the form type to open
   router.push({
-    path: "/capture",
+    path: "/dashboard",
     query: {
-      preset: formType,
+      openForm: formComponent,
       childData: btoa(JSON.stringify(childData)), // Base64 encode for URL safety
-      returnTo: "tracker-capture",
+      viewMode: stage.completed ? "true" : "false", // Pass view mode in query
     },
   });
 };
@@ -1908,26 +1807,14 @@ const viewStageInfo = async (stage) => {
       if (matchingForm) {
         stageInfoData.value = matchingForm;
       } else {
-        // Try to find by case ID if name matching failed
-        const caseId = selectedCase.value.caseId || selectedCase.value.id;
-        const caseMatchingForm = result.forms.find(
-          (form) => form.caseId === caseId
-        );
-
-        if (caseMatchingForm) {
-          stageInfoData.value = caseMatchingForm;
-        } else {
-          stageInfoData.value = { error: "No data found for this stage" };
-        }
+        stageInfoData.value = { error: "No data found for this stage" };
       }
     } else {
       stageInfoData.value = { error: "No data found for this stage" };
     }
   } catch (error) {
     console.error("Error loading stage info:", error);
-    stageInfoData.value = {
-      error: "Error loading stage information: " + error.message,
-    };
+    stageInfoData.value = { error: "Error loading stage information" };
   } finally {
     stageInfoLoading.value = false;
   }
@@ -4055,4 +3942,5 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
     margin: 0;
     color: #6c757d;
   }
+}
 </style>

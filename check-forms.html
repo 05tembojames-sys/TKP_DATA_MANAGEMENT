@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Check Forms in Firestore</title>
+  </head>
+  <body>
+    <h1>Firestore Forms Checker</h1>
+    <button onclick="checkAllForms()">Check All Child Overview Forms</button>
+    <div id="results"></div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        getDocs,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      // Your Firebase config (copy from .env or firebase/config.js)
+      const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        projectId: "tkp-dims",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      window.checkAllForms = async function () {
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = "<p>Loading...</p>";
+
+        try {
+          const querySnapshot = await getDocs(collection(db, "forms"));
+          const forms = [];
+
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.formType === "child-overview") {
+              forms.push({
+                firestoreId: doc.id,
+                childName: `${data.childFirstName || ""} ${
+                  data.childSurname || ""
+                }`,
+                dateOfBirth: data.dateOfBirth || "N/A",
+                formId: data.id || "N/A",
+                createdAt: data.createdAt?.toDate?.() || "N/A",
+              });
+            }
+          });
+
+          // Create table
+          let html = `
+                    <h2>Found ${forms.length} Child Overview Forms</h2>
+                    <table border="1" style="border-collapse: collapse; width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Firestore Document ID</th>
+                                <th>Child Name</th>
+                                <th>Date of Birth</th>
+                                <th>Form ID Field</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+          forms.forEach((form) => {
+            html += `
+                        <tr>
+                            <td>${form.firestoreId}</td>
+                            <td>${form.childName}</td>
+                            <td>${form.dateOfBirth}</td>
+                            <td>${form.formId}</td>
+                            <td>${form.createdAt}</td>
+                        </tr>
+                    `;
+          });
+
+          html += `
+                        </tbody>
+                    </table>
+                    <p><strong>Looking for ID: 67577655</strong></p>
+                    <p>Check if this ID appears in the "Firestore Document ID" column.</p>
+                `;
+
+          resultsDiv.innerHTML = html;
+        } catch (error) {
+          resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+          console.error("Error:", error);
+        }
+      };
+    </script>
+  </body>
+</html>

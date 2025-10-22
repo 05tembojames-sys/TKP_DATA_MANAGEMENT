@@ -14,7 +14,6 @@
       <div class="header-center">
         <h1 class="reports-title">Event Reports</h1>
         <div class="data-source-indicator">
-          <span class="indicator-badge firebase">📡 Live Firebase Data</span>
         </div>
       </div>
       <div class="header-right">
