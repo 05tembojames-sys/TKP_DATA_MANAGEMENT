@@ -12,7 +12,7 @@
         </button>
       </div>
       <div class="header-center">
-        <h1 class="reports-title">Reports - Weekly</h1>
+        <h1 class="reports-title">Reports - Weekly,monthly , quarterly, </h1>
         <div class="data-source-indicator">
           <span class="indicator-badge firebase">📡 Live Firebase Data</span>
         </div>

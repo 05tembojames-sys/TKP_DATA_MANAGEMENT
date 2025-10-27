@@ -415,7 +415,7 @@ const resetForm = () => {
 // Handle report upload - set category for custom documents
 const handleUploadReport = async () => {
   if (!uploadForm.value.file || !uploadForm.value.title || !uploadForm.value.reportType) {
-    showMessage('Please provide a title, select a report type, and select a file', 'error')
+    showMessage('Please provide a title, select a document type, and select a file', 'error')
     return
   }
 
