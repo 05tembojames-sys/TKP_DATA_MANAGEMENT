@@ -21,6 +21,18 @@
       </div>
     </div>
 
+    <!-- Validation Error Message -->
+    <div v-if="showValidationMessage && Object.keys(validationErrors).length > 0" class="validation-error">
+      <div class="error-message">
+        <strong>Please fix the following errors before proceeding:</strong>
+        <ul>
+          <li v-for="(error, field) in validationErrors" :key="field">
+            {{ error }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
     <div class="assessment-form">
       <!-- Child Information Section -->
       <div v-show="currentSection === 1" class="form-section">
@@ -1084,6 +1096,24 @@ const resetForm = () => {
 .form-header p {
   color: #666;
   font-size: 1rem;
+}
+
+.validation-error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.validation-error ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.validation-error li {
+  margin-bottom: 0.25rem;
 }
 
 .form-progress {
