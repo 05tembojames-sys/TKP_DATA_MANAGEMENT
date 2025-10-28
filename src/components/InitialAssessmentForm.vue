@@ -800,8 +800,13 @@ const clearFieldError = (fieldName) => {
 
 // Enhanced nextSection with validation
 const nextSection = () => {
+  console.log('Attempting to move to next section');
+  console.log('Current section:', currentSection.value);
+  console.log('Form data:', formData);
+  
   // Validate current section before proceeding
   if (!validateCurrentSection()) {
+    console.log('Validation failed', validationErrors.value);
     showValidationMessage.value = true;
 
     // Hide validation message after 5 seconds
@@ -812,12 +817,15 @@ const nextSection = () => {
     return;
   }
 
+  console.log('Validation passed');
+  
   // Clear any existing validation errors
   validationErrors.value = {};
   showValidationMessage.value = false;
 
   if (currentSection.value < totalSections) {
     currentSection.value++;
+    console.log('Moved to section:', currentSection.value);
   }
 };
 
