@@ -12,7 +12,7 @@
         </button>
       </div>
       <div class="header-center">
-        <h1 class="reports-title">Reports - Weekly,monthly , quarterly, </h1>
+        <h1 class="reports-title">Reports Management</h1>
         <div class="data-source-indicator">
           <span class="indicator-badge firebase">📡 Live Firebase Data</span>
         </div>
@@ -178,30 +178,52 @@
           </div>
           
           <div class="report-actions">
+            <button 
+              @click="viewReport(report)"
+              class="action-btn view-btn"
+            >
+              👁️ View
+            </button>
+            
             <a 
               :href="report.downloadURL" 
-              target="_blank" 
+              download
               class="action-btn download-btn"
             >
               📥 Download
             </a>
             
-            <div v-if="isAdmin" class="admin-actions">
-              <button 
-                v-if="report.status === 'pending' && canUserApprove"
-                @click="showApprovalModal(report)"
-                class="action-btn approve-btn"
-              >
-                ✅ Review
-              </button>
-              <button 
-                v-if="canUserApprove"
-                @click="confirmDeleteReport(report)"
-                class="action-btn delete-btn"
-              >
-                🗑️ Delete
-              </button>
-            </div>
+            <button 
+              v-if="report.status === 'approved' || report.status === 'rejected'"
+              @click="uploadUpdatedVersion(report)"
+              class="action-btn update-btn"
+            >
+              🔄 Upload Updated
+            </button>
+            
+            <button 
+              v-if="isAdmin && canUserApprove && report.status === 'pending'"
+              @click="quickApprove(report)"
+              class="action-btn approve-btn"
+            >
+              ✅ Approve
+            </button>
+            
+            <button 
+              v-if="isAdmin && canUserApprove && report.status === 'pending'"
+              @click="quickReject(report)"
+              class="action-btn reject-btn"
+            >
+              ❌ Reject
+            </button>
+            
+            <button 
+              v-if="isAdmin && canUserApprove"
+              @click="confirmDeleteReport(report)"
+              class="action-btn delete-btn"
+            >
+              🗑️ Delete
+            </button>
           </div>
         </div>
       </div>
@@ -212,7 +234,7 @@
     <div v-if="showUploadForm" class="modal-overlay" @click="closeUploadForm">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>📤 Upload New Report</h3>
+          <h3>{{ previousReport ? '🔄 Upload Updated Report' : '📤 Upload New Report' }}</h3>
           <button @click="closeUploadForm" class="close-btn">&times;</button>
         </div>
         <form @submit.prevent="handleUploadReport" class="upload-form">
@@ -456,6 +478,7 @@ const approvalForm = ref({
 })
 
 const selectedReport = ref(null)
+const previousReport = ref(null) // Track the report being updated
 
 // Messages
 const message = ref('')
@@ -473,8 +496,11 @@ const canUserApprove = computed(() => {
 // Initialize component
 onMounted(async () => {
   await checkUserPermissions()
-  await loadReports()
-  await loadReportStatistics()
+  // Load reports and statistics in one go
+  await Promise.all([
+    loadReportsAndStats(),
+    fetchUserNames()
+  ])
 })
 
 // Check if current user is admin
@@ -488,8 +514,8 @@ const checkUserPermissions = async () => {
   }
 }
 
-// Load reports with optional filtering - only general reports
-const loadReports = async () => {
+// Optimized: Load reports and calculate statistics in one call
+const loadReportsAndStats = async () => {
   loading.value = true
   try {
     const filters = {
@@ -500,9 +526,16 @@ const loadReports = async () => {
 
     const result = await ReportService.getAllReports(filters)
     if (result.success) {
-      reports.value = result.reports
-      // Fetch user names for all reports
-      await fetchUserNamesForReports(result.reports)
+      const allReports = result.reports
+      reports.value = allReports
+      
+      // Calculate statistics from loaded reports
+      reportStats.value = {
+        total: allReports.length,
+        pending: allReports.filter(r => r.status === 'pending').length,
+        approved: allReports.filter(r => r.status === 'approved').length,
+        rejected: allReports.filter(r => r.status === 'rejected').length
+      }
     } else {
       showMessage(result.error || 'Failed to load reports', 'error')
     }
@@ -511,6 +544,32 @@ const loadReports = async () => {
     showMessage('An unexpected error occurred while loading reports', 'error')
   } finally {
     loading.value = false
+  }
+}
+
+// For backwards compatibility with other functions
+const loadReports = async () => {
+  await loadReportsAndStats()
+}
+
+// Fetch user names once and cache them
+const fetchUserNames = async () => {
+  try {
+    const usersResult = await UserService.getAllUsers()
+    if (usersResult.success) {
+      const usersMap = {}
+      usersResult.users.forEach(user => {
+        if (user.email) {
+          usersMap[user.email] = user.name || user.fullName || user.username || user.email
+        }
+        if (user.uid) {
+          usersMap[user.uid] = user.name || user.fullName || user.username || user.email
+        }
+      })
+      userNames.value = usersMap
+    }
+  } catch (error) {
+    console.error('Error fetching user names:', error)
   }
 }
 
@@ -531,53 +590,10 @@ const resetFilters = () => {
   loadReports()
 }
 
-// Fetch user names for reports
-const fetchUserNamesForReports = async (reportsList) => {
-  try {
-    // Get all unique user emails from reports
-    const userEmails = [...new Set(
-      reportsList.map(r => r.uploadedBy).concat(
-        reportsList.map(r => r.approvedBy).filter(Boolean)
-      )
-    )]
-    
-    // Fetch all users from Firestore
-    const usersResult = await UserService.getAllUsers()
-    if (usersResult.success) {
-      const usersMap = {}
-      usersResult.users.forEach(user => {
-        // Map by email
-        if (user.email) {
-          usersMap[user.email] = user.name || user.fullName || user.username || user.email
-        }
-        // Also map by uid
-        if (user.uid) {
-          usersMap[user.uid] = user.name || user.fullName || user.username || user.email
-        }
-      })
-      userNames.value = usersMap
-    }
-  } catch (error) {
-    console.error('Error fetching user names:', error)
-  }
-}
-
 // Get display name for user
 const getUserDisplayName = (emailOrUid) => {
   if (!emailOrUid) return 'Unknown User'
   return userNames.value[emailOrUid] || emailOrUid
-}
-
-// Load report statistics
-const loadReportStatistics = async () => {
-  try {
-    const result = await ReportService.getReportStatistics()
-    if (result.success) {
-      reportStats.value = result.statistics
-    }
-  } catch (error) {
-    console.error('Error loading report statistics:', error)
-  }
 }
 
 // Handle file selection
@@ -601,6 +617,18 @@ const clearFile = () => {
   }
 }
 
+// Upload updated version of an approved report
+const uploadUpdatedVersion = (report) => {
+  previousReport.value = report
+  uploadForm.value = {
+    title: report.title + ' (Updated)',
+    description: `Updated version of: ${report.title}`,
+    reportType: report.reportType,
+    file: null
+  }
+  showUploadForm.value = true
+}
+
 // Handle report upload - set category for general reports
 const handleUploadReport = async () => {
   if (!uploadForm.value.file || !uploadForm.value.title) {
@@ -621,7 +649,6 @@ const handleUploadReport = async () => {
       showMessage('Report uploaded successfully! It will be reviewed by an admin.', 'success')
       closeUploadForm()
       await loadReports()
-      await loadReportStatistics()
     } else {
       showMessage(result.error || 'Failed to upload report', 'error')
     }
@@ -630,6 +657,61 @@ const handleUploadReport = async () => {
     showMessage('An unexpected error occurred while uploading', 'error')
   } finally {
     uploading.value = false
+  }
+}
+
+// View report - open in modal
+const viewReport = (report) => {
+  showApprovalModal(report)
+}
+
+// Quick approve without comments
+const quickApprove = async (report) => {
+  if (!confirm(`Approve "${report.title}"?`)) return
+  
+  try {
+    const result = await ReportService.updateReportStatus(
+      report.id,
+      'approved',
+      '',
+      currentUser.value
+    )
+    
+    if (result.success) {
+      showMessage('Report approved successfully!', 'success')
+      await loadReports()
+      await loadReportsAndStats()
+    } else {
+      showMessage(result.error || 'Failed to approve report', 'error')
+    }
+  } catch (error) {
+    console.error('Error approving report:', error)
+    showMessage('An unexpected error occurred', 'error')
+  }
+}
+
+// Quick reject without comments
+const quickReject = async (report) => {
+  if (!confirm(`Reject "${report.title}"?`)) return
+  
+  try {
+    const result = await ReportService.updateReportStatus(
+      report.id,
+      'rejected',
+      '',
+      currentUser.value
+    )
+    
+    if (result.success) {
+      showMessage('Report rejected', 'success')
+      await loadReports()
+      await loadReportsAndStats()
+    } else {
+      showMessage(result.error || 'Failed to reject report', 'error')
+    }
+  } catch (error) {
+    console.error('Error rejecting report:', error)
+    showMessage('An unexpected error occurred', 'error')
   }
 }
 
@@ -657,7 +739,7 @@ const handleApproveReport = async () => {
       showMessage('Report approved successfully!', 'success')
       closeApprovalForm()
       await loadReports()
-      await loadReportStatistics()
+      await loadReportsAndStats()
     } else {
       showMessage(result.error || 'Failed to approve report', 'error')
     }
@@ -686,7 +768,7 @@ const handleRejectReport = async () => {
       showMessage('Report rejected', 'success')
       closeApprovalForm()
       await loadReports()
-      await loadReportStatistics()
+      await loadReportsAndStats()
     } else {
       showMessage(result.error || 'Failed to reject report', 'error')
     }
@@ -714,7 +796,7 @@ const confirmDeleteReport = async (report) => {
     if (result.success) {
       showMessage('Report deleted successfully', 'success')
       await loadReports()
-      await loadReportStatistics()
+      await loadReportsAndStats()
     } else {
       showMessage(result.error || 'Failed to delete report', 'error')
     }

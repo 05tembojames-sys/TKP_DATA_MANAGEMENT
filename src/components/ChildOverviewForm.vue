@@ -5,6 +5,16 @@
       <p>
         Complete this form to document child information and background details
       </p>
+      
+      <!-- Auto-save status indicator -->
+      <div v-if="!isOutreachMode && !isViewMode" class="auto-save-status">
+        <span v-if="isSaving" class="saving">💾 Saving draft...</span>
+        <span v-else-if="lastSaved" class="saved">
+          ✓ Draft auto-saved at {{ new Date(lastSaved).toLocaleTimeString() }}
+        </span>
+        <span v-else-if="hasUnsavedChanges" class="unsaved">● Unsaved changes</span>
+      </div>
+      
       <div class="form-progress">
         <div class="progress-bar">
           <div
@@ -67,117 +77,157 @@
       <div v-show="currentSection === 1" class="form-section">
         <h4>Child Information</h4>
         <div class="form-grid">
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.childFirstName }"
-          >
+          <div class="form-group">
             <label>Child First Name *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.childFirstName) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.childFirstName"
               type="text"
               required
               @input="clearFieldError('childFirstName')"
               :disabled="isViewMode"
             />
-            <div v-if="validationErrors.childFirstName" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.childFirstName"
+              class="error-message"
+            >
               {{ validationErrors.childFirstName }}
             </div>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.childMiddleName }"
-          >
+          <div class="form-group">
             <label>Child Middle Name</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.childMiddleName) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.childMiddleName"
               type="text"
               :disabled="isViewMode"
             />
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.childSurname }"
-          >
+          <div class="form-group">
             <label>Child Surname *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.childSurname) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.childSurname"
               type="text"
               required
               @input="clearFieldError('childSurname')"
               :disabled="isViewMode"
             />
-            <div v-if="validationErrors.childSurname" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.childSurname"
+              class="error-message"
+            >
               {{ validationErrors.childSurname }}
             </div>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.otherFirstName }"
-          >
+          <div class="form-group">
             <label>Other First Name</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.otherFirstName) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.otherFirstName"
               type="text"
               :disabled="isViewMode"
             />
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.otherMiddleName }"
-          >
+          <div class="form-group">
             <label>Other Middle Name</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.otherMiddleName) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.otherMiddleName"
               type="text"
               :disabled="isViewMode"
             />
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.otherSurname }"
-          >
+          <div class="form-group">
             <label>Other Surname</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.otherSurname) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.otherSurname"
               type="text"
               :disabled="isViewMode"
             />
           </div>
-          <div class="form-group" :class="{ 'has-error': validationErrors.id }">
+          <div class="form-group">
             <label>ID *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.id) }}</div>
+            </template>
             <input
+              v-else
               v-model="formData.id"
               type="text"
               required
               @input="clearFieldError('id')"
               :disabled="isViewMode"
             />
-            <div v-if="validationErrors.id" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.id"
+              class="error-message"
+            >
               {{ validationErrors.id }}
             </div>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.dateOfAdmission }"
-          >
+          <div class="form-group">
             <label>Date of Admission *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ formatDate(formData.dateOfAdmission) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.dateOfAdmission"
               type="date"
               required
               @input="clearFieldError('dateOfAdmission')"
               :disabled="isViewMode"
             />
-            <div v-if="validationErrors.dateOfAdmission" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.dateOfAdmission"
+              class="error-message"
+            >
               {{ validationErrors.dateOfAdmission }}
             </div>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.gender }"
-          >
+          <div class="form-group">
             <label>Gender *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.gender) }}
+              </div>
+            </template>
             <select
+              v-else
               v-model="formData.gender"
               required
               @change="clearFieldError('gender')"
@@ -187,32 +237,44 @@
               <option value="Female">Female</option>
               <option value="Male">Male</option>
             </select>
-            <div v-if="validationErrors.gender" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.gender"
+              class="error-message"
+            >
               {{ validationErrors.gender }}
             </div>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.dateOfBirth }"
-          >
+          <div class="form-group">
             <label>Date of Birth *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ formatDate(formData.dateOfBirth) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.dateOfBirth"
               type="date"
               required
               @input="clearFieldError('dateOfBirth')"
               :disabled="isViewMode"
             />
-            <div v-if="validationErrors.dateOfBirth" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.dateOfBirth"
+              class="error-message"
+            >
               {{ validationErrors.dateOfBirth }}
             </div>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.ageAtIntake }"
-          >
+          <div class="form-group">
             <label>Age at Intake (years) *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.ageAtIntake) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.ageAtIntake"
               type="number"
               min="0"
@@ -221,115 +283,154 @@
               @input="clearFieldError('ageAtIntake')"
               :disabled="isViewMode"
             />
-            <div v-if="validationErrors.ageAtIntake" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.ageAtIntake"
+              class="error-message"
+            >
               {{ validationErrors.ageAtIntake }}
             </div>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.placeOfBirth }"
-          >
+          <div class="form-group">
             <label>Place of Birth *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.placeOfBirth) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.placeOfBirth"
               type="text"
               required
               @input="clearFieldError('placeOfBirth')"
               :disabled="isViewMode"
             />
-            <div v-if="validationErrors.placeOfBirth" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.placeOfBirth"
+              class="error-message"
+            >
               {{ validationErrors.placeOfBirth }}
             </div>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.residentArea }"
-          >
+          <div class="form-group">
             <label>Resident Area at Intake *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.residentArea) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.residentArea"
               type="text"
               required
               @input="clearFieldError('residentArea')"
               :disabled="isViewMode"
             />
-            <div v-if="validationErrors.residentArea" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.residentArea"
+              class="error-message"
+            >
               {{ validationErrors.residentArea }}
             </div>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.village }"
-          >
+          <div class="form-group">
             <label>Village</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.village) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.village"
               type="text"
               :disabled="isViewMode"
             />
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.chief }"
-          >
+          <div class="form-group">
             <label>Chief</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.chief) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.chief"
               type="text"
               :disabled="isViewMode"
             />
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.district }"
-          >
+          <div class="form-group">
             <label>District *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.district) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.district"
               type="text"
               required
               @input="clearFieldError('district')"
               :disabled="isViewMode"
             />
-            <div v-if="validationErrors.district" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.district"
+              class="error-message"
+            >
               {{ validationErrors.district }}
             </div>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.tribe }"
-          >
+          <div class="form-group">
             <label>Tribe</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.tribe) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.tribe"
               type="text"
               :disabled="isViewMode"
             />
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.denomination }"
-          >
+          <div class="form-group">
             <label>Denomination</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.denomination) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.denomination"
               type="text"
               :disabled="isViewMode"
             />
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.nationality }"
-          >
+          <div class="form-group">
             <label>Nationality *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.nationality) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.nationality"
               type="text"
               required
               @input="clearFieldError('nationality')"
               :disabled="isViewMode"
             />
-            <div v-if="validationErrors.nationality" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.nationality"
+              class="error-message"
+            >
               {{ validationErrors.nationality }}
             </div>
           </div>
@@ -345,12 +446,15 @@
       <div v-show="currentSection === 2" class="form-section">
         <h4>Vulnerability Status</h4>
         <div class="form-grid">
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.ovcStatus }"
-          >
+          <div class="form-group">
             <label>OVC Status *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.ovcStatus) }}
+              </div>
+            </template>
             <select
+              v-else
               v-model="formData.ovcStatus"
               required
               @change="clearFieldError('ovcStatus')"
@@ -362,27 +466,39 @@
               <option value="Double Orphan">Double Orphan</option>
               <option value="Serial Orphan">Serial Orphan</option>
             </select>
-            <div v-if="validationErrors.ovcStatus" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.ovcStatus"
+              class="error-message"
+            >
               {{ validationErrors.ovcStatus }}
             </div>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.ovcDateEffective }"
-          >
+          <div class="form-group">
             <label>Date Effective</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ formatDate(formData.ovcDateEffective) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.ovcDateEffective"
               type="date"
               :disabled="isViewMode"
             />
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.parentDeceased }"
-          >
+          <div class="form-group">
             <label>Parent Deceased</label>
-            <select v-model="formData.parentDeceased" :disabled="isViewMode">
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.parentDeceased) }}
+              </div>
+            </template>
+            <select
+              v-else
+              v-model="formData.parentDeceased"
+              :disabled="isViewMode"
+            >
               <option value="">Select</option>
               <option value="Father">Father</option>
               <option value="Mother">Mother</option>
@@ -390,34 +506,46 @@
               <option value="Neither">Neither</option>
             </select>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.parentDeathDate }"
-          >
+          <div class="form-group">
             <label>Date of Death</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ formatDate(formData.parentDeathDate) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.parentDeathDate"
               type="date"
               :disabled="isViewMode"
             />
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.guardianDeceased }"
-          >
+          <div class="form-group">
             <label>Guardian Deceased</label>
-            <select v-model="formData.guardianDeceased" :disabled="isViewMode">
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.guardianDeceased) }}
+              </div>
+            </template>
+            <select
+              v-else
+              v-model="formData.guardianDeceased"
+              :disabled="isViewMode"
+            >
               <option value="">Select</option>
               <option value="Y">Yes</option>
               <option value="N">No</option>
             </select>
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.guardianDeathDate }"
-          >
+          <div class="form-group">
             <label>Guardian Date of Death</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ formatDate(formData.guardianDeathDate) }}
+              </div>
+            </template>
             <input
+              v-else
               v-model="formData.guardianDeathDate"
               type="date"
               :disabled="isViewMode"
@@ -434,16 +562,336 @@
         </div>
       </div>
 
+      <!-- Biological Parents Section -->
+      <div v-show="currentSection === 3" class="form-section">
+        <!-- Biological Father -->
+        <h5>Biological Father</h5>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Name</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalFather.name) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalFather.name"
+              type="text"
+              :disabled="isViewMode"
+            />
+          </div>
+          <div class="form-group">
+            <label>Age</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalFather.age) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalFather.age"
+              type="number"
+              min="0"
+              :disabled="isViewMode"
+            />
+          </div>
+          <div class="form-group">
+            <label>Alive / Deceased</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalFather.status) }}</div>
+            </template>
+            <select
+              v-else
+              v-model="formData.biologicalFather.status"
+              :disabled="isViewMode"
+            >
+              <option value="">Select</option>
+              <option value="Alive">Alive</option>
+              <option value="Deceased">Deceased</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>If deceased, date of death</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ formatDate(formData.biologicalFather.deathDate) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalFather.deathDate"
+              type="date"
+              :disabled="isViewMode"
+            />
+          </div>
+          <div class="form-group">
+            <label>Cause of death</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalFather.causeOfDeath) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalFather.causeOfDeath"
+              type="text"
+              :disabled="isViewMode"
+            />
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalFather.location) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalFather.location"
+              type="text"
+              :disabled="isViewMode"
+            />
+          </div>
+          <div class="form-group">
+            <label>Profession</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalFather.profession) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalFather.profession"
+              type="text"
+              :disabled="isViewMode"
+            />
+          </div>
+        </div>
+
+        <!-- Biological Mother -->
+        <h5>Biological Mother</h5>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Name</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalMother.name) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalMother.name"
+              type="text"
+              :disabled="isViewMode"
+            />
+          </div>
+          <div class="form-group">
+            <label>Age</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalMother.age) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalMother.age"
+              type="number"
+              min="0"
+              :disabled="isViewMode"
+            />
+          </div>
+          <div class="form-group">
+            <label>Alive / Deceased</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalMother.status) }}</div>
+            </template>
+            <select
+              v-else
+              v-model="formData.biologicalMother.status"
+              :disabled="isViewMode"
+            >
+              <option value="">Select</option>
+              <option value="Alive">Alive</option>
+              <option value="Deceased">Deceased</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>If deceased, date of death</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ formatDate(formData.biologicalMother.deathDate) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalMother.deathDate"
+              type="date"
+              :disabled="isViewMode"
+            />
+          </div>
+          <div class="form-group">
+            <label>Cause of death</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalMother.causeOfDeath) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalMother.causeOfDeath"
+              type="text"
+              :disabled="isViewMode"
+            />
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalMother.location) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalMother.location"
+              type="text"
+              :disabled="isViewMode"
+            />
+          </div>
+          <div class="form-group">
+            <label>Profession</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.biologicalMother.profession) }}</div>
+            </template>
+            <input
+              v-else
+              v-model="formData.biologicalMother.profession"
+              type="text"
+              :disabled="isViewMode"
+            />
+          </div>
+        </div>
+        <div class="section-navigation">
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
+        </div>
+      </div>
+
+      <!-- Biological Siblings -->
+      <div v-show="currentSection === 3" class="form-section">
+        <h5>Biological Siblings</h5>
+        <div
+          v-for="(sibling, index) in formData.siblings"
+          :key="index"
+          class="sibling-section"
+        >
+          <h6>Sibling {{ index + 1 }}</h6>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Name</label>
+              <template v-if="isViewMode">
+                <div class="readonly-field">{{ displayValue(sibling.name) }}</div>
+              </template>
+              <input
+                v-else
+                v-model="sibling.name"
+                type="text"
+                :disabled="isViewMode"
+              />
+            </div>
+            <div class="form-group">
+              <label>Age</label>
+              <template v-if="isViewMode">
+                <div class="readonly-field">{{ displayValue(sibling.age) }}</div>
+              </template>
+              <input
+                v-else
+                v-model="sibling.age"
+                type="number"
+                min="0"
+                :disabled="isViewMode"
+              />
+            </div>
+            <div class="form-group">
+              <label>Older / Younger</label>
+              <template v-if="isViewMode">
+                <div class="readonly-field">{{ displayValue(sibling.ageRelation) }}</div>
+              </template>
+              <select v-else v-model="sibling.ageRelation" :disabled="isViewMode">
+                <option value="">Select</option>
+                <option value="Older">Older</option>
+                <option value="Younger">Younger</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Alive / Deceased</label>
+              <template v-if="isViewMode">
+                <div class="readonly-field">{{ displayValue(sibling.status) }}</div>
+              </template>
+              <select v-else v-model="sibling.status" :disabled="isViewMode">
+                <option value="">Select</option>
+                <option value="Alive">Alive</option>
+                <option value="Deceased">Deceased</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>If deceased, date of death</label>
+              <template v-if="isViewMode">
+                <div class="readonly-field">{{ formatDate(sibling.deathDate) }}</div>
+              </template>
+              <input
+                v-else
+                v-model="sibling.deathDate"
+                type="date"
+                :disabled="isViewMode"
+              />
+            </div>
+            <div class="form-group">
+              <label>Profession</label>
+              <template v-if="isViewMode">
+                <div class="readonly-field">{{ displayValue(sibling.profession) }}</div>
+              </template>
+              <input
+                v-else
+                v-model="sibling.profession"
+                type="text"
+                :disabled="isViewMode"
+              />
+            </div>
+            <div class="form-group">
+              <label>Potential Guardian for Program</label>
+              <template v-if="isViewMode">
+                <div class="readonly-field">{{ displayValue(sibling.potentialGuardian) }}</div>
+              </template>
+              <select
+                v-else
+                v-model="sibling.potentialGuardian"
+                :disabled="isViewMode"
+              >
+                <option value="">Select</option>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+              </select>
+            </div>
+            <div class="form-group" v-if="!isViewMode">
+              <button
+                type="button"
+                class="remove-btn"
+                @click="removeSibling(index)"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+        <button v-if="!isViewMode" type="button" class="add-btn" @click="addSibling">
+          Add Sibling
+        </button>
+        <div class="section-navigation">
+          <button type="button" class="prev-btn" @click="prevSection">
+            ‹ Previous Section
+          </button>
+          <button type="button" class="next-btn" @click="nextSection">
+            Next Section ›
+          </button>
+        </div>
+      </div>
+
       <!-- Referral Method Section -->
       <div v-show="currentSection === 3" class="form-section">
         <h4>Referral Method</h4>
         <div class="form-grid">
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.referralMethod }"
-          >
+          <div class="form-group">
             <label>Select One *</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">
+                {{ displayValue(formData.referralMethod) }}
+              </div>
+            </template>
             <select
+              v-else
               v-model="formData.referralMethod"
               required
               @change="clearFieldError('referralMethod')"
@@ -460,7 +908,10 @@
               </option>
               <option value="Other">Other</option>
             </select>
-            <div v-if="validationErrors.referralMethod" class="error-message">
+            <div
+              v-if="!isViewMode && validationErrors.referralMethod"
+              class="error-message"
+            >
               {{ validationErrors.referralMethod }}
             </div>
           </div>
@@ -478,19 +929,27 @@
       <!-- Reason for Admission Section -->
       <div v-show="currentSection === 4" class="form-section">
         <h4>Reason(s) for Admission</h4>
-        <div
-          class="form-group"
-          :class="{ 'has-error': validationErrors.reasons }"
-        >
+        <div class="form-group">
           <label>Select All That Apply *</label>
-          <div class="checkbox-group">
+          <template v-if="isViewMode">
+            <div class="readonly-field">
+              <div v-if="formData.reasons.attemptedAbortion">Attempted/Considered Abortion</div>
+              <div v-if="formData.reasons.attemptedSuicide">Attempted/Considered Suicide</div>
+              <div v-if="formData.reasons.pregnant">Pregnant</div>
+              <div v-if="formData.reasons.rapeDefilement">Rape/Defilement</div>
+              <div v-if="formData.reasons.survivalProstitution">Survival Prostitution</div>
+              <div v-if="formData.reasons.other">Other</div>
+              <div v-if="!Object.values(formData.reasons).some(r => r)">-</div>
+            </div>
+          </template>
+          <div v-else class="checkbox-group">
             <label class="checkbox-item">
               <input
                 type="checkbox"
                 v-model="formData.reasons.attemptedAbortion"
                 :disabled="isViewMode"
               />
-              Attempted/Considered Abortion
+              <span>Attempted/Considered Abortion</span>
             </label>
             <label class="checkbox-item">
               <input
@@ -498,7 +957,7 @@
                 v-model="formData.reasons.attemptedSuicide"
                 :disabled="isViewMode"
               />
-              Attempted/Considered Suicide
+              <span>Attempted/Considered Suicide</span>
             </label>
             <label class="checkbox-item">
               <input
@@ -506,7 +965,7 @@
                 v-model="formData.reasons.pregnant"
                 :disabled="isViewMode"
               />
-              Pregnant
+              <span>Pregnant</span>
             </label>
             <label class="checkbox-item">
               <input
@@ -514,7 +973,7 @@
                 v-model="formData.reasons.rapeDefilement"
                 :disabled="isViewMode"
               />
-              Rape/Defilement
+              <span>Rape/Defilement</span>
             </label>
             <label class="checkbox-item">
               <input
@@ -522,7 +981,7 @@
                 v-model="formData.reasons.survivalProstitution"
                 :disabled="isViewMode"
               />
-              Survival Prostitution
+              <span>Survival Prostitution</span>
             </label>
             <label class="checkbox-item">
               <input
@@ -530,31 +989,33 @@
                 v-model="formData.reasons.other"
                 :disabled="isViewMode"
               />
-              Other
+              <span>Other</span>
             </label>
           </div>
-          <div v-if="validationErrors.reasons" class="error-message">
+          <div v-if="!isViewMode && validationErrors.reasons" class="error-message">
             {{ validationErrors.reasons }}
           </div>
         </div>
         <div class="form-grid">
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.estimatedConceptionDate }"
-          >
+          <div class="form-group">
             <label>Estimated Date of Conception</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ formatDate(formData.estimatedConceptionDate) }}</div>
+            </template>
             <input
+              v-else
               v-model="formData.estimatedConceptionDate"
               type="date"
               :disabled="isViewMode"
             />
           </div>
-          <div
-            class="form-group"
-            :class="{ 'has-error': validationErrors.pregnancyDuration }"
-          >
+          <div class="form-group">
             <label>Current Duration of Pregnancy (Months/weeks)</label>
+            <template v-if="isViewMode">
+              <div class="readonly-field">{{ displayValue(formData.pregnancyDuration) }}</div>
+            </template>
             <input
+              v-else
               v-model="formData.pregnancyDuration"
               type="text"
               placeholder="e.g., 12 weeks"
@@ -562,12 +1023,13 @@
             />
           </div>
         </div>
-        <div
-          class="form-group full-width"
-          :class="{ 'has-error': validationErrors.abuseDetails }"
-        >
+        <div class="form-group full-width">
           <label>Additional Details of Abuse Situation</label>
+          <template v-if="isViewMode">
+            <div class="readonly-field">{{ displayValue(formData.abuseDetails) }}</div>
+          </template>
           <textarea
+            v-else
             v-model="formData.abuseDetails"
             rows="4"
             :disabled="isViewMode"
@@ -1429,9 +1891,9 @@
         </div>
       </div>
 
-      <!-- Documents Section -->
+      <!-- Documents Included Section -->
       <div v-show="currentSection === 8" class="form-section">
-        <h4>Documents Included Upon Admission</h4>
+        <h4>Documents Included</h4>
         <div class="checkbox-group">
           <label class="checkbox-item">
             <input
@@ -1502,8 +1964,9 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useToast } from "../composables/useToast.js";
+import { useFormAutoSave } from "../composables/useFormAutoSave.js";
 
 const props = defineProps({
   editData: {
@@ -1527,6 +1990,7 @@ const props = defineProps({
 const emit = defineEmits(["form-saved"]);
 const { success, error } = useToast();
 const router = useRouter();
+const route = useRoute();
 
 // Computed property to determine if form is in view-only mode
 const isViewMode = computed(() => {
@@ -1936,12 +2400,28 @@ watch(
   { immediate: true }
 );
 
+// Initialize auto-save functionality
+const {
+  isSaving,
+  lastSaved,
+  draftId,
+  hasUnsavedChanges,
+  loadDraft,
+  saveNow,
+  deleteDraft,
+} = useFormAutoSave(formData, "child-overview", null, 30000);
+
 // Check for child data from sessionStorage when form loads
-onMounted(() => {
+onMounted(async () => {
   console.log("📋 ChildOverviewForm mounted, checking for child data...");
 
+  // Check if we're editing an existing form
+  if (route.query.edit) {
+    await loadDraft(route.query.edit);
+  }
+
   // Only pre-populate if NOT in edit mode
-  if (!props.isEditMode) {
+  if (!props.isEditMode && !route.query.edit) {
     const storedChildData = sessionStorage.getItem("selectedChildForForm");
 
     if (storedChildData) {
@@ -2224,6 +2704,11 @@ Are you sure you want to create a new record?`
       }
 
       if (result.success) {
+        // Delete the draft since we've saved the final version
+        if (draftId.value) {
+          await deleteDraft();
+        }
+        
         // Emit success event to parent component with form data
         emit("form-saved", {
           formType: "child-overview",
@@ -2332,6 +2817,27 @@ const resetForm = () => {
 .form-header p {
   color: #666;
   font-size: 1rem;
+}
+
+.auto-save-status {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  min-height: 20px;
+}
+
+.auto-save-status .saving {
+  color: #007bff;
+  font-weight: 500;
+}
+
+.auto-save-status .saved {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.auto-save-status .unsaved {
+  color: #ffc107;
+  font-weight: 500;
 }
 
 .form-progress {
@@ -2494,11 +3000,42 @@ const resetForm = () => {
   gap: 0.5rem;
   font-size: 0.9rem;
   color: #333;
+  padding: 0.75rem;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background-color: white;
 }
+
+.checkbox-item:hover {
+  border-color: #4a148c;
+  background-color: #f8f9fa;
+}
+
+.checkbox-item input:checked + span {
+  font-weight: 600;
+  color: #4a148c;
+}
+
+.checkbox-item input:checked {
+  accent-color: #4a148c;
+}
+
+.checkbox-item:has(input:checked) {
+  border-color: #4a148c;
+  background-color: #e6f0ff;
+  box-shadow: 0 0 0 2px rgba(74, 20, 140, 0.2);
+}
+
+
 
 .checkbox-item input[type="checkbox"] {
   width: auto;
   margin: 0;
+  transform: scale(1.3);
+  accent-color: #4a148c;
+  border-radius: 4px;
+  border: 2px solid #4a148c;
 }
 
 .sibling-section {

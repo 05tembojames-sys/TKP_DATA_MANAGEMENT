@@ -598,20 +598,47 @@ class CaptureService {
     try {
       let result
       
+      // Normalize and link data to a case if possible (names, caseId)
+      const normalized = await this.normalizeAndLinkCase(dataSetId, dataValues)
+
       // Save to Firebase based on form type
       switch (dataSetId) {
         case 'initial-referral':
-          result = await FormService.saveInitialReferral(dataValues)
+          result = await FormService.saveInitialReferral(normalized)
           break
         case 'child-overview':
-          result = await FormService.saveChildOverview(dataValues)
+          result = await FormService.saveChildOverview(normalized)
           break
         case 'initial-assessment':
-          result = await FormService.saveInitialAssessment(dataValues)
+          result = await FormService.saveInitialAssessment(normalized)
+          break
+        case 'medical-intake':
+          result = await FormService.saveMedicalIntakeAssessment(normalized)
+          break
+        case 'academics-literacy':
+          result = await FormService.saveAcademicsLiteracyPlan(normalized)
+          break
+        case 'psychological-assessment':
+          result = await FormService.savePsychologicalAssessment(normalized)
+          break
+        case 'life-skills-survey':
+          result = await FormService.saveLifeSkillsSurvey(normalized)
+          break
+        case 'birth-delivery':
+          result = await FormService.saveBirthDeliveryReport(normalized)
+          break
+        case 'care-plan-summary':
+          result = await FormService.saveCarePlanSummary(normalized)
+          break
+        case 'care-plan-baby':
+          result = await FormService.saveCarePlanBaby(normalized)
+          break
+        case 'care-plan-ongoing-life-skills':
+          result = await FormService.saveCarePlanOngoingLifeSkills(normalized)
           break
         default:
-          // For other form types, create a generic save
-          result = await this.saveGenericForm(dataSetId, dataValues)
+          // For other form types, create a generic save (fallback)
+          result = await this.saveGenericForm(dataSetId, normalized)
       }
       
       if (result.success) {
@@ -772,6 +799,62 @@ class CaptureService {
         success: false,
         error: error.message
       }
+    }
+  }
+
+  // Normalize names and try to link to existing caseId
+  static async normalizeAndLinkCase(dataSetId, dataValues) {
+    try {
+      const normalized = { ...dataValues }
+
+      // Derive childFirstName/childSurname if missing
+      if (!normalized.childFirstName || !normalized.childSurname) {
+        const name =
+          normalized.nameOfGirl ||
+          normalized.childName ||
+          `${normalized.firstName || ''} ${normalized.lastName || ''}`
+        if (name && typeof name === 'string') {
+          const parts = name.trim().split(/\s+/)
+          if (!normalized.childFirstName) normalized.childFirstName = parts[0] || ''
+          if (!normalized.childSurname) normalized.childSurname = parts.length > 1 ? parts[parts.length - 1] : parts[0] || ''
+        }
+      }
+
+      // Try to attach caseId if missing by looking up existing forms
+      if (!normalized.caseId && (normalized.childFirstName || normalized.childSurname)) {
+        const first = (normalized.childFirstName || '').trim().toLowerCase()
+        const last = (normalized.childSurname || '').trim().toLowerCase()
+        const dob = normalized.dateOfBirth || normalized.dob || null
+
+        // Look in overview, assessment, and referral to find a caseId
+        const [overviewRes, assessmentRes, referralRes] = await Promise.all([
+          FormService.getForms('child-overview', 500),
+          FormService.getForms('initial-assessment', 500),
+          FormService.getForms('initial-referral', 500)
+        ])
+
+        const findMatch = (res) => {
+          if (!res?.success) return null
+          return res.forms.find(f => {
+            const fn = (f.childFirstName || '').trim().toLowerCase()
+            const ln = (f.childSurname || f.childLastName || '').trim().toLowerCase()
+            const nameMatch = fn === first && ln === last
+            if (!nameMatch) return false
+            if (!dob) return true
+            return (f.dateOfBirth || '') === dob
+          })
+        }
+
+        const matched = findMatch(overviewRes) || findMatch(assessmentRes) || findMatch(referralRes)
+        if (matched?.caseId) {
+          normalized.caseId = matched.caseId
+        }
+      }
+
+      return normalized
+    } catch (e) {
+      // On any error, return original values to avoid blocking save
+      return { ...dataValues }
     }
   }
 

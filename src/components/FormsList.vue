@@ -37,7 +37,6 @@
               <th>Form ID</th>
               <th>Child Name</th>
               <th>Date Created</th>
-              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -50,20 +49,15 @@
               <td class="date-created">
                 {{ formatDate(form.createdAt) }}
               </td>
-              <td class="status">
-                <span :class="['status-badge', form.status]">
-                  {{ form.status }}
-                </span>
-              </td>
               <td class="actions">
-                <button @click="viewForm(form)" class="action-btn view">
-                  View
+                <button @click="viewForm(form)" class="action-btn view" :disabled="loading" :class="{ loading: loading }">
+                  <span>View</span>
                 </button>
-                <button @click="editForm(form)" class="action-btn edit">
-                  Edit
+                <button @click="editForm(form)" class="action-btn edit" :disabled="loading" :class="{ loading: loading }">
+                  <span>Edit</span>
                 </button>
-                <button @click="deleteForm(form)" class="action-btn delete">
-                  Delete
+                <button @click="deleteForm(form)" class="action-btn delete" :disabled="loading" :class="{ loading: loading }">
+                  <span>Delete</span>
                 </button>
               </td>
             </tr>
@@ -84,16 +78,7 @@
     <!-- Form Modal -->
     <div v-if="selectedForm" class="modal-overlay" @click="closeModal">
       <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h4>Form Details</h4>
-          <button @click="closeModal" class="close-btn">&times;</button>
-        </div>
-        <div class="modal-body">
-          <pre class="form-data">{{ JSON.stringify(selectedForm, null, 2) }}</pre>
-        </div>
-        <div class="modal-footer">
-          <button @click="closeModal" class="cancel-btn">Close</button>
-        </div>
+        <FormDataDisplay :form="selectedForm" @close="closeModal" />
       </div>
     </div>
   </div>
@@ -104,6 +89,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useToast } from '../composables/useToast.js'
 import FormService from '../services/formService.js'
 import Pagination from './Pagination.vue'
+import FormDataDisplay from './FormDataDisplay.vue'
 
 const props = defineProps({
   formType: {
@@ -202,20 +188,71 @@ const formatDate = (date) => {
 }
 
 const viewForm = (form) => {
+  // Add a check to ensure form has an ID
+  if (!form || !form.id) {
+    error('Cannot view form: Invalid form data')
+    return
+  }
+  
   selectedForm.value = form
+  console.log('Viewing form:', form.id)
 }
 
-const editForm = (form) => {
-  emit('form-edit', form)
+const editForm = async (form) => {
+  // Add a check to ensure form has an ID
+  if (!form || !form.id) {
+    error('Cannot edit form: Invalid form data')
+    return
+  }
+  
+  // Check if form is in draft status - only drafts should be editable
+  if (form.status && form.status.toLowerCase() !== 'draft') {
+    const confirmed = await confirm(
+      `This form is already ${form.status}. Editing completed forms may affect data integrity. Do you want to continue?`,
+      'Edit Completed Form'
+    )
+    
+    if (!confirmed) {
+      return
+    }
+  }
+  
+  // Provide user feedback that edit is being initiated
+  console.log('Editing form:', form.id)
+  
+  // Show loading indicator
+  loading.value = true
+  
+  try {
+    // Emit the form-edit event with the form data
+    emit('form-edit', form)
+    success('Opening form for editing...')
+  } catch (err) {
+    console.error('Error initiating form edit:', err)
+    error('Failed to open form for editing. Please try again.')
+  } finally {
+    loading.value = false
+  }
 }
 
 const deleteForm = async (form) => {
+  // Validate form data
+  if (!form || !form.id) {
+    error('Cannot delete form: Invalid form data')
+    return
+  }
+  
+  // Show more detailed confirmation with form information
+  const childName = getChildName(form)
   const confirmed = await confirm(
-    `Are you sure you want to delete this form? This action cannot be undone.`,
-    'Delete Form'
+    `Are you sure you want to delete the form for ${childName}? This action cannot be undone.\n\nForm ID: ${form.id}\nDate Created: ${formatDate(form.createdAt)}`,
+    `Delete Form for ${childName}`
   )
   
   if (confirmed) {
+    // Show loading state
+    loading.value = true
+    
     try {
       const result = await FormService.deleteForm(form.id)
       if (result.success) {
@@ -224,13 +261,15 @@ const deleteForm = async (form) => {
         if (index > -1) {
           forms.value.splice(index, 1)
         }
-        success('Form deleted successfully!')
+        success(`Form for ${childName} deleted successfully!`)
       } else {
         error('Error deleting form: ' + result.error)
       }
     } catch (err) {
       console.error('Error deleting form:', err)
       error('Error deleting form. Please try again.')
+    } finally {
+      loading.value = false
     }
   }
 }
@@ -566,6 +605,32 @@ watch(() => props.formType, () => {
   font-size: 0.9rem;
 }
 
+.status {
+  text-align: center;
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.status .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  border-radius: 25px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status .status-badge:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
 .status-badge {
   padding: 0.4rem 1rem;
   border-radius: 20px;
@@ -584,41 +649,62 @@ watch(() => props.formType, () => {
 }
 
 .status-badge.draft {
-  background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
-  color: #ffffff;
-  border: 2px solid rgba(255, 193, 7, 0.3);
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  color: #212529;
+  border: 2px solid rgba(255, 193, 7, 0.5);
+  font-weight: 800;
+  animation: pulse 2s infinite;
+  box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
 }
 
-.status-badge.submitted {
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.edit-indicator {
+  margin-left: 5px;
+  font-size: 1rem;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.status-badge.submitted,
+.status-badge.completed {
   background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: #ffffff;
   border: 2px solid rgba(40, 167, 69, 0.3);
-}
-
-.status-badge.completed {
-  background: linear-gradient(135deg, #17a2b8 0%, #3498db 100%);
-  color: #ffffff;
-  border: 2px solid rgba(23, 162, 184, 0.3);
+  animation: none; /* Remove animation for submitted status */
 }
 
 .actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
 }
 
 .action-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border: 2px solid transparent;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.7px;
+  min-width: 80px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .action-btn::before {
@@ -653,16 +739,25 @@ watch(() => props.formType, () => {
 }
 
 .action-btn.edit {
-  background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
   color: #212529;
-  box-shadow: 0 2px 6px rgba(255, 193, 7, 0.3);
+  box-shadow: 0 4px 8px rgba(255, 193, 7, 0.4);
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
 }
 
 .action-btn.edit:hover {
-  background: linear-gradient(135deg, #e0a800 0%, #ffa000 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(255, 193, 7, 0.5);
+  border-color: rgba(255, 255, 255, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.action-btn.edit:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 4px rgba(255, 193, 7, 0.3);
 }
 
 .action-btn.delete {
@@ -680,6 +775,43 @@ watch(() => props.formType, () => {
 
 .action-btn:active {
   transform: translateY(0);
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.action-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.action-btn.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.action-btn.loading::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: 50%;
+  left: 50%;
+  margin-top: -6px;
+  margin-left: -6px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: button-spin 1s linear infinite;
+}
+
+@keyframes button-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Modal Styles */
@@ -706,9 +838,10 @@ watch(() => props.formType, () => {
 .modal-content {
   background: white;
   border-radius: 16px;
-  max-width: 85vw;
-  max-height: 85vh;
-  overflow: hidden;
+  max-width: 900px;
+  width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(74, 20, 140, 0.1);

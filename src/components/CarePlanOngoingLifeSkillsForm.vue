@@ -42,7 +42,13 @@
         </div>
         <div class="form-group">
           <label>Date of Admission: <span class="required">*</span></label>
-          <input v-model="formData.dateOfAdmission" type="date" required />
+          <input 
+            v-model="formData.dateOfAdmission" 
+            type="text" 
+            placeholder="DD-MM-YYYY"
+            required
+            @blur="formatDate('dateOfAdmission')"
+          />
         </div>
         <div class="form-group">
           <label>Baby's Age (months):</label>
@@ -50,7 +56,13 @@
         </div>
         <div class="form-group">
           <label>Date of Assessment: <span class="required">*</span></label>
-          <input v-model="formData.dateOfAssessment" type="date" required />
+          <input 
+            v-model="formData.dateOfAssessment" 
+            type="text" 
+            placeholder="DD-MM-YYYY"
+            required
+            @blur="formatDate('dateOfAssessment')"
+          />
         </div>
       </div>
     </div>
@@ -514,7 +526,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import FormService from "../services/formService.js";
 
 const emit = defineEmits(["form-saved"]);
@@ -750,6 +762,45 @@ const formData = reactive({
   houseMotherSignature: "",
   houseMother2Name: "",
   houseMother2Signature: "",
+  
+  // Child identification fields (needed for form service)
+  childFirstName: "",
+  childSurname: "",
+  dateOfBirth: "",
+});
+
+// Check for child data from sessionStorage when form loads
+onMounted(() => {
+  console.log("📋 CarePlanOngoingLifeSkillsForm mounted, checking for child data...");
+
+  const storedChildData = sessionStorage.getItem("selectedChildForForm");
+
+  if (storedChildData) {
+    try {
+      const childData = JSON.parse(storedChildData);
+      console.log("👶 Found child data in sessionStorage:", childData);
+
+      // Pre-populate child identification fields
+      if (childData.childFirstName) {
+        formData.childFirstName = childData.childFirstName;
+      }
+      if (childData.childSurname) {
+        formData.childSurname = childData.childSurname;
+      }
+      if (childData.dateOfBirth) {
+        formData.dateOfBirth = childData.dateOfBirth;
+      }
+
+      // Pre-populate girlName field if not already set
+      if (!formData.girlName && childData.childFirstName) {
+        formData.girlName = childData.childFirstName;
+      }
+
+      console.log("✅ Form pre-populated with child data");
+    } catch (error) {
+      console.error("Error parsing child data from sessionStorage:", error);
+    }
+  }
 });
 
 const validateSection = () => {
@@ -788,16 +839,14 @@ const submitForm = async () => {
   }
 
   try {
-    const result = await FormService.saveForm(
-      "care-plan-ongoing-life-skills",
-      formData
-    );
+    // Use the correct method for this form type
+    const result = await FormService.saveCarePlanOngoingLifeSkills(formData);
     if (result.success) {
       alert("Care Plan - Ongoing - Life Skills form submitted successfully!");
-      emit("form-saved", result.formId);
+      emit("form-saved", result.id);
       resetForm();
     } else {
-      alert("Error submitting form: " + result.message);
+      alert("Error submitting form: " + result.error);
     }
   } catch (error) {
     console.error("Error submitting form:", error);
@@ -823,6 +872,19 @@ const resetForm = () => {
   };
   currentSection.value = 1;
   showValidationMessage.value = false;
+};
+
+const formatDate = (fieldName) => {
+  const date = formData[fieldName];
+  if (date) {
+    const parts = date.split("-");
+    if (parts.length === 3) {
+      const year = parts[2];
+      const month = parts[1];
+      const day = parts[0];
+      formData[fieldName] = `${year}-${month}-${day}`;
+    }
+  }
 };
 </script>
 

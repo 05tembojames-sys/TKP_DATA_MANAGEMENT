@@ -1,3 +1,4 @@
+
 <template>
   <div class="dashboard">
     <!-- Header Section -->
@@ -436,7 +437,11 @@
                 ← Back to Forms List
               </button>
             </div>
-            <InitialReferralForm @form-saved="handleFormSaved" />
+            <InitialReferralForm 
+              :edit-data="getEditFormData('initial-referral')"
+              :is-edit-mode="isEditMode('initial-referral')"
+              @form-saved="handleFormSaved" 
+            />
           </div>
 
           <!-- Child Overview and Background Form -->
@@ -453,7 +458,11 @@
                 ← Back to Forms List
               </button>
             </div>
-            <ChildOverviewForm @form-saved="handleFormSaved" />
+            <ChildOverviewForm 
+              :edit-data="getEditFormData('child-overview')"
+              :is-edit-mode="isEditMode('child-overview')"
+              @form-saved="handleFormSaved" 
+            />
           </div>
 
           <!-- TKP Initial Assessment Form -->
@@ -470,7 +479,11 @@
                 ← Back to Forms List
               </button>
             </div>
-            <InitialAssessmentForm @form-saved="handleFormSaved" />
+            <InitialAssessmentForm 
+              :edit-data="getEditFormData('initial-assessment')"
+              :is-edit-mode="isEditMode('initial-assessment')"
+              @form-saved="handleFormSaved" 
+            />
           </div>
 
           <!-- Medical Intake Assessment Form -->
@@ -487,7 +500,11 @@
                 ← Back to Forms List
               </button>
             </div>
-            <MedicalIntakeForm @form-saved="handleFormSaved" />
+            <MedicalIntakeForm 
+              :edit-data="getEditFormData('medical-intake')"
+              :is-edit-mode="isEditMode('medical-intake')"
+              @form-saved="handleFormSaved" 
+            />
           </div>
         </div>
       </div>
@@ -628,6 +645,27 @@ const newUser = ref({
   phoneNumber: "",
 });
 
+// Edit form data
+const getEditFormData = (formType) => {
+  if (currentForm.value === formType + "-new") {
+    const editData = sessionStorage.getItem('editFormData');
+    if (editData) {
+      try {
+        return JSON.parse(editData);
+      } catch (e) {
+        console.error('Error parsing edit data:', e);
+        return {};
+      }
+    }
+  }
+  return {};
+};
+
+const isEditMode = (formType) => {
+  return currentForm.value === formType + "-new" && 
+         sessionStorage.getItem('editFormData') !== null;
+};
+
 const editUser = ref({
   id: "",
   uid: "",
@@ -707,12 +745,19 @@ const handleFormSaved = (formData) => {
   } else if (currentForm.value === "medical-intake-new") {
     currentForm.value = "medical-intake-list";
   }
+  
+  // Clear edit data from session storage
+  sessionStorage.removeItem('editFormData');
 };
 
 const handleFormEdit = (form) => {
   // Switch to the appropriate form and populate with data
   currentForm.value = form.formType + "-new";
   selectedFormType.value = form.formType;
+  
+  // Store the form data for editing
+  sessionStorage.setItem('editFormData', JSON.stringify(form));
+  
   success("Form loaded for editing");
 };
 
@@ -726,6 +771,9 @@ const backToFormsList = (formType) => {
   // Return to the forms list view
   currentForm.value = formType + "-list";
   selectedFormType.value = formType;
+  
+  // Clear edit data from session storage
+  sessionStorage.removeItem('editFormData');
 };
 
 // Handle navigation from Child Tracker to Medical Intake Forms

@@ -55,7 +55,13 @@
         </div>
         <div class="form-group">
           <label>Date of Assessment: <span class="required">*</span></label>
-          <input v-model="formData.dateOfAssessment" type="date" required />
+          <input 
+            v-model="formData.dateOfAssessment" 
+            type="text" 
+            placeholder="DD-MM-YYYY"
+            required
+            @blur="formatDate('dateOfAssessment')"
+          />
         </div>
         <div class="form-group full-width">
           <label>Type of Assessment: <span class="required">*</span></label>
@@ -915,7 +921,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import FormService from "../services/formService.js";
 
 const emit = defineEmits(["form-saved"]);
@@ -974,19 +980,90 @@ const formData = ref({
   supervisorSignature: "",
   motherName: "",
   motherSignature: "",
+  
+  // Child identification fields (needed for form service)
+  childFirstName: "",
+  childSurname: "",
+  dateOfBirth: "",
+});
+
+// Check for child data from sessionStorage when form loads
+onMounted(() => {
+  console.log("📋 CarePlanBabyForm mounted, checking for child data...");
+
+  const storedChildData = sessionStorage.getItem("selectedChildForForm");
+
+  if (storedChildData) {
+    try {
+      const childData = JSON.parse(storedChildData);
+      console.log("👶 Found child data in sessionStorage:", childData);
+
+      // Pre-populate child identification fields
+      if (childData.childFirstName) {
+        formData.value.childFirstName = childData.childFirstName;
+      }
+      if (childData.childSurname) {
+        formData.value.childSurname = childData.childSurname;
+      }
+      if (childData.dateOfBirth) {
+        formData.value.dateOfBirth = childData.dateOfBirth;
+      }
+
+      // Pre-populate nameOfMother field if not already set
+      if (!formData.value.nameOfMother && childData.childFirstName) {
+        formData.value.nameOfMother = childData.childFirstName;
+      }
+
+      console.log("✅ Form pre-populated with child data");
+    } catch (error) {
+      console.error("Error parsing child data from sessionStorage:", error);
+    }
+  }
 });
 
 const validateSection = (section) => {
   if (section === 1) {
+    // Check if date is in DD-MM-YYYY format
+    const datePattern = /^\d{2}-\d{2}-\d{4}$/;
+    const isDateValid = formData.value.dateOfAssessment && datePattern.test(formData.value.dateOfAssessment);
+    
     return !!(
       formData.value.nameOfBaby &&
       formData.value.nameOfMother &&
       formData.value.babyCurrentAge !== null &&
-      formData.value.dateOfAssessment &&
+      isDateValid &&
       formData.value.assessmentType
     );
   }
   return true;
+};
+
+const formatDate = (fieldName) => {
+  const date = formData.value[fieldName];
+  if (date) {
+    const parts = date.split("-");
+    if (parts.length === 3) {
+      formData.value[fieldName] = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+  }
+};
+
+const validateDate = (dateString) => {
+  // Check if date is in DD-MM-YYYY format
+  if (!dateString) return false;
+  
+  const datePattern = /^\d{2}-\d{2}-\d{4}$/;
+  if (!datePattern.test(dateString)) return false;
+  
+  const parts = dateString.split("-");
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed in JavaScript
+  const year = parseInt(parts[2], 10);
+  
+  const date = new Date(year, month, day);
+  return date.getDate() === day && 
+         date.getMonth() === month && 
+         date.getFullYear() === year;
 };
 
 const nextSection = () => {
@@ -1007,8 +1084,23 @@ const previousSection = () => {
 };
 
 const submitForm = async () => {
+  // Validate date format before submitting
+  if (!validateDate(formData.value.dateOfAssessment)) {
+    alert("Date of Assessment must be in DD-MM-YYYY format");
+    return;
+  }
+  
   try {
-    const result = await FormService.saveCarePlanBaby(formData.value);
+    // Convert date to YYYY-MM-DD format for backend
+    const formDataToSend = { ...formData.value };
+    if (formDataToSend.dateOfAssessment) {
+      const parts = formDataToSend.dateOfAssessment.split("-");
+      if (parts.length === 3) {
+        formDataToSend.dateOfAssessment = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+    }
+    
+    const result = await FormService.saveCarePlanBaby(formDataToSend);
     if (result.success) {
       alert("Care Plan (Baby) saved successfully!");
       emit("form-saved", result.id);

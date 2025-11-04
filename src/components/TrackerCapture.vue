@@ -1935,7 +1935,17 @@ const viewStageInfo = async (stage) => {
 
 const getStageEvents = (stageId) => {
   if (!selectedCase.value) return [];
-  return selectedCase.value.events.filter((event) => event.stageId === stageId);
+  const events = selectedCase.value.events || [];
+
+  // Prefer strict match on the form's actual type
+  return events.filter((event) => {
+    const eventFormType = event?.data?.formType;
+    if (eventFormType) return eventFormType === stageId;
+
+    // Fallbacks: match by known stage mapping or direct stageId
+    const mappedStage = mapStageIdFromFormType(stageId);
+    return event.stageId === stageId || event.stageId === mappedStage;
+  });
 };
 
 const createNewEnrollment = async () => {
@@ -2027,110 +2037,80 @@ const loadCaseDetails = async (caseId) => {
 const updateProgramStages = async () => {
   if (!selectedCase.value) return;
 
-  console.log("Updating program stages for case:", selectedCase.value.caseId);
-
-  // Reset all stages
+  // Reset states
   programStages.value.forEach((stage) => {
     stage.completed = false;
     stage.active = false;
   });
 
-  try {
-    // Load all forms for this child from Firebase
-    const childName = selectedCase.value.childName.split(" ");
-    const firstName = childName[0] || "";
-    const lastName = childName[childName.length - 1] || "";
+  const events = selectedCase.value.events || [];
 
-    // Get all form types and check which ones exist for this child
-    const formTypesToCheck = programStages.value.map((stage) => stage.formType);
-    const completedFormTypes = [];
-
-    for (const formType of formTypesToCheck) {
-      const result = await FormService.getForms(formType, 1000);
-      if (result.success && result.forms.length > 0) {
-        // Check if any form matches this child
-        const matchingForm = result.forms.find((form) => {
-          const formFirstName = (form.childFirstName || "")
-            .trim()
-            .toLowerCase();
-          const formSurname = (form.childSurname || form.childLastName || "")
-            .trim()
-            .toLowerCase();
-          const childFirstNameLower = firstName.trim().toLowerCase();
-          const childLastNameLower = lastName.trim().toLowerCase();
-
-          return (
-            formFirstName === childFirstNameLower &&
-            formSurname === childLastNameLower
-          );
-        });
-
-        if (matchingForm) {
-          completedFormTypes.push(formType);
-          console.log(
-            `✅ Found ${formType} for ${selectedCase.value.childName}`
-          );
-        }
-      }
-    }
-
-    // Mark stages as completed based on found forms
-    programStages.value.forEach((stage, index) => {
-      if (completedFormTypes.includes(stage.formType)) {
-        stage.completed = true;
-        console.log(`Stage ${stage.name} marked as completed`);
-      }
+  // Mark completed if any event exists for that form type
+  programStages.value.forEach((stage) => {
+    const hasForm = events.some((ev) => {
+      const evFormType = ev?.data?.formType;
+      if (evFormType) return evFormType === stage.formType;
+      const mappedStage = mapStageIdFromFormType(stage.formType);
+      return ev.stageId === stage.id || ev.stageId === mappedStage;
     });
+    stage.completed = !!hasForm;
+  });
 
-    // Find the first incomplete stage and mark it as active
-    const firstIncompleteStageIndex = programStages.value.findIndex(
-      (stage) => !stage.completed
-    );
-
-    if (firstIncompleteStageIndex >= 0) {
-      programStages.value[firstIncompleteStageIndex].active = true;
-      console.log(
-        `Stage ${programStages.value[firstIncompleteStageIndex].name} marked as active`
-      );
-    } else {
-      // All stages completed, mark the last one as active
-      if (programStages.value.length > 0) {
-        programStages.value[programStages.value.length - 1].active = true;
-        console.log("All stages completed");
-      }
-    }
-
-    // Update the selected case with events based on completed forms
-    if (!selectedCase.value.events) {
-      selectedCase.value.events = [];
-    }
-
-    // Add events for completed forms if they don't exist
-    completedFormTypes.forEach((formType) => {
-      const eventExists = selectedCase.value.events.some(
-        (event) => event.stageId === formType
-      );
-
-      if (!eventExists) {
-        const stage = programStages.value.find((s) => s.formType === formType);
-        selectedCase.value.events.push({
-          id: `${formType}-${Date.now()}`,
-          stageId: formType,
-          formType: stage ? stage.name : formType,
-          date: new Date(),
-          status: "completed",
-        });
-      }
-    });
-  } catch (error) {
-    console.error("Error updating program stages:", error);
+  // First incomplete becomes active
+  const firstIncompleteIndex = programStages.value.findIndex((s) => !s.completed);
+  if (firstIncompleteIndex >= 0) {
+    programStages.value[firstIncompleteIndex].active = true;
+  } else if (programStages.value.length > 0) {
+    programStages.value[programStages.value.length - 1].active = true;
   }
 };
 
 const getFormTypeForStage = (stageId) => {
-  // Find the stage by ID and return its formType
+  // Exact stage match
   const stage = programStages.value.find((s) => s.id === stageId);
-  return stage ? stage.formType : "initial-referral";
+  if (stage) return stage.formType;
+
+  // Handle aggregate stages (e.g., 'care-plan', 'assessment', 'enrollment', 'referral')
+  if (!selectedCase.value || !selectedCase.value.events) return "initial-referral";
+
+  const targetStageId = stageId;
+  // Pick the most recent event that belongs to the aggregate stage
+  const candidates = (selectedCase.value.events || []).filter((ev) => {
+    // Prefer formType on data
+    const evFormType = ev?.data?.formType;
+    if (evFormType) {
+      return mapStageIdFromFormType(evFormType) === targetStageId;
+    }
+    return ev.stageId === targetStageId;
+  });
+
+  if (candidates.length === 0) return "initial-referral";
+
+  candidates.sort((a, b) => {
+    const da = a.date?.toDate ? a.date.toDate() : new Date(a.date);
+    const db = b.date?.toDate ? b.date.toDate() : new Date(b.date);
+    return db - da;
+  });
+
+  const latest = candidates[0];
+  return latest?.data?.formType || latest?.stageId || "initial-referral";
+};
+
+const mapStageIdFromFormType = (formType) => {
+  const stageMap = {
+    "initial-referral": "referral",
+    "initial-assessment": "assessment",
+    "child-overview": "enrollment",
+    "medical-intake": "care-plan",
+    "academics-literacy": "care-plan",
+    "psychological-assessment": "care-plan",
+    "life-skills-survey": "care-plan",
+    "birth-delivery": "care-plan",
+    "care-plan-summary": "care-plan",
+    "care-plan-baby": "care-plan",
+    "care-plan-ongoing-life-skills": "follow-up",
+  };
+  return stageMap[formType] || "referral";
 };
 
 const getFormRouteForCase = (case_) => {
@@ -2141,7 +2121,8 @@ const getFormRouteForCase = (case_) => {
 
 const formatDate = (date) => {
   if (!date) return "N/A";
-  return new Date(date).toLocaleDateString();
+  const d = date?.toDate ? date.toDate() : new Date(date);
+  return d.toLocaleDateString();
 };
 
 const formatStatus = (status) => {

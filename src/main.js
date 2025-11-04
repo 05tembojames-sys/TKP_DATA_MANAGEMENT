@@ -1,8 +1,8 @@
 import { createApp } from "vue";
-import "./style.css";
 import "@fortawesome/fontawesome-free/css/all.css";
 import App from "./App.vue";
 import router from "./router/index.js";
+import "./style.css";
 
 // Register PWA
 if ("serviceWorker" in navigator) {

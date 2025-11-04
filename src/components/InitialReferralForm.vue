@@ -3,6 +3,16 @@
     <div class="form-header">
       <h3>Initial Child Referral Form</h3>
       <p>Complete this form to refer a child to The Kukhoma Project</p>
+      
+      <!-- Auto-save status indicator -->
+      <div v-if="!isOutreachMode" class="auto-save-status">
+        <span v-if="isSaving" class="saving">💾 Saving draft...</span>
+        <span v-else-if="lastSaved" class="saved">
+          ✓ Draft auto-saved at {{ new Date(lastSaved).toLocaleTimeString() }}
+        </span>
+        <span v-else-if="hasUnsavedChanges" class="unsaved">● Unsaved changes</span>
+      </div>
+      
       <div class="form-progress">
         <div class="progress-bar">
           <div
@@ -784,11 +794,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useToast } from "../composables/useToast.js";
+import { useFormAutoSave } from "../composables/useFormAutoSave.js";
+import { useRoute } from "vue-router";
 
 const emit = defineEmits(["form-saved"]);
 const { success, error } = useToast();
+const route = useRoute();
 
 const props = defineProps({
   editData: {
@@ -1100,6 +1113,11 @@ Do you want to continue and create this referral anyway?`
       const result = await FormService.saveInitialReferral(formData);
 
       if (result.success) {
+        // Delete the draft since we've saved the final version
+        if (draftId.value) {
+          await deleteDraft();
+        }
+        
         // Emit success event to parent component with form data
         emit("form-saved", {
           formType: "initial-referral",
@@ -1126,6 +1144,34 @@ const resetForm = () => {
     formData[key] = "";
   });
 };
+
+// Initialize auto-save functionality
+const {
+  isSaving,
+  lastSaved,
+  draftId,
+  hasUnsavedChanges,
+  loadDraft,
+  saveNow,
+  deleteDraft,
+} = useFormAutoSave(formData, "initial-referral", null, 30000);
+
+// Load existing draft if editing
+onMounted(async () => {
+  // Check if we're editing an existing form
+  if (route.query.edit) {
+    await loadDraft(route.query.edit);
+  }
+  
+  // Load draft data if passed via props
+  if (props.editData && Object.keys(props.editData).length > 0) {
+    Object.keys(formData).forEach((key) => {
+      if (props.editData[key] !== undefined) {
+        formData[key] = props.editData[key];
+      }
+    });
+  }
+});
 </script>
 
 <style scoped>
@@ -1151,6 +1197,27 @@ const resetForm = () => {
 .form-header p {
   color: #666;
   font-size: 1rem;
+}
+
+.auto-save-status {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  min-height: 20px;
+}
+
+.auto-save-status .saving {
+  color: #007bff;
+  font-weight: 500;
+}
+
+.auto-save-status .saved {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.auto-save-status .unsaved {
+  color: #ffc107;
+  font-weight: 500;
 }
 
 .form-progress {

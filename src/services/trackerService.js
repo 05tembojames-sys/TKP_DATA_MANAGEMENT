@@ -168,8 +168,12 @@ class TrackerService {
         }
       }
       
-      // Load events/forms for this case
-      const events = await this.loadCaseEvents(caseId)
+      // Load events/forms for this case (by caseId and fallback to child name)
+      const events = await this.loadCaseEvents(case_.caseId, {
+        firstName: case_.childFirstName,
+        lastName: case_.childLastName,
+        dateOfBirth: case_.dateOfBirth
+      })
       
       return {
         success: true,
@@ -189,26 +193,55 @@ class TrackerService {
   }
   
   // Load events/forms for a specific case
-  static async loadCaseEvents(caseId) {
+  static async loadCaseEvents(caseId, childInfo = null) {
     try {
-      // Try to get forms from FormService that might be related to this case
-      const [referralResult, overviewResult, assessmentResult] = await Promise.all([
-        FormService.getForms('initial-referral', 50),
-        FormService.getForms('child-overview', 50),
-        FormService.getForms('initial-assessment', 50)
+      // Load all supported form types
+      const [
+        referralResult,
+        overviewResult,
+        assessmentResult,
+        medicalIntakeResult,
+        academicsLiteracyResult,
+        psychologicalAssessmentResult,
+        lifeSkillsSurveyResult,
+        birthDeliveryResult,
+        carePlanSummaryResult,
+        carePlanBabyResult,
+        carePlanOngoingResult
+      ] = await Promise.all([
+        FormService.getForms('initial-referral', 500),
+        FormService.getForms('child-overview', 500),
+        FormService.getForms('initial-assessment', 500),
+        FormService.getForms('medical-intake', 500),
+        FormService.getForms('academics-literacy', 500),
+        FormService.getForms('psychological-assessment', 500),
+        FormService.getForms('life-skills-survey', 500),
+        FormService.getForms('birth-delivery', 500),
+        FormService.getForms('care-plan-summary', 500),
+        FormService.getForms('care-plan-baby', 500),
+        FormService.getForms('care-plan-ongoing-life-skills', 500)
       ])
       
       const allEvents = []
       
-      // Process referral forms
-      if (referralResult.success) {
-        referralResult.forms.forEach(form => {
-          // Check if this form is for the requested case
-          if (form.caseId === caseId) {
+      // Helper: name match fallback
+      const matchesChild = (form) => {
+        if (!childInfo) return false
+        const fn = (form.childFirstName || '').trim().toLowerCase()
+        const ln = (form.childSurname || form.childLastName || '').trim().toLowerCase()
+        const targetFn = (childInfo.firstName || '').trim().toLowerCase()
+        const targetLn = (childInfo.lastName || '').trim().toLowerCase()
+        return fn === targetFn && ln === targetLn
+      }
+
+      const pushIfMatch = (forms, displayName, formType) => {
+        if (!forms?.success) return
+        forms.forms.forEach(form => {
+          if (form.caseId === caseId || matchesChild(form)) {
             allEvents.push({
               id: form.id,
-              formType: form.status === 'draft' ? 'Initial Referral (Draft)' : 'Initial Referral',
-              stageId: 'referral',
+              formType: form.status === 'draft' ? `${displayName} (Draft)` : displayName,
+              stageId: this.getStageIdFromFormType(formType),
               date: form.createdAt,
               status: form.status || 'completed',
               data: form
@@ -216,40 +249,18 @@ class TrackerService {
           }
         })
       }
-      
-      // Process overview forms
-      if (overviewResult.success) {
-        overviewResult.forms.forEach(form => {
-          // Check if this form is for the requested case
-          if (form.caseId === caseId) {
-            allEvents.push({
-              id: form.id,
-              formType: form.status === 'draft' ? 'Child Overview (Draft)' : 'Child Overview',
-              stageId: 'enrollment',
-              date: form.createdAt,
-              status: form.status || 'completed',
-              data: form
-            })
-          }
-        })
-      }
-      
-      // Process assessment forms
-      if (assessmentResult.success) {
-        assessmentResult.forms.forEach(form => {
-          // Check if this form is for the requested case
-          if (form.caseId === caseId) {
-            allEvents.push({
-              id: form.id,
-              formType: form.status === 'draft' ? 'Initial Assessment (Draft)' : 'Initial Assessment',
-              stageId: 'assessment',
-              date: form.createdAt,
-              status: form.status || 'completed',
-              data: form
-            })
-          }
-        })
-      }
+
+      pushIfMatch(referralResult, 'Initial Referral', 'initial-referral')
+      pushIfMatch(overviewResult, 'Child Overview', 'child-overview')
+      pushIfMatch(assessmentResult, 'Initial Assessment', 'initial-assessment')
+      pushIfMatch(medicalIntakeResult, 'Medical Intake Assessment', 'medical-intake')
+      pushIfMatch(academicsLiteracyResult, 'Academics & Literacy', 'academics-literacy')
+      pushIfMatch(psychologicalAssessmentResult, 'Psychological Assessment', 'psychological-assessment')
+      pushIfMatch(lifeSkillsSurveyResult, 'Life Skills Survey', 'life-skills-survey')
+      pushIfMatch(birthDeliveryResult, 'Birth & Delivery Report', 'birth-delivery')
+      pushIfMatch(carePlanSummaryResult, 'Care Plan Summary', 'care-plan-summary')
+      pushIfMatch(carePlanBabyResult, 'Care Plan (Baby)', 'care-plan-baby')
+      pushIfMatch(carePlanOngoingResult, 'Care Plan - Ongoing Life Skills', 'care-plan-ongoing-life-skills')
       
       // Sort events by date
       allEvents.sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -315,22 +326,58 @@ class TrackerService {
       const cases = []
       
       // Get all forms from FormService with larger limits for real data
-      const [referralResult, overviewResult, assessmentResult] = await Promise.all([
+      const [
+        referralResult, 
+        overviewResult, 
+        assessmentResult,
+        medicalIntakeResult,
+        academicsLiteracyResult,
+        psychologicalAssessmentResult,
+        lifeSkillsSurveyResult,
+        birthDeliveryResult,
+        carePlanSummaryResult,
+        carePlanBabyResult,
+        carePlanOngoingResult
+      ] = await Promise.all([
         FormService.getForms('initial-referral', 1000),
         FormService.getForms('child-overview', 1000),
-        FormService.getForms('initial-assessment', 1000)
+        FormService.getForms('initial-assessment', 1000),
+        FormService.getForms('medical-intake', 1000),
+        FormService.getForms('academics-literacy', 1000),
+        FormService.getForms('psychological-assessment', 1000),
+        FormService.getForms('life-skills-survey', 1000),
+        FormService.getForms('birth-delivery', 1000),
+        FormService.getForms('care-plan-summary', 1000),
+        FormService.getForms('care-plan-baby', 1000),
+        FormService.getForms('care-plan-ongoing-life-skills', 1000)
       ])
       
       console.log('Raw form results:', {
-        referrals: referralResult,
-        overviews: overviewResult,
-        assessments: assessmentResult
+        referrals: referralResult.forms?.length || 0,
+        overviews: overviewResult.forms?.length || 0,
+        assessments: assessmentResult.forms?.length || 0,
+        medicalIntake: medicalIntakeResult.forms?.length || 0,
+        academicsLiteracy: academicsLiteracyResult.forms?.length || 0,
+        psychologicalAssessment: psychologicalAssessmentResult.forms?.length || 0,
+        lifeSkillsSurvey: lifeSkillsSurveyResult.forms?.length || 0,
+        birthDelivery: birthDeliveryResult.forms?.length || 0,
+        carePlanSummary: carePlanSummaryResult.forms?.length || 0,
+        carePlanBaby: carePlanBabyResult.forms?.length || 0,
+        carePlanOngoing: carePlanOngoingResult.forms?.length || 0
       })
       
       const allForms = [
         ...(referralResult.success ? referralResult.forms.map(f => ({ ...f, sourceType: 'initial-referral' })) : []),
         ...(overviewResult.success ? overviewResult.forms.map(f => ({ ...f, sourceType: 'child-overview' })) : []),
-        ...(assessmentResult.success ? assessmentResult.forms.map(f => ({ ...f, sourceType: 'initial-assessment' })) : [])
+        ...(assessmentResult.success ? assessmentResult.forms.map(f => ({ ...f, sourceType: 'initial-assessment' })) : []),
+        ...(medicalIntakeResult.success ? medicalIntakeResult.forms.map(f => ({ ...f, sourceType: 'medical-intake' })) : []),
+        ...(academicsLiteracyResult.success ? academicsLiteracyResult.forms.map(f => ({ ...f, sourceType: 'academics-literacy' })) : []),
+        ...(psychologicalAssessmentResult.success ? psychologicalAssessmentResult.forms.map(f => ({ ...f, sourceType: 'psychological-assessment' })) : []),
+        ...(lifeSkillsSurveyResult.success ? lifeSkillsSurveyResult.forms.map(f => ({ ...f, sourceType: 'life-skills-survey' })) : []),
+        ...(birthDeliveryResult.success ? birthDeliveryResult.forms.map(f => ({ ...f, sourceType: 'birth-delivery' })) : []),
+        ...(carePlanSummaryResult.success ? carePlanSummaryResult.forms.map(f => ({ ...f, sourceType: 'care-plan-summary' })) : []),
+        ...(carePlanBabyResult.success ? carePlanBabyResult.forms.map(f => ({ ...f, sourceType: 'care-plan-baby' })) : []),
+        ...(carePlanOngoingResult.success ? carePlanOngoingResult.forms.map(f => ({ ...f, sourceType: 'care-plan-ongoing-life-skills' })) : [])
       ]
       
       console.log('Total forms found:', allForms.length)
@@ -349,6 +396,19 @@ class TrackerService {
       Object.keys(childGroups).forEach((childKey, index) => {
         const forms = childGroups[childKey]
         const primaryForm = forms[0] // Use first form as primary data source
+        
+        // Check if this child has been housed (has both initial-assessment AND child-overview forms)
+        const formTypes = forms.map(f => f.sourceType)
+        const hasInitialAssessment = formTypes.includes('initial-assessment')
+        const hasChildOverview = formTypes.includes('child-overview')
+        
+        // Only include children who have BOTH forms (indicating they've been housed)
+        if (!hasInitialAssessment || !hasChildOverview) {
+          console.log(`Skipping child ${this.getChildNameFromForm(primaryForm)} - not housed yet (has assessment: ${hasInitialAssessment}, has overview: ${hasChildOverview})`)
+          return // Skip this child
+        }
+        
+        console.log(`Including housed child: ${this.getChildNameFromForm(primaryForm)}`)
         
         // Use existing caseId if available, otherwise generate new one
         const caseId = primaryForm.caseId || this.generateCaseId()
@@ -480,9 +540,26 @@ class TrackerService {
   
   // Determine current stage from forms
   static determineCurrentStage(forms) {
-    const formTypes = forms.map(f => f.formType)
+    const formTypes = forms.map(f => f.sourceType || f.formType)
     
-    if (formTypes.includes('child-overview')) {
+    // Priority order for determining current stage (most recent/advanced stage)
+    if (formTypes.includes('care-plan-ongoing-life-skills')) {
+      return 'follow-up'
+    } else if (formTypes.includes('care-plan-baby')) {
+      return 'care-plan'
+    } else if (formTypes.includes('care-plan-summary')) {
+      return 'care-plan'
+    } else if (formTypes.includes('birth-delivery')) {
+      return 'care-plan'
+    } else if (formTypes.includes('life-skills-survey')) {
+      return 'assessment'
+    } else if (formTypes.includes('psychological-assessment')) {
+      return 'assessment'
+    } else if (formTypes.includes('academics-literacy')) {
+      return 'assessment'
+    } else if (formTypes.includes('medical-intake')) {
+      return 'assessment'
+    } else if (formTypes.includes('child-overview')) {
       return 'enrollment'
     } else if (formTypes.includes('initial-assessment')) {
       return 'assessment'
@@ -520,7 +597,15 @@ class TrackerService {
     const stageMap = {
       'initial-referral': 'referral',
       'initial-assessment': 'assessment',
-      'child-overview': 'enrollment'
+      'child-overview': 'enrollment',
+      'medical-intake': 'care-plan',
+      'academics-literacy': 'care-plan',
+      'psychological-assessment': 'care-plan',
+      'life-skills-survey': 'care-plan',
+      'birth-delivery': 'care-plan',
+      'care-plan-summary': 'care-plan',
+      'care-plan-baby': 'care-plan',
+      'care-plan-ongoing-life-skills': 'follow-up'
     }
     return stageMap[formType] || 'referral'
   }
@@ -529,8 +614,16 @@ class TrackerService {
   static getFormTypeDisplayName(formType) {
     const displayNames = {
       'initial-referral': 'Initial Referral',
-      'initial-assessment': 'Initial Assessment',
-      'child-overview': 'Child Overview'
+      'initial-assessment': 'TKP Initial Assessment',
+      'child-overview': 'Child Overview & Background',
+      'medical-intake': 'Medical Intake Assessment',
+      'academics-literacy': 'Academics & Literacy',
+      'psychological-assessment': 'Psychological Assessment',
+      'life-skills-survey': 'Life Skills Survey',
+      'birth-delivery': 'Birth & Delivery Report',
+      'care-plan-summary': 'Care Plan Summary',
+      'care-plan-baby': 'Care Plan (Baby)',
+      'care-plan-ongoing-life-skills': 'Care Plan - Ongoing Life Skills'
     }
     return displayNames[formType] || formType
   }

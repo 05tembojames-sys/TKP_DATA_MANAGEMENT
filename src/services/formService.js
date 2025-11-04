@@ -255,9 +255,31 @@ class FormService {
   // Save Academics & Literacy Plan Form
   async saveAcademicsLiteracyPlan(formData) {
     try {
+      // Parse nameOfGirl to extract first and last name for matching
+      const nameParts = (formData.nameOfGirl || '').trim().split(' ');
+      const childFirstName = nameParts[0] || '';
+      const childSurname = nameParts[nameParts.length - 1] || nameParts[0] || '';
+      
+      // Get child data from sessionStorage if available (for better matching)
+      let dateOfBirth = formData.dateOfBirth;
+      if (!dateOfBirth) {
+        try {
+          const storedChildData = sessionStorage.getItem('selectedChildForForm');
+          if (storedChildData) {
+            const childData = JSON.parse(storedChildData);
+            dateOfBirth = childData.dateOfBirth;
+          }
+        } catch (e) {
+          console.warn('Could not retrieve child data from sessionStorage:', e);
+        }
+      }
+      
       const formDoc = {
         formType: "academics-literacy",
         ...formData,
+        childFirstName: childFirstName,  // Add for TrackerService matching
+        childSurname: childSurname,      // Add for TrackerService matching
+        dateOfBirth: dateOfBirth,         // Add for precise matching
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "completed",
@@ -284,9 +306,31 @@ class FormService {
   // Save Psychological Assessment Form
   async savePsychologicalAssessment(formData) {
     try {
+      // Get child data from sessionStorage for matching
+      let childFirstName = formData.childFirstName;
+      let childSurname = formData.childSurname;
+      let dateOfBirth = formData.dateOfBirth;
+      
+      if (!childFirstName || !childSurname || !dateOfBirth) {
+        try {
+          const storedChildData = sessionStorage.getItem('selectedChildForForm');
+          if (storedChildData) {
+            const childData = JSON.parse(storedChildData);
+            childFirstName = childFirstName || childData.childFirstName;
+            childSurname = childSurname || childData.childSurname;
+            dateOfBirth = dateOfBirth || childData.dateOfBirth;
+          }
+        } catch (e) {
+          console.warn('Could not retrieve child data from sessionStorage:', e);
+        }
+      }
+      
       const formDoc = {
         formType: "psychological-assessment",
         ...formData,
+        childFirstName: childFirstName,
+        childSurname: childSurname,
+        dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "completed",
@@ -313,9 +357,39 @@ class FormService {
   // Save Life Skills Survey Form
   async saveLifeSkillsSurvey(formData) {
     try {
+      // Get child data from formData or sessionStorage for matching
+      let childFirstName = formData.childFirstName || '';
+      let childSurname = formData.childSurname || '';
+      let dateOfBirth = formData.dateOfBirth || '';
+      
+      // If not in formData, try to get from sessionStorage
+      if (!childFirstName || !childSurname || !dateOfBirth) {
+        try {
+          const storedChildData = sessionStorage.getItem('selectedChildForForm');
+          if (storedChildData) {
+            const childData = JSON.parse(storedChildData);
+            childFirstName = childFirstName || childData.childFirstName || '';
+            childSurname = childSurname || childData.childSurname || '';
+            dateOfBirth = dateOfBirth || childData.dateOfBirth || '';
+          }
+        } catch (e) {
+          console.warn('Could not retrieve child data from sessionStorage:', e);
+        }
+      }
+      
+      // If we still don't have child data, try to extract from nameOfGirl field
+      if ((!childFirstName || !childSurname) && formData.nameOfGirl) {
+        const nameParts = formData.nameOfGirl.trim().split(' ');
+        childFirstName = childFirstName || nameParts[0] || '';
+        childSurname = childSurname || nameParts[nameParts.length - 1] || nameParts[0] || '';
+      }
+      
       const formDoc = {
         formType: "life-skills-survey",
         ...formData,
+        childFirstName: childFirstName,
+        childSurname: childSurname,
+        dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "completed",
@@ -341,9 +415,31 @@ class FormService {
 
   async saveBirthDeliveryReport(formData) {
     try {
+      // Get child data from sessionStorage for matching
+      let childFirstName = formData.childFirstName;
+      let childSurname = formData.childSurname;
+      let dateOfBirth = formData.dateOfBirth;
+      
+      if (!childFirstName || !childSurname || !dateOfBirth) {
+        try {
+          const storedChildData = sessionStorage.getItem('selectedChildForForm');
+          if (storedChildData) {
+            const childData = JSON.parse(storedChildData);
+            childFirstName = childFirstName || childData.childFirstName;
+            childSurname = childSurname || childData.childSurname;
+            dateOfBirth = dateOfBirth || childData.dateOfBirth;
+          }
+        } catch (e) {
+          console.warn('Could not retrieve child data from sessionStorage:', e);
+        }
+      }
+      
       const formDoc = {
         formType: "birth-delivery",
         ...formData,
+        childFirstName: childFirstName,
+        childSurname: childSurname,
+        dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "completed",
@@ -369,9 +465,39 @@ class FormService {
 
   async saveCarePlanSummary(formData) {
     try {
+      // Get child data from formData or sessionStorage for matching
+      let childFirstName = formData.childFirstName || '';
+      let childSurname = formData.childSurname || '';
+      let dateOfBirth = formData.dateOfBirth || '';
+      
+      // If not in formData, try to get from sessionStorage
+      if (!childFirstName || !childSurname || !dateOfBirth) {
+        try {
+          const storedChildData = sessionStorage.getItem('selectedChildForForm');
+          if (storedChildData) {
+            const childData = JSON.parse(storedChildData);
+            childFirstName = childFirstName || childData.childFirstName || '';
+            childSurname = childSurname || childData.childSurname || '';
+            dateOfBirth = dateOfBirth || childData.dateOfBirth || '';
+          }
+        } catch (e) {
+          console.warn('Could not retrieve child data from sessionStorage:', e);
+        }
+      }
+      
+      // If we still don't have child data, try to extract from nameOfGirl field
+      if ((!childFirstName || !childSurname) && formData.nameOfGirl) {
+        const nameParts = formData.nameOfGirl.trim().split(' ');
+        childFirstName = childFirstName || nameParts[0] || '';
+        childSurname = childSurname || nameParts[nameParts.length - 1] || nameParts[0] || '';
+      }
+      
       const formDoc = {
         formType: "care-plan-summary",
         ...formData,
+        childFirstName: childFirstName,
+        childSurname: childSurname,
+        dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "completed",
@@ -398,9 +524,39 @@ class FormService {
   // Save Care Plan Baby Form
   async saveCarePlanBaby(formData) {
     try {
+      // Get child data from formData or sessionStorage for matching
+      let childFirstName = formData.childFirstName || '';
+      let childSurname = formData.childSurname || '';
+      let dateOfBirth = formData.dateOfBirth || '';
+      
+      // If not in formData, try to get from sessionStorage
+      if (!childFirstName || !childSurname || !dateOfBirth) {
+        try {
+          const storedChildData = sessionStorage.getItem('selectedChildForForm');
+          if (storedChildData) {
+            const childData = JSON.parse(storedChildData);
+            childFirstName = childFirstName || childData.childFirstName || '';
+            childSurname = childSurname || childData.childSurname || '';
+            dateOfBirth = dateOfBirth || childData.dateOfBirth || '';
+          }
+        } catch (e) {
+          console.warn('Could not retrieve child data from sessionStorage:', e);
+        }
+      }
+      
+      // If we still don't have child data, try to extract from nameOfMother field
+      if ((!childFirstName || !childSurname) && formData.nameOfMother) {
+        const nameParts = formData.nameOfMother.trim().split(' ');
+        childFirstName = childFirstName || nameParts[0] || '';
+        childSurname = childSurname || nameParts[nameParts.length - 1] || nameParts[0] || '';
+      }
+      
       const formDoc = {
         formType: "care-plan-baby",
         ...formData,
+        childFirstName: childFirstName,
+        childSurname: childSurname,
+        dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "completed",
@@ -417,6 +573,65 @@ class FormService {
       };
     } catch (error) {
       console.error("Error saving care plan (baby):", error);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // Save Care Plan - Ongoing Life Skills Form
+  async saveCarePlanOngoingLifeSkills(formData) {
+    try {
+      // Get child data from formData or sessionStorage for matching
+      let childFirstName = formData.childFirstName || '';
+      let childSurname = formData.childSurname || '';
+      let dateOfBirth = formData.dateOfBirth || '';
+      
+      // If not in formData, try to get from sessionStorage
+      if (!childFirstName || !childSurname || !dateOfBirth) {
+        try {
+          const storedChildData = sessionStorage.getItem('selectedChildForForm');
+          if (storedChildData) {
+            const childData = JSON.parse(storedChildData);
+            childFirstName = childFirstName || childData.childFirstName || '';
+            childSurname = childSurname || childData.childSurname || '';
+            dateOfBirth = dateOfBirth || childData.dateOfBirth || '';
+          }
+        } catch (e) {
+          console.warn('Could not retrieve child data from sessionStorage:', e);
+        }
+      }
+      
+      // If we still don't have child data, try to extract from girlName field
+      if ((!childFirstName || !childSurname) && formData.girlName) {
+        const nameParts = formData.girlName.trim().split(' ');
+        childFirstName = childFirstName || nameParts[0] || '';
+        childSurname = childSurname || nameParts[nameParts.length - 1] || nameParts[0] || '';
+      }
+      
+      const formDoc = {
+        formType: "care-plan-ongoing-life-skills",
+        ...formData,
+        childFirstName: childFirstName,
+        childSurname: childSurname,
+        dateOfBirth: dateOfBirth,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: "completed",
+      };
+
+      const docRef = await addDoc(
+        collection(db, this.formsCollection),
+        formDoc
+      );
+      return {
+        success: true,
+        id: docRef.id,
+        message: "Care Plan - Ongoing Life Skills saved successfully",
+      };
+    } catch (error) {
+      console.error("Error saving care plan ongoing life skills:", error);
       return {
         success: false,
         error: error.message,
@@ -974,6 +1189,152 @@ class FormService {
         return "In Progress";
       default:
         return "Draft";
+    }
+  }
+
+  // Save draft form (auto-save functionality)
+  async saveDraft(formData, formType) {
+    try {
+      const formDoc = {
+        formType: formType,
+        ...formData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: "draft",
+        isDraft: true,
+      };
+
+      const docRef = await addDoc(
+        collection(db, this.formsCollection),
+        formDoc
+      );
+      return {
+        success: true,
+        id: docRef.id,
+        message: "Draft saved successfully",
+      };
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      if (!navigator.onLine) {
+        return {
+          success: false,
+          error:
+            "No internet connection. Please check your network and try again.",
+        };
+      }
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // Update existing draft
+  async updateDraft(formId, formData, formType) {
+    try {
+      const formRef = doc(db, this.formsCollection, formId);
+      const formSnap = await getDoc(formRef);
+
+      if (!formSnap.exists()) {
+        // If draft doesn't exist, create a new one
+        return await this.saveDraft(formData, formType);
+      }
+
+      await updateDoc(formRef, {
+        ...formData,
+        updatedAt: new Date(),
+        status: "draft",
+        isDraft: true,
+      });
+
+      return {
+        success: true,
+        id: formId,
+        message: "Draft updated successfully",
+      };
+    } catch (error) {
+      console.error("Error updating draft:", error);
+      if (!navigator.onLine) {
+        return {
+          success: false,
+          error:
+            "No internet connection. Please check your network and try again.",
+        };
+      }
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // Get all drafts (for showing list of saved drafts)
+  async getDrafts(formType = null, limitCount = 50) {
+    try {
+      let q;
+      if (formType) {
+        q = query(
+          collection(db, this.formsCollection),
+          where("isDraft", "==", true),
+          where("formType", "==", formType),
+          orderBy("updatedAt", "desc"),
+          limit(limitCount)
+        );
+      } else {
+        q = query(
+          collection(db, this.formsCollection),
+          where("isDraft", "==", true),
+          orderBy("updatedAt", "desc"),
+          limit(limitCount)
+        );
+      }
+
+      const querySnapshot = await getDocs(q);
+      const drafts = [];
+      querySnapshot.forEach((doc) => {
+        drafts.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      return {
+        success: true,
+        drafts: drafts,
+        count: drafts.length,
+      };
+    } catch (error) {
+      console.error("Error fetching drafts:", error);
+      return {
+        success: false,
+        error: error.message,
+        drafts: [],
+      };
+    }
+  }
+
+  // Convert draft to completed form
+  async completeDraft(formId) {
+    try {
+      const formRef = doc(db, this.formsCollection, formId);
+      await updateDoc(formRef, {
+        status: "completed",
+        isDraft: false,
+        completedAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      return {
+        success: true,
+        id: formId,
+        message: "Form completed successfully",
+      };
+    } catch (error) {
+      console.error("Error completing draft:", error);
+      return {
+        success: false,
+        error: error.message,
+      };
     }
   }
 

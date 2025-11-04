@@ -1009,7 +1009,10 @@
         <div class="header-spacer"></div>
       </div>
       <div class="fullscreen-content">
-        <AcademicsLiteracyForm @form-saved="handleAcademicsLiteracyFormSaved" />
+        <AcademicsLiteracyForm
+          :child-data="selectedChildForForms"
+          @form-saved="handleAcademicsLiteracyFormSaved"
+        />
       </div>
     </div>
 
@@ -1038,6 +1041,7 @@
       </div>
       <div class="fullscreen-content">
         <PsychologicalAssessmentForm
+          :child-data="selectedChildForForms"
           @form-saved="handlePsychologicalAssessmentFormSaved"
         />
       </div>
@@ -1064,7 +1068,10 @@
         <div class="header-spacer"></div>
       </div>
       <div class="fullscreen-content">
-        <LifeSkillsSurveyForm @form-saved="handleLifeSkillsSurveyFormSaved" />
+        <LifeSkillsSurveyForm
+          :child-data="selectedChildForForms"
+          @form-saved="handleLifeSkillsSurveyFormSaved"
+        />
       </div>
     </div>
 
@@ -1089,7 +1096,10 @@
         <div class="header-spacer"></div>
       </div>
       <div class="fullscreen-content">
-        <BirthDeliveryForm @form-saved="handleBirthDeliveryFormSaved" />
+        <BirthDeliveryForm
+          :child-data="selectedChildForForms"
+          @form-saved="handleBirthDeliveryFormSaved"
+        />
       </div>
     </div>
 
@@ -1114,7 +1124,10 @@
         <div class="header-spacer"></div>
       </div>
       <div class="fullscreen-content">
-        <CarePlanSummaryForm @form-saved="handleCarePlanSummaryFormSaved" />
+        <CarePlanSummaryForm
+          :child-data="selectedChildForForms"
+          @form-saved="handleCarePlanSummaryFormSaved"
+        />
       </div>
     </div>
 
@@ -1139,7 +1152,10 @@
         <div class="header-spacer"></div>
       </div>
       <div class="fullscreen-content">
-        <CarePlanBabyForm @form-saved="handleCarePlanBabyFormSaved" />
+        <CarePlanBabyForm
+          :child-data="selectedChildForForms"
+          @form-saved="handleCarePlanBabyFormSaved"
+        />
       </div>
     </div>
 
@@ -1168,6 +1184,7 @@
       </div>
       <div class="fullscreen-content">
         <CarePlanOngoingLifeSkillsForm
+          :child-data="selectedChildForForms"
           @form-saved="handleCarePlanOngoingLifeSkillsFormSaved"
         />
       </div>
@@ -1836,6 +1853,23 @@ const handleMedicalIntakeFormSaved = async () => {
 const goToAcademicsLiteracyForm = (child = null) => {
   // Set the selected child for this form
   selectedChildForForms.value = child;
+  
+  // Store child data in sessionStorage for form matching
+  if (child) {
+    const childData = {
+      childFirstName: child.rawData?.childFirstName || child.fullName?.split(' ')[0] || '',
+      childSurname: child.rawData?.childSurname || child.fullName?.split(' ').slice(-1)[0] || '',
+      dateOfBirth: child.rawData?.dateOfBirth || child.dateOfBirth,
+      childName: child.fullName,
+      age: child.age,
+      gender: child.gender,
+      caseId: child.customId || child.uniqueId,
+      formType: 'academics-literacy'
+    };
+    sessionStorage.setItem('selectedChildForForm', JSON.stringify(childData));
+    console.log('📚 Stored child data for Academics & Literacy form:', childData);
+  }
+  
   // Show the Academics & Literacy Form within ChildTracker
   showAcademicsLiteracyForm.value = true;
 };
@@ -1853,9 +1887,23 @@ const handleAcademicsLiteracyFormSaved = async () => {
 };
 
 const goToPsychologicalAssessmentForm = (child = null) => {
-  // Set the selected child for this form
   selectedChildForForms.value = child;
-  // Show the Psychological Assessment Form within ChildTracker
+  
+  if (child) {
+    const childData = {
+      childFirstName: child.rawData?.childFirstName || child.fullName?.split(' ')[0] || '',
+      childSurname: child.rawData?.childSurname || child.fullName?.split(' ').slice(-1)[0] || '',
+      dateOfBirth: child.rawData?.dateOfBirth || child.dateOfBirth,
+      childName: child.fullName,
+      age: child.age,
+      gender: child.gender,
+      caseId: child.customId || child.uniqueId,
+      formType: 'psychological-assessment'
+    };
+    sessionStorage.setItem('selectedChildForForm', JSON.stringify(childData));
+    console.log('🧠 Stored child data for Psychological Assessment:', childData);
+  }
+  
   showPsychologicalAssessmentForm.value = true;
 };
 
@@ -1872,9 +1920,23 @@ const handlePsychologicalAssessmentFormSaved = async () => {
 };
 
 const goToLifeSkillsSurveyForm = (child = null) => {
-  // Set the selected child for this form
   selectedChildForForms.value = child;
-  // Show the Life Skills Survey Form within ChildTracker
+  
+  if (child) {
+    const childData = {
+      childFirstName: child.rawData?.childFirstName || child.fullName?.split(' ')[0] || '',
+      childSurname: child.rawData?.childSurname || child.fullName?.split(' ').slice(-1)[0] || '',
+      dateOfBirth: child.rawData?.dateOfBirth || child.dateOfBirth,
+      childName: child.fullName,
+      age: child.age,
+      gender: child.gender,
+      caseId: child.customId || child.uniqueId,
+      formType: 'life-skills-survey'
+    };
+    sessionStorage.setItem('selectedChildForForm', JSON.stringify(childData));
+    console.log('🎯 Stored child data for Life Skills Survey:', childData);
+  }
+  
   showLifeSkillsSurveyForm.value = true;
 };
 
@@ -1891,9 +1953,23 @@ const handleLifeSkillsSurveyFormSaved = async () => {
 };
 
 const goToBirthDeliveryForm = (child = null) => {
-  // Set the selected child for this form
   selectedChildForForms.value = child;
-  // Show the Birth and Delivery Form within ChildTracker
+  
+  if (child) {
+    const childData = {
+      childFirstName: child.rawData?.childFirstName || child.fullName?.split(' ')[0] || '',
+      childSurname: child.rawData?.childSurname || child.fullName?.split(' ').slice(-1)[0] || '',
+      dateOfBirth: child.rawData?.dateOfBirth || child.dateOfBirth,
+      childName: child.fullName,
+      age: child.age,
+      gender: child.gender,
+      caseId: child.customId || child.uniqueId,
+      formType: 'birth-delivery'
+    };
+    sessionStorage.setItem('selectedChildForForm', JSON.stringify(childData));
+    console.log('👶 Stored child data for Birth & Delivery:', childData);
+  }
+  
   showBirthDeliveryForm.value = true;
 };
 
@@ -1910,9 +1986,23 @@ const handleBirthDeliveryFormSaved = async () => {
 };
 
 const goToCarePlanSummaryForm = (child = null) => {
-  // Set the selected child for this form
   selectedChildForForms.value = child;
-  // Show the Care Plan Summary Form within ChildTracker
+  
+  if (child) {
+    const childData = {
+      childFirstName: child.rawData?.childFirstName || child.fullName?.split(' ')[0] || '',
+      childSurname: child.rawData?.childSurname || child.fullName?.split(' ').slice(-1)[0] || '',
+      dateOfBirth: child.rawData?.dateOfBirth || child.dateOfBirth,
+      childName: child.fullName,
+      age: child.age,
+      gender: child.gender,
+      caseId: child.customId || child.uniqueId,
+      formType: 'care-plan-summary'
+    };
+    sessionStorage.setItem('selectedChildForForm', JSON.stringify(childData));
+    console.log('📋 Stored child data for Care Plan Summary:', childData);
+  }
+  
   showCarePlanSummaryForm.value = true;
 };
 
@@ -1929,9 +2019,23 @@ const handleCarePlanSummaryFormSaved = async () => {
 };
 
 const goToCarePlanBabyForm = (child = null) => {
-  // Set the selected child for this form
   selectedChildForForms.value = child;
-  // Show the Care Plan Baby Form within ChildTracker
+  
+  if (child) {
+    const childData = {
+      childFirstName: child.rawData?.childFirstName || child.fullName?.split(' ')[0] || '',
+      childSurname: child.rawData?.childSurname || child.fullName?.split(' ').slice(-1)[0] || '',
+      dateOfBirth: child.rawData?.dateOfBirth || child.dateOfBirth,
+      childName: child.fullName,
+      age: child.age,
+      gender: child.gender,
+      caseId: child.customId || child.uniqueId,
+      formType: 'care-plan-baby'
+    };
+    sessionStorage.setItem('selectedChildForForm', JSON.stringify(childData));
+    console.log('👶 Stored child data for Care Plan (Baby):', childData);
+  }
+  
   showCarePlanBabyForm.value = true;
 };
 
@@ -1948,9 +2052,23 @@ const handleCarePlanBabyFormSaved = async () => {
 };
 
 const goToCarePlanOngoingLifeSkillsForm = (child = null) => {
-  // Set the selected child for this form
   selectedChildForForms.value = child;
-  // Show the Care Plan Ongoing Life Skills Form within ChildTracker
+  
+  if (child) {
+    const childData = {
+      childFirstName: child.rawData?.childFirstName || child.fullName?.split(' ')[0] || '',
+      childSurname: child.rawData?.childSurname || child.fullName?.split(' ').slice(-1)[0] || '',
+      dateOfBirth: child.rawData?.dateOfBirth || child.dateOfBirth,
+      childName: child.fullName,
+      age: child.age,
+      gender: child.gender,
+      caseId: child.customId || child.uniqueId,
+      formType: 'care-plan-ongoing-life-skills'
+    };
+    sessionStorage.setItem('selectedChildForForm', JSON.stringify(childData));
+    console.log('🎓 Stored child data for Ongoing Life Skills:', childData);
+  }
+  
   showCarePlanOngoingLifeSkillsForm.value = true;
 };
 

@@ -90,9 +90,11 @@
             <label>Date of Admission *</label>
             <input
               v-model="formData.dateOfAdmission"
-              type="date"
+              type="text"
+              placeholder="DD-MM-YYYY"
               required
               @input="clearFieldError('dateOfAdmission')"
+              @blur="formatDate('dateOfAdmission')"
             />
             <div v-if="validationErrors.dateOfAdmission" class="error-message">
               {{ validationErrors.dateOfAdmission }}
@@ -109,9 +111,11 @@
             <label>Date of Assessment *</label>
             <input
               v-model="formData.dateOfAssessment"
-              type="date"
+              type="text"
+              placeholder="DD-MM-YYYY"
               required
               @input="clearFieldError('dateOfAssessment')"
+              @blur="formatDate('dateOfAssessment')"
             />
             <div v-if="validationErrors.dateOfAssessment" class="error-message">
               {{ validationErrors.dateOfAssessment }}
@@ -906,7 +910,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import FormService from "../services/formService.js";
 
 const emit = defineEmits(["form-saved"]);
@@ -1108,6 +1112,11 @@ const formData = ref({
   dateOfAdmission: "",
   babyAge: null,
   dateOfAssessment: "",
+  
+  // Child identification fields (needed for form service)
+  childFirstName: "",
+  childSurname: "",
+  dateOfBirth: "",
 
   // Section 2-7: Skills assessments
   personalHygiene: initSkillsObject(personalHygieneSkills),
@@ -1146,6 +1155,40 @@ const formData = ref({
   },
 });
 
+// Check for child data from sessionStorage when form loads
+onMounted(() => {
+  console.log("📋 LifeSkillsSurveyForm mounted, checking for child data...");
+
+  const storedChildData = sessionStorage.getItem("selectedChildForForm");
+
+  if (storedChildData) {
+    try {
+      const childData = JSON.parse(storedChildData);
+      console.log("👶 Found child data in sessionStorage:", childData);
+
+      // Pre-populate child identification fields
+      if (childData.childFirstName) {
+        formData.value.childFirstName = childData.childFirstName;
+      }
+      if (childData.childSurname) {
+        formData.value.childSurname = childData.childSurname;
+      }
+      if (childData.dateOfBirth) {
+        formData.value.dateOfBirth = childData.dateOfBirth;
+      }
+
+      // Pre-populate nameOfGirl field if not already set
+      if (!formData.value.nameOfGirl && childData.childFirstName) {
+        formData.value.nameOfGirl = childData.childFirstName;
+      }
+
+      console.log("✅ Form pre-populated with child data");
+    } catch (error) {
+      console.error("Error parsing child data from sessionStorage:", error);
+    }
+  }
+});
+
 const currentSectionName = computed(() => {
   const names = {
     1: "Girl Information",
@@ -1178,6 +1221,24 @@ const overallCompletion = computed(() => {
   return total > 0 ? Math.round((completed / total) * 100) : 0;
 });
 
+const validateDate = (dateString) => {
+  // Check if date is in DD-MM-YYYY format
+  if (!dateString) return false;
+  
+  const datePattern = /^\d{2}-\d{2}-\d{4}$/;
+  if (!datePattern.test(dateString)) return false;
+  
+  const parts = dateString.split("-");
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed in JavaScript
+  const year = parseInt(parts[2], 10);
+  
+  const date = new Date(year, month, day);
+  return date.getDate() === day && 
+         date.getMonth() === month && 
+         date.getFullYear() === year;
+};
+
 const validateSection = (section) => {
   validationErrors.value = {};
 
@@ -1187,17 +1248,19 @@ const validateSection = (section) => {
     }
     if (!formData.value.dateOfAdmission) {
       validationErrors.value.dateOfAdmission = "Date of Admission is required";
+    } else if (!validateDate(formData.value.dateOfAdmission)) {
+      validationErrors.value.dateOfAdmission = "Date of Admission must be in DD-MM-YYYY format";
     }
     if (!formData.value.dateOfAssessment) {
-      validationErrors.value.dateOfAssessment =
-        "Date of Assessment is required";
+      validationErrors.value.dateOfAssessment = "Date of Assessment is required";
+    } else if (!validateDate(formData.value.dateOfAssessment)) {
+      validationErrors.value.dateOfAssessment = "Date of Assessment must be in DD-MM-YYYY format";
     }
   }
 
   if (section === 9) {
     if (!formData.value.completedBy.socialWorkerName) {
-      validationErrors.value.socialWorkerName =
-        "Social Worker Name is required";
+      validationErrors.value.socialWorkerName = "Social Worker Name is required";
     }
     if (!formData.value.completedBy.houseMotherName) {
       validationErrors.value.houseMotherName = "House Mother Name is required";
@@ -1234,6 +1297,18 @@ const clearFieldError = (field) => {
   }
 };
 
+const formatDate = (field) => {
+  // Format the date to DD-MM-YYYY and validate
+  const date = formData.value[field];
+  if (date && date.includes("-")) {
+    const parts = date.split("-");
+    // If it looks like YYYY-MM-DD, convert to DD-MM-YYYY
+    if (parts.length === 3 && parts[0].length === 4) {
+      formData.value[field] = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+  }
+};
+
 const submitForm = async () => {
   if (!validateSection(9)) {
     showValidationMessage.value = true;
@@ -1242,7 +1317,24 @@ const submitForm = async () => {
   }
 
   try {
-    const result = await FormService.saveLifeSkillsSurvey(formData.value);
+    // Convert dates to YYYY-MM-DD format for backend
+    const formDataToSend = { ...formData.value };
+    
+    if (formDataToSend.dateOfAdmission) {
+      const admissionParts = formDataToSend.dateOfAdmission.split("-");
+      if (admissionParts.length === 3) {
+        formDataToSend.dateOfAdmission = `${admissionParts[2]}-${admissionParts[1]}-${admissionParts[0]}`;
+      }
+    }
+    
+    if (formDataToSend.dateOfAssessment) {
+      const assessmentParts = formDataToSend.dateOfAssessment.split("-");
+      if (assessmentParts.length === 3) {
+        formDataToSend.dateOfAssessment = `${assessmentParts[2]}-${assessmentParts[1]}-${assessmentParts[0]}`;
+      }
+    }
+    
+    const result = await FormService.saveLifeSkillsSurvey(formDataToSend);
 
     if (result.success) {
       alert("Life Skills Survey saved successfully!");

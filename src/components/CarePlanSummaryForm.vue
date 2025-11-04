@@ -62,7 +62,13 @@
         </div>
         <div class="form-group">
           <label>Date of Assessment: <span class="required">*</span></label>
-          <input v-model="formData.dateOfAssessment" type="date" required />
+          <input 
+            v-model="formData.dateOfAssessment" 
+            type="text" 
+            placeholder="DD-MM-YYYY"
+            required
+            @blur="formatDate('dateOfAssessment')"
+          />
         </div>
         <div class="form-group">
           <label>Time in TKP (Years):</label>
@@ -1041,7 +1047,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import FormService from "../services/formService.js";
 
 const emit = defineEmits(["form-saved"]);
@@ -1059,6 +1065,11 @@ const formData = ref({
   yearsInTKP: 0,
   monthsInTKP: 0,
   assessmentType: "",
+  
+  // Child identification fields (needed for form service)
+  childFirstName: "",
+  childSurname: "",
+  dateOfBirth: "",
 
   // Determinants - Age
   girlAgeTwoYears: null,
@@ -1140,13 +1151,51 @@ const formData = ref({
   girlSignature: "",
 });
 
+// Check for child data from sessionStorage when form loads
+onMounted(() => {
+  console.log("📋 CarePlanSummaryForm mounted, checking for child data...");
+
+  const storedChildData = sessionStorage.getItem("selectedChildForForm");
+
+  if (storedChildData) {
+    try {
+      const childData = JSON.parse(storedChildData);
+      console.log("👶 Found child data in sessionStorage:", childData);
+
+      // Pre-populate child identification fields
+      if (childData.childFirstName) {
+        formData.value.childFirstName = childData.childFirstName;
+      }
+      if (childData.childSurname) {
+        formData.value.childSurname = childData.childSurname;
+      }
+      if (childData.dateOfBirth) {
+        formData.value.dateOfBirth = childData.dateOfBirth;
+      }
+
+      // Pre-populate nameOfGirl field if not already set
+      if (!formData.value.nameOfGirl && childData.childFirstName) {
+        formData.value.nameOfGirl = childData.childFirstName;
+      }
+
+      console.log("✅ Form pre-populated with child data");
+    } catch (error) {
+      console.error("Error parsing child data from sessionStorage:", error);
+    }
+  }
+});
+
 const validateSection = (section) => {
   if (section === 1) {
+    // Check if date is in DD-MM-YYYY format
+    const datePattern = /^\d{2}-\d{2}-\d{4}$/;
+    const isDateValid = formData.value.dateOfAssessment && datePattern.test(formData.value.dateOfAssessment);
+    
     return !!(
       formData.value.nameOfGirl &&
       formData.value.girlCurrentAge &&
       formData.value.currentGrade &&
-      formData.value.dateOfAssessment &&
+      isDateValid &&
       formData.value.assessmentType
     );
   }
@@ -1154,26 +1203,52 @@ const validateSection = (section) => {
   return true;
 };
 
-const nextSection = () => {
-  if (validateSection(currentSection.value)) {
-    showValidationMessage.value = false;
-    currentSection.value++;
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  } else {
-    showValidationMessage.value = true;
-    window.scrollTo({ top: 0, behavior: "smooth" });
+const formatDate = (fieldName) => {
+  const date = formData.value[fieldName];
+  if (date) {
+    const parts = date.split("-");
+    if (parts.length === 3) {
+      formData.value[fieldName] = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
   }
 };
 
-const previousSection = () => {
-  showValidationMessage.value = false;
-  currentSection.value--;
-  window.scrollTo({ top: 0, behavior: "smooth" });
+const validateDate = (dateString) => {
+  // Check if date is in DD-MM-YYYY format
+  if (!dateString) return false;
+  
+  const datePattern = /^\d{2}-\d{2}-\d{4}$/;
+  if (!datePattern.test(dateString)) return false;
+  
+  const parts = dateString.split("-");
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed in JavaScript
+  const year = parseInt(parts[2], 10);
+  
+  const date = new Date(year, month, day);
+  return date.getDate() === day && 
+         date.getMonth() === month && 
+         date.getFullYear() === year;
 };
 
 const submitForm = async () => {
+  // Validate date format before submitting
+  if (!validateDate(formData.value.dateOfAssessment)) {
+    alert("Date of Assessment must be in DD-MM-YYYY format");
+    return;
+  }
+  
   try {
-    const result = await FormService.saveCarePlanSummary(formData.value);
+    // Convert date to YYYY-MM-DD format for backend
+    const formDataToSend = { ...formData.value };
+    if (formDataToSend.dateOfAssessment) {
+      const parts = formDataToSend.dateOfAssessment.split("-");
+      if (parts.length === 3) {
+        formDataToSend.dateOfAssessment = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      }
+    }
+    
+    const result = await FormService.saveCarePlanSummary(formDataToSend);
     if (result.success) {
       alert("Care Plan Summary saved successfully!");
       emit("form-saved", result.id);
@@ -1185,6 +1260,7 @@ const submitForm = async () => {
     alert("Error saving care plan. Please try again.");
   }
 };
+
 </script>
 
 <style scoped>

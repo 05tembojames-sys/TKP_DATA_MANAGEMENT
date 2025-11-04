@@ -1874,6 +1874,402 @@ watch(
 
 .custom-reports-section {
   margin-top: 2rem;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Hide all emoji file icons */
+.custom-reports-section :deep(.file-icon) {
+  display: none !important;
+}
+
+/* Header improvements */
+.custom-reports-section :deep(.header-section) {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.custom-reports-section :deep(.header-section h1) {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+}
+
+.custom-reports-section :deep(.header-section p) {
+  color: #6c757d;
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Filter panel styling */
+.custom-reports-section :deep(.filter-panel) {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e9ecef;
+}
+
+.custom-reports-section :deep(.filter-panel h3) {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 1.25rem 0;
+}
+
+.custom-reports-section :deep(.filter-row) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.custom-reports-section :deep(.form-group) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.custom-reports-section :deep(.form-group label) {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.custom-reports-section :deep(.search-input-wrapper) {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.custom-reports-section :deep(.search-input-wrapper input) {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 2.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.custom-reports-section :deep(.search-input-wrapper input:focus) {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.custom-reports-section :deep(.search-icon) {
+  position: absolute;
+  left: 0.75rem;
+  width: 18px;
+  height: 18px;
+  color: #6c757d;
+  pointer-events: none;
+}
+
+.custom-reports-section :deep(.clear-search-btn) {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+}
+
+.custom-reports-section :deep(.clear-search-btn:hover) {
+  color: #dc3545;
+}
+
+.custom-reports-section :deep(.form-group select) {
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.custom-reports-section :deep(.form-group select:focus) {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.custom-reports-section :deep(.filter-actions) {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.custom-reports-section :deep(.primary-button),
+.custom-reports-section :deep(.secondary-button) {
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.custom-reports-section :deep(.primary-button) {
+  background: #007bff;
+  color: white;
+}
+
+.custom-reports-section :deep(.primary-button:hover) {
+  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+}
+
+.custom-reports-section :deep(.secondary-button) {
+  background: #6c757d;
+  color: white;
+}
+
+.custom-reports-section :deep(.secondary-button:hover) {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+/* Reports grid styling */
+.custom-reports-section :deep(.reports-grid) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 1.5rem;
+}
+
+.custom-reports-section :deep(.report-card) {
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.custom-reports-section :deep(.report-card:hover) {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.custom-reports-section :deep(.report-header) {
+  margin-bottom: 1rem;
+}
+
+.custom-reports-section :deep(.report-main) {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.custom-reports-section :deep(.report-info) {
+  flex: 1;
+}
+
+.custom-reports-section :deep(.report-info h4) {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.custom-reports-section :deep(.report-info p) {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 0 0 0.75rem 0;
+}
+
+.custom-reports-section :deep(.status-badge) {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.custom-reports-section :deep(.report-card[data-status="pending_review"] .status-badge) {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+.custom-reports-section :deep(.report-card[data-status="approved"] .status-badge) {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #28a745;
+}
+
+.custom-reports-section :deep(.report-card[data-status="rejected"] .status-badge) {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #dc3545;
+}
+
+.custom-reports-section :deep(.report-description) {
+  color: #495057;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.custom-reports-section :deep(.report-meta) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.custom-reports-section :deep(.meta-item) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.custom-reports-section :deep(.meta-item svg) {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #6c757d;
+}
+
+.custom-reports-section :deep(.meta-item strong) {
+  font-weight: 600;
+  color: #495057;
+  margin-right: 0.25rem;
+}
+
+.custom-reports-section :deep(.report-actions) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.custom-reports-section :deep(.action-btn) {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.custom-reports-section :deep(.view-btn) {
+  background: #e3f2fd;
+  color: #1976d2;
+  border-color: #90caf9;
+}
+
+.custom-reports-section :deep(.view-btn:hover) {
+  background: #bbdefb;
+  color: #1565c0;
+}
+
+.custom-reports-section :deep(.download-btn) {
+  background: #e8f5e9;
+  color: #388e3c;
+  border-color: #81c784;
+}
+
+.custom-reports-section :deep(.download-btn:hover) {
+  background: #c8e6c9;
+  color: #2e7d32;
+}
+
+.custom-reports-section :deep(.delete-btn) {
+  background: #ffebee;
+  color: #d32f2f;
+  border-color: #ef5350;
+}
+
+.custom-reports-section :deep(.delete-btn:hover) {
+  background: #ffcdd2;
+  color: #c62828;
+}
+
+.custom-reports-section :deep(.approve-btn) {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #66bb6a;
+}
+
+.custom-reports-section :deep(.approve-btn:hover) {
+  background: #c8e6c9;
+  color: #1b5e20;
+}
+
+.custom-reports-section :deep(.reject-btn) {
+  background: #fff3e0;
+  color: #f57c00;
+  border-color: #ffb74d;
+}
+
+.custom-reports-section :deep(.reject-btn:hover) {
+  background: #ffe0b2;
+  color: #e65100;
+}
+
+.custom-reports-section :deep(.action-btn svg) {
+  width: 16px;
+  height: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .custom-reports-section {
+    padding: 1rem;
+  }
+
+  .custom-reports-section :deep(.reports-grid) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .custom-reports-section :deep(.filter-row) {
+    grid-template-columns: 1fr;
+  }
+
+  .custom-reports-section :deep(.filter-actions) {
+    flex-direction: column;
+  }
+
+  .custom-reports-section :deep(.filter-actions button) {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .custom-reports-section {
+    padding: 1rem;
+  }
 }
 
 /* Responsive Design */
