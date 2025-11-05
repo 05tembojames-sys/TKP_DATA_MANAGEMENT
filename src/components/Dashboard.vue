@@ -12,6 +12,19 @@
       <button @click="handleLogout" class="logout-button">Logout</button>
     </div>
 
+    <!-- Welcome Banner -->
+    <div class="welcome-banner" v-if="currentUserName">
+      <div class="welcome-content">
+        <div class="welcome-text">
+          <h2 class="welcome-greeting">{{ getGreeting() }}, {{ getFirstName() }}! 👋</h2>
+          <p class="welcome-message">{{ getWelcomeMessage() }}</p>
+        </div>
+        <div class="welcome-icon">
+          <i :class="getGreetingIcon()"></i>
+        </div>
+      </div>
+    </div>
+
     <!-- Offline Banner -->
     <div v-if="!isOnline" class="offline-banner">
       <div class="banner-content">
@@ -92,7 +105,7 @@
           <div class="right-section">
             <!-- Section Title -->
             <div class="section-title">
-              <h2>The khukoma project data management system</h2>
+              <h2>The Kukhoma Project Information Management System</h2>
             </div>
 
             <!-- Dashboard Buttons Grid (3x3) -->
@@ -189,14 +202,23 @@
                 <i class="fas fa-users-cog btn-icon"></i>
                 <span>Users</span>
               </button>
+
+              <!-- System Management - Only for Super Admin -->
+              <button
+                v-if="isSuperAdmin"
+                class="dashboard-btn system-btn"
+                @click="$router.push('/system-management')"
+              >
+                <i class="fas fa-tools btn-icon"></i>
+                <span>System Management</span>
+              </button>
             </div>
 
             <!-- Dashboard Description -->
             <div class="dashboard-description">
               <p class="description-text">
-                <strong>The Kukhoma Project Data Management System</strong>
-                provides comprehensive tools for child protection and support
-                services. The Kukhoma Project exists for God’s glory to rescue
+                <strong>The Kukhoma Project Information Management System</strong>
+                provides comprehensive tools for capturing , transforming and Analysing data. The Kukhoma Project exists for God’s glory to rescue
                 teen mothers in Lusaka, Zambia who have been victims of abuse,
                 to restore, equip and empower these girls and their communities.
               </p>
@@ -689,6 +711,11 @@ const canApproveReports = computed(() => {
   return role === "admin" || role === "manager";
 });
 
+const isSuperAdmin = computed(() => {
+  const currentUser = AuthService.getCurrentUser();
+  return currentUser && currentUser.email === 'davidchileshe33@gmail.com';
+});
+
 // View management functions
 const setCurrentView = async (view) => {
   // Handle navigation to capture page
@@ -1015,6 +1042,65 @@ const formatDate = (timestamp) => {
   return date.toLocaleDateString();
 };
 
+// Get user's first name
+const getFirstName = () => {
+  if (!currentUserName.value) return "User";
+  
+  // Try to get first name from full name
+  const nameParts = currentUserName.value.split(" ");
+  return nameParts[0];
+};
+
+// Get time-based greeting
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  
+  if (hour >= 5 && hour < 12) {
+    return "Good Morning";
+  } else if (hour >= 12 && hour < 17) {
+    return "Good Afternoon";
+  } else if (hour >= 17 && hour < 22) {
+    return "Good Evening";
+  } else {
+    return "Good Night";
+  }
+};
+
+// Get greeting icon based on time
+const getGreetingIcon = () => {
+  const hour = new Date().getHours();
+  
+  if (hour >= 5 && hour < 12) {
+    return "fas fa-sun greeting-icon morning";
+  } else if (hour >= 12 && hour < 17) {
+    return "fas fa-cloud-sun greeting-icon afternoon";
+  } else if (hour >= 17 && hour < 22) {
+    return "fas fa-moon greeting-icon evening";
+  } else {
+    return "fas fa-star greeting-icon night";
+  }
+};
+
+// Get motivational welcome message
+const getWelcomeMessage = () => {
+  const messages = [
+    "Ready to make a difference in children's lives today? ",
+    "Let's continue making an impact together! ",
+    "Your dedication to helping children is inspiring! ",
+    "Every child's story matters. Let's capture them! ",
+    "Together, we're building a brighter future for children! ",
+    "Thank you for being part of The Kukhoma Project family! ",
+    "Let's track progress and celebrate every milestone! ",
+    "Your work today will create lasting change! ",
+    "Empowering children, one record at a time! ",
+    "Making data work for kids who need us most! "
+  ];
+  
+  // Use date to get consistent message for the day
+  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+  return messages[dayOfYear % messages.length];
+};
+
 const handleLogout = async () => {
   const result = await AuthService.logout();
   if (result.success) {
@@ -1232,6 +1318,7 @@ onMounted(() => {
   font-weight: 600;
   margin: 0 0 1.5rem 0;
   text-align: center;
+  text-transform: uppercase;
 }
 
 .summary-stats {
@@ -1271,6 +1358,7 @@ onMounted(() => {
   font-weight: 600;
   margin: 0;
   text-align: left;
+  text-transform: uppercase;
 }
 
 /* Dashboard Buttons Grid - Responsive Layout */
@@ -1429,6 +1517,27 @@ onMounted(() => {
   box-shadow: 0 6px 20px rgba(162, 155, 254, 0.4);
 }
 
+.system-btn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+  border: 2px solid #fff;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.system-btn:hover {
+  box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
+  transform: translateY(-2px) scale(1.05);
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 25px rgba(240, 147, 251, 0.6);
+  }
+}
+
 .btn-icon {
   font-size: 2rem;
   flex-shrink: 0;
@@ -1476,9 +1585,8 @@ onMounted(() => {
   margin-top: 2rem;
   padding: 1.5rem;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  border-left: 4px solid #4a148c;
-}
+  
+  }
 
 .description-text {
   color: #333;
@@ -2044,6 +2152,7 @@ tbody tr:hover {
   .description-text {
     font-size: 0.85rem;
     text-align: left;
+    
   }
 }
 
@@ -2055,6 +2164,136 @@ tbody tr:hover {
 
 .outreach-btn:hover {
   box-shadow: 0 6px 20px rgba(106, 17, 203, 0.4);
+}
+
+/* Welcome Banner */
+.welcome-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 0 2rem 1rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  overflow: hidden;
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.welcome-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2.5rem;
+  color: white;
+}
+
+.welcome-text {
+  flex: 1;
+}
+
+.welcome-greeting {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-message {
+  font-size: 1.1rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.welcome-icon {
+  font-size: 4rem;
+  opacity: 0.9;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.greeting-icon {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.greeting-icon.morning {
+  color: #ffd700;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.greeting-icon.afternoon {
+  color: #ff9500;
+}
+
+.greeting-icon.evening {
+  color: #f8f9fa;
+}
+
+.greeting-icon.night {
+  color: #ffe66d;
+  animation: twinkle 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Responsive design for welcome banner */
+@media (max-width: 768px) {
+  .welcome-banner {
+    margin: 0 1rem 1rem 1rem;
+  }
+  
+  .welcome-content {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem;
+  }
+  
+  .welcome-greeting {
+    font-size: 1.5rem;
+  }
+  
+  .welcome-message {
+    font-size: 1rem;
+  }
+  
+  .welcome-icon {
+    font-size: 3rem;
+    margin-top: 1rem;
+  }
 }
 
 /* Offline Banner */

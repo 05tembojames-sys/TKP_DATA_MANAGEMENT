@@ -13,9 +13,7 @@
       </div>
       <div class="header-center">
         <h1 class="reports-title">Reports Management</h1>
-        <div class="data-source-indicator">
-          <span class="indicator-badge firebase">📡 Live Firebase Data</span>
-        </div>
+        
       </div>
       <div class="header-right">
         <button @click="showUploadForm = true" class="new-report-button">

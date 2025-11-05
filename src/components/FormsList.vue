@@ -42,7 +42,7 @@
           </thead>
           <tbody>
             <tr v-for="form in forms" :key="form.id" class="form-row">
-              <td class="form-id">{{ form.id.substring(0, 8) }}...</td>
+              <td class="form-id">{{ form.formDataId || form.childId || form.id.substring(0, 8) + '...' }}</td>
               <td class="child-name">
                 {{ getChildName(form) }}
               </td>
@@ -99,7 +99,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['form-selected', 'form-edit', 'add-new-form'])
-const { success, error, confirm } = useToast()
+const { success, error } = useToast()
 
 // Reactive data
 const forms = ref([])
@@ -207,9 +207,8 @@ const editForm = async (form) => {
   
   // Check if form is in draft status - only drafts should be editable
   if (form.status && form.status.toLowerCase() !== 'draft') {
-    const confirmed = await confirm(
-      `This form is already ${form.status}. Editing completed forms may affect data integrity. Do you want to continue?`,
-      'Edit Completed Form'
+    const confirmed = window.confirm(
+      `This form is already ${form.status}. Editing completed forms may affect data integrity. Do you want to continue?`
     )
     
     if (!confirmed) {
@@ -244,33 +243,41 @@ const deleteForm = async (form) => {
   
   // Show more detailed confirmation with form information
   const childName = getChildName(form)
-  const confirmed = await confirm(
-    `Are you sure you want to delete the form for ${childName}? This action cannot be undone.\n\nForm ID: ${form.id}\nDate Created: ${formatDate(form.createdAt)}`,
-    `Delete Form for ${childName}`
-  )
   
-  if (confirmed) {
-    // Show loading state
-    loading.value = true
+  // Use native browser confirm as fallback
+  const confirmMessage = `Are you sure you want to delete the form for ${childName}?\n\nThis action cannot be undone.\n\nForm ID: ${form.id}\nDate Created: ${formatDate(form.createdAt)}`
+  const confirmed = window.confirm(confirmMessage)
+  
+  if (!confirmed) {
+    return
+  }
+  
+  // Show loading state
+  loading.value = true
+  
+  try {
+    console.log('Attempting to delete form with ID:', form.id)
+    const result = await FormService.deleteForm(form.id)
+    console.log('Delete result:', result)
     
-    try {
-      const result = await FormService.deleteForm(form.id)
-      if (result.success) {
-        // Remove from local list
-        const index = forms.value.findIndex(f => f.id === form.id)
-        if (index > -1) {
-          forms.value.splice(index, 1)
-        }
-        success(`Form for ${childName} deleted successfully!`)
-      } else {
-        error('Error deleting form: ' + result.error)
-      }
-    } catch (err) {
-      console.error('Error deleting form:', err)
-      error('Error deleting form. Please try again.')
-    } finally {
-      loading.value = false
+    if (result.success) {
+      // Remove from local list - create new array to ensure reactivity
+      forms.value = forms.value.filter(f => f.id !== form.id)
+      
+      // Update total items count
+      totalItems.value = forms.value.length
+      
+      console.log('Form removed from list. Remaining forms:', forms.value.length)
+      success(`Form for ${childName} deleted successfully!`)
+    } else {
+      console.error('Delete failed:', result.error)
+      error('Error deleting form: ' + result.error)
     }
+  } catch (err) {
+    console.error('Error deleting form:', err)
+    error('Error deleting form. Please try again.')
+  } finally {
+    loading.value = false
   }
 }
 

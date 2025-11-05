@@ -483,7 +483,7 @@ class EventReportsService {
           date: formDate ? formDate.toISOString() : new Date().toISOString(),
           program: this.getFormTypeDisplay(form.formType),
           orgUnit: form.orgUnit || "Main Center",
-          status: form.status || "completed",
+          status: form.status || "submitted",
           childName: this.getChildName(form),
           data: form,
         };
@@ -523,29 +523,116 @@ class EventReportsService {
   // Get available data elements based on program
   getDataElementsForProgram(program) {
     const baseElements = [
+      { id: "childName", name: "Child Name" },
       { id: "age", name: "Age" },
       { id: "gender", name: "Gender" },
-      { id: "pregnant", name: "Pregnant" },
+      { id: "dateOfBirth", name: "Date of Birth" },
       { id: "status", name: "Status" },
     ];
 
-    if (program === "child-assessment") {
-      return [
+    // Program-specific data elements
+    const programElements = {
+      "initial-referral": [
         ...baseElements,
-        { id: "assessment-score", name: "Assessment Score" },
-        { id: "performance", name: "Performance Level" },
-      ];
-    } else if (program === "initial-referral") {
-      return [
+        { id: "referralType", name: "Referral Type" },
+        { id: "reportType", name: "Report Type" },
+        { id: "referralSource", name: "Referral Source" },
+        { id: "dateOfReferral", name: "Date of Referral" },
+        { id: "reasonForReferral", name: "Reason for Referral" },
+      ],
+      
+      "child-overview": [
         ...baseElements,
-        { id: "referral-type", name: "Referral Type" },
-        { id: "report-type", name: "Report Type" },
-      ];
-    } else if (program === "medical-intake" || program === "birth-delivery") {
-      return [...baseElements, { id: "pregnant", name: "Pregnant" }];
-    }
+        { id: "vulnerabilityStatus", name: "Vulnerability Status" },
+        { id: "familyStructure", name: "Family Structure" },
+        { id: "educationLevel", name: "Education Level" },
+        { id: "healthStatus", name: "Health Status" },
+        { id: "safeguardingConcerns", name: "Safeguarding Concerns" },
+      ],
+      
+      "initial-assessment": [
+        ...baseElements,
+        { id: "assessmentType", name: "Assessment Type" },
+        { id: "assessmentScore", name: "Assessment Score" },
+        { id: "riskLevel", name: "Risk Level" },
+        { id: "recommendations", name: "Recommendations" },
+        { id: "assessmentDate", name: "Assessment Date" },
+      ],
+      
+      "medical-intake": [
+        ...baseElements,
+        { id: "medicalHistory", name: "Medical History" },
+        { id: "currentMedication", name: "Current Medication" },
+        { id: "allergies", name: "Allergies" },
+        { id: "immunizations", name: "Immunizations" },
+        { id: "pregnant", name: "Pregnant" },
+      ],
+      
+      "academics-literacy": [
+        ...baseElements,
+        { id: "educationLevel", name: "Education Level" },
+        { id: "literacyLevel", name: "Literacy Level" },
+        { id: "schoolAttendance", name: "School Attendance" },
+        { id: "academicPerformance", name: "Academic Performance" },
+        { id: "specialNeeds", name: "Special Needs" },
+      ],
+      
+      "psychological-assessment": [
+        ...baseElements,
+        { id: "mentalHealth", name: "Mental Health Status" },
+        { id: "emotionalWellbeing", name: "Emotional Wellbeing" },
+        { id: "behavioralIssues", name: "Behavioral Issues" },
+        { id: "traumaHistory", name: "Trauma History" },
+        { id: "supportNeeded", name: "Support Needed" },
+      ],
+      
+      "life-skills-survey": [
+        ...baseElements,
+        { id: "lifeSkillsLevel", name: "Life Skills Level" },
+        { id: "independence", name: "Independence Level" },
+        { id: "socialSkills", name: "Social Skills" },
+        { id: "vocationalSkills", name: "Vocational Skills" },
+        { id: "decisionMaking", name: "Decision Making" },
+      ],
+      
+      "birth-delivery": [
+        ...baseElements,
+        { id: "deliveryDate", name: "Delivery Date" },
+        { id: "deliveryType", name: "Delivery Type" },
+        { id: "birthWeight", name: "Birth Weight" },
+        { id: "complications", name: "Complications" },
+        { id: "healthStatus", name: "Health Status" },
+      ],
+      
+      "care-plan-summary": [
+        ...baseElements,
+        { id: "carePlanGoals", name: "Care Plan Goals" },
+        { id: "servicesRequired", name: "Services Required" },
+        { id: "reviewDate", name: "Review Date" },
+        { id: "progress", name: "Progress" },
+        { id: "challenges", name: "Challenges" },
+      ],
+      
+      "care-plan-baby": [
+        ...baseElements,
+        { id: "babyAge", name: "Baby Age" },
+        { id: "developmentalMilestones", name: "Developmental Milestones" },
+        { id: "feedingSchedule", name: "Feeding Schedule" },
+        { id: "healthCheckups", name: "Health Checkups" },
+        { id: "immunizationStatus", name: "Immunization Status" },
+      ],
+      
+      "care-plan-ongoing-life-skills": [
+        ...baseElements,
+        { id: "skillsAcquired", name: "Skills Acquired" },
+        { id: "trainingCompleted", name: "Training Completed" },
+        { id: "employmentStatus", name: "Employment Status" },
+        { id: "independenceLevel", name: "Independence Level" },
+        { id: "futureGoals", name: "Future Goals" },
+      ],
+    };
 
-    return baseElements;
+    return programElements[program] || baseElements;
   }
 
   // Get summary statistics

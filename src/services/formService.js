@@ -27,7 +27,7 @@ class FormService {
         ...formData,
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: "draft",
+        status: "submitted",
       };
 
       const docRef = await addDoc(
@@ -64,7 +64,7 @@ class FormService {
         ...formData,
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: "draft",
+        status: "submitted",
       };
 
       const docRef = await addDoc(
@@ -194,7 +194,7 @@ class FormService {
         ...formData,
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: "draft",
+        status: "submitted",
       };
 
       const docRef = await addDoc(
@@ -231,7 +231,7 @@ class FormService {
         ...formData,
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: "completed",
+        status: "submitted",
       };
 
       const docRef = await addDoc(
@@ -282,7 +282,7 @@ class FormService {
         dateOfBirth: dateOfBirth,         // Add for precise matching
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: "completed",
+        status: "submitted",
       };
 
       const docRef = await addDoc(
@@ -333,7 +333,7 @@ class FormService {
         dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: "completed",
+        status: "submitted",
       };
 
       const docRef = await addDoc(
@@ -392,7 +392,7 @@ class FormService {
         dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: "completed",
+        status: "submitted",
       };
 
       const docRef = await addDoc(
@@ -442,7 +442,7 @@ class FormService {
         dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: "completed",
+        status: "submitted",
       };
 
       const docRef = await addDoc(
@@ -500,7 +500,7 @@ class FormService {
         dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: "completed",
+        status: "submitted",
       };
 
       const docRef = await addDoc(
@@ -559,7 +559,7 @@ class FormService {
         dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: "completed",
+        status: "submitted",
       };
 
       const docRef = await addDoc(
@@ -618,7 +618,7 @@ class FormService {
         dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: "completed",
+        status: "submitted",
       };
 
       const docRef = await addDoc(
@@ -662,11 +662,15 @@ class FormService {
 
       querySnapshot.forEach((doc) => {
         const data = doc.data();
+        // Extract the custom id field before spreading
+        const { id: customId, ...restData } = data;
+        
         forms.push({
-          firestoreId: doc.id, // Store the actual Firestore document ID
-          id: doc.id, // Also keep it as 'id' for compatibility
-          ...data,
-          formDataId: data.id, // Preserve the form's internal ID field separately
+          id: doc.id, // Use Firestore document ID as the primary ID
+          firestoreId: doc.id, // Also store as firestoreId for clarity
+          formDataId: customId, // Preserve the form's internal ID field separately
+          childId: customId, // Also store as childId for display purposes
+          ...restData,
         });
         lastVisible = doc;
       });
@@ -707,11 +711,17 @@ class FormService {
       const formSnap = await getDoc(formDoc);
 
       if (formSnap.exists()) {
+        const data = formSnap.data();
+        const { id: customId, ...restData } = data;
+        
         return {
           success: true,
           form: {
-            id: formSnap.id,
-            ...formSnap.data(),
+            id: formSnap.id, // Use Firestore document ID as primary ID
+            firestoreId: formSnap.id,
+            formDataId: customId, // Preserve custom ID separately
+            childId: customId,
+            ...restData,
           },
         };
       } else {
@@ -809,14 +819,43 @@ class FormService {
   // Delete form
   async deleteForm(formId) {
     try {
-      await deleteDoc(doc(db, this.formsCollection, formId));
-
+      console.log('🗑️ FormService: Attempting to delete document:', formId);
+      console.log('🗑️ Collection:', this.formsCollection);
+      
+      const formRef = doc(db, this.formsCollection, formId);
+      
+      // First verify the document exists
+      const formSnap = await getDoc(formRef);
+      if (!formSnap.exists()) {
+        console.warn('⚠️ Document does not exist:', formId);
+        return {
+          success: false,
+          error: "Document not found",
+        };
+      }
+      
+      console.log('✅ Document exists, proceeding with deletion...');
+      await deleteDoc(formRef);
+      
+      // Verify deletion
+      const verifySnap = await getDoc(formRef);
+      if (verifySnap.exists()) {
+        console.error('❌ Document still exists after deletion!');
+        return {
+          success: false,
+          error: "Failed to delete document - still exists after deletion",
+        };
+      }
+      
+      console.log('✅ Document successfully deleted and verified');
       return {
         success: true,
         message: "Form deleted successfully",
       };
     } catch (error) {
-      console.error("Error deleting form:", error);
+      console.error("❌ Error deleting form:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
       return {
         success: false,
         error: error.message,
@@ -1106,7 +1145,7 @@ class FormService {
     if (forms.length === 0) return 0;
 
     const completedForms = forms.filter(
-      (form) => form.status === "completed" || form.status === "complete"
+      (form) => form.status === "submitted" || form.status === "completed" || form.status === "complete"
     );
     return Math.round((completedForms.length / forms.length) * 100);
   }
@@ -1318,7 +1357,7 @@ class FormService {
     try {
       const formRef = doc(db, this.formsCollection, formId);
       await updateDoc(formRef, {
-        status: "completed",
+        status: "submitted",
         isDraft: false,
         completedAt: new Date(),
         updatedAt: new Date(),

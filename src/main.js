@@ -4,8 +4,13 @@ import App from "./App.vue";
 import router from "./router/index.js";
 import "./style.css";
 
-// Register PWA
-if ("serviceWorker" in navigator) {
+// Dev utilities - exposed to browser console
+import { fixFormStatus, checkFormStatus } from "./utils/fixFormStatus.js";
+window.fixFormStatus = fixFormStatus;
+window.checkFormStatus = checkFormStatus;
+
+// Register PWA (only in production)
+if ("serviceWorker" in navigator && import.meta.env.MODE === "production") {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("/sw.js")
@@ -16,15 +21,21 @@ if ("serviceWorker" in navigator) {
         );
       })
       .catch((error) => {
-        console.log("Service Worker registration failed:", error);
-        // This is expected in development mode
-        if (import.meta.env.MODE === "development") {
-          console.log(
-            "Service Worker registration failure is expected in development mode"
-          );
-        }
+        console.error("Service Worker registration failed:", error);
       });
   });
+} else if (import.meta.env.MODE === "development") {
+  console.log("ℹ️ Service Worker disabled in development mode");
+  
+  // Unregister any existing service workers in development
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+        console.log("🗑️ Unregistered service worker");
+      }
+    });
+  }
 }
 
 const app = createApp(App);

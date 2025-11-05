@@ -154,13 +154,17 @@
 
           <!-- Form Selection (from saved forms) -->
           <div class="selection-item" v-if="forms.length > 0">
-            <label class="selection-label">Form</label>
+            <label class="selection-label">
+              📋 Load Existing Form
+              <span class="form-count">({{ forms.length }} available)</span>
+            </label>
             <select v-model="selectedFormId" class="selection-dropdown">
-              <option value="">Select Form</option>
+              <option value="">-- New Form --</option>
               <option v-for="form in forms" :key="form.id" :value="form.id">
                 {{ formatFormOption(form) }}
               </option>
             </select>
+            <p class="selection-hint">Select an existing form to edit, or choose "New Form" to start fresh</p>
           </div>
 
           <!-- Load Data Button -->
@@ -520,12 +524,19 @@ const onPeriodChange = () => {
 };
 
 const loadDataEntry = async () => {
+  console.log('🚀 loadDataEntry() called');
+  console.log('   selectedDataSet:', selectedDataSet.value);
+  console.log('   selectedFormId:', selectedFormId.value);
+  console.log('   selectedOrgUnit:', selectedOrgUnit.value);
+  console.log('   selectedPeriod:', selectedPeriod.value);
+  
   loading.value = true;
   loadingMessage.value = "Loading data entry form...";
 
   try {
     // Special handling for Initial Referral Form
     if (selectedDataSet.value === "initial-referral") {
+      console.log('📄 Loading Initial Referral Form (special handling)');
       // For Initial Referral Form, we directly show the form component
       showDataEntry.value = true;
       activeTab.value = "referral";
@@ -540,6 +551,7 @@ const loadDataEntry = async () => {
         }
       }
     } else {
+      console.log('📝 Loading standard data entry form');
       // Standard handling for other form types
       const formData = await CaptureService.loadDataEntryForm({
         dataSetId: selectedDataSet.value,
@@ -548,19 +560,58 @@ const loadDataEntry = async () => {
       });
 
       formSections.value = formData.sections;
+      console.log('📐 Form structure loaded:', formSections.value.length, 'sections');
+      
+      // Log all form field IDs for debugging
+      const allFieldIds = formSections.value.flatMap(s => s.dataElements.map(e => e.id));
+      console.log('🔑 Form field IDs:', allFieldIds);
 
       // If a specific saved form is selected, load its values from Forms collection
       if (selectedFormId.value) {
+        console.log('📋 Loading form with ID:', selectedFormId.value);
         const result = await FormService.getFormById(selectedFormId.value);
         if (result.success) {
+          console.log('✅ Form loaded successfully:', result.form);
+          
           // Exclude metadata fields not part of data elements
-          const { id, formType, createdAt, updatedAt, status, ...rest } =
+          const { id, formType, createdAt, updatedAt, status, firestoreId, formDataId, ...formData } =
             result.form;
-          dataValues.value = rest || {};
+          
+          console.log('📝 Form data to populate:', formData);
+          console.log('📊 Number of fields:', Object.keys(formData).length);
+          console.log('🔑 Data keys:', Object.keys(formData));
+          
+          // Check which fields match
+          const matchingFields = allFieldIds.filter(id => formData.hasOwnProperty(id));
+          const missingFields = allFieldIds.filter(id => !formData.hasOwnProperty(id));
+          console.log('✅ Matching fields:', matchingFields.length, '/', allFieldIds.length);
+          console.log('⚠️ Missing fields:', missingFields);
+          
+          dataValues.value = formData || {};
+          
+          // Store the form ID for updates
+          dataValues.value.formId = id;
+          
+          // Show success message
+          saveStatusMessage.value = `Form data loaded successfully (${Object.keys(formData).length} fields)`;
+          saveStatusClass.value = "success";
+          setTimeout(() => {
+            saveStatusMessage.value = "";
+            saveStatusClass.value = "";
+          }, 2000);
         } else {
+          console.error('❌ Failed to load form:', result.error);
           dataValues.value = formData.dataValues || {};
+          saveStatusMessage.value = "Using default form data";
+          saveStatusClass.value = "info";
+          setTimeout(() => {
+            saveStatusMessage.value = "";
+            saveStatusClass.value = "";
+          }, 2000);
         }
       } else {
+        // Load default/empty form data
+        console.log('📄 Loading new form with default data');
         dataValues.value = formData.dataValues || {};
       }
 
@@ -569,11 +620,14 @@ const loadDataEntry = async () => {
         formData.completionStatus || completionStatus.value;
       showDataEntry.value = true;
       activeTab.value = "referral";
+      hasUnsavedChanges.value = false;
     }
   } catch (error) {
-    console.error("Error loading data entry form:", error);
-    alert("Failed to load data entry form");
+    console.error("❌❌❌ ERROR in loadDataEntry:", error);
+    console.error("Error details:", error.message, error.stack);
+    alert("Failed to load data entry form: " + error.message);
   } finally {
+    console.log('🏁 loadDataEntry() complete');
     loading.value = false;
   }
 };
@@ -1146,6 +1200,88 @@ watch(
     }
   }
 );
+
+// Watch for form selection changes
+watch(selectedFormId, async (newFormId) => {
+  console.log('👀 Form selection changed:', newFormId);
+  console.log('   showDataEntry:', showDataEntry.value);
+  console.log('   canLoadData:', canLoadData.value);
+  
+  if (newFormId) {
+    // Auto-load the form when a form is selected
+    // This will load the form structure and then populate it with data
+    if (!showDataEntry.value && canLoadData.value) {
+      // If form isn't loaded yet, load it first
+      console.log('🔄 Auto-loading form structure...');
+      await loadDataEntry();
+      console.log('✅ Auto-load complete. showDataEntry:', showDataEntry.value);
+      console.log('   dataValues:', Object.keys(dataValues.value).length, 'fields');
+    } else if (showDataEntry.value) {
+      // If form is already loaded, just populate the data
+      console.log('📝 Form already loaded, populating data...');
+      loading.value = true;
+      loadingMessage.value = "Loading form data...";
+      
+      try {
+        const result = await FormService.getFormById(newFormId);
+        if (result.success) {
+          console.log('✅ Form data retrieved:', result.form);
+          
+          // Extract form data, excluding metadata
+          const { id, formType, createdAt, updatedAt, status, firestoreId, formDataId, ...formData } = result.form;
+          
+          console.log('📊 Populating', Object.keys(formData).length, 'fields');
+          
+          // Populate the form
+          dataValues.value = formData;
+          
+          // Update completion status
+          updateCompletionStatus();
+          
+          // Store the form ID for updates
+          dataValues.value.formId = id;
+          
+          hasUnsavedChanges.value = false;
+          saveStatusMessage.value = `Form loaded successfully (${Object.keys(formData).length} fields)`;
+          saveStatusClass.value = "success";
+          
+          // Clear status message after 2 seconds
+          setTimeout(() => {
+            saveStatusMessage.value = "";
+            saveStatusClass.value = "";
+          }, 2000);
+        } else {
+          console.error('❌ Failed to load form:', result.error);
+          saveStatusMessage.value = "Failed to load form";
+          saveStatusClass.value = "error";
+          
+          setTimeout(() => {
+            saveStatusMessage.value = "";
+            saveStatusClass.value = "";
+          }, 3000);
+        }
+      } catch (error) {
+        console.error("❌ Error loading form:", error);
+        saveStatusMessage.value = "Error loading form";
+        saveStatusClass.value = "error";
+        
+        setTimeout(() => {
+          saveStatusMessage.value = "";
+          saveStatusClass.value = "";
+        }, 3000);
+      } finally {
+        loading.value = false;
+      }
+    } else {
+      console.log('⚠️ Cannot load: showDataEntry=false, canLoadData=false');
+    }
+  } else if (!newFormId && showDataEntry.value) {
+    // Clear the form when "-- New Form --" is chosen
+    console.log('🗑️ Clearing form data');
+    clearDataValues();
+    hasUnsavedChanges.value = false;
+  }
+});
 </script>
 
 <style scoped>
@@ -2691,5 +2827,24 @@ watch(
 .save-status.error {
   color: #721c24;
   background-color: #f8d7da;
+}
+
+.save-status.info {
+  color: #004085;
+  background-color: #cce5ff;
+}
+
+.form-count {
+  font-size: 0.85em;
+  color: #6c757d;
+  font-weight: normal;
+  margin-left: 0.5rem;
+}
+
+.selection-hint {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin: 0.5rem 0 0 0;
+  font-style: italic;
 }
 </style>

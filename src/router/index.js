@@ -10,6 +10,7 @@ import UserManagement from "../components/UserManagement.vue";
 import EventReports from "../components/EventReports.vue";
 // Add the new import for OutreachModule
 import OutreachModule from "../components/OutreachModule.vue";
+import SystemManagement from "../components/SystemManagement.vue";
 
 const routes = [
   {
@@ -64,6 +65,12 @@ const routes = [
     name: "OutreachModule",
     component: OutreachModule,
     meta: { requiresAuth: true },
+  },
+  {
+    path: "/system-management",
+    name: "SystemManagement",
+    component: SystemManagement,
+    meta: { requiresAuth: true, requiresSuperAdmin: true },
   },
   {
     // Catch-all route - redirect to setup

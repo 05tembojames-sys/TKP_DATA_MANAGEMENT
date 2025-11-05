@@ -163,6 +163,18 @@ class AuthService {
         userDoc.permissions || []
       );
 
+      // Add user's name to the user object for display
+      if (userDoc.fullName) {
+        this.user.displayName = userDoc.fullName;
+        this.user.name = userDoc.fullName;
+      } else if (userDoc.name) {
+        this.user.displayName = userDoc.name;
+        this.user.name = userDoc.name;
+      } else if (userDoc.firstName && userDoc.lastName) {
+        this.user.displayName = `${userDoc.firstName} ${userDoc.lastName}`;
+        this.user.name = `${userDoc.firstName} ${userDoc.lastName}`;
+      }
+
       // Find user document ID for activity tracking
       const usersQuery = query(
         collection(this.db, "users"),
@@ -306,6 +318,18 @@ class AuthService {
           this.userRole = userDoc.role;
           this.userPermissions = userDoc.permissions || [];
           this.isAuthenticated = true;
+
+          // Add user's name to the user object for display
+          if (userDoc.fullName) {
+            this.user.displayName = userDoc.fullName;
+            this.user.name = userDoc.fullName;
+          } else if (userDoc.name) {
+            this.user.displayName = userDoc.name;
+            this.user.name = userDoc.name;
+          } else if (userDoc.firstName && userDoc.lastName) {
+            this.user.displayName = `${userDoc.firstName} ${userDoc.lastName}`;
+            this.user.name = `${userDoc.firstName} ${userDoc.lastName}`;
+          }
 
           // Save user data for offline access
           this.saveOfflineUserData();
