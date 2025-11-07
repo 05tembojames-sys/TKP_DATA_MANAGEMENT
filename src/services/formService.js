@@ -20,14 +20,36 @@ class FormService {
   }
 
   // Save Initial Child Referral Form
-  async saveInitialReferral(formData) {
+  async saveInitialReferral(formData, draftId = null) {
     try {
+      // If draftId is provided, update the existing draft instead of creating new
+      if (draftId) {
+        const formRef = doc(db, this.formsCollection, draftId);
+        const formSnap = await getDoc(formRef);
+        
+        if (formSnap.exists()) {
+          await updateDoc(formRef, {
+            ...formData,
+            updatedAt: new Date(),
+            status: "submitted",
+            isDraft: false,
+          });
+          return {
+            success: true,
+            id: draftId,
+            message: "Initial referral form submitted successfully",
+          };
+        }
+      }
+
+      // Otherwise create a new document
       const formDoc = {
         formType: "initial-referral",
         ...formData,
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "submitted",
+        isDraft: false,
       };
 
       const docRef = await addDoc(
@@ -57,14 +79,36 @@ class FormService {
   }
 
   // Save Child Overview and Background Form
-  async saveChildOverview(formData) {
+  async saveChildOverview(formData, draftId = null) {
     try {
+      // If draftId is provided, update the existing draft instead of creating new
+      if (draftId) {
+        const formRef = doc(db, this.formsCollection, draftId);
+        const formSnap = await getDoc(formRef);
+        
+        if (formSnap.exists()) {
+          await updateDoc(formRef, {
+            ...formData,
+            updatedAt: new Date(),
+            status: "submitted",
+            isDraft: false,
+          });
+          return {
+            success: true,
+            id: draftId,
+            message: "Child overview form submitted successfully",
+          };
+        }
+      }
+
+      // Otherwise create a new document
       const formDoc = {
         formType: "child-overview",
         ...formData,
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "submitted",
+        isDraft: false,
       };
 
       const docRef = await addDoc(
@@ -187,14 +231,36 @@ class FormService {
   }
 
   // Save TKP Initial Assessment Form
-  async saveInitialAssessment(formData) {
+  async saveInitialAssessment(formData, draftId = null) {
     try {
+      // If draftId is provided, update the existing draft instead of creating new
+      if (draftId) {
+        const formRef = doc(db, this.formsCollection, draftId);
+        const formSnap = await getDoc(formRef);
+        
+        if (formSnap.exists()) {
+          await updateDoc(formRef, {
+            ...formData,
+            updatedAt: new Date(),
+            status: "submitted",
+            isDraft: false,
+          });
+          return {
+            success: true,
+            id: draftId,
+            message: "Initial assessment form submitted successfully",
+          };
+        }
+      }
+
+      // Otherwise create a new document
       const formDoc = {
         formType: "initial-assessment",
         ...formData,
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "submitted",
+        isDraft: false,
       };
 
       const docRef = await addDoc(
@@ -224,14 +290,36 @@ class FormService {
   }
 
   // Save Medical Intake Assessment Form
-  async saveMedicalIntakeAssessment(formData) {
+  async saveMedicalIntakeAssessment(formData, draftId = null) {
     try {
+      // If draftId is provided, update the existing draft instead of creating new
+      if (draftId) {
+        const formRef = doc(db, this.formsCollection, draftId);
+        const formSnap = await getDoc(formRef);
+        
+        if (formSnap.exists()) {
+          await updateDoc(formRef, {
+            ...formData,
+            updatedAt: new Date(),
+            status: "submitted",
+            isDraft: false,
+          });
+          return {
+            success: true,
+            id: draftId,
+            message: "Medical intake assessment form submitted successfully",
+          };
+        }
+      }
+
+      // Otherwise create a new document
       const formDoc = {
         formType: "medical-intake",
         ...formData,
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "submitted",
+        isDraft: false,
       };
 
       const docRef = await addDoc(

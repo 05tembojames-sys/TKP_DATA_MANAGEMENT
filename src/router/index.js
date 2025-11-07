@@ -11,6 +11,7 @@ import EventReports from "../components/EventReports.vue";
 // Add the new import for OutreachModule
 import OutreachModule from "../components/OutreachModule.vue";
 import SystemManagement from "../components/SystemManagement.vue";
+import DataAnalytics from "../views/DataAnalytics.vue";
 
 const routes = [
   {
@@ -71,6 +72,12 @@ const routes = [
     name: "SystemManagement",
     component: SystemManagement,
     meta: { requiresAuth: true, requiresSuperAdmin: true },
+  },
+  {
+    path: "/data-analytics",
+    name: "DataAnalytics",
+    component: DataAnalytics,
+    meta: { requiresAuth: true },
   },
   {
     // Catch-all route - redirect to setup

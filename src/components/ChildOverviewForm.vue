@@ -1967,6 +1967,7 @@ import { ref, reactive, computed, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useToast } from "../composables/useToast.js";
 import { useFormAutoSave } from "../composables/useFormAutoSave.js";
+import { getOrGenerateChildId } from "../utils/childIdGenerator.js";
 
 const props = defineProps({
   editData: {
@@ -2626,8 +2627,13 @@ Are you sure you want to create a new record?`
     }
 
     // Prepare form data with additional metadata
+    // Generate or retrieve consistent child ID
+    const childId = generateChildId(formData);
+    console.log('📝 Saving child overview with child ID:', childId);
+    
     const submissionData = {
       ...formData,
+      childId: childId,
       submittedAt: new Date(),
       formVersion: "1.0",
       completedSections: totalSections,
@@ -2699,27 +2705,25 @@ Are you sure you want to create a new record?`
           submissionData
         );
       } else {
-        // Create new record
-        result = await FormService.saveChildOverview(submissionData);
+        // Create new record - pass draftId to update existing draft
+        result = await FormService.saveChildOverview(submissionData, draftId.value);
       }
 
       if (result.success) {
-        // Delete the draft since we've saved the final version
-        if (draftId.value) {
-          await deleteDraft();
-        }
+        // No need to delete draft - we updated it to submitted status
         
         // Emit success event to parent component with form data
         emit("form-saved", {
           formType: "child-overview",
           id: result.id,
+          childId: childId,
           childName: `${formData.childFirstName} ${formData.childSurname}`,
-          uniqueId: generateChildId(formData),
+          uniqueId: childId,
           isEdit: props.isEditMode,
-          data: { ...formData },
+          data: { ...submissionData },
         });
 
-        // Show success message with child information
+        success(`Child Overview saved! Child ID: ${childId}`);
         const actionText = props.isEditMode ? "updated" : "saved";
         success(
           `Child Overview Form ${actionText} successfully! Child: ${
@@ -2753,19 +2757,8 @@ Are you sure you want to create a new record?`
 };
 
 const generateChildId = (data) => {
-  // Generate the unique ID pattern for display
-  const firstName = (data.childFirstName || "").toUpperCase();
-  const lastName = (data.childSurname || "").toUpperCase();
-  const tribe = (data.tribe || "").toUpperCase();
-
-  const firstNamePrefix = firstName.substring(0, 2).padEnd(2, "X");
-  const lastNamePrefix = lastName.substring(0, 2).padEnd(2, "X");
-  const locationCode = "03"; // Lusaka code
-  const currentYear = new Date().getFullYear().toString().slice(-2);
-  const tribePrefix = tribe.substring(0, 2).padEnd(2, "X");
-  const sequence = "001";
-
-  return `${firstNamePrefix}${lastNamePrefix}${locationCode}${currentYear}${tribePrefix}${sequence}`;
+  // Use the shared utility to generate or retrieve existing child ID
+  return getOrGenerateChildId(data);
 };
 
 const resetForm = () => {

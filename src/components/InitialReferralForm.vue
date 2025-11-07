@@ -798,6 +798,7 @@ import { ref, reactive, computed, onMounted } from "vue";
 import { useToast } from "../composables/useToast.js";
 import { useFormAutoSave } from "../composables/useFormAutoSave.js";
 import { useRoute } from "vue-router";
+import { getOrGenerateChildId } from "../utils/childIdGenerator.js";
 
 const emit = defineEmits(["form-saved"]);
 const { success, error } = useToast();
@@ -1107,25 +1108,40 @@ Do you want to continue and create this referral anyway?`
         error("Error saving form: " + result.error);
       }
     } else {
+      // Generate or retrieve consistent child ID
+      const childId = getOrGenerateChildId({
+        childFirstName: formData.childFirstName,
+        childLastName: formData.childLastName,
+        dateOfBirth: formData.dateOfBirth,
+        tribe: formData.tribe || ''
+      });
+      
+      console.log('📝 Saving referral with child ID:', childId);
+      
       // Import FormService dynamically to avoid circular imports
       const { default: FormService } = await import("../services/formService.js");
 
-      const result = await FormService.saveInitialReferral(formData);
+      // Add child ID to form data
+      const formDataWithId = {
+        ...formData,
+        childId: childId
+      };
+
+      // Pass draftId to update existing draft instead of creating new document
+      const result = await FormService.saveInitialReferral(formDataWithId, draftId.value);
 
       if (result.success) {
-        // Delete the draft since we've saved the final version
-        if (draftId.value) {
-          await deleteDraft();
-        }
+        // No need to delete draft - we updated it to submitted status
         
         // Emit success event to parent component with form data
         emit("form-saved", {
           formType: "initial-referral",
           id: result.id,
+          childId: childId,
           childName: `${formData.childFirstName} ${formData.childLastName}`,
-          data: { ...formData },
+          data: { ...formDataWithId },
         });
-        success("Referral form saved successfully!");
+        success(`Referral saved! Child ID: ${childId}`);
         resetForm();
       } else {
         error("Error saving form: " + result.error);

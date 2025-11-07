@@ -212,6 +212,15 @@
                 <i class="fas fa-tools btn-icon"></i>
                 <span>System Management</span>
               </button>
+
+              <!-- Data Analytics -->
+              <button
+                class="dashboard-btn analytics-btn"
+                @click="$router.push('/data-analytics')"
+              >
+                <i class="fas fa-chart-bar btn-icon"></i>
+                <span>Data Analytics</span>
+              </button>
             </div>
 
             <!-- Dashboard Description -->
@@ -1526,6 +1535,17 @@ onMounted(() => {
 
 .system-btn:hover {
   box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.analytics-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  border: 2px solid #fff;
+}
+
+.analytics-btn:hover {
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
   transform: translateY(-2px) scale(1.05);
 }
 
