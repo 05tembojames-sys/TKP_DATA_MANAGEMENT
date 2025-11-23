@@ -37,6 +37,8 @@ export default defineConfig({
         ]
       },
       workbox: {
+        // Increase the precache limit to 5 MB
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MiB
         runtimeCaching: [
           // Cache pages and navigation
           {
