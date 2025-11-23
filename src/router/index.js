@@ -5,6 +5,8 @@ import AdminLogin from "../components/AdminLogin.vue";
 import AdminSetup from "../components/AdminSetup.vue";
 import Dashboard from "../components/Dashboard.vue";
 import Capture from "../components/Capture.vue";
+import CaptureDHIS2 from "../components/Capture_DHIS2.vue";
+import TKPDocuments from "../components/TKPDocuments.vue";
 import TrackerCapture from "../components/TrackerCapture.vue";
 import UserManagement from "../components/UserManagement.vue";
 import EventReports from "../components/EventReports.vue";
@@ -12,6 +14,15 @@ import EventReports from "../components/EventReports.vue";
 import OutreachModule from "../components/OutreachModule.vue";
 import SystemManagement from "../components/SystemManagement.vue";
 import DataAnalytics from "../views/DataAnalytics.vue";
+// New component imports
+import Maps from "../components/Maps.vue";
+import ImportExport from "../components/ImportExport.vue";
+import DataQuality from "../components/DataQuality.vue";
+import DataVisualizer from "../components/DataVisualizer.vue";
+import PivotTables from "../components/PivotTables.vue";
+import Approval from "../components/Approval.vue";
+import Messaging from "../components/Messaging.vue";
+import Maintenance from "../components/Maintenance.vue";
 
 const routes = [
   {
@@ -39,7 +50,25 @@ const routes = [
   {
     path: "/capture",
     name: "Capture",
+    component: CaptureDHIS2,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/capture-old",
+    name: "CaptureOld",
     component: Capture,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/capture-dhis2",
+    name: "CaptureDHIS2",
+    component: CaptureDHIS2,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/tkp-documents",
+    name: "TKPDocuments",
+    component: TKPDocuments,
     meta: { requiresAuth: true },
   },
   {
@@ -77,6 +106,54 @@ const routes = [
     path: "/data-analytics",
     name: "DataAnalytics",
     component: DataAnalytics,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/maps",
+    name: "Maps",
+    component: Maps,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/import-export",
+    name: "ImportExport",
+    component: ImportExport,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/data-quality",
+    name: "DataQuality",
+    component: DataQuality,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/data-visualizer",
+    name: "DataVisualizer",
+    component: DataVisualizer,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/pivot-tables",
+    name: "PivotTables",
+    component: PivotTables,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/approval",
+    name: "Approval",
+    component: Approval,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/messaging",
+    name: "Messaging",
+    component: Messaging,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/maintenance",
+    name: "Maintenance",
+    component: Maintenance,
     meta: { requiresAuth: true },
   },
   {

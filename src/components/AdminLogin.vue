@@ -1,49 +1,82 @@
 <template>
-  <div class="login-container">
-    <div class="login-card">
-      <h1 class="login-title">LOGIN</h1>
-
-      <form @submit.prevent="handleLogin" class="login-form">
-        <div class="form-group">
-          <label for="email" class="form-label">Email</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            required
-            class="form-input"
-            placeholder="Enter your admin email"
-            :disabled="loading"
-          />
+  <div class="login-wrapper">
+    <header class="login-header">
+      <div class="brand">
+        <div class="brand-logo">TKP</div>
+        <div class="brand-text">
+          <div class="brand-title">The Kukhoma Project</div>
+          <div class="brand-subtitle">Data Management System</div>
         </div>
-
-        <div class="form-group">
-          <label for="password" class="form-label">Password</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            required
-            class="form-input"
-            placeholder="Enter your password"
-            :disabled="loading"
-          />
-        </div>
-
-        <button type="submit" :disabled="loading" class="login-button">
-          <span v-if="loading" class="spinner"></span>
-          {{ loading ? "Logging in..." : "Login" }}
-        </button>
-      </form>
-
-      <div v-if="error" class="error-message">
-        {{ error }}
       </div>
-
-      <div v-if="offlineMode" class="offline-notice">
-        <p>🔒 Offline Mode: Using cached login credentials</p>
+      <div class="actions">
+        <select v-model="selectedLanguage" class="language-select" aria-label="Language">
+          <option value="en">English</option>
+          <option value="bm">Bemba</option>
+          <option value="ny">Nyanja</option>
+        </select>
       </div>
-    </div>
+    </header>
+
+    <main class="login-main">
+      <div class="login-panel">
+        <div class="panel-title">Log in</div>
+        <form @submit.prevent="handleLogin" class="panel-form">
+          <div class="form-row">
+            <label for="email" class="form-label">Email</label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-user"></i>
+              <input
+                id="email"
+                v-model="email"
+                type="email"
+                required
+                class="input"
+                placeholder="Enter your email"
+                :disabled="loading"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-lock"></i>
+              <input
+                id="password"
+                v-model="password"
+                type="password"
+                required
+                class="input"
+                placeholder="Enter your password"
+                :disabled="loading"
+              />
+            </div>
+          </div>
+
+          <button type="submit" :disabled="loading" class="primary-btn">
+            <span v-if="loading" class="spinner"></span>
+            {{ loading ? "Logging in..." : "Log in" }}
+          </button>
+
+          <div class="support-row">
+            <a href="#" class="link" @click.prevent>Forgot password?</a>
+          </div>
+
+          <div v-if="error" class="error">
+            {{ error }}
+          </div>
+
+          <div v-if="offlineMode" class="offline">
+            Offline mode: using cached credentials
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <footer class="login-footer">
+      <div class="footer-left">TKP Outreach • v1.0</div>
+      <div class="footer-right">© 2025 TKP</div>
+    </footer>
   </div>
 </template>
 
@@ -60,6 +93,7 @@ const password = ref("");
 const loading = ref(false);
 const error = ref("");
 const offlineMode = ref(false);
+const selectedLanguage = ref("en");
 
 // Check if we're in offline mode on component mount
 onMounted(() => {
@@ -132,106 +166,151 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-/* Container with light gray background */
-.login-container {
+.login-wrapper {
   min-height: 100vh;
-  background-color: #eeeeee;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: linear-gradient(180deg, #f7fafc 0%, #eef2f7 100%);
+}
+
+.login-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #2c6693;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  font-weight: 700;
 }
 
-/* Login card */
-.login-card {
-  background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.brand-title {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.brand-subtitle {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.language-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.login-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.login-panel {
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(31, 41, 55, 0.08);
+  padding: 1.5rem;
 }
 
-/* Centered title */
-.login-title {
-  text-align: center;
-  margin-bottom: 2rem;
-  font-size: 2rem;
-  font-weight: bold;
-  color: #4a148c; /* Dark purple */
+.panel-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
 }
 
-/* Form styling */
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.panel-form {
+  display: grid;
+  gap: 1rem;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
+.form-row {
+  display: grid;
   gap: 0.5rem;
 }
 
 .form-label {
-  font-weight: 500;
-  color: #4a148c; /* Dark purple */
   font-size: 0.9rem;
+  color: #374151;
+  font-weight: 600;
 }
 
-.form-input {
-  padding: 0.75rem;
-  border: 2px solid #ddd;
-  border-radius: 4px;
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+}
+
+.input {
+  width: 100%;
+  padding: 0.65rem 0.75rem 0.65rem 2.25rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
   font-size: 1rem;
-  color: #4a148c; /* Dark purple text */
-  transition: border-color 0.3s ease;
 }
 
-.form-input:focus {
+.input:focus {
   outline: none;
-  border-color: #4a148c;
+  border-color: #2c6693;
+  box-shadow: 0 0 0 3px rgba(44, 102, 147, 0.15);
 }
 
-.form-input:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-}
-
-.form-input::placeholder {
-  color: #999;
-}
-
-/* Login button with orange background */
-.login-button {
-  background-color: #ff5722; /* Orange */
-  color: white;
-  padding: 10px 20px; /* As specified */
+.primary-btn {
+  width: 100%;
+  background: #2c6693;
+  color: #fff;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 1rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
 }
 
-.login-button:hover:not(:disabled) {
-  background-color: #ff8a50; /* Lighter orange on hover */
-}
-
-.login-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.primary-btn:disabled {
   opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* Loading spinner */
+.primary-btn:hover:not(:disabled) {
+  background: #285a81;
+}
+
 .spinner {
   width: 16px;
   height: 16px;
@@ -242,33 +321,49 @@ const handleLogin = async () => {
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* Error message */
-.error-message {
-  color: #d32f2f;
-  background-color: #ffebee;
-  padding: 0.75rem;
-  border-radius: 4px;
-  margin-top: 1rem;
-  border-left: 4px solid #d32f2f;
+.support-row {
+  display: flex;
+  justify-content: flex-end;
 }
 
-/* Offline notice */
-.offline-notice {
-  color: #1976d2;
-  background-color: #e3f2fd;
+.link {
+  color: #2c6693;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.link:hover { text-decoration: underline; }
+
+.error {
+  color: #b91c1c;
+  background: #fee2e2;
+  border-left: 4px solid #b91c1c;
+  border-radius: 6px;
   padding: 0.75rem;
-  border-radius: 4px;
-  margin-top: 1rem;
-  border-left: 4px solid #1976d2;
-  text-align: center;
-  font-weight: 500;
+}
+
+.offline {
+  color: #1d4ed8;
+  background: #dbeafe;
+  border-left: 4px solid #1d4ed8;
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+.login-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .login-panel { padding: 1rem; }
 }
 </style>

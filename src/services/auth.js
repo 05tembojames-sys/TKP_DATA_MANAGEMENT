@@ -1,3 +1,4 @@
+// AuthService.js
 import {
   signInWithEmailAndPassword,
   signOut,
@@ -13,6 +14,7 @@ import {
   query,
   where,
   getDocs,
+  limit,
 } from "firebase/firestore";
 import { auth } from "../firebase/config.js";
 import app from "../firebase/config.js";
@@ -23,20 +25,20 @@ class AuthService {
     this.user = null;
     this.isAuthenticated = false;
     this.db = getFirestore(app);
+
+    // Simplified to only admin or normal user
     this.userRole = null;
-    this.userPermissions = [];
-    this.permissionStructure = {
-      users: ["users_read", "users_write"],
-      forms: ["forms_read", "forms_write"],
-      reports: ["reports_read", "reports_write"],
-      analytics: ["analytics_read"],
-      system: ["system_admin"],
-    };
-    // Load user data from localStorage if available (for offline access)
+
+    // Option A flag
+    this.ADMIN_FLAG_KEY = "tkp_admin_created";
+
+    // Load offline user
     this.loadOfflineUserData();
   }
 
-  // Load user data from localStorage for offline access
+  // -------------------------
+  // Offline caching
+  // -------------------------
   loadOfflineUserData() {
     try {
       const savedUserData = localStorage.getItem("tkp_user_data");
@@ -45,57 +47,93 @@ class AuthService {
       if (savedUserData && savedAuthState === "authenticated") {
         const userData = JSON.parse(savedUserData);
         this.user = userData.user;
-        this.userRole = userData.role;
-        this.userPermissions = userData.permissions || [];
+        this.userRole = userData.role || "user";
         this.isAuthenticated = true;
-        console.log("Loaded user data from localStorage for offline access");
+        console.log("Loaded offline user data");
       }
     } catch (error) {
-      console.error("Error loading offline user data:", error);
+      console.error("Error loading offline data:", error);
     }
   }
 
-  // Save user data to localStorage for offline access
   saveOfflineUserData() {
     try {
       if (this.user && this.isAuthenticated) {
         const userData = {
           user: this.user,
           role: this.userRole,
-          permissions: this.userPermissions,
         };
         localStorage.setItem("tkp_user_data", JSON.stringify(userData));
         localStorage.setItem("tkp_auth_state", "authenticated");
       } else {
-        // Clear offline data when user logs out
         localStorage.removeItem("tkp_user_data");
         localStorage.removeItem("tkp_auth_state");
       }
     } catch (error) {
-      console.error("Error saving offline user data:", error);
+      console.error("Error saving offline data:", error);
     }
   }
 
-  // Check if any admin exists in the system
+  // -------------------------
+  // Admin detection
+  // -------------------------
   async checkAdminExists() {
     try {
-      const adminQuery = query(
-        collection(this.db, "users"),
-        where("role", "==", "admin")
-      );
-      const querySnapshot = await getDocs(adminQuery);
-      return !querySnapshot.empty;
+      // First check localStorage flag
+      const flag = localStorage.getItem(this.ADMIN_FLAG_KEY);
+      if (flag === "true") return true;
+      
+      // Check if we have a cached admin check result
+      const cachedAdminCheck = localStorage.getItem('cached_admin_check');
+      const lastCheckTime = localStorage.getItem('last_admin_check_time');
+      
+      // If we have a recent cached result (within 1 hour), use it
+      if (cachedAdminCheck && lastCheckTime) {
+        const oneHourAgo = Date.now() - (60 * 60 * 1000);
+        if (parseInt(lastCheckTime) > oneHourAgo) {
+          return cachedAdminCheck === 'true';
+        }
+      }
+      
+      try {
+        // If no flag, check Firestore for admin users
+        const usersRef = collection(this.db, 'users');
+        const q = query(usersRef, where('role', '==', 'admin'), limit(1));
+        const querySnapshot = await getDocs(q);
+        
+        // If admin found in Firestore, update the flag
+        if (!querySnapshot.empty) {
+          localStorage.setItem(this.ADMIN_FLAG_KEY, "true");
+          localStorage.setItem('cached_admin_check', 'true');
+          localStorage.setItem('last_admin_check_time', Date.now().toString());
+          return true;
+        }
+        
+        // Cache the negative result
+        localStorage.setItem('cached_admin_check', 'false');
+        localStorage.setItem('last_admin_check_time', Date.now().toString());
+        return false;
+      } catch (firestoreError) {
+        console.warn('Firestore error when checking admin, using cached value if available:', firestoreError);
+        // If we have a cached value, use it
+        if (cachedAdminCheck) {
+          return cachedAdminCheck === 'true';
+        }
+        // Default to true to prevent lockout if we can't check
+        return true;
+      }
     } catch (error) {
-      console.error("Error checking admin existence:", error);
-      // If Firestore is not set up, assume no admin exists
-      return false;
+      console.error('Error in checkAdminExists:', error);
+      // Default to true to prevent lockout if there's an error
+      return true;
     }
   }
 
-  // Create the first admin user
+  // -------------------------
+  // Create First Admin
+  // -------------------------
   async createFirstAdmin(email, password, fullName, phoneNumber) {
     try {
-      // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -103,25 +141,42 @@ class AuthService {
       );
       const user = userCredential.user;
 
-      // Store admin data in Firestore
-      await setDoc(doc(this.db, "users", user.uid), {
-        email: email,
-        fullName: fullName,
-        phoneNumber: phoneNumber,
-        role: "admin",
-        createdAt: new Date(),
-        isFirstAdmin: true,
-      });
+      try {
+        await setDoc(doc(this.db, "users", user.uid), {
+          email,
+          fullName,
+          phoneNumber,
+          role: "admin",
+          createdAt: new Date(),
+          isFirstAdmin: true,
+          uid: user.uid,
+        });
+      } catch (e) {
+        console.error("Firestore write failed:", e);
+      }
+
+      // Mark admin as created
+      localStorage.setItem(this.ADMIN_FLAG_KEY, "true");
 
       this.user = user;
+      this.userRole = "admin";
       this.isAuthenticated = true;
 
-      // Save user data for offline access
       this.saveOfflineUserData();
 
-      return { success: true, user: user };
+      return { success: true, user };
     } catch (error) {
-      console.error("Error creating first admin:", error);
+      console.error("Error creating admin:", error);
+
+      if (error.code === "auth/email-already-in-use") {
+        localStorage.setItem(this.ADMIN_FLAG_KEY, "true");
+        return {
+          success: false,
+          error: "Admin already created.",
+          adminExists: true,
+        };
+      }
+
       return {
         success: false,
         error: this.getErrorMessage(error.code) || error.message,
@@ -129,7 +184,9 @@ class AuthService {
     }
   }
 
-  // Login with email and password
+  // -------------------------
+  // Login (simplified)
+  // -------------------------
   async login(email, password) {
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -139,82 +196,43 @@ class AuthService {
       );
       this.user = userCredential.user;
 
-      // Get user data from Firestore
+      // Get user role (if exists)
       const userDoc = await this.getUserRole(this.user.uid);
 
-      // Check if user exists and is active
-      if (!userDoc) {
-        await this.logout();
-        throw new Error("User data not found. Please contact administrator.");
-      }
+      // If not found → assign default "user"
+      this.userRole = userDoc?.role || "user";
 
-      // Check if user status is active
-      if (userDoc.status && userDoc.status !== "active") {
-        await this.logout();
-        throw new Error(
-          `Account is ${userDoc.status}. Please contact administrator.`
-        );
-      }
-
-      // Store user role and permissions
-      this.userRole = userDoc.role;
-      this.userPermissions = this.validatePermissions(
-        userDoc.role,
-        userDoc.permissions || []
-      );
-
-      // Add user's name to the user object for display
-      if (userDoc.fullName) {
-        this.user.displayName = userDoc.fullName;
-        this.user.name = userDoc.fullName;
-      } else if (userDoc.name) {
-        this.user.displayName = userDoc.name;
-        this.user.name = userDoc.name;
-      } else if (userDoc.firstName && userDoc.lastName) {
-        this.user.displayName = `${userDoc.firstName} ${userDoc.lastName}`;
-        this.user.name = `${userDoc.firstName} ${userDoc.lastName}`;
-      }
-
-      // Find user document ID for activity tracking
-      const usersQuery = query(
-        collection(this.db, "users"),
-        where("uid", "==", this.user.uid)
-      );
-      const usersSnapshot = await getDocs(usersQuery);
-
-      if (!usersSnapshot.empty) {
-        const userDocId = usersSnapshot.docs[0].id;
-        // Record login activity
-        await UserService.recordUserLogin(userDocId);
+      // If they are admin in Firestore, enforce admin flag.
+      if (this.userRole === "admin") {
+        try {
+          localStorage.setItem(this.ADMIN_FLAG_KEY, "true");
+        } catch {}
       }
 
       this.isAuthenticated = true;
-
-      // Save user data for offline access
       this.saveOfflineUserData();
 
       return {
         success: true,
         user: this.user,
         role: this.userRole,
-        permissions: this.userPermissions,
       };
     } catch (error) {
       console.error("Login error:", error);
-      // Check if we have offline user data we can use
+
+      // Offline fallback
       if (!navigator.onLine) {
-        // Try to load offline user data
         this.loadOfflineUserData();
         if (this.isAuthenticated) {
           return {
             success: true,
             user: this.user,
             role: this.userRole,
-            permissions: this.userPermissions,
             offline: true,
           };
         }
       }
+
       return {
         success: false,
         error: this.getErrorMessage(error.code) || error.message,
@@ -222,81 +240,30 @@ class AuthService {
     }
   }
 
-  // Logout
   async logout() {
     try {
-      // Record logout activity if user is authenticated
-      if (this.user && this.isAuthenticated) {
-        try {
-          // Find user document ID for activity tracking
-          const usersQuery = query(
-            collection(this.db, "users"),
-            where("uid", "==", this.user.uid)
-          );
-          const usersSnapshot = await getDocs(usersQuery);
-
-          if (!usersSnapshot.empty) {
-            const userDocId = usersSnapshot.docs[0].id;
-            // Record logout activity
-            await UserService.recordUserLogout(userDocId);
-          }
-        } catch (activityError) {
-          console.error("Error recording logout activity:", activityError);
-          // Don't fail logout if activity recording fails
-        }
-      }
-
       await signOut(auth);
+
       this.user = null;
       this.isAuthenticated = false;
       this.userRole = null;
-      this.userPermissions = [];
 
-      // Clear offline user data
       this.saveOfflineUserData();
 
       return { success: true };
     } catch (error) {
-      console.error("Logout error:", error);
       return { success: false, error: error.message };
     }
   }
 
-  // Get user role from Firestore
+  // -------------------------
+  // Firestore user lookup
+  // -------------------------
   async getUserRole(uid) {
     try {
-      // First, try to find user by UID as document ID (for first admin)
-      const userDocRef = doc(this.db, "users", uid);
-      const userDocSnap = await getDoc(userDocRef);
-
-      if (userDocSnap.exists()) {
-        return userDocSnap.data();
-      }
-
-      // If not found, search for user by uid field (for regular users)
-      const usersQuery = query(
-        collection(this.db, "users"),
-        where("uid", "==", uid)
-      );
-      const querySnapshot = await getDocs(usersQuery);
-
-      if (!querySnapshot.empty) {
-        return querySnapshot.docs[0].data();
-      }
-
-      // If still not found, search by email (for legacy users)
-      const user = auth.currentUser || this.user;
-      if (user && user.email) {
-        const emailQuery = query(
-          collection(this.db, "users"),
-          where("email", "==", user.email.toLowerCase())
-        );
-        const emailSnapshot = await getDocs(emailQuery);
-
-        if (!emailSnapshot.empty) {
-          return emailSnapshot.docs[0].data();
-        }
-      }
+      const ref = doc(this.db, "users", uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) return snap.data();
 
       return null;
     } catch (error) {
@@ -305,157 +272,61 @@ class AuthService {
     }
   }
 
-  // Check authentication state
+  // -------------------------
+  // Auth state
+  // -------------------------
   onAuthStateChange(callback) {
     return onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Get user data from Firestore
         const userDoc = await this.getUserRole(user.uid);
+        this.user = user;
+        this.userRole = userDoc?.role || "user";
+        this.isAuthenticated = true;
 
-        // Allow any valid user with active status
-        if (userDoc && (!userDoc.status || userDoc.status === "active")) {
-          this.user = user;
-          this.userRole = userDoc.role;
-          this.userPermissions = userDoc.permissions || [];
-          this.isAuthenticated = true;
-
-          // Add user's name to the user object for display
-          if (userDoc.fullName) {
-            this.user.displayName = userDoc.fullName;
-            this.user.name = userDoc.fullName;
-          } else if (userDoc.name) {
-            this.user.displayName = userDoc.name;
-            this.user.name = userDoc.name;
-          } else if (userDoc.firstName && userDoc.lastName) {
-            this.user.displayName = `${userDoc.firstName} ${userDoc.lastName}`;
-            this.user.name = `${userDoc.firstName} ${userDoc.lastName}`;
-          }
-
-          // Save user data for offline access
-          this.saveOfflineUserData();
-        } else {
-          await this.logout();
+        // If admin → set flag
+        if (this.userRole === "admin") {
+          try {
+            localStorage.setItem(this.ADMIN_FLAG_KEY, "true");
+          } catch {}
         }
+
+        this.saveOfflineUserData();
       } else {
         this.user = null;
-        this.userRole = null;
-        this.userPermissions = [];
         this.isAuthenticated = false;
-
-        // Clear offline user data
+        this.userRole = null;
         this.saveOfflineUserData();
       }
+
       callback(this.user, this.isAuthenticated);
     });
   }
 
-  // Get current user role
-  getUserRoleInfo() {
-    return this.userRole;
-  }
-
-  // Get user permissions
-  getUserPermissions() {
-    return this.userPermissions || [];
-  }
-
-  // Check if user has specific permission
-  hasPermission(permission) {
-    if (this.userRole === "admin") return true; // Admin has all permissions
-    return this.userPermissions.includes(permission);
-  }
-
-  // Check if user has any permission in a category
-  hasCategoryPermission(category) {
-    if (this.userRole === "admin") return true; // Admin has all permissions
-
-    if (this.permissionStructure[category]) {
-      return this.permissionStructure[category].some((permission) =>
-        this.userPermissions.includes(permission)
-      );
-    }
-
-    return false;
-  }
-
-  // Get all user permissions
-  getAllPermissions() {
-    if (this.userRole === "admin") {
-      // Admins have all permissions
-      return [
-        "users_read",
-        "users_write",
-        "forms_read",
-        "forms_write",
-        "reports_read",
-        "reports_write",
-        "analytics_read",
-        "system_admin",
-      ];
-    }
-
-    return this.userPermissions;
-  }
-
-  // Validate permissions based on role hierarchy
-  validatePermissions(role, permissions) {
-    // Admins get all permissions automatically
-    if (role === "admin") {
-      return [
-        "users_read",
-        "users_write",
-        "forms_read",
-        "forms_write",
-        "reports_read",
-        "reports_write",
-        "analytics_read",
-        "system_admin",
-      ];
-    }
-
-    // For other roles, validate that permissions are valid
-    const validPermissions = [];
-    const allValidPermissions = Object.values(this.permissionStructure).flat();
-
-    if (Array.isArray(permissions)) {
-      permissions.forEach((permission) => {
-        if (allValidPermissions.includes(permission)) {
-          validPermissions.push(permission);
-        }
-      });
-    }
-
-    // Remove duplicates
-    return [...new Set(validPermissions)];
-  }
-
-  // Get current user
+  // -------------------------
+  // Helpers
+  // -------------------------
   getCurrentUser() {
     return this.user;
   }
 
-  // Check if user is authenticated
   isUserAuthenticated() {
     return this.isAuthenticated;
   }
 
-  // Convert Firebase error codes to user-friendly messages
+  getUserRoleInfo() {
+    return this.userRole;
+  }
+
   getErrorMessage(errorCode) {
     switch (errorCode) {
       case "auth/user-not-found":
-        return "No account found with this email address";
+        return "No account found";
       case "auth/wrong-password":
         return "Incorrect password";
       case "auth/invalid-email":
-        return "Invalid email address";
-      case "auth/too-many-requests":
-        return "Too many failed attempts. Please try again later";
-      case "auth/user-disabled":
-        return "This account has been disabled";
-      case "auth/network-request-failed":
-        return "Network error. Please check your connection";
+        return "Invalid email";
       default:
-        return "Login failed. Please try again";
+        return "Login failed";
     }
   }
 }

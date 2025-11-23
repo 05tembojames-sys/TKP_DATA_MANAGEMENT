@@ -1,239 +1,155 @@
 
 <template>
-  <div class="dashboard">
-    <!-- Header Section -->
-    <div class="header-section">
-      <!-- User Info -->
-      <div class="user-info" v-if="currentUserName">
-        <span class="user-name">{{ currentUserName }}</span>
-        <span v-if="!isOnline" class="offline-indicator"> (Offline)</span>
-      </div>
-      <!-- Logout Button -->
-      <button @click="handleLogout" class="logout-button">Logout</button>
+    <!-- DHIS2 Top Header -->
+    <TopHeader />
+
+    <!-- Dashboard Toolbar -->
+    <div class="dhis-toolbar-container" v-if="currentView === 'main'">
+       <div class="toolbar-left">
+          <button class="dashboards-btn"><i class="fas fa-bars"></i> Dashboards</button>
+          <div class="dashboard-title">
+             <span>Main Dashboard</span>
+             <i class="fas fa-star favorite-icon"></i>
+          </div>
+       </div>
+       <div class="toolbar-right">
+          <button class="tool-btn">Edit</button>
+          <button class="tool-btn">Share</button>
+          <button class="tool-btn">Slideshow</button>
+          <button class="tool-btn filter-btn"><i class="fas fa-filter"></i> Filter</button>
+       </div>
     </div>
 
-    <!-- Welcome Banner -->
-    <div class="welcome-banner" v-if="currentUserName">
-      <div class="welcome-content">
-        <div class="welcome-text">
-          <h2 class="welcome-greeting">{{ getGreeting() }}, {{ getFirstName() }}! 👋</h2>
-          <p class="welcome-message">{{ getWelcomeMessage() }}</p>
-        </div>
-        <div class="welcome-icon">
-          <i :class="getGreetingIcon()"></i>
-        </div>
-      </div>
-    </div>
-
-    <!-- Offline Banner -->
-    <div v-if="!isOnline" class="offline-banner">
-      <div class="banner-content">
-        <i class="fas fa-cloud-offline"></i>
-        <span
-          >Working in offline mode. Data will sync when connection is
-          restored.</span
-        >
-      </div>
-    </div>
-
-    <!-- Main Content -->
     <div class="dashboard-content">
-      <div v-if="currentView === 'main'">
-        <!-- Two Column Layout -->
-        <div class="dashboard-layout">
-          <!-- Left Section - Logo and Summary -->
-          <div class="left-section">
-            <!-- Logo Card -->
-            <div class="logo-card">
-              <div class="logo-container">
-                <img
-                  src="//images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png"
-                  alt="The Kukhoma Project"
-                  sizes="240px"
-                  class="Mobile-bar-branding-logo"
-                  style="display: block"
-                  srcset="
-                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=100w   100w,
-                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=300w   300w,
-                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=500w   500w,
-                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=750w   750w,
-                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=1000w 1000w,
-                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=1500w 1500w,
-                    //images.squarespace-cdn.com/content/v1/5b08016af8370af3f2b2b58d/1534174468002-2RGE6FR5FO4GFASQDMG2/TKPLogo_Stacked-purple.png?format=2500w 2500w
-                  "
-                  loading="lazy"
-                  decoding="async"
-                  data-loader="sqs"
-                />
-              </div>
-              <h1 class="project-title">THE KUKHOMA PROJECT</h1>
-            </div>
-
-            <!-- Summary Section -->
-            <div class="summary-section">
-              <h3>Summary of the data in the system</h3>
-              <div class="summary-stats">
-                <div class="stat-item">
-                  <div class="stat-number">{{ users.length || 0 }}</div>
-                  <div class="stat-label">Total Users</div>
-                </div>
-                <div class="stat-item">
-                  <div class="stat-number">1</div>
-                  <div class="stat-label">Active Sessions</div>
-                </div>
-                <div class="stat-item">
-                  <div class="stat-number">{{ totalReports || 0 }}</div>
-                  <div class="stat-label">Reports Generated</div>
-                </div>
-                <div class="stat-item">
-                  <div class="stat-number">{{ totalChildren || 0 }}</div>
-                  <div class="stat-label">Children Tracked</div>
-                </div>
-                <div class="stat-item">
-                  <div class="stat-number">{{ totalEvents || 0 }}</div>
-                  <div class="stat-label">Events Recorded</div>
-                </div>
-                <div class="stat-item">
-                  <div class="stat-number">{{ totalDataEntries || 0 }}</div>
-                  <div class="stat-label">Data Entries</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right Section - Dashboard Buttons -->
-          <div class="right-section">
-            <!-- Section Title -->
-            <div class="section-title">
-              <h2>The Kukhoma Project Information Management System</h2>
-            </div>
-
-            <!-- Dashboard Buttons Grid (3x3) -->
-            <div class="dashboard-buttons-grid">
-              <button
-                class="dashboard-btn tracker-btn"
-                @click="setCurrentView('tracker-capture')"
-              >
-                <i class="fas fa-search-location btn-icon"></i>
-                <span>Tracker Capture</span>
-              </button>
-
-              <button
-                class="dashboard-btn reports-btn"
-                @click="setCurrentView('reports')"
-              >
-                <i class="fas fa-chart-bar btn-icon"></i>
-                <span>Reports</span>
-              </button>
-
-              <button
-                class="dashboard-btn data-entry-btn"
-                @click="setCurrentView('data-entry')"
-              >
-                <i class="fas fa-keyboard btn-icon"></i>
-                <span>Data Entry</span>
-              </button>
-
-              <button
-                class="dashboard-btn child-tracker-btn"
-                @click="setCurrentView('child-tracker')"
-              >
-                <i class="fas fa-baby btn-icon"></i>
-                <span>Child Tracker</span>
-              </button>
-
-              <button
-                class="dashboard-btn analytics-btn"
-                @click="setCurrentView('visualization')"
-              >
-                <i class="fas fa-chart-line btn-icon"></i>
-                <span>Analytics</span>
-              </button>
-
-              <button
-                class="dashboard-btn events-btn"
-                @click="setCurrentView('event-reports')"
-              >
-                <i class="fas fa-calendar-alt btn-icon"></i>
-                <span>Events</span>
-              </button>
-
-              <button
-                class="dashboard-btn capture-btn"
-                @click="setCurrentView('capture')"
-              >
-                <i class="fas fa-camera btn-icon"></i>
-                <span>Capture</span>
-              </button>
-
-              <button
-                class="dashboard-btn residents-btn"
-                @click="setCurrentView('child-tracker-2')"
-              >
-                <i class="fas fa-home btn-icon"></i>
-                <span>In Housed Girls</span>
-              </button>
-
-              <button
-                class="dashboard-btn analysis-btn"
-                @click="setCurrentView('data-analysis')"
-              >
-                <i class="fas fa-microscope btn-icon"></i>
-                <span>Analysis</span>
-              </button>
-
-              <!-- Add this new button for Outreach Module -->
-              <button
-                class="dashboard-btn outreach-btn"
-                @click="setCurrentView('outreach')"
-              >
-                <i class="fas fa-route btn-icon"></i>
-                <span>Outreach</span>
-              </button>
-
-              <button
-                class="dashboard-btn users-btn"
-                @click="
-                  canManageUsers ? $router.push('/user-management') : null
-                "
-                :disabled="!canManageUsers"
-                :class="{ 'btn-disabled': !canManageUsers }"
-              >
-                <i class="fas fa-users-cog btn-icon"></i>
-                <span>Users</span>
-              </button>
-
-              <!-- System Management - Only for Super Admin -->
-              <button
-                v-if="isSuperAdmin"
-                class="dashboard-btn system-btn"
-                @click="$router.push('/system-management')"
-              >
-                <i class="fas fa-tools btn-icon"></i>
-                <span>System Management</span>
-              </button>
-
-              <!-- Data Analytics -->
-              <button
-                class="dashboard-btn analytics-btn"
-                @click="$router.push('/data-analytics')"
-              >
-                <i class="fas fa-chart-bar btn-icon"></i>
-                <span>Data Analytics</span>
-              </button>
-            </div>
-
-            <!-- Dashboard Description -->
-            <div class="dashboard-description">
-              <p class="description-text">
-                <strong>The Kukhoma Project Information Management System</strong>
-                provides comprehensive tools for capturing , transforming and Analysing data. The Kukhoma Project exists for God’s glory to rescue
-                teen mothers in Lusaka, Zambia who have been victims of abuse,
-                to restore, equip and empower these girls and their communities.
-              </p>
-            </div>
-          </div>
+      <!-- Offline Banner -->
+      <div v-if="!isOnline" class="offline-banner">
+        <div class="banner-content">
+          <i class="fas fa-cloud-offline"></i>
+          <span>Working in offline mode. Data will sync when connection is restored.</span>
         </div>
+      </div>
+      <div v-if="currentView === 'main'" class="dhis-dashboard-grid">
+          
+          <!-- Welcome/Info Widget (Text) -->
+          <div class="dhis-widget text-widget double-height">
+             <div class="widget-header">
+                <div class="widget-title">Welcome, {{ getFirstName() }}</div>
+                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+             </div>
+             <div class="widget-content welcome-content">
+                <h3>{{ getGreeting() }}!</h3>
+                <p>{{ getWelcomeMessage() }}</p>
+                <div class="user-stats">
+                   <div class="stat"><strong>{{ totalChildren }}</strong> Children Tracked</div>
+                   <div class="stat"><strong>{{ totalReports }}</strong> Reports</div>
+                </div>
+             </div>
+          </div>
+
+          <!-- Tracker Capture Widget -->
+          <div class="dhis-widget chart-widget" @click="setCurrentView('tracker-capture')">
+             <div class="widget-header">
+                <div class="widget-title">Tracker Capture</div>
+                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+             </div>
+             <div class="widget-content center-content">
+                 <div class="big-icon"><i class="fa-solid fa-search"></i></div>
+                 <div class="widget-label">Search & Track</div>
+             </div>
+          </div>
+
+           <!-- Data Entry Widget (Chart) -->
+          <div class="dhis-widget chart-widget" @click="setCurrentView('data-entry')">
+             <div class="widget-header">
+                <div class="widget-title">Data Entry Progress</div>
+                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+             </div>
+             <div class="widget-content">
+                 <canvas ref="formsMiniChart"></canvas>
+             </div>
+          </div>
+
+          <!-- Reports Widget (Chart) -->
+          <div class="dhis-widget chart-widget" @click="setCurrentView('reports')">
+             <div class="widget-header">
+                <div class="widget-title">Reports Generated</div>
+                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+             </div>
+             <div class="widget-content">
+                 <canvas ref="reportsMiniChart"></canvas>
+             </div>
+          </div>
+
+          <!-- Events Widget (Chart) -->
+          <div class="dhis-widget chart-widget" @click="setCurrentView('event-reports')">
+             <div class="widget-header">
+                <div class="widget-title">Event Status</div>
+                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+             </div>
+             <div class="widget-content">
+                 <canvas ref="eventsMiniChart"></canvas>
+             </div>
+          </div>
+
+           <!-- Analytics Widget (Chart) -->
+          <div class="dhis-widget chart-widget" @click="setCurrentView('visualization')">
+             <div class="widget-header">
+                <div class="widget-title">Demographics</div>
+                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+             </div>
+             <div class="widget-content">
+                 <canvas ref="analyticsMiniChart"></canvas>
+             </div>
+          </div>
+
+           <!-- Outreach Widget -->
+          <div class="dhis-widget chart-widget" @click="setCurrentView('outreach')">
+             <div class="widget-header">
+                <div class="widget-title">Outreach</div>
+                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+             </div>
+             <div class="widget-content center-content">
+                 <div class="big-icon"><i class="fa-solid fa-route"></i></div>
+                 <div class="widget-label">Offline Sync</div>
+             </div>
+          </div>
+          
+          <!-- User Management Widget -->
+          <div class="dhis-widget chart-widget" :class="{ disabled: !canManageUsers }" @click="canManageUsers ? $router.push('/user-management') : null">
+             <div class="widget-header">
+                <div class="widget-title">User Management</div>
+                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+             </div>
+             <div class="widget-content center-content">
+                 <div class="big-icon"><i class="fa-solid fa-users-cog"></i></div>
+                 <div class="widget-label">{{ users.length }} Users</div>
+             </div>
+          </div>
+
+          <!-- System Management Widget -->
+          <div v-if="isSuperAdmin" class="dhis-widget chart-widget" @click="$router.push('/system-management')">
+            <div class="widget-header">
+              <div class="widget-title">System Management</div>
+              <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+            </div>
+            <div class="widget-content center-content">
+                <div class="big-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                <div class="widget-label">Admin Tools</div>
+            </div>
+          </div>
+
+          <!-- Data Analytics Widget -->
+          <div class="dhis-widget chart-widget" @click="$router.push('/data-analytics')">
+            <div class="widget-header">
+              <div class="widget-title">Data Analytics</div>
+              <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+            </div>
+            <div class="widget-content center-content">
+                <div class="big-icon"><i class="fa-solid fa-chart-simple"></i></div>
+                <div class="widget-label">Advanced Analytics</div>
+            </div>
+          </div>
+
       </div>
 
       <!-- User Management Section -->
@@ -380,164 +296,8 @@
       </div>
 
       <!-- Data Entry Forms Section -->
-      <div v-if="currentView === 'data-entry'" class="forms-section">
-        <div class="section-header">
-          <h2>Data Entry</h2>
-          <div class="header-actions">
-            <button class="back-btn" @click="setCurrentView('main')">
-              Back to Dashboard
-            </button>
-          </div>
-        </div>
-
-        <!-- Forms Navigation -->
-        <div class="forms-navigation">
-          <div class="form-tabs">
-            <button
-              v-for="form in availableForms"
-              :key="form.id"
-              @click="setCurrentForm(form.id)"
-              :class="['form-tab', { active: currentForm === form.id }]"
-            >
-              {{ form.name }}
-            </button>
-          </div>
-        </div>
-
-        <!-- Form Content -->
-        <div class="form-content">
-          <!-- Initial Child Referral Forms List -->
-          <div
-            v-if="currentForm === 'initial-referral-list'"
-            class="forms-list-container"
-          >
-            <FormsList
-              :form-type="'initial-referral'"
-              @form-edit="handleFormEdit"
-              @add-new-form="handleAddNewForm"
-            />
-          </div>
-
-          <!-- Child Overview Forms List -->
-          <div
-            v-else-if="currentForm === 'child-overview-list'"
-            class="forms-list-container"
-          >
-            <FormsList
-              :form-type="'child-overview'"
-              @form-edit="handleFormEdit"
-              @add-new-form="handleAddNewForm"
-            />
-          </div>
-
-          <!-- TKP Initial Assessment Forms List -->
-          <div
-            v-else-if="currentForm === 'initial-assessment-list'"
-            class="forms-list-container"
-          >
-            <FormsList
-              :form-type="'initial-assessment'"
-              @form-edit="handleFormEdit"
-              @add-new-form="handleAddNewForm"
-            />
-          </div>
-
-          <!-- Medical Intake Assessment Forms List -->
-          <div
-            v-else-if="currentForm === 'medical-intake-list'"
-            class="forms-list-container"
-          >
-            <FormsList
-              :form-type="'medical-intake'"
-              @form-edit="handleFormEdit"
-              @add-new-form="handleAddNewForm"
-            />
-          </div>
-
-          <!-- Initial Child Referral Form -->
-          <div
-            v-else-if="currentForm === 'initial-referral-new'"
-            class="form-container"
-          >
-            <div class="form-header">
-              <h3>New Initial Child Referral Form</h3>
-              <button
-                @click="backToFormsList('initial-referral')"
-                class="back-to-list-btn"
-              >
-                ← Back to Forms List
-              </button>
-            </div>
-            <InitialReferralForm 
-              :edit-data="getEditFormData('initial-referral')"
-              :is-edit-mode="isEditMode('initial-referral')"
-              @form-saved="handleFormSaved" 
-            />
-          </div>
-
-          <!-- Child Overview and Background Form -->
-          <div
-            v-else-if="currentForm === 'child-overview-new'"
-            class="form-container"
-          >
-            <div class="form-header">
-              <h3>New Child Overview and Background Form</h3>
-              <button
-                @click="backToFormsList('child-overview')"
-                class="back-to-list-btn"
-              >
-                ← Back to Forms List
-              </button>
-            </div>
-            <ChildOverviewForm 
-              :edit-data="getEditFormData('child-overview')"
-              :is-edit-mode="isEditMode('child-overview')"
-              @form-saved="handleFormSaved" 
-            />
-          </div>
-
-          <!-- TKP Initial Assessment Form -->
-          <div
-            v-else-if="currentForm === 'initial-assessment-new'"
-            class="form-container"
-          >
-            <div class="form-header">
-              <h3>New TKP Initial Assessment Form</h3>
-              <button
-                @click="backToFormsList('initial-assessment')"
-                class="back-to-list-btn"
-              >
-                ← Back to Forms List
-              </button>
-            </div>
-            <InitialAssessmentForm 
-              :edit-data="getEditFormData('initial-assessment')"
-              :is-edit-mode="isEditMode('initial-assessment')"
-              @form-saved="handleFormSaved" 
-            />
-          </div>
-
-          <!-- Medical Intake Assessment Form -->
-          <div
-            v-else-if="currentForm === 'medical-intake-new'"
-            class="form-container"
-          >
-            <div class="form-header">
-              <h3>New Medical Intake Assessment Form</h3>
-              <button
-                @click="backToFormsList('medical-intake')"
-                class="back-to-list-btn"
-              >
-                ← Back to Forms List
-              </button>
-            </div>
-            <MedicalIntakeForm 
-              :edit-data="getEditFormData('medical-intake')"
-              :is-edit-mode="isEditMode('medical-intake')"
-              @form-saved="handleFormSaved" 
-            />
-          </div>
-        </div>
+      <div v-if="currentView === 'data-entry'" class="forms-section" style="padding: 0; height: calc(100vh - 48px);">
+        <AggregateDataEntry />
       </div>
 
       <!-- Child Tracker Section -->
@@ -551,6 +311,7 @@
           :show-only-complete="currentView === 'child-tracker-2'"
           @back-to-dashboard="setCurrentView('main')"
           @navigate-to-medical-intake="handleNavigateToMedicalIntake"
+          @toggle-in-housed="toggleInHousedMode"
         />
       </div>
 
@@ -611,12 +372,13 @@
         </button>
       </div>
     </div>
-  </div>
+ 
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { useRouter } from "vue-router";
+import TopHeader from "./TopHeader.vue";
+import { ref, onMounted, computed, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useToast } from "../composables/useToast.js";
 import AuthService from "../services/auth.js";
 import UserService from "../services/userService.js";
@@ -633,11 +395,14 @@ import Reports from "./Reports.vue";
 import EventReports from "./EventReports.vue";
 import FormService from "../services/formService.js";
 import OutreachModule from "./OutreachModule.vue";
+import AggregateDataEntry from "./AggregateDataEntry.vue";
+import Chart from "chart.js/auto";
 
 // Import custom SVG icon (uncomment when you add the file)
 // import DataEntryIcon from '../assets/icons/data-entry.svg?url'
 
 const router = useRouter();
+const route = useRoute();
 const { success, error, confirm } = useToast();
 
 // View management
@@ -646,11 +411,17 @@ const currentView = ref("main");
 // User management
 const users = ref([]);
 const loadingUsers = ref(false);
-const loading = ref(false);
-const showAddUserForm = ref(false);
-const showEditUserForm = ref(false);
-const currentUserName = ref("");
-const isOnline = ref(navigator.onLine); // Track online status
+  const loading = ref(false);
+  const showAddUserForm = ref(false);
+  const showEditUserForm = ref(false);
+  const currentUserName = ref("");
+  const isOnline = ref(navigator.onLine); // Track online status
+  const selectedDashboard = ref("main");
+  const searchQuery = ref("");
+  const formsMiniChart = ref(null);
+  const reportsMiniChart = ref(null);
+  const eventsMiniChart = ref(null);
+  const analyticsMiniChart = ref(null);
 
 // Summary statistics
 const totalReports = ref(0);
@@ -821,6 +592,14 @@ const handleNavigateToMedicalIntake = () => {
   selectedFormType.value = "medical-intake";
 };
 
+const toggleInHousedMode = () => {
+  if (currentView.value === 'child-tracker') {
+    currentView.value = 'child-tracker-2';
+  } else {
+    currentView.value = 'child-tracker';
+  }
+};
+
 // Load summary data
 const loadSummaryData = async () => {
   try {
@@ -868,6 +647,17 @@ const getSectionTitle = (view) => {
   };
   return titles[view] || "Section";
 };
+
+// Watch for route query changes to update view
+watch(
+  () => route.query.view,
+  (newView) => {
+    if (newView) {
+      currentView.value = newView;
+    }
+  },
+  { immediate: true }
+);
 
 // User management functions
 const loadUsers = async () => {
@@ -1060,6 +850,15 @@ const getFirstName = () => {
   return nameParts[0];
 };
 
+const getInitials = () => {
+  if (!currentUserName.value) return "U";
+  const nameParts = currentUserName.value.split(" ");
+  if (nameParts.length >= 2) {
+    return (nameParts[0][0] + nameParts[1][0]).toUpperCase();
+  }
+  return nameParts[0][0].toUpperCase();
+};
+
 // Get time-based greeting
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -1117,6 +916,13 @@ const handleLogout = async () => {
   }
 };
 
+// Watch for route query changes
+watch(() => route.query.view, (newView) => {
+  if (newView) {
+    setCurrentView(newView);
+  }
+});
+
 // Load summary data when component mounts
 onMounted(() => {
   // Set current user name
@@ -1153,6 +959,11 @@ onMounted(() => {
   // Check for query parameters (e.g., from Child Tracker navigation)
   const query = router.currentRoute.value.query;
 
+  // Handle view query parameter from TopHeader navigation
+  if (query.view) {
+    setCurrentView(query.view);
+  }
+
   // Handle openForm query parameter from TrackerCapture
   if (query.openForm) {
     console.log("📋 Dashboard received openForm query:", query.openForm);
@@ -1178,6 +989,68 @@ onMounted(() => {
     selectedFormType.value = query.openForm;
   }
 });
+
+onMounted(() => {
+  setTimeout(async () => {
+    await createMiniCharts();
+  }, 400);
+});
+
+const createMiniCharts = async () => {
+  try {
+    const [referrals, overviews, assessments] = await Promise.all([
+      FormService.getForms('initial-referral', 100),
+      FormService.getForms('child-overview', 100),
+      FormService.getForms('initial-assessment', 100)
+    ]);
+
+    const referralForms = referrals.success ? referrals.forms : [];
+    const overviewForms = overviews.success ? overviews.forms : [];
+    const assessmentForms = assessments.success ? assessments.forms : [];
+
+    if (formsMiniChart.value) {
+      const ctx = formsMiniChart.value.getContext('2d');
+      const data = {
+        labels: ['Initial Referral', 'Child Overview', 'Assessment'],
+        datasets: [{
+          data: [referralForms.length, overviewForms.length, assessmentForms.length],
+          backgroundColor: ['#2c6693', '#6b7280', '#f59e0b']
+        }]
+      };
+      new Chart(ctx, { type: 'doughnut', data, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+    }
+
+    if (reportsMiniChart.value) {
+      const ctx = reportsMiniChart.value.getContext('2d');
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const count = new Array(12).fill(0);
+      [...overviewForms, ...referralForms, ...assessmentForms].forEach(f => {
+        const d = f.createdAt || f.submittedAt || f.dateCreated;
+        if (!d) return;
+        const date = d?.toDate ? d.toDate() : new Date(d);
+        const m = date.getMonth();
+        count[m]++;
+      });
+      new Chart(ctx, { type: 'bar', data: { labels: months, datasets: [{ data: count, backgroundColor: '#2c6693' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+    }
+
+    if (eventsMiniChart.value) {
+      const ctx = eventsMiniChart.value.getContext('2d');
+      const statusCount = {};
+      [...overviewForms, ...assessmentForms, ...referralForms].forEach(f => { const s = f.status || f.caseStatus || 'Unknown'; statusCount[s] = (statusCount[s]||0)+1; });
+      const labels = Object.keys(statusCount);
+      const values = Object.values(statusCount);
+      new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ data: values, backgroundColor: '#f59e0b' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+    }
+
+    if (analyticsMiniChart.value) {
+      const ctx = analyticsMiniChart.value.getContext('2d');
+      const genderCount = { Female: 0, Male: 0 };
+      [...overviewForms, ...referralForms, ...assessmentForms].forEach(f => { const g = f.gender; if (g === 'Female') genderCount.Female++; else if (g === 'Male') genderCount.Male++; });
+      new Chart(ctx, { type: 'pie', data: { labels: Object.keys(genderCount), datasets: [{ data: Object.values(genderCount), backgroundColor: ['#10b981', '#ef4444'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+    }
+  } catch (e) {}
+};
 </script>
 
 <style scoped>
@@ -1187,749 +1060,226 @@ onMounted(() => {
   background-color: #eeeeee; /* Light gray background */
 }
 
-/* Top Section */
-.header-section {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: #eeeeee;
-}
+/* DHIS2 Style Implementation */
 
-.logo-card {
+/* Top Header Styles moved to TopHeader.vue */
+
+/* Toolbar */
+.dhis-toolbar-container {
   background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 24px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.logo-container {
-  width: 100px;
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.logo-image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.project-title {
-  color: #4a148c; /* Dark purple */
-  font-weight: bold;
-  font-size: 1.5rem;
-  margin: 0;
-  text-align: center;
-}
-
-.logout-button {
-  background-color: #4a148c; /* Dark purple - same as logo */
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s;
-}
-
-.logout-button:hover {
-  background-color: #2d1b69; /* Darker purple on hover */
-}
-
-/* User Info */
-.user-info {
-  margin-right: 1rem;
-  display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 
-.user-name {
-  color: #4a148c;
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboards-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #d1d5db;
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: #374151;
   font-weight: 500;
-  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-/* Main Content */
+.dashboards-btn:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.dashboard-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.favorite-icon {
+  color: #fbbf24; /* Amber for star */
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.toolbar-right {
+  display: flex;
+  gap: 8px;
+}
+
+.tool-btn {
+  background: white;
+  border: 1px solid #d1d5db;
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: #4b5563;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tool-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+/* Dashboard Content */
 .dashboard-content {
-  padding: 2rem;
-  max-width: 1400px;
+  padding: 24px;
+  background-color: #f3f4f6;
+  min-height: calc(100vh - 110px);
+}
+
+.dhis-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
-/* Dashboard Layout */
-.dashboard-layout {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 3rem;
-  align-items: start;
-}
-
-/* Left Section */
-.left-section {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.logo-card {
+/* Widgets */
+.dhis-widget {
   background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  max-width: 300px;
-}
-
-.logo-container {
-  width: 240px;
-  height: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.Mobile-bar-branding-logo {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-
-.project-title {
-  color: #4a148c; /* Dark purple */
-  font-weight: bold;
-  font-size: 1.2rem;
-  margin: 0;
-  text-align: center;
-  line-height: 1.3;
-}
-
-.summary-section {
-  padding: 1rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.summary-section h3 {
-  color: #4a148c;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 1.5rem 0;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.summary-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 0.5rem;
-}
-
-.stat-number {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #4a148c;
-  margin-bottom: 0.25rem;
-}
-
-.stat-label {
-  font-size: 0.8rem;
-  color: #666;
-  font-weight: 500;
-}
-
-/* Right Section */
-.right-section {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.section-title h2 {
-  color: #333;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin: 0;
-  text-align: left;
-  text-transform: uppercase;
-}
-
-/* Dashboard Buttons Grid - Responsive Layout */
-.dashboard-buttons-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 0.75rem;
-  max-width: 100%;
-  justify-items: center;
-}
-
-.dashboard-btn {
-  background: linear-gradient(135deg, #4a148c 0%, #2d1b69 100%);
-  color: #ffffff;
-  padding: 18px 14px;
-  border: none;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-height: 95px;
-  width: 150px;
-  max-width: 150px;
-  font-weight: 500;
-  text-align: center;
-  line-height: 1.2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  position: relative;
-  box-shadow: 0 4px 15px rgba(74, 20, 140, 0.25);
+  height: 320px; /* Fixed height for uniformity */
+  transition: box-shadow 0.2s;
   overflow: hidden;
 }
 
-.dashboard-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
+.dhis-widget:hover {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
-.dashboard-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(74, 20, 140, 0.35);
+.dhis-widget.double-height {
+  grid-row: span 1; /* Keep it single row for now, or span 2 if needed */
 }
 
-.dashboard-btn:hover::before {
-  opacity: 1;
+.widget-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
 }
 
-.dashboard-btn:active {
-  transform: translateY(-1px);
+.widget-title {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.95rem;
 }
 
-/* Individual button color schemes */
-.tracker-btn {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+.widget-controls {
+  color: #9ca3af;
+  cursor: pointer;
 }
 
-.tracker-btn:hover {
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+.widget-controls:hover {
+  color: #4b5563;
 }
 
-.reports-btn {
-  background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+.widget-content {
+  flex: 1;
+  padding: 16px;
+  overflow: hidden;
+  position: relative;
 }
 
-.reports-btn:hover {
-  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+.widget-content.center-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  cursor: pointer;
 }
 
-.data-entry-btn {
-  background: linear-gradient(135deg, #ffd93d 0%, #ffc53d 100%);
-  box-shadow: 0 4px 15px rgba(255, 217, 61, 0.3);
-  color: #333;
+.widget-content.center-content:hover .big-icon {
+  transform: scale(1.1);
+  color: #2c6693;
 }
 
-.data-entry-btn:hover {
-  box-shadow: 0 6px 20px rgba(255, 217, 61, 0.4);
-}
-
-.child-tracker-btn {
-  background: linear-gradient(135deg, #a8e6cf 0%, #7bdcb5 100%);
-  box-shadow: 0 4px 15px rgba(168, 230, 207, 0.3);
-  color: #333;
-}
-
-.child-tracker-btn:hover {
-  box-shadow: 0 6px 20px rgba(168, 230, 207, 0.4);
-}
-
-.analytics-btn {
-  background: linear-gradient(135deg, #95e1d3 0%, #38a3a5 100%);
-  box-shadow: 0 4px 15px rgba(149, 225, 211, 0.3);
-}
-
-.analytics-btn:hover {
-  box-shadow: 0 6px 20px rgba(149, 225, 211, 0.4);
-}
-
-.events-btn {
-  background: linear-gradient(135deg, #faa43a 0%, #f77f00 100%);
-  box-shadow: 0 4px 15px rgba(250, 164, 58, 0.3);
-}
-
-.events-btn:hover {
-  box-shadow: 0 6px 20px rgba(250, 164, 58, 0.4);
-}
-
-.capture-btn {
-  background: linear-gradient(135deg, #b983ff 0%, #8c5eff 100%);
-  box-shadow: 0 4px 15px rgba(185, 131, 255, 0.3);
-}
-
-.capture-btn:hover {
-  box-shadow: 0 6px 20px rgba(185, 131, 255, 0.4);
-}
-
-.residents-btn {
-  background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
-  box-shadow: 0 4px 15px rgba(253, 121, 168, 0.3);
-}
-
-.residents-btn:hover {
-  box-shadow: 0 6px 20px rgba(253, 121, 168, 0.4);
-}
-
-.analysis-btn {
-  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-  box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
-}
-
-.analysis-btn:hover {
-  box-shadow: 0 6px 20px rgba(116, 185, 255, 0.4);
-}
-
-.users-btn {
-  background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
-  box-shadow: 0 4px 15px rgba(162, 155, 254, 0.3);
-}
-
-.users-btn:hover {
-  box-shadow: 0 6px 20px rgba(162, 155, 254, 0.4);
-}
-
-.system-btn {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
-  border: 2px solid #fff;
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.system-btn:hover {
-  box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
-  transform: translateY(-2px) scale(1.05);
-}
-
-.analytics-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  border: 2px solid #fff;
-}
-
-.analytics-btn:hover {
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-  transform: translateY(-2px) scale(1.05);
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
-  }
-  50% {
-    box-shadow: 0 6px 25px rgba(240, 147, 251, 0.6);
-  }
-}
-
-.btn-icon {
-  font-size: 2rem;
-  flex-shrink: 0;
-  opacity: 0.95;
+.big-icon {
+  font-size: 4rem;
+  color: #9ca3af;
   transition: all 0.3s ease;
+}
+
+.widget-label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+/* Welcome Widget Specifics */
+.welcome-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.welcome-content h3 {
+  font-size: 1.8rem;
+  color: #2c6693;
+  margin-bottom: 8px;
+}
+
+.welcome-content p {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.user-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.stat strong {
+  font-size: 1.5rem;
+  color: #111827;
   margin-bottom: 4px;
 }
 
-.dashboard-btn:hover .btn-icon {
-  opacity: 1;
-  transform: scale(1.1) rotate(5deg);
-}
-
-/* Disabled button state */
-.dashboard-btn:disabled,
-.dashboard-btn.btn-disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
-  box-shadow: 0 2px 8px rgba(158, 158, 158, 0.2);
-}
-
-.dashboard-btn:disabled:hover,
-.dashboard-btn.btn-disabled:hover {
-  transform: none;
-  box-shadow: 0 2px 8px rgba(158, 158, 158, 0.2);
-}
-
-.dashboard-btn:disabled .btn-icon,
-.dashboard-btn.btn-disabled .btn-icon {
-  transform: none;
-}
-
-.dashboard-btn span {
-  line-height: 1.1;
-  text-align: center;
-  font-size: 0.8rem;
-  font-weight: 600;
-  display: block;
-  letter-spacing: 0.3px;
-}
-
-/* Dashboard Description */
-.dashboard-description {
-  margin-top: 2rem;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  
-  }
-
-.description-text {
-  color: #333;
-  font-size: 1.5rem;
-  line-height: 1.6;
-  margin: 0;
-  text-align: justify;
-}
-
-.description-text strong {
-  color: #4a148c;
-  font-weight: 600;
-}
-
-.description-text em {
-  color: #2d1b69;
-  font-style: normal;
-  font-weight: 500;
-  background: rgba(74, 20, 140, 0.1);
-  padding: 1px 4px;
-  border-radius: 3px;
-}
-
-/* User Management Section */
-.user-management {
-  background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #eeeeee;
-}
-
-.section-header h2 {
-  color: #4a148c; /* Dark purple */
-  margin: 0;
-  font-size: 2rem;
-}
-
-.header-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-.back-btn {
-  background-color: #333333; /* Dark gray */
+/* Offline Banner */
+.offline-banner {
+  background-color: #f59e0b; /* Amber 500 */
   color: white;
   padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.3s;
-}
-
-.back-btn:hover {
-  background-color: #555;
-}
-
-/* Forms */
-.user-form {
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-}
-
-.user-form h3 {
-  color: #4a148c;
-  margin: 0 0 1.5rem 0;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  color: #4a148c; /* Dark purple */
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.form-group input {
-  padding: 0.75rem;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  color: #4a148c;
-  transition: border-color 0.3s ease;
-}
-
-.form-group input:focus {
-  outline: none;
-  border-color: #4a148c;
-}
-
-.form-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-start;
-  margin-top: 1.5rem;
-}
-
-.cancel-btn {
-  background-color: #6c757d;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
-}
-
-.cancel-btn:hover {
-  background-color: #5a6268;
-}
-
-/* Users Table */
-.users-table {
-  margin-top: 2rem;
-}
-
-.loading,
-.no-users {
-  text-align: center;
-  padding: 2rem;
-  color: #666;
-  font-size: 1.1rem;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-th,
-td {
-  text-align: left;
-  padding: 1rem;
-  border-bottom: 1px solid #dee2e6;
-}
-
-th {
-  background-color: #4a148c; /* Dark purple */
-  color: white;
-  font-weight: bold;
-}
-
-tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-.actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.edit-btn {
-  background-color: #17a2b8;
-  color: white;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: background-color 0.3s;
-}
-
-.edit-btn:hover {
-  background-color: #138496;
-}
-
-.delete-btn {
-  background-color: #dc3545;
-  color: white;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: background-color 0.3s;
-}
-
-.delete-btn:hover {
-  background-color: #c82333;
-}
-
-/* Forms Section */
-.forms-section {
-  background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.forms-navigation {
-  margin-bottom: 2rem;
-  border-bottom: 2px solid #eeeeee;
-  padding-bottom: 1rem;
-}
-
-.form-tabs {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.form-tab {
-  background-color: #f8f9fa;
-  color: #4a148c;
-  padding: 12px 20px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s;
-  font-size: 0.9rem;
-}
-
-.form-tab:hover {
-  background-color: #e9ecef;
-  border-color: #4a148c;
-}
-
-.form-tab.active {
-  background-color: #4a148c;
-  color: white;
-  border-color: #4a148c;
-}
-
-.form-content {
-  min-height: 500px;
-}
-
-.form-container {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 2rem;
-  border: 1px solid #e9ecef;
-}
-
-.form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding: 2rem;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-radius: 12px;
-  border-left: 6px solid #4a148c;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e9ecef;
-  position: relative;
-  overflow: hidden;
-}
-
-.form-header::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #4a148c 0%, #ff5722 100%);
-}
-
-.form-header h3 {
-  color: #4a148c;
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 600;
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.form-header h3::before {
-  content: "📋";
-  font-size: 1.5rem;
-}
-
-.back-to-list-btn {
-  background-color: #4a148c;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 2px 4px rgba(74, 20, 140, 0.3);
-}
-
-.back-to-list-btn:hover {
-  background-color: #2d1b69;
-  transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(74, 20, 140, 0.4);
 }
 

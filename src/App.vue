@@ -6,14 +6,36 @@ import Toast from "./components/Toast.vue";
 
 const router = useRouter();
 
-// Set up authentication state listener
-onMounted(() => {
+onMounted(async () => {
+  try {
+    // Check if admin exists in Firestore
+    const adminExists = await AuthService.checkAdminExists();
+    
+    // If we can't determine if admin exists (due to permissions), check if we're already on the setup page
+    if (adminExists === null) {
+      if (router.currentRoute.value.path === "/setup-admin") {
+        // If we're already on the setup page, stay there
+        return;
+      }
+      // Otherwise, assume admin exists to prevent lockout
+      console.warn('Could not verify admin status. Proceeding with the assumption that an admin exists.');
+    } else if (!adminExists && router.currentRoute.value.path !== "/setup-admin") {
+      // If we're sure no admin exists, go to setup
+      router.push("/setup-admin");
+      return;
+    }
+  } catch (error) {
+    console.error('Error in onMounted admin check:', error);
+    // Continue with the rest of the code even if there's an error
+  }
+
+  // Listen to auth changes
   AuthService.onAuthStateChange((user, isAuthenticated) => {
-    // Check if we're in offline mode and have saved auth data
     const savedAuthState = localStorage.getItem("tkp_auth_state");
     const isOfflineAuthenticated =
       savedAuthState === "authenticated" && !navigator.onLine;
 
+    // If admin exists, handle normal auth navigation
     if (
       (isAuthenticated || isOfflineAuthenticated) &&
       router.currentRoute.value.path === "/login"
@@ -31,26 +53,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="app">
-    <router-view />
-    <Toast />
-  </div>
+  <router-view />
+  <Toast />
+  
 </template>
-
-<style>
-/* Global styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  line-height: 1.6;
-}
-
-#app {
-  min-height: 100vh;
-}
-</style>

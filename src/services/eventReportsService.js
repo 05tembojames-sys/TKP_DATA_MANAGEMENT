@@ -101,7 +101,7 @@ class EventReportsService {
       console.log(`Found ${forms.length} forms for program ${config.program}`);
 
       // Apply period filter
-      if (config.periodType && config.selectedPeriods.length > 0) {
+      if (config.periodType && config.selectedPeriods && config.selectedPeriods.length > 0) {
         forms = this.filterByPeriod(
           forms,
           config.periodType,
@@ -177,8 +177,7 @@ class EventReportsService {
 
       if (!matches) {
         console.log(
-          `Form ${
-            form.id
+          `Form ${form.id
           } (${formDate.toISOString()}) -> periodId: ${periodId} not in`,
           selectedPeriods
         );
@@ -442,8 +441,8 @@ class EventReportsService {
             form.formType === "initial-referral"
               ? 1
               : form.formType === "initial-assessment"
-              ? 2
-              : 3;
+                ? 2
+                : 3;
           break;
         default:
           value = 1; // Count
@@ -540,7 +539,7 @@ class EventReportsService {
         { id: "dateOfReferral", name: "Date of Referral" },
         { id: "reasonForReferral", name: "Reason for Referral" },
       ],
-      
+
       "child-overview": [
         ...baseElements,
         { id: "vulnerabilityStatus", name: "Vulnerability Status" },
@@ -549,7 +548,7 @@ class EventReportsService {
         { id: "healthStatus", name: "Health Status" },
         { id: "safeguardingConcerns", name: "Safeguarding Concerns" },
       ],
-      
+
       "initial-assessment": [
         ...baseElements,
         { id: "assessmentType", name: "Assessment Type" },
@@ -558,7 +557,7 @@ class EventReportsService {
         { id: "recommendations", name: "Recommendations" },
         { id: "assessmentDate", name: "Assessment Date" },
       ],
-      
+
       "medical-intake": [
         ...baseElements,
         { id: "medicalHistory", name: "Medical History" },
@@ -567,7 +566,7 @@ class EventReportsService {
         { id: "immunizations", name: "Immunizations" },
         { id: "pregnant", name: "Pregnant" },
       ],
-      
+
       "academics-literacy": [
         ...baseElements,
         { id: "educationLevel", name: "Education Level" },
@@ -576,7 +575,7 @@ class EventReportsService {
         { id: "academicPerformance", name: "Academic Performance" },
         { id: "specialNeeds", name: "Special Needs" },
       ],
-      
+
       "psychological-assessment": [
         ...baseElements,
         { id: "mentalHealth", name: "Mental Health Status" },
@@ -585,7 +584,7 @@ class EventReportsService {
         { id: "traumaHistory", name: "Trauma History" },
         { id: "supportNeeded", name: "Support Needed" },
       ],
-      
+
       "life-skills-survey": [
         ...baseElements,
         { id: "lifeSkillsLevel", name: "Life Skills Level" },
@@ -594,7 +593,7 @@ class EventReportsService {
         { id: "vocationalSkills", name: "Vocational Skills" },
         { id: "decisionMaking", name: "Decision Making" },
       ],
-      
+
       "birth-delivery": [
         ...baseElements,
         { id: "deliveryDate", name: "Delivery Date" },
@@ -603,7 +602,7 @@ class EventReportsService {
         { id: "complications", name: "Complications" },
         { id: "healthStatus", name: "Health Status" },
       ],
-      
+
       "care-plan-summary": [
         ...baseElements,
         { id: "carePlanGoals", name: "Care Plan Goals" },
@@ -612,7 +611,7 @@ class EventReportsService {
         { id: "progress", name: "Progress" },
         { id: "challenges", name: "Challenges" },
       ],
-      
+
       "care-plan-baby": [
         ...baseElements,
         { id: "babyAge", name: "Baby Age" },
@@ -621,7 +620,7 @@ class EventReportsService {
         { id: "healthCheckups", name: "Health Checkups" },
         { id: "immunizationStatus", name: "Immunization Status" },
       ],
-      
+
       "care-plan-ongoing-life-skills": [
         ...baseElements,
         { id: "skillsAcquired", name: "Skills Acquired" },

@@ -3,6 +3,7 @@ import "@fortawesome/fontawesome-free/css/all.css";
 import App from "./App.vue";
 import router from "./router/index.js";
 import "./style.css";
+import "./assets/dhis2-forms.css";
 
 // Dev utilities - exposed to browser console
 import { fixFormStatus, checkFormStatus } from "./utils/fixFormStatus.js";
@@ -26,7 +27,7 @@ if ("serviceWorker" in navigator && import.meta.env.MODE === "production") {
   });
 } else if (import.meta.env.MODE === "development") {
   console.log("ℹ️ Service Worker disabled in development mode");
-  
+
   // Unregister any existing service workers in development
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.getRegistrations().then((registrations) => {

@@ -1,3602 +1,2136 @@
 <template>
   <div class="tracker-capture-container">
-    <!-- Header -->
-    <div class="tracker-header">
+    <!-- Top Header -->
+    <TopHeader />
+
+    <!-- Tracker Sub-Header -->
+    <div class="tracker-sub-header">
       <div class="header-left">
-        <button @click="goBack" class="back-button">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="m12 19-7-7 7-7" />
-            <path d="m19 12H5" />
-          </svg>
-          Back to Dashboard
-        </button>
-      </div>
-      <div class="header-center">
-        <h1 class="tracker-title">Tracker Capture - Child Cases</h1>
-        <div class="data-source-indicator"></div>
+        <h1 class="tracker-title">Tracker Capture</h1>
+        <span class="program-badge">Child Protection Program</span>
       </div>
       <div class="header-right">
-        <button
-          @click="showNewEnrollmentModal = true"
-          class="new-enrollment-button"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M12 5v14" />
-            <path d="m5 12 14 0" />
-          </svg>
-          New Enrollment
-        </button>
-        <button @click="handleLogout" class="logout-button">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Logout
+        <button @click="showRegisterModal = true" class="register-button">
+          <i class="fas fa-plus"></i>
+          Register
         </button>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="tracker-content">
-      <!-- DHIS2 EMIS Style Toolbar -->
-      <div class="dhis2-toolbar">
-        <div class="toolbar-section">
-          <div class="toolbar-item">
-            <label>Organisation Unit</label>
-            <select v-model="selectedOrgUnit" class="toolbar-select">
-              <option value="main">The Kukhoma Project - Main Center</option>
-              <option value="lusaka">Community Outreach - Lusaka</option>
-              <option value="chongwe">Community Outreach - Chongwe</option>
-            </select>
-          </div>
-
-          <div class="toolbar-item">
-            <label>Program</label>
-            <select v-model="selectedProgram" class="toolbar-select">
-              <option value="child-protection">Child Protection Program</option>
-              <option value="pregnancy-support">
-                Pregnancy Support Program
-              </option>
-              <option value="family-support">Family Support Program</option>
-            </select>
-          </div>
+    <div class="tracker-main">
+      <!-- Left Sidebar - Organisation Units -->
+      <div class="org-unit-sidebar">
+        <div class="sidebar-header">
+          <h3>Organisation Units</h3>
         </div>
-
-        <div class="toolbar-section">
-          <button @click="refreshData" class="toolbar-button">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                d="M21 12a9 9 0 0 1-9 9c-4.97 0-9-4.03-9-9 0-4.97 4.03-9 9-9"
-              />
-              <path d="M16 12l-4-4-4 4M12 16V8" />
-            </svg>
-            Refresh
-          </button>
-
-          <button @click="exportData" class="toolbar-button">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Export
-          </button>
+        <div class="org-tree">
+          <div 
+            v-for="unit in orgUnits" 
+            :key="unit.id"
+            class="org-unit-item"
+            :class="{ active: selectedOrgUnit === unit.id }"
+            @click="selectOrgUnit(unit.id)"
+          >
+            <i :class="unit.icon"></i>
+            <span>{{ unit.name }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Search and Filter Panel -->
-      <div class="search-panel">
-        <div class="search-controls">
-          <div class="search-input-group">
-            <label class="search-label">Search Cases</label>
-            <div class="search-input-container">
-              <svg
-                class="search-icon"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-              <input
-                type="text"
-                v-model="searchQuery"
-                @input="performSearch"
-                placeholder="Search by name, ID, or case number..."
-                class="search-input"
-              />
-              <button
-                v-if="searchQuery"
-                @click="clearSearch"
-                class="clear-search"
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="m18 6-12 12" />
-                  <path d="m6 6 12 12" />
-                </svg>
+      <!-- Center Panel - Tracked Entities List -->
+      <div class="entities-panel">
+        <!-- Search and Filters -->
+        <div class="search-section">
+          <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input 
+              type="text" 
+              v-model="searchQuery"
+              placeholder="Search by name, ID..."
+              @input="filterEntities"
+            />
+            <button v-if="searchQuery" @click="searchQuery = ''" class="clear-btn">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          
+          <div class="filters">
+            <select v-model="filterStatus" @change="filterEntities" class="filter-select">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            
+            <select v-model="filterGender" @change="filterEntities" class="filter-select">
+              <option value="">All Genders</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Entities List -->
+        <div class="entities-list">
+          <div class="list-header">
+            <span class="col-wide">Name</span>
+            <span class="col">ID</span>
+            <span class="col">Age</span>
+            <span class="col">Gender</span>
+            <span class="col">Enrollment Date</span>
+            <span class="col-action">Action</span>
+          </div>
+          
+          <div 
+            v-for="entity in filteredEntities" 
+            :key="entity.id"
+            class="entity-item"
+            :class="{ selected: selectedEntity?.id === entity.id }"
+            @click="selectEntity(entity)"
+          >
+            <span class="col-wide entity-name">
+              <i class="fas fa-user-circle"></i>
+              {{ entity.firstName }} {{ entity.lastName }}
+            </span>
+            <span class="col">{{ entity.caseId || entity.childId }}</span>
+            <span class="col">{{ entity.age }}</span>
+            <span class="col">{{ entity.gender }}</span>
+            <span class="col">{{ formatDate(entity.enrollmentDate) }}</span>
+            <span class="col-action">
+              <button @click.stop="selectEntity(entity)" class="view-btn">
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </span>
+          </div>
+
+          <div v-if="filteredEntities.length === 0" class="no-results">
+            <i class="fas fa-inbox"></i>
+            <p>No tracked entities found</p>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" v-if="filteredEntities.length > 0">
+          <span>Showing {{ paginationText }}</span>
+          <div class="pagination-controls">
+            <button @click="previousPage" :disabled="currentPage === 1">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <span>Page {{ currentPage }} of {{ totalPages }}</span>
+            <button @click="nextPage" :disabled="currentPage === totalPages">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel - Entity Dashboard -->
+      <div class="dashboard-panel">
+        <div v-if="!selectedEntity" class="no-selection">
+          <i class="fas fa-user-alt"></i>
+          <h3>No Entity Selected</h3>
+          <p>Select a tracked entity to view details</p>
+        </div>
+
+        <div v-else class="entity-dashboard">
+          <!-- Profile Header -->
+          <div class="profile-header">
+            <div class="profile-avatar">
+              {{ selectedEntity.firstName.charAt(0) }}{{ selectedEntity.lastName.charAt(0) }}
+            </div>
+            <div class="profile-info">
+              <h2>{{ selectedEntity.firstName }} {{ selectedEntity.lastName }}</h2>
+              <div class="profile-meta">
+                <span><i class="fas fa-id-card"></i> {{ selectedEntity.caseId || selectedEntity.childId }}</span>
+                <span><i class="fas fa-calendar"></i> {{ selectedEntity.age }} years</span>
+                <span><i class="fas fa-venus-mars"></i> {{ selectedEntity.gender }}</span>
+              </div>
+            </div>
+            <div class="profile-actions">
+              <button @click="editEntity" class="action-btn">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button @click="deleteEntity" class="action-btn danger">
+                <i class="fas fa-trash"></i>
               </button>
             </div>
           </div>
 
-          <div class="filter-group">
-            <div class="filter-item">
-              <label class="filter-label">Status</label>
-              <select
-                v-model="selectedStatus"
-                @change="applyFilters"
-                class="filter-select"
-              >
-                <option value="">All Status</option>
-                <option value="active">Active</option>
-                <option value="completed">Completed</option>
-                <option value="pending">Pending</option>
-                <option value="transferred">Transferred</option>
-              </select>
-            </div>
-
-            <div class="filter-item">
-              <label class="filter-label">Age Group</label>
-              <select
-                v-model="selectedAgeGroup"
-                @change="applyFilters"
-                class="filter-select"
-              >
-                <option value="">All Ages</option>
-                <option value="0-5">0-5 years</option>
-                <option value="6-12">6-12 years</option>
-                <option value="13-17">13-17 years</option>
-                <option value="18+">18+ years</option>
-              </select>
-            </div>
-
-            <div class="filter-item">
-              <label class="filter-label">Program Stage</label>
-              <select
-                v-model="selectedStage"
-                @change="applyFilters"
-                class="filter-select"
-              >
-                <option value="">All Stages</option>
-                <option value="referral">Referral</option>
-                <option value="assessment">Assessment</option>
-                <option value="enrollment">Enrollment</option>
-                <option value="care-plan">Care Plan</option>
-                <option value="follow-up">Follow-up</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="search-actions">
-            <button @click="performSearch" class="search-button">Search</button>
-            <button @click="resetFilters" class="reset-button">Reset</button>
-          </div>
-        </div>
-
-        <!-- Quick Stats -->
-        <div class="quick-stats">
-          <div class="stat-card">
-            ``
-
-            <!-- Quick Stats -->
-            <div class="quick-stats">
-              <div class="stat-card">
-                <div class="stat-number">{{ totalCases }}</div>
-                <div class="stat-label">Total Cases</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">{{ activeCases }}</div>
-                <div class="stat-label">Active Cases</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">{{ completedCases }}</div>
-                <div class="stat-label">Completed</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-number">{{ newThisMonth }}</div>
-                <div class="stat-label">New This Month</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Cases List or Selected Case View -->
-          <div class="tracker-main">
-            <!-- Cases List View -->
-            <div v-if="!selectedCase" class="cases-list-view">
-              <div class="list-header">
-                <h3>Tracked Cases ({{ filteredCases.length }})</h3>
-                <div class="list-controls">
-                  <button
-                    @click="viewMode = 'table'"
-                    :class="{ active: viewMode === 'table' }"
-                    class="view-toggle"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <rect x="3" y="3" width="7" height="7" />
-                      <rect x="14" y="3" width="7" height="7" />
-                      <rect x="14" y="14" width="7" height="7" />
-                      <rect x="3" y="14" width="7" height="7" />
-                    </svg>
-                    Table
-                  </button>
-                  <button
-                    @click="viewMode = 'cards'"
-                    :class="{ active: viewMode === 'cards' }"
-                    class="view-toggle"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <rect x="3" y="3" width="18" height="4" />
-                      <rect x="3" y="9" width="18" height="4" />
-                      <rect x="3" y="15" width="18" height="4" />
-                    </svg>
-                    Cards
-                  </button>
-                </div>
-              </div>
-
-              <!-- Table View -->
-              <div v-if="viewMode === 'table'" class="cases-table-container">
-                <table class="cases-table">
-                  <thead>
-                    <tr>
-                      <th @click="sortBy('childName')" class="sortable">
-                        Child Name
-                        <svg
-                          class="sort-icon"
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                        >
-                          <path d="M7 10l5-5 5 5" />
-                          <path d="M7 14l5 5 5-5" />
-                        </svg>
-                      </th>
-                      <th @click="sortBy('caseId')" class="sortable">
-                        Case ID
-                      </th>
-                      <th @click="sortBy('age')" class="sortable">Age</th>
-                      <th @click="sortBy('status')" class="sortable">Status</th>
-                      <th @click="sortBy('currentStage')" class="sortable">
-                        Current Stage
-                      </th>
-                      <th @click="sortBy('lastActivity')" class="sortable">
-                        Last Activity
-                      </th>
-                      <th @click="sortBy('assignedWorker')" class="sortable">
-                        Assigned Worker
-                      </th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="case_ in paginatedCases"
-                      :key="case_.id"
-                      @click="selectCase(case_)"
-                      class="case-row"
-                    >
-                      <td class="child-name-cell">
-                        <div class="child-info">
-                          <div class="child-name">{{ case_.childName }}</div>
-                          <div class="child-id">ID: {{ case_.childId }}</div>
-                        </div>
-                      </td>
-                      <td>{{ case_.caseId }}</td>
-                      <td>{{ case_.age }} years</td>
-                      <td>
-                        <span class="status-badge" :class="case_.status">
-                          {{ formatStatus(case_.status) }}
-                        </span>
-                      </td>
-                      <td>{{ case_.currentStage }}</td>
-                      <td>{{ formatDate(case_.lastActivity) }}</td>
-                      <td>{{ case_.assignedWorker }}</td>
-                      <td class="actions-cell">
-                        <button
-                          @click.stop="selectCase(case_)"
-                          class="action-button view-button"
-                        >
-                          View
-                        </button>
-                        <button
-                          @click.stop="editCase(case_)"
-                          class="action-button edit-button"
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-
-                <!-- Pagination -->
-                <div class="pagination" v-if="totalPages > 1">
-                  <button
-                    @click="currentPage = 1"
-                    :disabled="currentPage === 1"
-                    class="pagination-button"
-                  >
-                    First
-                  </button>
-                  <button
-                    @click="currentPage--"
-                    :disabled="currentPage === 1"
-                    class="pagination-button"
-                  >
-                    Previous
-                  </button>
-                  <span class="pagination-info">
-                    Page {{ currentPage }} of {{ totalPages }} ({{
-                      filteredCases.length
-                    }}
-                    cases)
-                  </span>
-                  <button
-                    @click="currentPage++"
-                    :disabled="currentPage === totalPages"
-                    class="pagination-button"
-                  >
-                    Next
-                  </button>
-                  <button
-                    @click="currentPage = totalPages"
-                    :disabled="currentPage === totalPages"
-                    class="pagination-button"
-                  >
-                    Last
-                  </button>
-                </div>
-              </div>
-
-              <!-- Cards View -->
-              <div v-if="viewMode === 'cards'" class="cases-cards-container">
-                <div class="cases-cards-grid">
-                  <div
-                    v-for="case_ in paginatedCases"
-                    :key="case_.id"
-                    @click="selectCase(case_)"
-                    class="case-card"
-                  >
-                    <div class="card-header">
-                      <div class="child-info">
-                        <h4 class="child-name">{{ case_.childName }}</h4>
-                        <div class="child-details">
-                          <span class="child-age"
-                            >{{ case_.age }} years old</span
-                          >
-                          <span class="case-id"
-                            >Case ID: {{ case_.caseId }}</span
-                          >
-                        </div>
-                      </div>
-                      <span class="status-badge" :class="case_.status">
-                        {{ formatStatus(case_.status) }}
-                      </span>
-                    </div>
-                    <div class="card-content">
-                      <div class="stage-info">
-                        <strong>Current Stage:</strong> {{ case_.currentStage }}
-                      </div>
-                      <div class="worker-info">
-                        <strong>Assigned Worker:</strong>
-                        {{ case_.assignedWorker }}
-                      </div>
-                      <div class="activity-info">
-                        <strong>Last Activity:</strong>
-                        {{ formatDate(case_.lastActivity) }}
-                      </div>
-                    </div>
-                    <div class="card-footer">
-                      <button
-                        @click.stop="selectCase(case_)"
-                        class="card-action-button primary"
-                      >
-                        View Case
-                      </button>
-                      <button
-                        @click.stop="editCase(case_)"
-                        class="card-action-button secondary"
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Pagination for Cards -->
-                <div class="pagination" v-if="totalPages > 1">
-                  <button
-                    @click="currentPage = 1"
-                    :disabled="currentPage === 1"
-                    class="pagination-button"
-                  >
-                    First
-                  </button>
-                  <button
-                    @click="currentPage--"
-                    :disabled="currentPage === 1"
-                    class="pagination-button"
-                  >
-                    Previous
-                  </button>
-                  <span class="pagination-info">
-                    Page {{ currentPage }} of {{ totalPages }} ({{
-                      filteredCases.length
-                    }}
-                    cases)
-                  </span>
-                  <button
-                    @click="currentPage++"
-                    :disabled="currentPage === totalPages"
-                    class="pagination-button"
-                  >
-                    Next
-                  </button>
-                  <button
-                    @click="currentPage = totalPages"
-                    :disabled="currentPage === totalPages"
-                    class="pagination-button"
-                  >
-                    Last
-                  </button>
-                </div>
-              </div>
-
-              <!-- No Cases Message -->
-              <div v-if="filteredCases.length === 0" class="no-cases-message">
-                <div class="no-cases-content">
-                  <svg
-                    width="48"
-                    height="48"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="m22 21-3-3m0-6a6 6 0 1 1-12 0 6 6 0 0 1 12 0Z" />
-                  </svg>
-                  <h3>No Cases Found</h3>
-                  <p>
-                    {{
-                      searchQuery
-                        ? "No cases match your search criteria."
-                        : "No cases have been enrolled yet."
-                    }}
-                  </p>
-                  <button
-                    @click="showNewEnrollmentModal = true"
-                    class="primary-button"
-                  >
-                    Enroll New Case
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Selected Case Detail View -->
-            <div v-if="selectedCase" class="case-detail-view">
-              <div class="case-detail-header">
-                <div class="case-info">
-                  <button
-                    @click="selectedCase = null"
-                    class="back-to-list-button"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path d="m12 19-7-7 7-7" />
-                      <path d="m19 12H5" />
-                    </svg>
-                    Back to Cases List
-                  </button>
-                  <h2>{{ selectedCase.childName }}</h2>
-                  <div class="case-meta">
-                    <span class="case-id"
-                      >Case ID: {{ selectedCase.caseId }}</span
-                    >
-                    <span class="status-badge" :class="selectedCase.status">
-                      {{ formatStatus(selectedCase.status) }}
-                    </span>
-                  </div>
-                </div>
-                <div class="case-actions">
-                  <button @click="addEvent" class="add-event-button">
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path d="M12 5v14" />
-                      <path d="m5 12 14 0" />
-                    </svg>
-                    Add Event
-                  </button>
-                  <button
-                    @click="editCase(selectedCase)"
-                    class="edit-case-button"
-                  >
-                    Edit Case
-                  </button>
-                </div>
-              </div>
-
-              <!-- Case Timeline and Forms -->
-              <div class="case-detail-content">
-                <div class="case-summary-panel">
-                  <div class="summary-cards">
-                    <div class="summary-card">
-                      <div class="card-title">Basic Information</div>
-                      <div class="card-content">
-                        <div class="info-item">
-                          <strong>Age:</strong> {{ selectedCase.age }} years
-                        </div>
-                        <div class="info-item">
-                          <strong>Gender:</strong> {{ selectedCase.gender }}
-                        </div>
-                        <div class="info-item">
-                          <strong>Date of Birth:</strong>
-                          {{ formatDate(selectedCase.dateOfBirth) }}
-                        </div>
-                        <div class="info-item">
-                          <strong>Enrollment Date:</strong>
-                          {{ formatDate(selectedCase.enrollmentDate) }}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="summary-card">
-                      <div class="card-title">Case Management</div>
-                      <div class="card-content">
-                        <div class="info-item">
-                          <strong>Current Stage:</strong>
-                          {{ selectedCase.currentStage }}
-                        </div>
-                        <div class="info-item">
-                          <strong>Assigned Worker:</strong>
-                          {{ selectedCase.assignedWorker }}
-                        </div>
-                        <div class="info-item">
-                          <strong>Last Activity:</strong>
-                          {{ formatDate(selectedCase.lastActivity) }}
-                        </div>
-                        <div class="info-item">
-                          <strong>Total Events:</strong>
-                          {{ selectedCase.events.length }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Program Stages and Events -->
-                <div class="program-stages">
-                  <h3>Program Timeline</h3>
-                  <div class="timeline">
-                    <div
-                      v-for="(stage, index) in programStages"
-                      :key="stage.id"
-                      class="timeline-stage"
-                      :class="{
-                        completed: stage.completed,
-                        active: stage.active,
-                        upcoming: !stage.completed && !stage.active,
-                      }"
-                    >
-                      <div class="stage-indicator">
-                        <div class="stage-number">{{ index + 1 }}</div>
-                      </div>
-                      <div class="stage-content">
-                        <h4 class="stage-title">{{ stage.name }}</h4>
-                        <div class="stage-description">
-                          {{ stage.description }}
-                        </div>
-                        <div class="stage-events">
-                          <div
-                            v-for="event in getStageEvents(stage.id)"
-                            :key="event.id"
-                            class="event-item"
-                            @click="viewEvent(event)"
-                          >
-                            <div class="event-info">
-                              <div class="event-title">
-                                {{ event.formType }}
-                              </div>
-                              <div class="event-date">
-                                {{ formatDate(event.date) }}
-                              </div>
-                            </div>
-                            <div class="event-status">
-                              <span class="status-badge" :class="event.status">
-                                {{ formatStatus(event.status) }}
-                              </span>
-                            </div>
-                          </div>
-                          <!-- Show "No events" message when there are no events for this stage -->
-                          <div
-                            v-if="getStageEvents(stage.id).length === 0"
-                            class="no-events-message"
-                          >
-                            No events recorded
-                          </div>
-                        </div>
-                        <button
-                          v-if="stage.completed"
-                          @click="viewStageInfo(stage)"
-                          class="add-stage-event-button"
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                          >
-                            <path
-                              d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
-                            />
-                            <circle cx="12" cy="12" r="3" />
-                          </svg>
-                          View {{ stage.name }} Information
-                        </button>
-                        <button
-                          v-else-if="stage.active"
-                          @click="addStageEvent(stage)"
-                          class="add-stage-event-button"
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                          >
-                            <path d="M12 5v14" />
-                            <path d="m5 12 14 0" />
-                          </svg>
-                          Complete {{ stage.name }} Form
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- New Enrollment Modal -->
-      <div
-        v-if="showNewEnrollmentModal"
-        class="modal-overlay"
-        @click="showNewEnrollmentModal = false"
-      >
-        <div class="modal-content" @click.stop>
-          <div class="modal-header">
-            <h3>Enroll New Case</h3>
-            <button
-              @click="showNewEnrollmentModal = false"
-              class="close-button"
+          <!-- Tabs -->
+          <div class="dashboard-tabs">
+            <button 
+              v-for="tab in tabs" 
+              :key="tab.id"
+              @click="activeTab = tab.id"
+              :class="{ active: activeTab === tab.id }"
+              class="tab-button"
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="m18 6-12 12" />
-                <path d="m6 6 12 12" />
-              </svg>
+              <i :class="tab.icon"></i>
+              {{ tab.label }}
             </button>
           </div>
-          <div class="modal-body">
-            <form @submit.prevent="createNewEnrollment">
-              <!-- Loading Overlay -->
-              <div v-if="loading" class="loading-overlay">
-                <div class="loading-spinner">
-                  <div class="spinner"></div>
-                  <p>{{ loadingMessage }}</p>
+
+          <!-- Tab Content -->
+          <div class="tab-content">
+            <!-- Attributes Tab -->
+            <div v-if="activeTab === 'attributes'" class="attributes-view">
+              <h3>Tracked Entity Attributes</h3>
+              <div class="attributes-grid">
+                <div 
+                  v-for="(value, key) in selectedEntity.attributes" 
+                  :key="key" 
+                  v-show="value && value !== 'N/A' && value !== 'None reported' && value !== 'None'"
+                  class="attribute-item"
+                >
+                  <label>{{ formatAttributeName(key) }}</label>
+                  <span>{{ value }}</span>
                 </div>
               </div>
+              <div v-if="!hasVisibleAttributes" class="no-attributes">
+                <i class="fas fa-info-circle"></i>
+                <p>No additional attributes available for this entity</p>
+              </div>
+            </div>
 
-              <!-- Stage Information Modal -->
-              <div
-                v-if="showStageInfoModal"
-                class="modal-overlay"
-                @click="closeStageInfoModal"
-              >
-                <div class="modal-content stage-info-modal" @click.stop>
-                  <div class="modal-header">
-                    <h3>Stage Information</h3>
-                    <button @click="closeStageInfoModal" class="close-button">
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <path d="m18 6-12 12" />
-                        <path d="m6 6 12 12" />
-                      </svg>
+            <!-- Enrollment Tab -->
+            <div v-if="activeTab === 'enrollment'" class="enrollment-view">
+              <div class="enrollment-header">
+                <h3>Program Enrollments</h3>
+                <button @click="enrollInProgram" class="enroll-btn">
+                  <i class="fas fa-plus"></i>
+                  Enroll in Program
+                </button>
+              </div>
+              
+              <div class="enrollments-list">
+                <div v-for="enrollment in selectedEntity.enrollments" :key="enrollment.id" class="enrollment-card">
+                  <div class="enrollment-main">
+                    <div class="enrollment-info">
+                      <h4>{{ enrollment.program }}</h4>
+                      <p>Enrolled: {{ formatDate(enrollment.enrollmentDate) }}</p>
+                      <span class="status-badge" :class="enrollment.status">{{ enrollment.status }}</span>
+                    </div>
+                    <button @click="viewEnrollment(enrollment)" class="view-enrollment-btn">
+                      View Details
                     </button>
                   </div>
-                  <div class="modal-body">
-                    <div v-if="stageInfoLoading" class="loading-info">
-                      <div class="spinner"></div>
-                      <p>Loading stage information...</p>
+                  
+                  <!-- Current Stage Indicator -->
+                  <div class="current-stage-section">
+                    <div class="stage-header">
+                      <h5><i class="fas fa-map-marked-alt"></i> Current Stage</h5>
+                      <span class="stage-badge" :class="getCurrentStageClass(selectedEntity)">
+                        {{ formatStageName(selectedEntity.attributes?.currentStage || 'referral') }}
+                      </span>
                     </div>
-                    <div
-                      v-else-if="stageInfoData && !stageInfoData.error"
-                      class="stage-info-content"
-                    >
-                      <div class="info-section">
-                        <h4>Basic Information</h4>
-                        <div class="info-grid">
-                          <div class="info-item">
-                            <strong>Child Name:</strong>
-                            <span
-                              >{{ stageInfoData.childFirstName }}
-                              {{ stageInfoData.childSurname }}</span
-                            >
-                          </div>
-                          <div class="info-item">
-                            <strong>Child ID:</strong>
-                            <span>{{
-                              stageInfoData.id || stageInfoData.childId
-                            }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Gender:</strong>
-                            <span>{{ stageInfoData.gender }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Date of Birth:</strong>
-                            <span>{{
-                              formatDate(stageInfoData.dateOfBirth)
-                            }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Age at Intake:</strong>
-                            <span>{{ stageInfoData.ageAtIntake }}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="info-section" v-if="stageInfoData.ovcStatus">
-                        <h4>Vulnerability Status</h4>
-                        <div class="info-grid">
-                          <div class="info-item">
-                            <strong>OVC Status:</strong>
-                            <span>{{ stageInfoData.ovcStatus }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Date Effective:</strong>
-                            <span>{{
-                              formatDate(stageInfoData.ovcDateEffective)
-                            }}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="info-section" v-if="stageInfoData.reasons">
-                        <h4>Reasons for Admission</h4>
-                        <div class="reasons-list">
-                          <div
-                            v-for="(value, key) in stageInfoData.reasons"
-                            :key="key"
-                            class="reason-item"
-                            v-if="value"
-                          >
-                            {{ formatReasonKey(key) }}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        class="info-section"
-                        v-if="stageInfoData.primaryCaregiver"
+                    
+                    <!-- Program Stages Progress -->
+                    <div class="stages-timeline">
+                      <div 
+                        v-for="stage in programStages" 
+                        :key="stage.id"
+                        class="stage-step"
+                        :class="getStageStatus(stage.id, selectedEntity)"
                       >
-                        <h4>Primary Caregiver</h4>
-                        <div class="info-grid">
-                          <div class="info-item">
-                            <strong>Name:</strong>
-                            <span>{{
-                              stageInfoData.primaryCaregiver.name
-                            }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Relationship:</strong>
-                            <span>{{
-                              stageInfoData.primaryCaregiver.relationship
-                            }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Phone:</strong>
-                            <span>{{
-                              stageInfoData.primaryCaregiver.phone1
-                            }}</span>
-                          </div>
-                          <div class="info-item">
-                            <strong>Occupation:</strong>
-                            <span>{{
-                              stageInfoData.primaryCaregiver.occupation
-                            }}</span>
-                          </div>
+                        <div class="stage-marker">
+                          <i :class="getStageIcon(stage.id, selectedEntity)"></i>
                         </div>
-                      </div>
-
-                      <div class="info-section" v-if="stageInfoData.documents">
-                        <h4>Documents Included</h4>
-                        <div class="documents-list">
-                          <div
-                            v-for="(value, key) in stageInfoData.documents"
-                            :key="key"
-                            class="document-item"
-                            v-if="value"
-                          >
-                            {{ formatDocumentKey(key) }}
-                          </div>
+                        <div class="stage-content">
+                          <strong>{{ stage.name }}</strong>
+                          <span class="stage-forms">{{ getStageFormCount(stage.id, selectedEntity) }}</span>
                         </div>
                       </div>
                     </div>
-                    <div
-                      v-else-if="stageInfoData && stageInfoData.error"
-                      class="error-info"
-                    >
-                      <p>{{ stageInfoData.error }}</p>
-                    </div>
-                    <div v-else class="no-info">
-                      <p>No information available for this stage.</p>
+                    
+                    <!-- Completed Forms -->
+                    <div class="completed-forms">
+                      <h6><i class="fas fa-check-square"></i> Completed Forms</h6>
+                      <div class="forms-list">
+                        <div 
+                          v-for="event in getCompletedForms(selectedEntity)" 
+                          :key="event.id"
+                          class="form-chip"
+                          :class="event.status"
+                        >
+                          <i class="fas fa-check-circle"></i>
+                          {{ event.formType }}
+                        </div>
+                        <div v-if="getCompletedForms(selectedEntity).length === 0" class="no-forms">
+                          <i class="fas fa-info-circle"></i>
+                          <span>No completed forms yet</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Child First Name *</label>
-                  <input
-                    v-model="newEnrollment.childFirstName"
-                    type="text"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Child Last Name *</label>
-                  <input
-                    v-model="newEnrollment.childLastName"
-                    type="text"
-                    required
-                  />
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Date of Birth *</label>
-                  <input
-                    v-model="newEnrollment.dateOfBirth"
-                    type="date"
-                    required
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Gender *</label>
-                  <select v-model="newEnrollment.gender" required>
-                    <option value="">Select Gender</option>
-                    <option value="Female">Female</option>
-                    <option value="Male">Male</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Enrollment Program *</label>
-                <select v-model="newEnrollment.program" required>
-                  <option value="">Select Program</option>
-                  <option value="child-protection">
-                    Child Protection Program
-                  </option>
-                  <option value="pregnancy-support">
-                    Pregnancy Support Program
-                  </option>
-                  <option value="family-support">Family Support Program</option>
-                </select>
-              </div>
-
-              <!-- Dynamic form fields based on selected form type -->
-              <div class="form-group">
-                <label>Initial Form Type *</label>
-                <select
-                  v-model="newEnrollment.initialFormType"
-                  required
-                  @change="handleFormTypeChange"
-                >
-                  <option value="">Select Form Type</option>
-                  <option value="initial-referral">Initial Referral</option>
-                  <option value="child-overview">
-                    Child Overview & Background
-                  </option>
-                  <option value="initial-assessment">
-                    TKP Initial Assessment
-                  </option>
-                  <option value="medical-intake">
-                    Medical Intake Assessment
-                  </option>
-                  <option value="academics-literacy">
-                    Academics & Literacy
-                  </option>
-                  <option value="psychological-assessment">
-                    Psychological Assessment
-                  </option>
-                  <option value="life-skills-survey">Life Skills Survey</option>
-                  <option value="birth-delivery">
-                    Birth & Delivery Report
-                  </option>
-                  <option value="care-plan-summary">Care Plan Summary</option>
-                  <option value="care-plan-baby">Care Plan (Baby)</option>
-                  <option value="care-plan-ongoing-life-skills">
-                    Care Plan - Ongoing Life Skills
-                  </option>
-                </select>
-              </div>
-
-              <!-- Additional fields for Initial Referral -->
-              <div
-                v-if="newEnrollment.initialFormType === 'initial-referral'"
-                class="form-group"
-              >
-                <label>Referral Date *</label>
-                <input
-                  v-model="newEnrollment.referralDate"
-                  type="date"
-                  required
-                />
-              </div>
-
-              <div
-                v-if="newEnrollment.initialFormType === 'initial-referral'"
-                class="form-group"
-              >
-                <label>Referral Method *</label>
-                <select v-model="newEnrollment.referralMethod" required>
-                  <option value="">Select Method</option>
-                  <option value="Department of Social Welfare - Lusaka">
-                    Department of Social Welfare - Lusaka
-                  </option>
-                  <option value="Coptic Hospital">Coptic Hospital</option>
-                  <option value="MNK Psychotherapy">MNK Psychotherapy</option>
-                  <option value="Department of Social Welfare: Chongwe">
-                    Department of Social Welfare: Chongwe
-                  </option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              <!-- Additional fields for Initial Assessment -->
-              <div
-                v-if="newEnrollment.initialFormType === 'initial-assessment'"
-                class="form-group"
-              >
-                <label>Assessment Date *</label>
-                <input
-                  v-model="newEnrollment.assessmentDate"
-                  type="date"
-                  required
-                />
-              </div>
-
-              <div
-                v-if="newEnrollment.initialFormType === 'initial-assessment'"
-                class="form-group"
-              >
-                <label>Assessment Type *</label>
-                <select v-model="newEnrollment.assessmentType" required>
-                  <option value="">Select Type</option>
-                  <option value="Initial">Initial Assessment</option>
-                  <option value="Follow-up">Follow-up Assessment</option>
-                </select>
-              </div>
-
-              <!-- Additional fields for Program Enrollment -->
-              <div
-                v-if="newEnrollment.initialFormType === 'program-enrollment'"
-                class="form-group"
-              >
-                <label>Enrollment Date *</label>
-                <input
-                  v-model="newEnrollment.enrollmentDate"
-                  type="date"
-                  required
-                />
-              </div>
-
-              <!-- Additional fields for Care Plan Development -->
-              <div
-                v-if="newEnrollment.initialFormType === 'care-plan'"
-                class="form-group"
-              >
-                <label>Care Plan Date *</label>
-                <input
-                  v-model="newEnrollment.carePlanDate"
-                  type="date"
-                  required
-                />
-              </div>
-
-              <!-- Additional fields for Regular Follow-up -->
-              <div
-                v-if="newEnrollment.initialFormType === 'regular-follow-up'"
-                class="form-group"
-              >
-                <label>Follow-up Date *</label>
-                <input
-                  v-model="newEnrollment.followUpDate"
-                  type="date"
-                  required
-                />
-              </div>
-
-              <div class="modal-actions">
-                <button
-                  type="button"
-                  @click="showNewEnrollmentModal = false"
-                  class="cancel-button"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  class="create-button"
-                  :disabled="enrollmentLoading"
-                >
-                  {{
-                    enrollmentLoading ? "Creating..." : "Create & Start Form"
-                  }}
+            <!-- Events Tab -->
+            <div v-if="activeTab === 'events'" class="events-view">
+              <div class="events-header">
+                <h3>Program Events</h3>
+                <button @click="scheduleEvent" class="schedule-btn">
+                  <i class="fas fa-plus"></i>
+                  Schedule Event
                 </button>
               </div>
-            </form>
-          </div>
+              
+              <!-- Quick Access Section -->
+              <div class="quick-forms-section">
+                <h4><i class="fas fa-bolt"></i> Quick Access</h4>
+                <div class="quick-forms-grid">
+                  <div class="quick-form-card" @click="openForm('Child Overview')">
+                    <i class="fas fa-child" style="color: #93c5fd;"></i>
+                    <span>Child Overview</span>
+                  </div>
+                  <div class="quick-form-card" @click="openForm('Medical Intake')">
+                    <i class="fas fa-user-md" style="color: #86efac;"></i>
+                    <span>Medical Intake</span>
+                  </div>
+                  <div class="quick-form-card" @click="openForm('Academics & Literacy')">
+                    <i class="fas fa-book" style="color: #fde047;"></i>
+                    <span>Academics</span>
+                  </div>
+                  <div class="quick-form-card" @click="openForm('Care Plan Summary')">
+                    <i class="fas fa-clipboard-list" style="color: #d8b4fe;"></i>
+                    <span>Care Plan</span>
+                  </div>
+                  <div class="quick-form-card" @click="openForm('Regular Follow-up')">
+                    <i class="fas fa-walking" style="color: #f9a8d4;"></i>
+                    <span>Follow-up</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="events-timeline">
+                <div class="timeline-title">
+                  <i class="fas fa-history"></i>
+                  Timeline
+                </div>
+                
+                <div v-for="event in selectedEntity.events" :key="event.id" class="timeline-item">
+                  <div class="timeline-marker" :class="event.status"></div>
+                  <div class="event-card">
+                    <div class="event-header">
+                      <h4>{{ event.formType }}</h4>
+                      <span class="event-date">{{ formatDate(event.date) }}</span>
+                    </div>
+                    <div class="event-meta">
+                      <span class="status-badge" :class="event.status">{{ event.status }}</span>
+                      <span class="event-org">{{ event.orgUnitName || 'Main Center' }}</span>
+                    </div>
+                    <div class="event-actions">
+                      <button @click="enterData(event)" class="data-entry-btn">
+                        <i class="fas fa-edit"></i> {{ event.status === 'completed' ? 'View Data' : 'Enter Data' }}
+                      </button>
+                      <button @click="viewEventDetails(event)" class="view-details-btn">
+                        <i class="fas fa-eye"></i> Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div v-if="!selectedEntity.events || selectedEntity.events.length === 0" class="no-events">
+                  <i class="fas fa-calendar-times"></i>
+                  <p>No events recorded for this entity</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Indicators Tab -->
+            <div v-if="activeTab === 'indicators'" class="indicators-view">
+              <h3>Program Indicators</h3>
+              <div class="indicators-grid">
+                <div v-for="indicator in programIndicators" :key="indicator.id" class="indicator-card">
+                  <div class="indicator-icon" :style="{ backgroundColor: indicator.color }">
+                    <i :class="indicator.icon"></i>
+                  </div>
+                  <div class="indicator-details">
+                    <div class="indicator-value">{{ indicator.value }}</div>
+                    <div class="indicator-label">{{ indicator.label }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes Tab -->
+            <div v-if="activeTab === 'notes'" class="notes-view">
+              <div class="notes-header">
+                <h3>Notes & Comments</h3>
+                <button @click="showAddNote = !showAddNote" class="add-note-btn">
+                  <i class="fas fa-plus"></i>
+                  Add Note
+                </button>
+              </div>
+              
+              <div v-if="showAddNote" class="add-note-form">
+                <textarea v-model="newNote" placeholder="Type your note here..."></textarea>
+                <div class="note-actions">
+                  <button @click="showAddNote = false" class="cancel-btn">Cancel</button>
+                  <button @click="saveNote" class="save-btn">Save Note</button>
+                </div>
+              </div>
+              
+              <div class="notes-list">
+                <div v-for="note in selectedEntity.notes" :key="note.id" class="note-item">
+                  <div class="note-header">
+                    <strong>{{ note.createdBy }}</strong>
+                    <span class="note-date">{{ formatDate(note.createdDate) }}</span>
+                  </div>
+                  <p>{{ note.text }}</p>
+                </div>
+                
+                <div v-if="!selectedEntity.notes || selectedEntity.notes.length === 0" class="no-results">
+                  <i class="fas fa-sticky-note"></i>
+                  <p>No notes available</p>
+                </div>
+              </div>
+            </div>
+
+          </div> <!-- End Tab Content -->
+        </div> <!-- End Entity Dashboard -->
+      </div> <!-- End Dashboard Panel -->
+    </div> <!-- End Tracker Main -->
+
+    <!-- Register Modal -->
+    <div v-if="showRegisterModal" class="modal-overlay" @click="showRegisterModal = false">
+      <div class="modal-content" @click.stop>
+          <h3>Register New Tracked Entity</h3>
+          <button @click="showRegisterModal = false" class="close-btn">×</button>
         </div>
-      </div>
-
-      <!-- Event Type Selection Modal -->
-      <div
-        v-if="showEventTypeModal"
-        class="modal-overlay"
-        @click="cancelEventTypeSelection"
-      >
-        <div class="modal-content" @click.stop>
-          <div class="modal-header">
-            <h3>Select Event Type</h3>
-            <button @click="cancelEventTypeSelection" class="close-button">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="m18 6-12 12" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
-          </div>
-          <div class="modal-body">
+        <div class="modal-body">
+          <div class="form-row">
             <div class="form-group">
-              <label>Choose the type of event you want to add:</label>
-              <div class="event-type-options">
-                <button
-                  @click="selectEventType('initial-referral')"
-                  class="event-type-button"
-                >
-                  Initial Referral
-                </button>
-                <button
-                  @click="selectEventType('child-overview')"
-                  class="event-type-button"
-                >
-                  Child Overview & Background
-                </button>
-                <button
-                  @click="selectEventType('initial-assessment')"
-                  class="event-type-button"
-                >
-                  TKP Initial Assessment
-                </button>
-                <button
-                  @click="selectEventType('medical-intake')"
-                  class="event-type-button"
-                >
-                  Medical Intake Assessment
-                </button>
-                <button
-                  @click="selectEventType('academics-literacy')"
-                  class="event-type-button"
-                >
-                  Academics & Literacy
-                </button>
-                <button
-                  @click="selectEventType('psychological-assessment')"
-                  class="event-type-button"
-                >
-                  Psychological Assessment
-                </button>
-                <button
-                  @click="selectEventType('life-skills-survey')"
-                  class="event-type-button"
-                >
-                  Life Skills Survey
-                </button>
-                <button
-                  @click="selectEventType('birth-delivery')"
-                  class="event-type-button"
-                >
-                  Birth & Delivery Report
-                </button>
-                <button
-                  @click="selectEventType('care-plan-summary')"
-                  class="event-type-button"
-                >
-                  Care Plan Summary
-                </button>
-                <button
-                  @click="selectEventType('care-plan-baby')"
-                  class="event-type-button"
-                >
-                  Care Plan (Baby)
-                </button>
-                <button
-                  @click="selectEventType('care-plan-ongoing-life-skills')"
-                  class="event-type-button"
-                >
-                  Care Plan - Ongoing Life Skills
-                </button>
-              </div>
+              <label>First Name *</label>
+              <input type="text" v-model="newEntity.firstName" />
             </div>
-            <div class="modal-actions">
-              <button @click="cancelEventTypeSelection" class="cancel-button">
-                Cancel
-              </button>
+            <div class="form-group">
+              <label>Last Name *</label>
+              <input type="text" v-model="newEntity.lastName" />
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Loading Overlay -->
-      <div v-if="loading" class="loading-overlay">
-        <div class="loading-spinner">
-          <div class="spinner"></div>
-          <p>{{ loadingMessage }}</p>
-        </div>
-      </div>
-
-      <!-- Stage Information Modal -->
-      <div
-        v-if="showStageInfoModal"
-        class="modal-overlay"
-        @click="closeStageInfoModal"
-      >
-        <div class="modal-content stage-info-modal" @click.stop>
-          <div class="modal-header">
-            <h3>Stage Information</h3>
-            <button @click="closeStageInfoModal" class="close-button">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="m18 6-12 12" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date of Birth *</label>
+              <input type="date" v-model="newEntity.dateOfBirth" />
+            </div>
+            <div class="form-group">
+              <label>Gender *</label>
+              <select v-model="newEntity.gender">
+                <option value="">Select...</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
           </div>
-          <div class="modal-body">
-            <div v-if="stageInfoLoading" class="loading-info">
-              <div class="spinner"></div>
-              <p>Loading stage information...</p>
-            </div>
-            <div
-              v-else-if="stageInfoData && !stageInfoData.error"
-              class="stage-info-content"
-            >
-              <div class="info-section">
-                <h4>Basic Information</h4>
-                <div class="info-grid">
-                  <div class="info-item">
-                    <strong>Child Name:</strong>
-                    <span
-                      >{{ stageInfoData.childFirstName }}
-                      {{ stageInfoData.childSurname }}</span
-                    >
-                  </div>
-                  <div class="info-item">
-                    <strong>Child ID:</strong>
-                    <span>{{ stageInfoData.id || stageInfoData.childId }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Gender:</strong>
-                    <span>{{ stageInfoData.gender }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Date of Birth:</strong>
-                    <span>{{ formatDate(stageInfoData.dateOfBirth) }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Age at Intake:</strong>
-                    <span>{{ stageInfoData.ageAtIntake }}</span>
-                  </div>
-                </div>
-              </div>
+          <div class="form-group">
+            <label>Program</label>
+            <select v-model="newEntity.program">
+              <option value="child-protection">Child Protection Program</option>
+              <option value="pregnancy-support">Pregnancy Support Program</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button @click="showRegisterModal = false" class="cancel-button">Cancel</button>
+          <button @click="registerEntity" class="save-button">Register</button>
+        </div>
+      </div>
+    </div>
 
-              <div class="info-section" v-if="stageInfoData.ovcStatus">
-                <h4>Vulnerability Status</h4>
-                <div class="info-grid">
-                  <div class="info-item">
-                    <strong>OVC Status:</strong>
-                    <span>{{ stageInfoData.ovcStatus }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Date Effective:</strong>
-                    <span>{{
-                      formatDate(stageInfoData.ovcDateEffective)
-                    }}</span>
-                  </div>
+    <!-- Enrollment Details Modal -->
+    <div v-if="showEnrollmentModal" class="modal-overlay" @click="showEnrollmentModal = false">
+      <div class="modal-content enrollment-modal" @click.stop>
+        <div class="modal-header">
+          <h3>Enrollment Details</h3>
+          <button @click="showEnrollmentModal = false" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
+          <div v-if="selectedEnrollment" class="enrollment-details">
+            <!-- Program Information -->
+            <div class="detail-section">
+              <h4><i class="fas fa-briefcase"></i> Program Information</h4>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <label>Program Name</label>
+                  <span>{{ selectedEnrollment.program }}</span>
                 </div>
-              </div>
-
-              <div class="info-section" v-if="stageInfoData.reasons">
-                <h4>Reasons for Admission</h4>
-                <div class="reasons-list">
-                  <div
-                    v-for="(value, key) in stageInfoData.reasons"
-                    :key="key"
-                    class="reason-item"
-                    v-if="value"
-                  >
-                    {{ formatReasonKey(key) }}
-                  </div>
+                <div class="detail-item">
+                  <label>Enrollment Date</label>
+                  <span>{{ formatDate(selectedEnrollment.enrollmentDate) }}</span>
                 </div>
-              </div>
-
-              <div class="info-section" v-if="stageInfoData.primaryCaregiver">
-                <h4>Primary Caregiver</h4>
-                <div class="info-grid">
-                  <div class="info-item">
-                    <strong>Name:</strong>
-                    <span>{{ stageInfoData.primaryCaregiver.name }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Relationship:</strong>
-                    <span>{{
-                      stageInfoData.primaryCaregiver.relationship
-                    }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Phone:</strong>
-                    <span>{{ stageInfoData.primaryCaregiver.phone1 }}</span>
-                  </div>
-                  <div class="info-item">
-                    <strong>Occupation:</strong>
-                    <span>{{ stageInfoData.primaryCaregiver.occupation }}</span>
-                  </div>
+                <div class="detail-item">
+                  <label>Status</label>
+                  <span class="status-badge" :class="selectedEnrollment.status">
+                    {{ selectedEnrollment.status }}
+                  </span>
                 </div>
-              </div>
-
-              <div class="info-section" v-if="stageInfoData.documents">
-                <h4>Documents Included</h4>
-                <div class="documents-list">
-                  <div
-                    v-for="(value, key) in stageInfoData.documents"
-                    :key="key"
-                    class="document-item"
-                    v-if="value"
-                  >
-                    {{ formatDocumentKey(key) }}
-                  </div>
+                <div class="detail-item">
+                  <label>Days Enrolled</label>
+                  <span>{{ calculateDaysEnrolled(selectedEnrollment.enrollmentDate) }} days</span>
                 </div>
               </div>
             </div>
-            <div
-              v-else-if="stageInfoData && stageInfoData.error"
-              class="error-info"
-            >
-              <p>{{ stageInfoData.error }}</p>
+
+            <!-- Participant Information -->
+            <div class="detail-section">
+              <h4><i class="fas fa-user"></i> Participant Information</h4>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <label>Name</label>
+                  <span>{{ selectedEntity?.firstName }} {{ selectedEntity?.lastName }}</span>
+                </div>
+                <div class="detail-item">
+                  <label>Case ID</label>
+                  <span>{{ selectedEntity?.caseId || selectedEntity?.childId }}</span>
+                </div>
+                <div class="detail-item">
+                  <label>Age</label>
+                  <span>{{ selectedEntity?.age }} years</span>
+                </div>
+                <div class="detail-item">
+                  <label>Gender</label>
+                  <span>{{ selectedEntity?.gender }}</span>
+                </div>
+              </div>
             </div>
-            <div v-else class="no-info">
-              <p>No information available for this stage.</p>
+
+            <!-- Program Progress -->
+            <div class="detail-section">
+              <h4><i class="fas fa-chart-line"></i> Program Progress</h4>
+              <div class="progress-stats">
+                <div class="progress-item">
+                  <div class="progress-label">Completed Events</div>
+                  <div class="progress-bar-container">
+                    <div class="progress-bar" :style="{ width: completedPercentage + '%' }"></div>
+                  </div>
+                  <div class="progress-text">{{ completedEvents }} of {{ totalEvents }} events</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Events -->
+            <div class="detail-section">
+              <h4><i class="fas fa-history"></i> Recent Events</h4>
+              <div class="recent-events">
+                <div v-for="event in recentEnrollmentEvents" :key="event.id" class="event-summary">
+                  <div class="event-icon" :class="event.status">
+                    <i :class="event.status === 'completed' ? 'fas fa-check' : 'fas fa-clock'"></i>
+                  </div>
+                  <div class="event-info">
+                    <strong>{{ event.formType }}</strong>
+                    <span>{{ formatDate(event.date) }}</span>
+                  </div>
+                  <span class="status-badge small" :class="event.status">{{ event.status }}</span>
+                </div>
+                <div v-if="recentEnrollmentEvents.length === 0" class="no-events">
+                  <i class="fas fa-info-circle"></i>
+                  <p>No events recorded yet</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="detail-section">
+              <h4><i class="fas fa-cog"></i> Actions</h4>
+              <div class="enrollment-actions">
+                <button @click="scheduleEvent" class="action-button primary">
+                  <i class="fas fa-calendar-plus"></i>
+                  Schedule Event
+                </button>
+                <button @click="viewAllEvents" class="action-button secondary">
+                  <i class="fas fa-list"></i>
+                  View All Events
+                </button>
+                <button v-if="selectedEnrollment.status === 'active'" @click="completeEnrollment" class="action-button success">
+                  <i class="fas fa-check-circle"></i>
+                  Complete Enrollment
+                </button>
+                <button v-if="selectedEnrollment.status === 'active'" @click="cancelEnrollment" class="action-button danger">
+                  <i class="fas fa-times-circle"></i>
+                  Cancel Enrollment
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- New Enrollment Modal -->
+    <div v-if="showNewEnrollmentModal" class="modal-overlay" @click="showNewEnrollmentModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Enroll in Program</h3>
+          <button @click="showNewEnrollmentModal = false" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="enrollment-form">
+            <!-- Current Entity Info -->
+            <div class="info-section">
+              <h4><i class="fas fa-user"></i> Enrolling</h4>
+              <div class="entity-summary">
+                <div class="entity-avatar">
+                  {{ selectedEntity?.firstName?.charAt(0) }}{{ selectedEntity?.lastName?.charAt(0) }}
+                </div>
+                <div class="entity-info">
+                  <strong>{{ selectedEntity?.firstName }} {{ selectedEntity?.lastName }}</strong>
+                  <span>{{ selectedEntity?.caseId || selectedEntity?.childId }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Program Selection -->
+            <div class="form-group">
+              <label>Select Program *</label>
+              <select v-model="newEnrollment.program" class="form-select">
+                <option value="">-- Select Program --</option>
+                <option value="Child Protection Program">Child Protection Program</option>
+                <option value="Pregnancy Support Program">Pregnancy Support Program</option>
+                <option value="Family Support Program">Family Support Program</option>
+                <option value="Education Support Program">Education Support Program</option>
+                <option value="Medical Support Program">Medical Support Program</option>
+              </select>
+            </div>
+
+            <!-- Enrollment Date -->
+            <div class="form-group">
+              <label>Enrollment Date *</label>
+              <input 
+                type="date" 
+                v-model="newEnrollment.enrollmentDate"
+                :max="today"
+                class="form-input"
+              />
+            </div>
+
+            <!-- Organization Unit -->
+            <div class="form-group">
+              <label>Organization Unit *</label>
+              <select v-model="newEnrollment.orgUnit" class="form-select">
+                <option value="">-- Select Organization Unit --</option>
+                <option value="main">Main Center</option>
+                <option value="lusaka">Lusaka Outreach</option>
+                <option value="chongwe">Chongwe Outreach</option>
+              </select>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-group">
+              <label>Notes (Optional)</label>
+              <textarea 
+                v-model="newEnrollment.notes"
+                rows="3"
+                class="form-textarea"
+                placeholder="Add any enrollment notes or comments..."
+              ></textarea>
+            </div>
+
+            <!-- Attribution -->
+            <div class="form-group">
+              <label>Enrolled By</label>
+              <input 
+                type="text" 
+                v-model="newEnrollment.enrolledBy"
+                class="form-input"
+                placeholder="Staff name"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button @click="showNewEnrollmentModal = false" class="cancel-button">Cancel</button>
+          <button @click="submitEnrollment" class="save-button" :disabled="!isEnrollmentValid">
+            <i class="fas fa-check"></i>
+            Enroll in Program
+          </button>
+        </div>
+      </div>
+    </div>
+ 
 </template>
 
 <script setup>
-// Stage information modal enhancement
-import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
-import FormService from "../services/formService.js";
+import TopHeader from "./TopHeader.vue";
+import { ref, computed, onMounted } from "vue";
 import TrackerService from "../services/trackerService.js";
-import AuthService from "../services/auth.js";
+import FormService from "../services/formService.js";
+import { useToast } from "../composables/useToast.js";
 
+const { showToast } = useToast();
 const router = useRouter();
 
-// Reactive data
-const loading = ref(false);
-const loadingMessage = ref("");
+// State
 const searchQuery = ref("");
-const selectedStatus = ref("");
-const selectedAgeGroup = ref("");
-const selectedStage = ref("");
-const viewMode = ref("table");
+const filterStatus = ref("");
+const filterGender = ref("");
+const selectedOrgUnit = ref("main");
+const selectedEntity = ref(null);
+const activeTab = ref("attributes");
 const currentPage = ref(1);
 const pageSize = ref(10);
-const sortField = ref("lastActivity");
-const sortOrder = ref("desc");
-
-// DHIS2 EMIS style toolbar data
-const selectedOrgUnit = ref("main");
-const selectedProgram = ref("child-protection");
-
-// Cases data
-const allCases = ref([]);
-const selectedCase = ref(null);
+const showRegisterModal = ref(false);
+const showAddNote = ref(false);
+const newNote = ref("");
+const loading = ref(true);
+const allEntities = ref([]);
+const showEnrollmentModal = ref(false);
+const selectedEnrollment = ref(null);
 const showNewEnrollmentModal = ref(false);
-const showEventTypeModal = ref(false);
-const enrollmentLoading = ref(false);
 
-// View stage info modal
-const showStageInfoModal = ref(false);
-const stageInfoData = ref(null);
-const stageInfoLoading = ref(false);
-
-// New enrollment form with additional fields
 const newEnrollment = ref({
-  childFirstName: "",
-  childLastName: "",
+  program: '',
+  enrollmentDate: new Date().toISOString().split('T')[0],
+  orgUnit: 'main',
+  notes: '',
+  enrolledBy: 'Current User'
+});
+
+const today = computed(() => new Date().toISOString().split('T')[0]);
+
+const isEnrollmentValid = computed(() => {
+  return newEnrollment.value.program && 
+         newEnrollment.value.enrollmentDate && 
+         newEnrollment.value.orgUnit;
+});
+
+const newEntity = ref({
+  firstName: "",
+  lastName: "",
   dateOfBirth: "",
   gender: "",
-  program: "",
-  initialFormType: "",
-  referralDate: "",
-  referralMethod: "",
-  assessmentDate: "",
-  assessmentType: "",
-  enrollmentDate: "",
-  carePlanDate: "",
-  followUpDate: "",
+  program: "child-protection"
 });
 
-const resetEnrollmentForm = () => {
-  newEnrollment.value = {
-    childFirstName: "",
-    childLastName: "",
-    dateOfBirth: "",
-    gender: "",
-    program: "",
-    initialFormType: "",
-    referralDate: "",
-    referralMethod: "",
-    assessmentDate: "",
-    assessmentType: "",
-    enrollmentDate: "",
-    carePlanDate: "",
-    followUpDate: "",
-  };
-};
-
-// Handle form type change
-const handleFormTypeChange = () => {
-  // Reset specific fields when form type changes
-  if (newEnrollment.value.initialFormType === "initial-referral") {
-    newEnrollment.value.referralDate = new Date().toISOString().split("T")[0];
-  } else if (newEnrollment.value.initialFormType === "initial-assessment") {
-    newEnrollment.value.assessmentDate = new Date().toISOString().split("T")[0];
-  } else if (newEnrollment.value.initialFormType === "program-enrollment") {
-    newEnrollment.value.enrollmentDate = new Date().toISOString().split("T")[0];
-  } else if (newEnrollment.value.initialFormType === "care-plan") {
-    newEnrollment.value.carePlanDate = new Date().toISOString().split("T")[0];
-  } else if (newEnrollment.value.initialFormType === "regular-follow-up") {
-    newEnrollment.value.followUpDate = new Date().toISOString().split("T")[0];
-  }
-};
-
-// Watch for changes in initialFormType to pre-populate fields
-watch(
-  () => newEnrollment.value.initialFormType,
-  (newVal) => {
-    if (newVal === "initial-referral") {
-      // Pre-populate some fields for initial referral
-      console.log("Selected Initial Referral Form");
-    } else if (newVal === "initial-assessment") {
-      // Pre-populate some fields for initial assessment
-      console.log("Selected Initial Assessment Form");
-    } else if (newVal === "program-enrollment") {
-      // Pre-populate some fields for program enrollment
-      console.log("Selected Program Enrollment Form");
-    } else if (newVal === "care-plan") {
-      // Pre-populate some fields for care plan
-      console.log("Selected Care Plan Development Form");
-    } else if (newVal === "regular-follow-up") {
-      // Pre-populate some fields for regular follow-up
-      console.log("Selected Regular Follow-up Form");
-    }
-  }
-);
-
-// Program stages - aligned with actual form types
-const programStages = ref([
-  {
-    id: "initial-referral",
-    formType: "initial-referral",
-    name: "Initial Referral",
-    description: "Child referred to the program",
-    completed: false,
-    active: true,
-  },
-  {
-    id: "child-overview",
-    formType: "child-overview",
-    name: "Child Overview & Background",
-    description: "Comprehensive background information",
-    completed: false,
-    active: false,
-  },
-  {
-    id: "initial-assessment",
-    formType: "initial-assessment",
-    name: "TKP Initial Assessment",
-    description: "Initial assessment of child needs",
-    completed: false,
-    active: false,
-  },
-  {
-    id: "medical-intake",
-    formType: "medical-intake",
-    name: "Medical Intake Assessment",
-    description: "Medical history and health assessment",
-    completed: false,
-    active: false,
-  },
-  {
-    id: "academics-literacy",
-    formType: "academics-literacy",
-    name: "Academics & Literacy",
-    description: "Educational assessment and planning",
-    completed: false,
-    active: false,
-  },
-  {
-    id: "psychological-assessment",
-    formType: "psychological-assessment",
-    name: "Psychological Assessment",
-    description: "Mental health and psychological evaluation",
-    completed: false,
-    active: false,
-  },
-  {
-    id: "life-skills-survey",
-    formType: "life-skills-survey",
-    name: "Life Skills Survey",
-    description: "Life skills assessment and planning",
-    completed: false,
-    active: false,
-  },
-  {
-    id: "birth-delivery",
-    formType: "birth-delivery",
-    name: "Birth & Delivery Report",
-    description: "Birth and delivery information",
-    completed: false,
-    active: false,
-  },
-  {
-    id: "care-plan-summary",
-    formType: "care-plan-summary",
-    name: "Care Plan Summary",
-    description: "Individual care plan summary",
-    completed: false,
-    active: false,
-  },
-  {
-    id: "care-plan-baby",
-    formType: "care-plan-baby",
-    name: "Care Plan (Baby)",
-    description: "Care plan for baby",
-    completed: false,
-    active: false,
-  },
-  {
-    id: "care-plan-ongoing-life-skills",
-    formType: "care-plan-ongoing-life-skills",
-    name: "Care Plan - Ongoing Life Skills",
-    description: "Ongoing life skills development plan",
-    completed: false,
-    active: false,
-  },
+// Data
+const orgUnits = ref([
+  { id: "main", name: "Main Center", icon: "fas fa-building" },
+  { id: "lusaka", name: "Lusaka Outreach", icon: "fas fa-map-marker-alt" },
+  { id: "chongwe", name: "Chongwe Outreach", icon: "fas fa-map-marker-alt" }
 ]);
 
-// Computed properties
-const filteredCases = computed(() => {
-  let filtered = allCases.value;
+const tabs = ref([
+  { id: "attributes", label: "Attributes", icon: "fas fa-list" },
+  { id: "enrollment", label: "Enrollment", icon: "fas fa-user-check" },
+  { id: "events", label: "Events", icon: "fas fa-calendar-alt" },
+  { id: "indicators", label: "Indicators", icon: "fas fa-chart-line" },
+  { id: "notes", label: "Notes", icon: "fas fa-sticky-note" }
+]);
 
-  // Search filter
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(
-      (case_) =>
-        case_.childName.toLowerCase().includes(query) ||
-        case_.caseId.toLowerCase().includes(query) ||
-        case_.childId.toLowerCase().includes(query)
-    );
-  }
+const programStages = ref([
+  { id: 'referral', name: 'Referral', order: 1 },
+  { id: 'assessment', name: 'Assessment', order: 2 },
+  { id: 'enrollment', name: 'Enrollment', order: 3 },
+  { id: 'care-plan', name: 'Care Plan', order: 4 },
+  { id: 'follow-up', name: 'Follow-up', order: 5 }
+]);
 
-  // Status filter
-  if (selectedStatus.value) {
-    filtered = filtered.filter(
-      (case_) => case_.status === selectedStatus.value
-    );
-  }
+const programIndicators = computed(() => {
+  if (!selectedEntity.value) return [];
+  
+  const completedEvents = selectedEntity.value.events?.filter(e => e.status === 'completed').length || 0;
+  const totalEvents = selectedEntity.value.events?.length || 0;
+  const scheduledEvents = selectedEntity.value.events?.filter(e => e.status === 'scheduled').length || 0;
+  
+  const enrollmentDate = new Date(selectedEntity.value.enrollmentDate);
+  const daysInProgram = Math.floor((new Date() - enrollmentDate) / (1000 * 60 * 60 * 24));
+  
+  const progress = totalEvents > 0 ? Math.round((completedEvents / totalEvents) * 100) : 0;
+  
+  return [
+    { id: 1, label: "Days in Program", value: daysInProgram.toString(), icon: "fas fa-calendar", color: "#3b82f6" },
+    { id: 2, label: "Completed Events", value: `${completedEvents}/${totalEvents}`, icon: "fas fa-check-circle", color: "#10b981" },
+    { id: 3, label: "Upcoming Events", value: scheduledEvents.toString(), icon: "fas fa-clock", color: "#f59e0b" },
+    { id: 4, label: "Overall Progress", value: `${progress}%`, icon: "fas fa-chart-line", color: "#8b5cf6" }
+  ];
+});
 
-  // Age group filter
-  if (selectedAgeGroup.value) {
-    filtered = filtered.filter((case_) => {
-      const age = case_.age;
-      switch (selectedAgeGroup.value) {
-        case "0-5":
-          return age <= 5;
-        case "6-12":
-          return age >= 6 && age <= 12;
-        case "13-17":
-          return age >= 13 && age <= 17;
-        case "18+":
-          return age >= 18;
-        default:
-          return true;
-      }
-    });
-  }
-
-  // Stage filter
-  if (selectedStage.value) {
-    filtered = filtered.filter((case_) =>
-      case_.currentStage.toLowerCase().includes(selectedStage.value)
-    );
-  }
-
-  // Sort
-  filtered.sort((a, b) => {
-    const aVal = a[sortField.value];
-    const bVal = b[sortField.value];
-
-    if (sortOrder.value === "asc") {
-      return aVal > bVal ? 1 : -1;
-    } else {
-      return aVal < bVal ? 1 : -1;
-    }
+// Computed
+const filteredEntities = computed(() => {
+  return allEntities.value.filter(entity => {
+    const matchesSearch = !searchQuery.value || 
+      entity.childFirstName?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      entity.childLastName?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      entity.childName?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      entity.childId?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      entity.caseId?.toLowerCase().includes(searchQuery.value.toLowerCase());
+    
+    const matchesStatus = !filterStatus.value || entity.status === filterStatus.value;
+    const matchesGender = !filterGender.value || entity.gender?.toLowerCase() === filterGender.value.toLowerCase();
+    
+    return matchesSearch && matchesStatus && matchesGender;
   });
-
-  return filtered;
 });
 
-const paginatedCases = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  const end = start + pageSize.value;
-  return filteredCases.value.slice(start, end);
+const totalPages = computed(() => Math.ceil(filteredEntities.value.length / pageSize.value));
+
+const paginationText = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value + 1;
+  const end = Math.min(currentPage.value * pageSize.value, filteredEntities.value.length);
+  return `${start}-${end} of ${filteredEntities.value.length}`;
 });
 
-const totalPages = computed(() =>
-  Math.ceil(filteredCases.value.length / pageSize.value)
-);
-
-const totalCases = computed(() => allCases.value.length);
-const activeCases = computed(
-  () => allCases.value.filter((c) => c.status === "active").length
-);
-const completedCases = computed(
-  () => allCases.value.filter((c) => c.status === "completed").length
-);
-const newThisMonth = computed(() => {
-  const thisMonth = new Date();
-  thisMonth.setDate(1);
-  return allCases.value.filter((c) => new Date(c.enrollmentDate) >= thisMonth)
-    .length;
+const hasVisibleAttributes = computed(() => {
+  if (!selectedEntity.value?.attributes) return false;
+  
+  return Object.values(selectedEntity.value.attributes).some(value => 
+    value && value !== 'N/A' && value !== 'None reported' && value !== 'None'
+  );
 });
+
+const completedEvents = computed(() => {
+  return selectedEntity.value?.events?.filter(e => e.status === 'completed').length || 0;
+});
+
+const totalEvents = computed(() => {
+  return selectedEntity.value?.events?.length || 0;
+});
+
+const completedPercentage = computed(() => {
+  if (totalEvents.value === 0) return 0;
+  return Math.round((completedEvents.value / totalEvents.value) * 100);
+});
+
+const recentEnrollmentEvents = computed(() => {
+  if (!selectedEntity.value?.events) return [];
+  return selectedEntity.value.events.slice(0, 5); // Show 5 most recent events
+});
+
+// Helper methods for stage tracking
+const formatStageName = (stageId) => {
+  const stageNames = {
+    'referral': 'Referral',
+    'assessment': 'Assessment',
+    'enrollment': 'Enrollment',
+    'care-plan': 'Care Plan',
+    'follow-up': 'Follow-up'
+  };
+  return stageNames[stageId] || stageId;
+};
+
+const getCurrentStageClass = (entity) => {
+  const stage = entity?.attributes?.currentStage || 'referral';
+  const stageClasses = {
+    'referral': 'stage-referral',
+    'assessment': 'stage-assessment',
+    'enrollment': 'stage-enrollment',
+    'care-plan': 'stage-care-plan',
+    'follow-up': 'stage-follow-up'
+  };
+  return stageClasses[stage] || 'stage-referral';
+};
+
+const getStageStatus = (stageId, entity) => {
+  const currentStage = entity?.attributes?.currentStage || 'referral';
+  const stages = ['referral', 'assessment', 'enrollment', 'care-plan', 'follow-up'];
+  const currentIndex = stages.indexOf(currentStage);
+  const stageIndex = stages.indexOf(stageId);
+  
+  if (stageIndex < currentIndex) return 'completed';
+  if (stageIndex === currentIndex) return 'current';
+  return 'pending';
+};
+
+const getStageIcon = (stageId, entity) => {
+  const status = getStageStatus(stageId, entity);
+  if (status === 'completed') return 'fas fa-check-circle';
+  if (status === 'current') return 'fas fa-dot-circle';
+  return 'far fa-circle';
+};
+
+const getStageFormCount = (stageId, entity) => {
+  if (!entity?.events) return '0 forms';
+  
+  const stageEvents = entity.events.filter(event => {
+    const eventStage = getEventStage(event.formType);
+    return eventStage === stageId;
+  });
+  
+  const count = stageEvents.length;
+  return count === 1 ? '1 form' : `${count} forms`;
+};
+
+const getEventStage = (formType) => {
+  const stageMap = {
+    // Referral Stage
+    'Initial Referral': 'referral',
+    
+    // Assessment Stage
+    'TKP Initial Assessment': 'assessment',
+    'Initial Assessment': 'assessment',
+    
+    // Enrollment Stage
+    'Child Overview & Background': 'enrollment',
+    'Child Overview': 'enrollment',
+    'Program Enrollment': 'enrollment',
+    
+    // Care Plan Stage
+    'Medical Intake Assessment': 'care-plan',
+    'Medical Intake': 'care-plan',
+    'Academics & Literacy': 'care-plan',
+    'Academics and Literacy': 'care-plan',
+    'Psychological Assessment': 'care-plan',
+    'Life Skills Survey': 'care-plan',
+    'Birth & Delivery Report': 'care-plan',
+    'Birth and Delivery Report': 'care-plan',
+    'Care Plan Summary': 'care-plan',
+    'Care Plan (Baby)': 'care-plan',
+    'Care Plan Baby': 'care-plan',
+    
+    // Follow-up Stage
+    'Care Plan - Ongoing Life Skills': 'follow-up',
+    'Care Plan Ongoing Life Skills': 'follow-up',
+    'Regular Follow-up': 'follow-up',
+    'Follow-up Visit': 'follow-up'
+  };
+  
+  return stageMap[formType] || 'referral';
+};
+
+const getCompletedForms = (entity) => {
+  if (!entity?.events) return [];
+  return entity.events.filter(e => e.status === 'completed' || e.status === 'complete');
+};
 
 // Methods
-const goBack = () => {
-  router.push("/dashboard");
-};
-
-const handleLogout = async () => {
-  const result = await AuthService.logout();
-  if (result.success) {
-    router.push("/login");
-  }
-};
-
-// DHIS2 EMIS style toolbar methods
-const refreshData = async () => {
-  loading.value = true;
-  loadingMessage.value = "Refreshing data...";
-  await loadCases();
-};
-
-const exportData = () => {
-  // In a real implementation, this would export the data to a file
-  alert("Export functionality would be implemented here");
-};
-
-const performSearch = () => {
-  currentPage.value = 1;
-  // Search is reactive through computed property
-};
-
-const clearSearch = () => {
-  searchQuery.value = "";
-  currentPage.value = 1;
-};
-
-const applyFilters = () => {
-  currentPage.value = 1;
-};
-
-const resetFilters = () => {
-  searchQuery.value = "";
-  selectedStatus.value = "";
-  selectedAgeGroup.value = "";
-  selectedStage.value = "";
-  currentPage.value = 1;
-};
-
-const sortBy = (field) => {
-  if (sortField.value === field) {
-    sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
-  } else {
-    sortField.value = field;
-    sortOrder.value = "asc";
-  }
-};
-
-const selectCase = (case_) => {
-  selectedCase.value = case_;
-  loadCaseDetails(case_.id);
-};
-
-const editCase = (case_) => {
-  // Navigate to appropriate form based on case stage
-  const formRoute = getFormRouteForCase(case_);
-  router.push(formRoute);
-};
-
-const addEvent = () => {
-  if (!selectedCase.value) return;
-
-  // Instead of showing modal, directly open the initial-referral form
-  // Store child info in sessionStorage so the form can pre-populate
-  const childData = {
-    childFirstName: selectedCase.value.childName.split(" ")[0] || "",
-    childSurname: selectedCase.value.childName.split(" ").slice(-1)[0] || "",
-    childName: selectedCase.value.childName,
-    dateOfBirth: selectedCase.value.dateOfBirth,
-    age: selectedCase.value.age,
-    gender: selectedCase.value.gender,
-    caseId: selectedCase.value.caseId || selectedCase.value.id,
-    formType: "initial-referral",
-    returnTo: "tracker-capture",
-  };
-
-  sessionStorage.setItem("selectedChildForForm", JSON.stringify(childData));
-
-  // Navigate directly to the capture page with the form preset
-  router.push({
-    path: "/capture",
-    query: {
-      preset: "initial-referral",
-      childData: btoa(JSON.stringify(childData)), // Base64 encode for URL safety
-      returnTo: "tracker-capture",
-    },
-  });
-};
-
-const selectEventType = (formType) => {
-  showEventTypeModal.value = false;
-  if (formType && selectedCase.value) {
-    // Store child info in sessionStorage
-    const childData = {
-      childFirstName: selectedCase.value.childName.split(" ")[0] || "",
-      childSurname: selectedCase.value.childName.split(" ").slice(-1)[0] || "",
-      childName: selectedCase.value.childName,
-      dateOfBirth: selectedCase.value.dateOfBirth,
-      age: selectedCase.value.age,
-      gender: selectedCase.value.gender,
-      caseId: selectedCase.value.caseId || selectedCase.value.id,
-      formType: formType,
-      returnTo: "tracker-capture",
-    };
-
-    sessionStorage.setItem("selectedChildForForm", JSON.stringify(childData));
-
-    // Navigate to dashboard with the form to open
-    router.push({
-      path: "/dashboard",
-    });
-  }
-};
-
-const cancelEventTypeSelection = () => {
-  showEventTypeModal.value = false;
-};
-
-const closeStageInfoModal = () => {
-  showStageInfoModal.value = false;
-  stageInfoData.value = null;
-};
-
-const addStageEvent = (stage) => {
-  if (!selectedCase.value) return;
-
-  // Get the form type from the stage
-  const formType = stage.formType || stage.id;
-
-  console.log("Adding stage event:", {
-    stageName: stage.name,
-    formType: formType,
-    childName: selectedCase.value.childName,
-  });
-
-  // Store child info in sessionStorage so the form can pre-populate
-  const childData = {
-    childFirstName: selectedCase.value.childName.split(" ")[0] || "",
-    childSurname: selectedCase.value.childName.split(" ").slice(-1)[0] || "",
-    childName: selectedCase.value.childName,
-    dateOfBirth: selectedCase.value.dateOfBirth,
-    age: selectedCase.value.age,
-    gender: selectedCase.value.gender,
-    caseId: selectedCase.value.caseId || selectedCase.value.id,
-    formType: formType,
-    returnTo: "tracker-capture", // So we know where to return after form submission
-    viewMode: stage.completed, // View-only mode if stage is already completed
-  };
-
-  sessionStorage.setItem("selectedChildForForm", JSON.stringify(childData));
-
-  // Navigate directly to the capture page with the form preset
-  router.push({
-    path: "/capture",
-    query: {
-      preset: formType,
-      childData: btoa(JSON.stringify(childData)), // Base64 encode for URL safety
-      returnTo: "tracker-capture",
-    },
-  });
-};
-
-const viewEvent = (event) => {
-  // Navigate to view the specific form/event
-  router.push(`/capture?view=${event.id}`);
-};
-
-// View stage information in modal
-const viewStageInfo = async (stage) => {
-  if (!selectedCase.value) return;
-
-  console.log("Viewing stage info for:", stage);
-  stageInfoLoading.value = true;
-  showStageInfoModal.value = true;
-  stageInfoData.value = null;
-
-  try {
-    // Get the form type from the stage
-    const formType = stage.formType || stage.id;
-
-    console.log("Viewing stage info:", {
-      stageName: stage.name,
-      formType: formType,
-      childName: selectedCase.value.childName,
-    });
-
-    // Load the form data for this child and form type
-    const result = await FormService.getForms(formType, 1000);
-
-    console.log("Form service result:", result);
-
-    if (result.success && result.forms.length > 0) {
-      // Find the form that matches this child
-      const childName = selectedCase.value.childName.split(" ");
-      const firstName = childName[0] || "";
-      const lastName = childName[childName.length - 1] || "";
-
-      const matchingForm = result.forms.find((form) => {
-        const formFirstName = (form.childFirstName || "").trim().toLowerCase();
-        const formSurname = (form.childSurname || form.childLastName || "")
-          .trim()
-          .toLowerCase();
-        const childFirstNameLower = firstName.trim().toLowerCase();
-        const childLastNameLower = lastName.trim().toLowerCase();
-
-        return (
-          formFirstName === childFirstNameLower &&
-          formSurname === childLastNameLower
-        );
-      });
-
-      console.log("Matching form found:", matchingForm);
-
-      if (matchingForm) {
-        stageInfoData.value = matchingForm;
-      } else {
-        // Try to find by case ID if name matching failed
-        const caseId = selectedCase.value.caseId || selectedCase.value.id;
-        const caseMatchingForm = result.forms.find(
-          (form) => form.caseId === caseId
-        );
-
-        if (caseMatchingForm) {
-          stageInfoData.value = caseMatchingForm;
-        } else {
-          stageInfoData.value = { error: "No data found for this stage" };
-        }
-      }
-    } else {
-      stageInfoData.value = { error: "No data found for this stage" };
-    }
-  } catch (error) {
-    console.error("Error loading stage info:", error);
-    stageInfoData.value = {
-      error: "Error loading stage information: " + error.message,
-    };
-  } finally {
-    stageInfoLoading.value = false;
-  }
-};
-
-const getStageEvents = (stageId) => {
-  if (!selectedCase.value) return [];
-  const events = selectedCase.value.events || [];
-
-  // Prefer strict match on the form's actual type
-  return events.filter((event) => {
-    const eventFormType = event?.data?.formType;
-    if (eventFormType) return eventFormType === stageId;
-
-    // Fallbacks: match by known stage mapping or direct stageId
-    const mappedStage = mapStageIdFromFormType(stageId);
-    return event.stageId === stageId || event.stageId === mappedStage;
-  });
-};
-
-const createNewEnrollment = async () => {
-  enrollmentLoading.value = true;
-
-  try {
-    // The form type is used directly as the stage ID (no mapping needed)
-    const formType = newEnrollment.value.initialFormType;
-
-    // Prepare enrollment data based on form type
-    const enrollmentData = {
-      ...newEnrollment.value,
-      enrollmentDate: new Date().toISOString(),
-      status: "active",
-      currentStage: formType, // Use the actual form type as the current stage
-    };
-
-    const enrollment = await TrackerService.createEnrollment(enrollmentData);
-
-    if (enrollment.success) {
-      // Navigate to the initial form
-      const formRoute = `/capture?preset=${formType}&caseId=${enrollment.caseId}`;
-      console.log("Navigating to form:", formRoute);
-      router.push(formRoute);
-    } else {
-      alert("Failed to create enrollment: " + enrollment.error);
-    }
-  } catch (error) {
-    console.error("Error creating enrollment:", error);
-    alert("Failed to create enrollment");
-  } finally {
-    enrollmentLoading.value = false;
-    showNewEnrollmentModal.value = false;
-    resetEnrollmentForm();
-  }
-};
-
 const loadCases = async () => {
   loading.value = true;
-  loadingMessage.value = "Loading cases from Firebase forms...";
-
   try {
-    console.log("TrackerCapture: Loading cases from Firebase...");
     const result = await TrackerService.getAllCases();
-
-    console.log("TrackerCapture: Cases loaded:", {
-      success: result.success,
-      count: result.cases?.length || 0,
-      error: result.error,
-    });
-
-    if (result.success) {
-      allCases.value = result.cases;
-      console.log(
-        "TrackerCapture: Cases set to reactive value:",
-        allCases.value.length
-      );
+    
+    if (result.success && result.cases) {
+      // Transform cases to entities format
+      const entities = result.cases.map(case_ => {
+        // Get the most complete form data for attributes
+        const primaryEvent = case_.events?.find(e => e.formType === 'child-overview' || e.data?.sourceType === 'child-overview') 
+          || case_.events?.find(e => e.formType === 'initial-assessment' || e.data?.sourceType === 'initial-assessment')
+          || case_.events?.[0];
+        
+        const formData = primaryEvent?.data || {};
+        
+        // Extract all available attributes from form data
+        const attributes = {
+          // Basic Information
+          dateOfBirth: case_.dateOfBirth || formData.dateOfBirth || 'N/A',
+          age: case_.age || formData.age || 'N/A',
+          gender: case_.gender || formData.gender || 'N/A',
+          
+          // Contact Information
+          phoneNumber: formData.phoneNumber || formData.contactNumber || formData.guardianPhone || 'N/A',
+          address: formData.address || formData.currentAddress || formData.residentialAddress || 'N/A',
+          district: formData.district || formData.currentDistrict || 'N/A',
+          province: formData.province || 'N/A',
+          
+          // Guardian Information
+          guardianName: formData.guardianName || formData.caregiverName || formData.parentGuardianName || 'N/A',
+          guardianRelationship: formData.guardianRelationship || formData.relationshipToChild || 'N/A',
+          guardianPhone: formData.guardianPhone || formData.guardianContact || 'N/A',
+          guardianOccupation: formData.guardianOccupation || 'N/A',
+          
+          // Education Information
+          schoolName: formData.schoolName || formData.currentSchool || 'N/A',
+          gradeLevel: formData.gradeLevel || formData.currentGrade || 'N/A',
+          educationLevel: formData.educationLevel || 'N/A',
+          
+          // Medical Information
+          medicalConditions: formData.medicalConditions || formData.knownMedicalConditions || 'None reported',
+          allergies: formData.allergies || 'None reported',
+          medications: formData.currentMedications || formData.medications || 'None',
+          
+          // Program Information
+          program: case_.program || formData.program || 'Child Protection Program',
+          referralSource: formData.referralSource || formData.sourceOfReferral || 'N/A',
+          referralDate: case_.enrollmentDate || formData.dateOfReferral || formData.referralDate || 'N/A',
+          dateOfAdmission: formData.dateOfAdmission || formData.admissionDate || 'N/A',
+          
+          // Additional Information
+          nationality: formData.nationality || 'Zambian',
+          placeOfBirth: formData.placeOfBirth || 'N/A',
+          language: formData.primaryLanguage || formData.language || 'N/A',
+          religion: formData.religion || 'N/A',
+          
+          // Case Information
+          caseId: case_.caseId,
+          childId: case_.childId,
+          currentStage: case_.currentStage || 'referral',
+          status: case_.status || 'active',
+          assignedWorker: case_.assignedWorker || 'System User',
+          lastActivity: case_.lastActivity || case_.updatedAt
+        };
+        
+        return {
+          id: case_.id,
+          firstName: case_.childFirstName || 'Unknown',
+          lastName: case_.childLastName || 'Child',
+          age: case_.age || 0,
+          gender: case_.gender || 'Unknown',
+          enrollmentDate: case_.enrollmentDate || case_.createdAt,
+          status: case_.status || 'active',
+          caseId: case_.caseId,
+          childId: case_.childId,
+          childName: case_.childName,
+          attributes: attributes,
+          enrollments: [
+            {
+              id: case_.id,
+              program: case_.program || 'Child Protection Program',
+              enrollmentDate: case_.enrollmentDate || case_.createdAt,
+              status: case_.status || 'active'
+            }
+          ],
+          events: case_.events || [],
+          notes: []
+        };
+      });
+      
+      // De-duplicate based on strict criteria - only remove obvious duplicates
+      const uniqueEntities = [];
+      const seenCaseIds = new Set();
+      
+      for (const entity of entities) {
+        let isDuplicate = false;
+        
+        // Only consider duplicate if:
+        // 1. Has the EXACT same caseId (high confidence duplicate)
+        if (entity.caseId && seenCaseIds.has(entity.caseId)) {
+          isDuplicate = true;
+          
+          // Merge with existing entry
+          const existingEntity = uniqueEntities.find(e => e.caseId === entity.caseId);
+          
+          if (existingEntity) {
+            // Merge events, avoiding duplicates
+            if (entity.events && entity.events.length > 0) {
+              const existingEventIds = new Set(existingEntity.events.map(e => e.id));
+              entity.events.forEach(event => {
+                if (!existingEventIds.has(event.id)) {
+                  existingEntity.events.push(event);
+                }
+              });
+            }
+            
+            // Merge attributes - prefer non-N/A values
+            for (const [key, value] of Object.entries(entity.attributes)) {
+              if (value && value !== 'N/A' && value !== 'None reported' && value !== 'None') {
+                if (!existingEntity.attributes[key] || 
+                    existingEntity.attributes[key] === 'N/A' || 
+                    existingEntity.attributes[key] === 'None reported' || 
+                    existingEntity.attributes[key] === 'None') {
+                  existingEntity.attributes[key] = value;
+                }
+              }
+            }
+          }
+        }
+        
+        // If not a duplicate, add to unique list
+        if (!isDuplicate) {
+          if (entity.caseId) {
+            seenCaseIds.add(entity.caseId);
+          }
+          uniqueEntities.push(entity);
+        }
+      }
+      
+      allEntities.value = uniqueEntities;
+      
+      console.log(`Loaded ${allEntities.value.length} tracked entities from Firebase (original: ${entities.length})`);
+      if (entities.length !== uniqueEntities.length) {
+        console.log(`Removed ${entities.length - uniqueEntities.length} duplicate entries based on caseId matching`);
+      }
     } else {
-      console.error("Failed to load cases:", result.error);
-      // Show user-friendly error
-      alert(`Failed to load cases: ${result.error}`);
+      console.warn('No cases returned from TrackerService');
+      allEntities.value = [];
     }
   } catch (error) {
-    console.error("Error loading cases:", error);
-    // Show user-friendly error
-    alert(`Error loading cases: ${error.message}`);
+    console.error('Error loading cases:', error);
+    showToast('Error loading cases', 'error');
+    allEntities.value = [];
   } finally {
     loading.value = false;
   }
 };
 
-const loadCaseDetails = async (caseId) => {
+const selectOrgUnit = (unitId) => {
+  selectedOrgUnit.value = unitId;
+  console.log("Selected org unit:", unitId);
+};
+
+const selectEntity = async (entity) => {
   loading.value = true;
-  loadingMessage.value = "Loading case details...";
-
   try {
-    const result = await TrackerService.getCaseDetails(caseId);
-    if (result.success) {
-      selectedCase.value = { ...selectedCase.value, ...result.details };
-      updateProgramStages();
+    // Load full case details
+    const result = await TrackerService.getCaseDetails(entity.id);
+    
+    if (result.success && result.details) {
+      const details = result.details;
+      
+      // Update selected entity with full details and events
+      selectedEntity.value = {
+        ...entity,
+        events: details.events || entity.events || [],
+        notes: details.notes || []
+      };
+      
+      activeTab.value = "attributes";
+    } else {
+      selectedEntity.value = entity;
+      activeTab.value = "attributes";
     }
   } catch (error) {
-    console.error("Error loading case details:", error);
+    console.error('Error loading entity details:', error);
+    selectedEntity.value = entity;
+    activeTab.value = "attributes";
   } finally {
     loading.value = false;
   }
 };
 
-const updateProgramStages = async () => {
-  if (!selectedCase.value) return;
-
-  // Reset states
-  programStages.value.forEach((stage) => {
-    stage.completed = false;
-    stage.active = false;
-  });
-
-  const events = selectedCase.value.events || [];
-
-  // Mark completed if any event exists for that form type
-  programStages.value.forEach((stage) => {
-    const hasForm = events.some((ev) => {
-      const evFormType = ev?.data?.formType;
-      if (evFormType) return evFormType === stage.formType;
-      const mappedStage = mapStageIdFromFormType(stage.formType);
-      return ev.stageId === stage.id || ev.stageId === mappedStage;
-    });
-    stage.completed = !!hasForm;
-  });
-
-  // First incomplete becomes active
-  const firstIncompleteIndex = programStages.value.findIndex((s) => !s.completed);
-  if (firstIncompleteIndex >= 0) {
-    programStages.value[firstIncompleteIndex].active = true;
-  } else if (programStages.value.length > 0) {
-    programStages.value[programStages.value.length - 1].active = true;
-  }
+const filterEntities = () => {
+  currentPage.value = 1;
 };
 
-const getFormTypeForStage = (stageId) => {
-  // Exact stage match
-  const stage = programStages.value.find((s) => s.id === stageId);
-  if (stage) return stage.formType;
-
-  // Handle aggregate stages (e.g., 'care-plan', 'assessment', 'enrollment', 'referral')
-  if (!selectedCase.value || !selectedCase.value.events) return "initial-referral";
-
-  const targetStageId = stageId;
-  // Pick the most recent event that belongs to the aggregate stage
-  const candidates = (selectedCase.value.events || []).filter((ev) => {
-    // Prefer formType on data
-    const evFormType = ev?.data?.formType;
-    if (evFormType) {
-      return mapStageIdFromFormType(evFormType) === targetStageId;
-    }
-    return ev.stageId === targetStageId;
-  });
-
-  if (candidates.length === 0) return "initial-referral";
-
-  candidates.sort((a, b) => {
-    const da = a.date?.toDate ? a.date.toDate() : new Date(a.date);
-    const db = b.date?.toDate ? b.date.toDate() : new Date(b.date);
-    return db - da;
-  });
-
-  const latest = candidates[0];
-  return latest?.data?.formType || latest?.stageId || "initial-referral";
+const previousPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
 };
 
-const mapStageIdFromFormType = (formType) => {
-  const stageMap = {
-    "initial-referral": "referral",
-    "initial-assessment": "assessment",
-    "child-overview": "enrollment",
-    "medical-intake": "care-plan",
-    "academics-literacy": "care-plan",
-    "psychological-assessment": "care-plan",
-    "life-skills-survey": "care-plan",
-    "birth-delivery": "care-plan",
-    "care-plan-summary": "care-plan",
-    "care-plan-baby": "care-plan",
-    "care-plan-ongoing-life-skills": "follow-up",
-  };
-  return stageMap[formType] || "referral";
-};
-
-const getFormRouteForCase = (case_) => {
-  // Determine which form to edit based on case stage
-  const formType = getFormTypeForStage(case_.currentStage);
-  return `/capture?preset=${formType}&caseId=${case_.id}&edit=true`;
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
 };
 
 const formatDate = (date) => {
-  if (!date) return "N/A";
-  const d = date?.toDate ? date.toDate() : new Date(date);
-  return d.toLocaleDateString();
+  if (!date) return 'N/A';
+  try {
+    return new Date(date).toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  } catch {
+    return 'Invalid Date';
+  }
 };
 
-const formatStatus = (status) => {
-  const statusMap = {
-    active: "Active",
-    completed: "Completed",
-    pending: "Pending",
-    transferred: "Transferred",
-    draft: "Draft",
+const formatAttributeName = (key) => {
+  return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+};
+
+const registerEntity = async () => {
+  if (!newEntity.value.firstName || !newEntity.value.lastName || !newEntity.value.dateOfBirth || !newEntity.value.gender) {
+    showToast('Please fill in all required fields', 'error');
+    return;
+  }
+  
+  try {
+    const enrollmentData = {
+      childFirstName: newEntity.value.firstName,
+      childLastName: newEntity.value.lastName,
+      dateOfBirth: newEntity.value.dateOfBirth,
+      gender: newEntity.value.gender,
+      program: newEntity.value.program,
+      enrollmentDate: new Date().toISOString(),
+      initialFormType: 'child-overview'
+    };
+    
+    const result = await TrackerService.createEnrollment(enrollmentData);
+    
+    if (result.success) {
+      showToast('Entity registered successfully', 'success');
+      showRegisterModal.value = false;
+      
+      // Reset form
+      newEntity.value = {
+        firstName: "",
+        lastName: "",
+        dateOfBirth: "",
+        gender: "",
+        program: "child-protection"
+      };
+      
+      // Reload cases
+      await loadCases();
+    } else {
+      showToast(result.error || 'Failed to register entity', 'error');
+    }
+  } catch (error) {
+    console.error('Error registering entity:', error);
+    showToast('Error registering entity', 'error');
+  }
+};
+
+const editEntity = () => {
+  console.log("Edit entity:", selectedEntity.value);
+  showToast('Edit functionality coming soon', 'info');
+};
+
+const deleteEntity = () => {
+  if (confirm(`Are you sure you want to delete ${selectedEntity.value.firstName} ${selectedEntity.value.lastName}?`)) {
+    console.log("Delete entity:", selectedEntity.value);
+    showToast('Delete functionality coming soon', 'info');
+  }
+};
+
+const enrollInProgram = () => {
+  if (!selectedEntity.value) {
+    showToast('Please select a child first', 'error');
+    return;
+  }
+  
+  // Reset form
+  newEnrollment.value = {
+    program: '',
+    enrollmentDate: new Date().toISOString().split('T')[0],
+    orgUnit: selectedOrgUnit.value || 'main',
+    notes: '',
+    enrolledBy: 'Current User'
   };
-  return statusMap[status] || status;
+  
+  showNewEnrollmentModal.value = true;
 };
 
-const formatReasonKey = (key) => {
-  const reasonMap = {
-    attemptedAbortion: "Attempted/Considered Abortion",
-    attemptedSuicide: "Attempted/Considered Suicide",
-    pregnant: "Pregnant",
-    rapeDefilement: "Rape/Defilement",
-    survivalProstitution: "Survival Prostitution",
-    other: "Other",
+const submitEnrollment = async () => {
+  if (!isEnrollmentValid.value || !selectedEntity.value) {
+    showToast('Please fill in all required fields', 'error');
+    return;
+  }
+  
+  try {
+    loading.value = true;
+    
+    // Create enrollment data
+    const enrollmentData = {
+      entityId: selectedEntity.value.id,
+      caseId: selectedEntity.value.caseId,
+      childId: selectedEntity.value.childId,
+      childFirstName: selectedEntity.value.firstName,
+      childLastName: selectedEntity.value.lastName,
+      program: newEnrollment.value.program,
+      enrollmentDate: newEnrollment.value.enrollmentDate,
+      orgUnit: newEnrollment.value.orgUnit,
+      status: 'active',
+      notes: newEnrollment.value.notes,
+      enrolledBy: newEnrollment.value.enrolledBy,
+      createdAt: new Date().toISOString()
+    };
+    
+    // Add to entity's enrollments
+    const newEnrollmentEntry = {
+      id: `ENR${Date.now()}`,
+      program: newEnrollment.value.program,
+      enrollmentDate: newEnrollment.value.enrollmentDate,
+      status: 'active',
+      orgUnit: newEnrollment.value.orgUnit,
+      notes: newEnrollment.value.notes
+    };
+    
+    // Update the selected entity
+    if (selectedEntity.value.enrollments) {
+      selectedEntity.value.enrollments.push(newEnrollmentEntry);
+    } else {
+      selectedEntity.value.enrollments = [newEnrollmentEntry];
+    }
+    
+    // Update in allEntities
+    const entityIndex = allEntities.value.findIndex(e => e.id === selectedEntity.value.id);
+    if (entityIndex !== -1) {
+      allEntities.value[entityIndex] = {...selectedEntity.value};
+    }
+    
+    // Log enrollment (in real app, save to Firebase)
+    console.log('Enrollment created:', enrollmentData);
+    
+    showToast(`Successfully enrolled in ${newEnrollment.value.program}`, 'success');
+    showNewEnrollmentModal.value = false;
+    
+    // Switch to enrollment tab to show the new enrollment
+    activeTab.value = 'enrollment';
+    
+  } catch (error) {
+    console.error('Error creating enrollment:', error);
+    showToast('Error creating enrollment', 'error');
+  } finally {
+    loading.value = false;
+  }
+};
+
+const viewEnrollment = (enrollment) => {
+  selectedEnrollment.value = enrollment;
+  showEnrollmentModal.value = true;
+};
+
+const calculateDaysEnrolled = (enrollmentDate) => {
+  if (!enrollmentDate) return 0;
+  const start = new Date(enrollmentDate);
+  const now = new Date();
+  const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  return diff > 0 ? diff : 0;
+};
+
+const viewAllEvents = () => {
+  showEnrollmentModal.value = false;
+  activeTab.value = 'events';
+  showToast('Switched to Events tab', 'info');
+};
+
+const completeEnrollment = () => {
+  if (confirm('Mark this enrollment as completed?')) {
+    selectedEnrollment.value.status = 'completed';
+    showToast('Enrollment marked as completed', 'success');
+    showEnrollmentModal.value = false;
+  }
+};
+
+const cancelEnrollment = () => {
+  if (confirm('Are you sure you want to cancel this enrollment?')) {
+    selectedEnrollment.value.status = 'cancelled';
+    showToast('Enrollment cancelled', 'success');
+    showEnrollmentModal.value = false;
+  }
+};
+
+const scheduleEvent = () => {
+  console.log("Schedule event");
+  showToast('Schedule event functionality coming soon', 'info');
+};
+
+const getDataSetId = (formName) => {
+  const map = {
+    'Child Overview': 'child-overview',
+    'Medical Intake': 'medical-intake',
+    'Academics & Literacy': 'academics-literacy',
+    'Care Plan Summary': 'care-plan-summary',
+    'Regular Follow-up': 'regular-follow-up',
+    'Initial Referral': 'initial-referral',
+    'Initial Assessment': 'initial-assessment',
+    'Psychological Assessment': 'psychological-assessment',
+    'Life Skills Survey': 'life-skills-survey',
+    'Birth & Delivery Report': 'birth-delivery-report'
   };
-  return reasonMap[key] || key;
+  return map[formName] || formName.toLowerCase().replace(/ /g, '-');
 };
 
-const formatDocumentKey = (key) => {
-  const documentMap = {
-    tkpReferralForm: "TKP Referral Form",
-    carePlanAssessment: "Care Plan Assessment Form",
-    birthRecord: "Copy of Birth Record",
-    policeRecord: "Copy of Police Record",
-    dswAdmissionLetter: "DSW Admission Letter",
-    medicalRecords: "Medical Records",
-  };
-  return documentMap[key] || key;
+const enterData = (event) => {
+  console.log("Enter data for event:", event);
+  
+  // Navigate to Capture page with the child case ID and form type
+  if (selectedEntity.value) {
+    const formType = event.formType || event.stage;
+    const dataSetId = getDataSetId(formType);
+    
+    router.push({
+      path: '/capture',
+      query: {
+        caseId: selectedEntity.value.id,
+        preset: dataSetId,
+        childId: selectedEntity.value.childId,
+        childName: `${selectedEntity.value.firstName} ${selectedEntity.value.lastName}`
+      }
+    });
+  } else {
+    showToast('No child selected', 'error');
+  }
 };
 
-// Initialize component
-onMounted(() => {
-  loadCases();
-});
+const viewEventDetails = (event) => {
+  console.log("View event details:", event);
+  showToast('View event details functionality coming soon', 'info');
+};
 
-// Watch for page changes
-watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
-  currentPage.value = 1;
+const openForm = (formType) => {
+  if (!selectedEntity.value) {
+    showToast('Please select a child first', 'error');
+    return;
+  }
+  
+  const dataSetId = getDataSetId(formType);
+  
+  router.push({
+    path: '/capture',
+    query: {
+      caseId: selectedEntity.value.id,
+      preset: dataSetId,
+      childId: selectedEntity.value.childId,
+      childName: `${selectedEntity.value.firstName} ${selectedEntity.value.lastName}`
+    }
+  });
+  
+  showToast(`Opening ${formType} form...`, 'info');
+};
+
+const saveNote = () => {
+  if (!newNote.value.trim()) return;
+  
+  selectedEntity.value.notes.unshift({
+    id: `N${Date.now()}`,
+    text: newNote.value,
+    createdBy: "Current User",
+    createdDate: new Date().toISOString()
+  });
+  
+  newNote.value = "";
+  showAddNote.value = false;
+  showToast('Note added successfully', 'success');
+};
+
+// Load data on mount
+onMounted(async () => {
+  await loadCases();
 });
 </script>
 
 <style scoped>
 .tracker-capture-container {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #f5f5f5;
   display: flex;
   flex-direction: column;
 }
 
-.tracker-header {
-  background: #ffffff;
-  border-bottom: 1px solid #e9ecef;
-  padding: 1rem 2rem;
+.tracker-sub-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem 1.5rem;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .header-left {
-  flex: 1;
   display: flex;
   align-items: center;
-}
-
-.header-right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  justify-content: flex-end;
-}
-
-.header-center {
-  flex: 2;
-  text-align: center;
-}
-
-.back-button,
-.logout-button {
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.back-button:hover,
-.logout-button:hover {
-  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.logout-button {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
-}
-
-.logout-button:hover {
-  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+  gap: 1rem;
 }
 
 .tracker-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #111827;
   margin: 0;
 }
 
-.data-source-indicator {
-  margin-top: 0.5rem;
-}
-
-.indicator-badge {
-  display: inline-block;
+.program-badge {
   padding: 0.25rem 0.75rem;
+  background: #dbeafe;
+  color: #1e40af;
   border-radius: 12px;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   font-weight: 500;
-  background: #28a745;
-  color: white;
-  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
 }
 
-.indicator-badge.firebase {
-  background: linear-gradient(45deg, #ff6b35, #f7931e);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.new-enrollment-button {
-  background: #007bff;
+.register-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #10b981;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
+  border-radius: 6px;
   font-weight: 500;
+  cursor: pointer;
   transition: background-color 0.2s;
-  margin-left: auto;
 }
 
-.new-enrollment-button:hover {
-  background: #0056b3;
+.register-button:hover {
+  background-color: #059669;
 }
 
-.tracker-content {
+.tracker-main {
+  display: grid;
+  grid-template-columns: 250px 450px 1fr;
   flex: 1;
-  padding: 2rem;
-  max-width: 1600px;
-  margin: 0 auto;
-  width: 100%;
+  height: calc(100vh - 110px);
+  overflow: hidden;
 }
 
-.search-panel {
+/* Organisation Unit Sidebar */
+.org-unit-sidebar {
   background: white;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid #e5e7eb;
+  overflow-y: auto;
 }
 
-.search-controls {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2rem;
-  align-items: end;
-  margin-bottom: 1.5rem;
+.sidebar-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.search-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.search-label {
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #495057;
-  font-size: 0.9rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.search-input-container {
-  position: relative;
+.org-tree {
+  padding: 0.5rem;
+}
+
+.org-unit-item {
   display: flex;
   align-items: center;
-}
-
-.search-icon {
-  position: absolute;
-  left: 0.75rem;
-  color: #6c757d;
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
-  font-size: 0.9rem;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.clear-search {
-  position: absolute;
-  right: 0.75rem;
-  background: none;
-  border: none;
-  color: #6c757d;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 0.125rem;
-}
-
-.clear-search:hover {
-  background: #f8f9fa;
-}
-
-.filter-group {
-  display: flex;
-  gap: 1rem;
-}
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.filter-label {
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
-
-.filter-select {
-  padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
-  font-size: 0.9rem;
-  background: white;
-  min-width: 150px;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.search-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.search-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.search-button:hover {
-  background: #0056b3;
-}
-
-.reset-button {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.reset-button:hover {
-  background: #5a6268;
-}
-
-.quick-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.stat-card {
-  text-align: center;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 0.25rem;
-}
-
-.stat-number {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #007bff;
+  transition: all 0.2s;
+  color: #374151;
   margin-bottom: 0.25rem;
 }
 
-.stat-label {
-  font-size: 0.9rem;
-  color: #6c757d;
+.org-unit-item:hover {
+  background: #f3f4f6;
+}
+
+.org-unit-item.active {
+  background: #dbeafe;
+  color: #1e40af;
   font-weight: 500;
 }
 
-.tracker-main {
+.org-unit-item i {
+  width: 16px;
+  color: #6b7280;
+}
+
+.org-unit-item.active i {
+  color: #1e40af;
+}
+
+/* Entities Panel */
+.entities-panel {
   background: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-.tracker-capture-container {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-  display: flex;
-  flex-direction: column;
-}
-
-.tracker-header {
-  background: #ffffff;
-  border-bottom: 1px solid #e9ecef;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.header-left {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.header-right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  justify-content: flex-end;
-}
-
-.header-center {
-  flex: 2;
-  text-align: center;
-}
-
-.back-button,
-.logout-button {
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.back-button:hover,
-.logout-button:hover {
-  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.logout-button {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
-}
-
-.logout-button:hover {
-  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
-}
-
-.tracker-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0;
-}
-
-.data-source-indicator {
-  margin-top: 0.5rem;
-}
-
-.indicator-badge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  background: #28a745;
-  color: white;
-  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
-}
-
-.indicator-badge.firebase {
-  background: linear-gradient(45deg, #ff6b35, #f7931e);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.new-enrollment-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-  margin-left: auto;
-}
-
-.new-enrollment-button:hover {
-  background: #0056b3;
-}
-
-/* DHIS2 EMIS Style Toolbar */
-.dhis2-toolbar {
-  background: #ffffff;
-  border: 1px solid #e9ecef;
-  border-radius: 0.5rem;
+.search-section {
   padding: 1rem;
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.toolbar-section {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.toolbar-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.toolbar-item label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #495057;
-  text-transform: uppercase;
-}
-
-.toolbar-select {
-  padding: 0.5rem;
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
-  font-size: 0.9rem;
-  background: white;
-  min-width: 200px;
-}
-
-.toolbar-select:focus {
-  outline: none;
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.toolbar-button {
-  background: #f8f9fa;
-  border: 1px solid #ced4da;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.toolbar-button:hover {
-  background: #e9ecef;
-  border-color: #adb5bd;
-}
-
-.tracker-content {
-  flex: 1;
-  padding: 2rem;
-  max-width: 1600px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.search-panel {
-  background: white;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.search-controls {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2rem;
-  align-items: end;
-  margin-bottom: 1.5rem;
-}
-
-.search-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.search-label {
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.9rem;
-}
-
-.search-input-container {
+.search-bar {
   position: relative;
-  display: flex;
-  align-items: center;
+  margin-bottom: 0.75rem;
 }
 
-.search-icon {
+.search-bar i {
   position: absolute;
-  left: 0.75rem;
-  color: #6c757d;
-  pointer-events: none;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
 }
 
-.search-input {
+.search-bar input {
   width: 100%;
-  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
-  font-size: 0.9rem;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.clear-search {
-  position: absolute;
-  right: 0.75rem;
-  background: none;
-  border: none;
-  color: #6c757d;
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 0.125rem;
-}
-
-.clear-search:hover {
-  background: #f8f9fa;
-}
-
-.filter-group {
-  display: flex;
-  gap: 1rem;
-}
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.filter-label {
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
-
-.filter-select {
-  padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
-  font-size: 0.9rem;
-  background: white;
-  min-width: 150px;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.search-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.search-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.search-button:hover {
-  background: #0056b3;
-}
-
-.reset-button {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.reset-button:hover {
-  background: #5a6268;
-}
-
-.quick-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.stat-card {
-  text-align: center;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 0.25rem;
-}
-
-.stat-number {
-  font-size: 1.5rem;
-}
-
-.search-input,
-.filter-select {
+  padding: 0.625rem 2.5rem 0.625rem 2.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
   font-size: 0.875rem;
 }
 
-/* Stage Info Modal Styles */
-.stage-info-modal {
-  max-width: 800px;
+.clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.25rem;
 }
 
-.stage-info-content {
-  padding: 1rem 0;
-}
-
-.info-section {
-  margin-bottom: 1.5rem;
-}
-
-.info-section h4 {
-  margin: 0 0 1rem 0;
-  color: #4a148c;
-  font-size: 1.1rem;
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 0.5rem;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.info-item {
+.filters {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.info-item strong {
-  color: #495057;
-  font-size: 0.9rem;
-}
-
-.info-item span {
-  color: #2c3e50;
-  font-size: 1rem;
-}
-
-.reasons-list,
-.documents-list {
-  display: flex;
-  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.reason-item,
-.document-item {
-  background: #e9ecef;
-  color: #495057;
-  padding: 0.5rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.9rem;
+.filter-select {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.8125rem;
 }
 
-.loading-info,
-.error-info,
-.no-info {
-  text-align: center;
-  padding: 2rem;
-}
-
-.loading-info .spinner {
-  margin: 0 auto 1rem auto;
-}
-
-.loading-info p,
-.error-info p,
-.no-info p {
-  margin: 0;
-  color: #6c757d;
-}
-
-.stat-label {
-  font-size: 0.9rem;
-  color: #6c757d;
-  font-weight: 500;
-}
-
-.tracker-main {
-  background: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+.entities-list {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .list-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f8f9fa;
-}
-
-.list-header h3 {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 1.25rem;
-}
-
-.list-controls {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.view-toggle {
-  background: white;
-  border: 1px solid #ced4da;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-}
-
-.view-toggle:hover {
-  background: #f8f9fa;
-}
-
-.view-toggle.active {
-  background: #007bff;
-  color: white;
-  border-color: #007bff;
-}
-
-.cases-table-container {
-  overflow-x: auto;
-}
-
-.cases-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.cases-table th {
-  background: #f8f9fa;
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: #495057;
-  border-bottom: 1px solid #e9ecef;
-  white-space: nowrap;
-}
-
-.cases-table th.sortable {
-  cursor: pointer;
-  user-select: none;
-  position: relative;
-}
-
-.cases-table th.sortable:hover {
-  background: #e9ecef;
-}
-
-.sort-icon {
-  opacity: 0.5;
-  margin-left: 0.5rem;
-}
-
-.cases-table td {
-  padding: 1rem;
-  border-bottom: 1px solid #f1f3f4;
-  vertical-align: top;
-}
-
-.case-row {
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.case-row:hover {
-  background: #f8f9fa;
-}
-
-.child-name-cell {
-  min-width: 200px;
-}
-
-.child-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.child-name {
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.child-id {
-  font-size: 0.8rem;
-  color: #6c757d;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.status-badge.active {
-  background: #d4edda;
-  color: #155724;
-}
-
-.status-badge.completed {
-  background: #cce5ff;
-  color: #004085;
-}
-
-.status-badge.pending {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.status-badge.transferred {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.status-badge.draft {
-  background: #e2e3e5;
-  color: #495057;
-}
-
-.actions-cell {
-  white-space: nowrap;
-}
-
-.action-button {
-  background: none;
-  border: 1px solid #ced4da;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.8rem;
-  margin-right: 0.25rem;
-  transition: all 0.2s;
-}
-
-.view-button {
-  color: #007bff;
-  border-color: #007bff;
-}
-
-.view-button:hover {
-  background: #007bff;
-  color: white;
-}
-
-.edit-button {
-  color: #28a745;
-  border-color: #28a745;
-}
-
-.edit-button:hover {
-  background: #28a745;
-  color: white;
-}
-
-.cases-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem;
-  padding: 1.5rem;
-}
-
-.case-card {
-  border: 1px solid #e9ecef;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.case-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.child-name {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0 0 0.5rem 0;
-}
-
-.child-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.child-age,
-.case-id {
-  font-size: 0.9rem;
-  color: #6c757d;
-}
-
-.card-content {
-  margin-bottom: 1rem;
-}
-
-.card-content > div {
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.card-footer {
-  display: flex;
+  grid-template-columns: 2fr 1fr 0.5fr 0.75fr 1fr 0.5fr;
   gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.card-action-button {
-  flex: 1;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
+.entity-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 0.5fr 0.75fr 1fr 0.5fr;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #f3f4f6;
   cursor: pointer;
-  font-size: 0.9rem;
+  transition: background 0.2s;
+  font-size: 0.875rem;
+  align-items: center;
+}
+
+.entity-item:hover {
+  background: #f9fafb;
+}
+
+.entity-item.selected {
+  background: #eff6ff;
+  border-left: 3px solid #3b82f6;
+}
+
+.entity-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 500;
+  color: #111827;
+}
+
+.entity-name i {
+  color: #6b7280;
+}
+
+.view-btn {
+  background: #f3f4f6;
   border: none;
-  transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.card-action-button.primary {
-  background: #007bff;
+.view-btn:hover {
+  background: #3b82f6;
   color: white;
 }
 
-.card-action-button.primary:hover {
-  background: #0056b3;
+.no-results {
+  padding: 3rem;
+  text-align: center;
+  color: #9ca3af;
 }
 
-.card-action-button.secondary {
-  background: white;
-  color: #007bff;
-  border: 1px solid #007bff;
-}
-
-.card-action-button.secondary:hover {
-  background: #007bff;
-  color: white;
+.no-results i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
 }
 
 .pagination {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+}
+
+.pagination-controls {
+  display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.5rem;
-  border-top: 1px solid #e9ecef;
 }
 
-.pagination-button {
-  background: white;
-  border: 1px solid #ced4da;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
+.pagination-controls button {
+  background: #f3f4f6;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.pagination-button:hover:not(:disabled) {
-  background: #f8f9fa;
+.pagination-controls button:hover:not(:disabled) {
+  background: #e5e7eb;
 }
 
-.pagination-button:disabled {
+.pagination-controls button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.pagination-info {
-  color: #6c757d;
-  font-size: 0.9rem;
+/* Dashboard Panel */
+.dashboard-panel {
+  background: white;
+  overflow-y: auto;
 }
 
-.no-cases-message {
+.no-selection {
+  height: 100%;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  min-height: 300px;
-  padding: 3rem;
-}
-
-.no-cases-content {
+  justify-content: center;
   text-align: center;
-  color: #6c757d;
-  max-width: 400px;
+  color: #9ca3af;
 }
 
-.no-cases-content svg {
+.no-selection i {
+  font-size: 4rem;
   margin-bottom: 1rem;
   opacity: 0.5;
 }
 
-.no-cases-content h3 {
+.no-selection h3 {
+  color: #6b7280;
   margin: 0 0 0.5rem 0;
-  font-size: 1.25rem;
-  color: #495057;
 }
 
-.no-cases-content p {
-  margin: 0 0 1.5rem 0;
-  font-size: 0.9rem;
-}
-
-.primary-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.primary-button:hover {
-  background: #0056b3;
-}
-
-/* Case Detail View Styles */
-.case-detail-view {
-  padding: 0;
-}
-
-.case-detail-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
-  background: #f8f9fa;
+.entity-dashboard {
+  height: 100%;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+}
+
+.profile-header {
+  display: flex;
   align-items: flex-start;
-}
-
-.back-to-list-button {
-  background: none;
-  border: none;
-  color: #007bff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-  padding: 0.25rem 0;
-}
-
-.back-to-list-button:hover {
-  text-decoration: underline;
-}
-
-.case-detail-header h2 {
-  margin: 0 0 0.5rem 0;
-  color: #2c3e50;
-  font-size: 1.5rem;
-}
-
-.case-meta {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.case-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.add-event-button,
-.edit-case-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.add-event-button:hover,
-.edit-case-button:hover {
-  background: #0056b3;
-}
-
-.edit-case-button {
-  background: #28a745;
-}
-
-.edit-case-button:hover {
-  background: #218838;
-}
-
-.case-detail-content {
-  padding: 1.5rem;
-}
-
-.case-summary-panel {
-  margin-bottom: 2rem;
-}
-
-.summary-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
+  padding: 2rem;
+  border-bottom: 2px solid #e5e7eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
-.summary-card {
-  border: 1px solid #e9ecef;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  background: white;
-}
-
-.summary-card .card-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.info-item {
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.info-item strong {
-  color: #495057;
-  margin-right: 0.5rem;
-}
-
-.program-stages h3 {
-  margin: 0 0 1.5rem 0;
-  color: #2c3e50;
-  font-size: 1.25rem;
-}
-
-.timeline {
-  position: relative;
-}
-
-.timeline::before {
-  content: "";
-  position: absolute;
-  left: 1.5rem;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: #e9ecef;
-}
-
-.timeline-stage {
-  position: relative;
-  padding-left: 4rem;
-  margin-bottom: 2rem;
-}
-
-.timeline-stage:last-child {
-  margin-bottom: 0;
-}
-
-.stage-indicator {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 3rem;
-  height: 3rem;
-  background: white;
-  border: 3px solid #e9ecef;
+.profile-avatar {
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 3px solid white;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  font-size: 2rem;
+  font-weight: 700;
 }
 
-.timeline-stage.completed .stage-indicator {
-  border-color: #28a745;
-  background: #28a745;
+.profile-info {
+  flex: 1;
 }
 
-.timeline-stage.active .stage-indicator {
-  border-color: #007bff;
-  background: white;
+.profile-info h2 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.75rem;
 }
 
-.timeline-stage.upcoming .stage-indicator {
-  border-color: #ced4da;
-  background: white;
-}
-
-.stage-number {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #6c757d;
-}
-
-.timeline-stage.completed .stage-number {
-  color: white;
-}
-
-.timeline-stage.active .stage-number {
-  color: #007bff;
-}
-
-.stage-content {
-  background: white;
-  border: 1px solid #e9ecef;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-}
-
-.timeline-stage.active .stage-content {
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.stage-title {
-  margin: 0 0 0.5rem 0;
-  color: #2c3e50;
-  font-size: 1.1rem;
-}
-
-.stage-description {
-  color: #6c757d;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-}
-
-.stage-events {
-  margin-bottom: 1rem;
-  min-height: 60px;
-}
-
-.event-item {
-  padding: 0.75rem;
-  border: 1px solid #f1f3f4;
-  border-radius: 0.25rem;
-  margin-bottom: 0.5rem;
+.profile-meta {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.2s;
+  gap: 1.5rem;
+  font-size: 0.9375rem;
+  opacity: 0.95;
 }
 
-.event-item:hover {
-  background: #f8f9fa;
-  border-color: #e9ecef;
-}
-
-.event-item:last-child {
-  margin-bottom: 0;
-}
-
-.event-info {
+.profile-meta span {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.event-title {
-  font-weight: 500;
-  color: #495057;
-  font-size: 0.9rem;
-}
-
-.event-date {
-  font-size: 0.8rem;
-  color: #6c757d;
-}
-
-.event-status {
-  display: flex;
-  align-items: center;
-}
-
-.no-events-message {
-  padding: 0.75rem;
-  color: #6c757d;
-  font-style: italic;
-  text-align: center;
-  border: 1px dashed #dee2e6;
-  border-radius: 0.25rem;
-}
-
-.add-stage-event-button {
-  background: #17a2b8;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.add-stage-event-button:hover {
-  background: #138496;
+.profile-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.add-stage-event-button:active {
-  transform: translateY(1px);
+.action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
-/* Modal Styles */
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.action-btn.danger:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+.dashboard-tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 2rem;
+  background: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9375rem;
+}
+
+.tab-button:hover {
+  color: #111827;
+  background: #f9fafb;
+}
+
+.tab-button.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem;
+}
+
+.attributes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.attribute-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.attribute-item label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.attribute-item span {
+  font-size: 0.9375rem;
+  color: #111827;
+}
+
+.no-attributes {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #9ca3af;
+}
+
+.no-attributes i {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-attributes p {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.enrollment-header,
+.events-header,
+.notes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.enrollment-header h3,
+.events-header h3,
+.notes-header h3 {
+  margin: 0;
+  color: #111827;
+}
+
+.enroll-btn,
+.schedule-btn,
+.add-note-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+}
+
+.status-badge.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.scheduled {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.events-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -2rem;
+  top: 0.5rem;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 3px solid #e5e7eb;
+}
+
+.timeline-marker.completed {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.timeline-marker.scheduled {
+  background: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -1.5rem;
+  top: 1.5rem;
+  bottom: -2rem;
+  width: 2px;
+  background: #e5e7eb;
+}
+
+.timeline-item:last-child::before {
+  display: none;
+}
+
+.event-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.event-header h4 {
+  margin: 0;
+  color: #111827;
+}
+
+.event-date {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.event-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.event-org {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.event-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.data-entry-btn,
+.view-enrollment-btn {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.data-entry-btn {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.data-entry-btn:hover {
+  background: #2563eb;
+}
+
+.view-enrollment-btn:hover {
+  background: #f3f4f6;
+}
+
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.indicator-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.indicator-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.indicator-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.indicator-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.add-note-form {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.add-note-form textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 0.75rem;
+}
+
+.note-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.save-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.cancel-btn {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.note-item {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.note-header strong {
+  color: #111827;
+}
+
+.note-date {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.note-item p {
+  margin: 0;
+  color: #374151;
+  line-height: 1.6;
+}
+
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -3605,53 +2139,47 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 10000;
+  justify-content: center;
+  z-index: 2000;
 }
 
 .modal-content {
   background: white;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f8f9fa;
-  border-radius: 0.5rem 0.5rem 0 0;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #2c3e50;
-  font-size: 1.25rem;
+  color: #111827;
 }
 
-.close-button {
+.close-btn {
   background: none;
   border: none;
-  color: #6c757d;
+  font-size: 2rem;
+  color: #6b7280;
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 0.125rem;
-}
-
-.close-button:hover {
-  background: #e9ecef;
-  color: #495057;
+  line-height: 1;
 }
 
 .modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
 }
 
 .form-row {
@@ -3668,373 +2196,735 @@ watch([selectedStatus, selectedAgeGroup, selectedStage, searchQuery], () => {
 }
 
 .form-group label {
-  font-weight: 600;
-  color: #495057;
-  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
 }
 
 .form-group input,
 .form-group select {
-  padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 0.25rem;
-  font-size: 0.9rem;
+  padding: 0.625rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9375rem;
 }
 
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.modal-actions {
+.modal-footer {
   display: flex;
-  gap: 0.5rem;
   justify-content: flex-end;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e9ecef;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cancel-button,
+.save-button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .cancel-button {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.cancel-button:hover {
-  background: #5a6268;
-}
-
-.create-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.create-button:hover:not(:disabled) {
-  background: #0056b3;
-}
-
-.create-button:disabled {
-  background: #6c757d;
-  cursor: not-allowed;
-}
-
-/* Loading Overlay */
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.loading-spinner {
   background: white;
-  padding: 2rem;
-  border-radius: 0.5rem;
-  text-align: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border: 1px solid #d1d5db;
+  color: #374151;
 }
 
-.spinner {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #007bff;
-  border-radius: 50%;
+.save-button {
+  background: #10b981;
+  border: none;
+  color: white;
+}
+
+.save-button:hover {
+  background: #059669;
+}
+
+/* Enrollment Modal Styles */
+.enrollment-modal {
+  max-width: 800px;
+}
+
+.enrollment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.detail-section {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.detail-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem 0;
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.detail-section h4 i {
+  color: #3b82f6;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-item label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-item span {
+  font-size: 0.9375rem;
+  color: #111827;
+}
+
+.progress-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.progress-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.progress-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.progress-bar-container {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #10b981);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.8125rem;
+  color: #111827;
+  font-weight: 600;
+}
+
+.recent-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.event-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.event-icon {
   width: 40px;
   height: 40px;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.event-icon.completed {
+  background: #d1fae5;
+  color: #10b981;
 }
 
-.loading-spinner p {
-  margin: 0;
-  color: #495057;
-  font-weight: 500;
+.event-icon.scheduled {
+  background: #fef3c7;
+  color: #f59e0b;
 }
 
-/* Event Type Selection Modal */
-.event-type-options {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+.event-icon.draft {
+  background: #e5e7eb;
+  color: #6b7280;
 }
 
-.event-type-button {
-  background: #f8f9fa;
-  border: 1px solid #ced4da;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s;
+.event-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.event-info strong {
+  font-size: 0.9375rem;
+  color: #111827;
+}
+
+.event-info span {
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.status-badge.small {
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+}
+
+.no-events {
   text-align: center;
+  padding: 2rem 1rem;
+  color: #9ca3af;
 }
 
-.event-type-button:hover {
-  background: #e9ecef;
-  border-color: #adb5bd;
+.no-events i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.5;
+}
+
+.no-events p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.enrollment-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.action-button.primary {
+  background: #3b82f6;
+  color: white;
+}
+
+.action-button.primary:hover {
+  background: #2563eb;
+}
+
+.action-button.secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.action-button.secondary:hover {
+  background: #e5e7eb;
+}
+
+.action-button.success {
+  background: #10b981;
+  color: white;
+}
+
+.action-button.success:hover {
+  background: #059669;
+}
+
+.action-button.danger {
+  background: #ef4444;
+  color: white;
+}
+
+.action-button.danger:hover {
+  background: #dc2626;
+}
+
+/* Enrollment Form Styles */
+.enrollment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.info-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  padding: 1.5rem;
+  color: white;
+}
+
+.info-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+.entity-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.entity-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 3px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.entity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.entity-info strong {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.entity-info span {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.form-select,
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  font-family: inherit;
+}
+
+.form-select:focus,
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+}
+
+.save-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.save-button:disabled:hover {
+  background: #9ca3af;
+}
+
+.save-button i {
+  margin-right: 0.5rem;
+}
+
+/* Enrollment Card & Stage Tracking Styles */
+.enrollment-card {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.enrollment-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.enrollment-info h4 {
+  margin: 0 0 0.5rem 0;
+  color: #111827;
+}
+
+.enrollment-info p {
+  margin: 0 0 0.75rem 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.completed {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.current-stage-section {
+  padding: 1.5rem;
+  background: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.stage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stage-header h5 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1rem;
+  color: #111827;
+  font-weight: 600;
+}
+
+.stage-header h5 i {
+  color: #3b82f6;
+}
+
+.stage-badge {
+  padding: 0.375rem 0.875rem;
+  border-radius: 16px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.stage-badge.stage-referral {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.stage-badge.stage-assessment {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.stage-badge.stage-enrollment {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.stage-badge.stage-care-plan {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.stage-badge.stage-follow-up {
+  background: #fce7f3;
+  color: #9f1239;
+}
+
+.stages-timeline {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.stages-timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 20px;
+  bottom: 20px;
+  width: 2px;
+  background: #e5e7eb;
+}
+
+.stage-step {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  position: relative;
+}
+
+.stage-marker {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: white;
+  border: 2px solid #e5e7eb;
+  z-index: 1;
+  position: relative;
+  left: -1.5rem;
+}
+
+.stage-step.completed .stage-marker {
+  background: #10b981;
+  border-color: #10b981;
+  color: white;
+}
+
+.stage-step.current .stage-marker {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.stage-step.pending .stage-marker {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #9ca3af;
+}
+
+.stage-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stage-content strong {
+  font-size: 0.9375rem;
+  color: #111827;
+}
+
+.stage-step.pending .stage-content strong {
+  color: #9ca3af;
+}
+
+.stage-forms {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  background: #f9fafb;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.stage-step.completed .stage-forms {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.stage-step.current .stage-forms {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.completed-forms {
+  background: white;
+  border-radius: 8px;
+  padding: 1.25rem;
+  border: 1px solid #e5e7eb;
+}
+
+.completed-forms h6 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.completed-forms h6 i {
+  color: #10b981;
+}
+
+.forms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.form-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  font-size: 0.8125rem;
+  color: #374151;
+  transition: all 0.2s;
+}
+
+.form-chip i {
+  color: #10b981;
+  font-size: 0.75rem;
+}
+
+.form-chip.completed {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+
+.form-chip:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .tracker-header {
-    padding: 1rem;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .header-left,
-  .header-center,
-  .header-right {
-    flex: none;
-    width: 100%;
-  }
-
-  .header-left {
-    order: 1;
-  }
-
-  .header-center {
-    order: 2;
-    text-align: center;
-  }
-
-  .header-right {
-    order: 3;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .back-button,
-  .logout-button,
-  .new-enrollment-button {
-    padding: 0.75rem 1rem;
-    font-size: 0.85rem;
-  }
-
-  .dhis2-toolbar {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-  }
-
-  .toolbar-section {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-  }
-
-  .toolbar-item {
-    align-items: stretch;
-  }
-
-  .toolbar-select {
-    min-width: auto;
-  }
-
-  .tracker-content {
-    padding: 1rem;
-  }
-
-  .search-controls {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .filter-group {
-    flex-direction: column;
-  }
-
-  .search-actions {
-    justify-content: stretch;
-  }
-
-  .search-button,
-  .reset-button {
-    flex: 1;
-  }
-
-  .quick-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .list-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .cases-table-container {
-    font-size: 0.8rem;
-  }
-
-  .cases-cards-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .summary-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .case-detail-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-start;
-  }
-
-  .case-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
+.no-forms {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  color: #9ca3af;
+  font-size: 0.875rem;
 }
 
-@media (max-width: 480px) {
-  .tracker-header {
-    padding: 0.75rem;
-  }
+.no-forms i {
+  color: #d1d5db;
+}
 
-  .tracker-title {
-    font-size: 1.25rem;
-  }
+/* Quick Forms Section */
+.quick-forms-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  color: white;
+}
 
-  .back-button,
-  .logout-button,
-  .new-enrollment-button {
-    padding: 0.625rem 0.875rem;
-    font-size: 0.8rem;
-    width: 100%;
-    justify-content: center;
-  }
+.quick-forms-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
 
-  .header-right {
-    flex-direction: column;
-  }
+.quick-forms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
 
-  .quick-stats {
-    grid-template-columns: 1fr;
-  }
+.quick-form-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
 
-  .stat-number {
-    font-size: 1.5rem;
-  }
+.quick-form-card:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
 
-  .search-input,
-  .filter-select {
-    font-size: 0.875rem;
-  }
+.quick-form-card i {
+  font-size: 2rem;
+  opacity: 0.9;
+}
 
-  /* Stage Info Modal Styles */
-  .stage-info-modal {
-    max-width: 800px;
-  }
+.quick-form-card span {
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
 
-  .stage-info-content {
-    padding: 1rem 0;
-  }
+.timeline-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem 0;
+  color: #111827;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
 
-  .info-section {
-    margin-bottom: 1.5rem;
-  }
+.timeline-title i {
+  color: #3b82f6;
+}
 
-  .info-section h4 {
-    margin: 0 0 1rem 0;
-    color: #4a148c;
-    font-size: 1.1rem;
-    border-bottom: 1px solid #e9ecef;
-    padding-bottom: 0.5rem;
-  }
+.view-details-btn {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
 
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-  }
-
-  .info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .info-item strong {
-    color: #495057;
-    font-size: 0.9rem;
-  }
-
-  .info-item span {
-    color: #2c3e50;
-    font-size: 1rem;
-  }
-
-  .reasons-list,
-  .documents-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .reason-item,
-  .document-item {
-    background: #e9ecef;
-    color: #495057;
-    padding: 0.5rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.9rem;
-  }
-
-  .loading-info,
-  .error-info,
-  .no-info {
-    text-align: center;
-    padding: 2rem;
-  }
-
-  .loading-info .spinner {
-    margin: 0 auto 1rem auto;
-  }
-
-  .loading-info p,
-  .error-info p,
-  .no-info p {
-    margin: 0;
-    color: #6c757d;
-  }
+.view-details-btn:hover {
+  background: #f3f4f6;
 }
 </style>

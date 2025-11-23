@@ -1191,111 +1191,99 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Form Wrapper */
 .form-wrapper {
-  max-width: 1000px;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  padding: 24px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 0 1rem;
+  font-family: 'Roboto', sans-serif;
 }
 
+/* Header */
 .form-header {
-  text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #4a148c;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f4f6f8;
 }
 
 .form-header h3 {
-  color: #4a148c;
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
+  font-size: 20px;
+  font-weight: 500;
+  color: #212934;
+  margin: 0 0 8px 0;
 }
 
 .form-header p {
-  color: #666;
-  font-size: 1rem;
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0;
 }
 
+/* Auto Save Status */
 .auto-save-status {
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
-  min-height: 20px;
-}
-
-.auto-save-status .saving {
-  color: #007bff;
-  font-weight: 500;
-}
-
-.auto-save-status .saved {
-  color: #28a745;
-  font-weight: 500;
-}
-
-.auto-save-status .unsaved {
-  color: #ffc107;
-  font-weight: 500;
-}
-
-.form-progress {
-  margin-top: 1rem;
+  margin-top: 12px;
+  font-size: 12px;
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 8px;
+}
+
+.saving { color: #147cd7; }
+.saved { color: #2e7d32; }
+.unsaved { color: #ef6c00; }
+
+/* Progress Bar */
+.form-progress {
+  margin-top: 16px;
 }
 
 .progress-bar {
   width: 100%;
-  height: 8px;
-  background: #e9ecef;
-  border-radius: 4px;
+  height: 4px;
+  background: #e8f3fa;
+  border-radius: 2px;
   overflow: hidden;
+  margin-bottom: 8px;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4a148c, #2d1b69);
+  background: #147cd7;
   transition: width 0.3s ease;
 }
 
 .progress-text {
-  font-size: 0.9rem;
-  color: #4a148c;
-  font-weight: 500;
-  text-align: center;
+  font-size: 12px;
+  color: #6c757d;
 }
 
-.referral-form {
-  background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
+/* Form Section */
 .form-section {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid #4a148c;
+  margin-bottom: 24px;
 }
 
 .form-section h4 {
-  color: #4a148c;
-  font-size: 1.3rem;
-  margin-bottom: 1.5rem;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
+  color: #212934;
+  margin: 0 0 24px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e8f3fa;
 }
 
+/* Form Grid */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
+  margin-bottom: 0;
 }
 
 .form-group.full-width {
@@ -1303,487 +1291,147 @@ onMounted(async () => {
 }
 
 .form-group label {
-  color: #4a148c;
+  display: block;
+  font-size: 14px;
   font-weight: 500;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  color: #494949;
+  margin-bottom: 8px;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  padding: 0.75rem;
-  border: 2px solid #e9ecef;
-  border-radius: 6px;
-  font-size: 1rem;
-  color: #333;
-  transition: border-color 0.3s;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-color: white;
   width: 100%;
-  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #d5dde5;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #212934;
+  background: white;
+  transition: all 0.2s;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #4a148c;
+  border-color: #147cd7;
+  box-shadow: 0 0 0 3px rgba(20, 124, 215, 0.1);
 }
 
 .form-group textarea {
+  min-height: 100px;
   resize: vertical;
-  min-height: 80px;
 }
 
-.section-navigation {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 2px solid #e9ecef;
-}
-
-.prev-btn,
-.next-btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s;
-  min-width: 150px;
-}
-
-.prev-btn {
-  background: #6c757d;
-  color: white;
-}
-
-.prev-btn:hover {
-  background: #5a6268;
-}
-
-.next-btn {
-  background: #4a148c;
-  color: white;
-}
-
-.next-btn:hover {
-  background: #2d1b69;
-}
-
-.submit-btn {
-  background: #28a745;
-  color: white;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s;
-  min-width: 150px;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background: #218838;
-}
-
-.submit-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 2px solid #e9ecef;
-}
-
-.submit-btn {
-  background-color: #4a148c;
-  color: white;
-  padding: 12px 30px;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background-color: #2d1b69;
-}
-
-.submit-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.cancel-btn {
-  background-color: #6c757d;
-  color: white;
-  padding: 12px 30px;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.cancel-btn:hover {
-  background-color: #5a6268;
-}
-
-/* Validation Styles */
+/* Validation */
 .validation-message {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 6px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  color: #721c24;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 24px;
 }
 
 .validation-header {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.validation-header svg {
-  color: #dc3545;
+  gap: 8px;
+  color: #c62828;
+  font-weight: 500;
+  margin-bottom: 8px;
 }
 
 .validation-list {
   margin: 0;
-  padding-left: 1.5rem;
+  padding-left: 24px;
+  color: #c62828;
+  font-size: 13px;
 }
 
-.validation-item {
-  margin-bottom: 0.25rem;
-  font-size: 0.9rem;
-}
-
-.form-group.has-error label {
-  color: #dc3545;
-}
-
-.form-group input.error,
-.form-group select.error,
-.form-group textarea.error {
-  border-color: #dc3545;
-  background-color: #f8d7da;
-}
-
-.form-group input.error:focus,
-.form-group select.error:focus,
-.form-group textarea.error:focus {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+.has-error input,
+.has-error select,
+.has-error textarea {
+  border-color: #ef5350;
 }
 
 .error-message {
-  color: #dc3545;
-  font-size: 0.8rem;
-  margin-top: 0.25rem;
+  color: #c62828;
+  font-size: 12px;
+  margin-top: 4px;
   display: block;
-  font-weight: 500;
 }
 
-/* Responsive Design */
+/* Navigation Buttons */
+.section-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f4f6f8;
+}
+
+.prev-btn,
+.next-btn,
+.submit-btn {
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+.prev-btn {
+  background: white;
+  border: 1px solid #d5dde5;
+  color: #494949;
+}
+
+.prev-btn:hover {
+  background: #f4f6f8;
+  color: #147cd7;
+  border-color: #147cd7;
+}
+
+.next-btn {
+  background: #147cd7;
+  color: white;
+}
+
+.next-btn:hover {
+  background: #1169ba;
+}
+
+.submit-btn {
+  background: #2e7d32;
+  color: white;
+}
+
+.submit-btn:hover {
+  background: #1b5e20;
+}
+
+.submit-btn:disabled {
+  background: #a5d6a7;
+  cursor: not-allowed;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .form-wrapper {
-    max-width: 100%;
-    padding: 0 0.5rem;
-  }
-
-  .form-header {
-    padding: 0.75rem 0.5rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .form-header h3 {
-    font-size: 1.2rem;
-    line-height: 1.3;
-  }
-
-  .form-header p {
-    font-size: 0.85rem;
-  }
-
-  .referral-form {
-    padding: 0.75rem;
-    border-radius: 0;
-  }
-
-  .form-section {
-    padding: 0.75rem;
-    margin-bottom: 0.75rem;
-    border-radius: 6px;
-  }
-
-  .form-section h4 {
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-  }
-
   .form-grid {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
   }
-
-  .form-group {
-    margin-bottom: 0;
-  }
-
-  .form-group label {
-    font-size: 0.8rem;
-    margin-bottom: 0.3rem;
-    font-weight: 600;
-  }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    padding: 0.5rem;
-    font-size: 0.875rem;
-    border-width: 1px;
-    min-height: 40px;
-  }
-
-  .form-group textarea {
-    min-height: 70px;
-  }
-
+  
   .section-navigation {
     flex-direction: column;
-    gap: 0.5rem;
-    padding-top: 0.75rem;
-    margin-top: 0.75rem;
+    gap: 12px;
   }
-
-  .prev-btn,
-  .next-btn {
+  
+  .prev-btn, .next-btn, .submit-btn {
     width: 100%;
-    min-width: auto;
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-    min-height: 44px;
-  }
-
-  .form-actions {
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-    padding-top: 0.75rem;
-  }
-
-  .submit-btn,
-  .cancel-btn {
-    width: 100%;
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-    min-height: 44px;
-  }
-
-  .validation-message {
-    padding: 0.625rem;
-    font-size: 0.8rem;
-    margin-bottom: 1rem;
-  }
-
-  .validation-header {
-    font-size: 0.8rem;
-  }
-
-  .validation-list {
-    padding-left: 1rem;
-    margin-top: 0.5rem;
-  }
-
-  .validation-item {
-    font-size: 0.75rem;
-  }
-
-  .progress-bar {
-    height: 6px;
-  }
-
-  .progress-text {
-    font-size: 0.8rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .form-wrapper {
-    padding: 0 0.25rem;
-  }
-
-  .form-header {
-    padding: 0.5rem 0.25rem;
-  }
-
-  .form-header h3 {
-    font-size: 1rem;
-  }
-
-  .form-header p {
-    font-size: 0.8rem;
-  }
-
-  .form-section {
-    padding: 0.5rem;
-  }
-
-  .form-section h4 {
-    font-size: 0.95rem;
-  }
-
-  .form-group label {
-    font-size: 0.75rem;
-  }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    padding: 0.4rem;
-    font-size: 0.8rem;
-  }
-
-  .progress-text {
-    font-size: 0.75rem;
-  }
-
-  .section-navigation {
-    gap: 0.4rem;
-    padding-top: 0.5rem;
-    margin-top: 0.5rem;
-  }
-
-  .prev-btn,
-  .next-btn {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.8rem;
-    min-height: 40px;
-  }
-
-  .form-actions {
-    gap: 0.4rem;
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-  }
-
-  .submit-btn,
-  .cancel-btn {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.8rem;
-    min-height: 40px;
-  }
-}
-
-/* Extra small devices (phones, less than 360px) */
-@media (max-width: 360px) {
-  .form-wrapper {
-    padding: 0 0.125rem;
-  }
-
-  .form-header {
-    padding: 0.4rem 0.125rem;
-  }
-
-  .form-header h3 {
-    font-size: 0.9rem;
-  }
-
-  .form-header p {
-    font-size: 0.75rem;
-  }
-
-  .referral-form {
-    padding: 0.5rem;
-  }
-
-  .form-section {
-    padding: 0.4rem;
-  }
-
-  .form-section h4 {
-    font-size: 0.9rem;
-  }
-
-  .form-grid {
-    gap: 0.4rem;
-  }
-
-  .form-group label {
-    font-size: 0.7rem;
-  }
-
-  .form-group input,
-  .form-group select,
-  .form-group textarea {
-    padding: 0.3rem;
-    font-size: 0.75rem;
-  }
-
-  .form-group textarea {
-    min-height: 60px;
-  }
-
-  .section-navigation {
-    gap: 0.3rem;
-    padding-top: 0.4rem;
-    margin-top: 0.4rem;
-  }
-
-  .prev-btn,
-  .next-btn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.75rem;
-    min-height: 36px;
-  }
-
-  .form-actions {
-    gap: 0.3rem;
-    margin-top: 0.4rem;
-    padding-top: 0.4rem;
-  }
-
-  .submit-btn,
-  .cancel-btn {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.75rem;
-    min-height: 36px;
-  }
-
-  .validation-message {
-    padding: 0.5rem;
-    font-size: 0.75rem;
-  }
-
-  .validation-header {
-    font-size: 0.75rem;
-  }
-
-  .validation-item {
-    font-size: 0.7rem;
-  }
-
-  .progress-text {
-    font-size: 0.7rem;
   }
 }
 </style>
+

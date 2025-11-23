@@ -58,7 +58,7 @@
           <input 
             v-model="formData.dateOfAssessment" 
             type="text" 
-            placeholder="DD-MM-YYYY"
+            placeholder="DD/MM/YYYY"
             required
             @blur="formatDate('dateOfAssessment')"
           />
@@ -1023,8 +1023,8 @@ onMounted(() => {
 
 const validateSection = (section) => {
   if (section === 1) {
-    // Check if date is in DD-MM-YYYY format
-    const datePattern = /^\d{2}-\d{2}-\d{4}$/;
+    // Check if date is in DD/MM/YYYY format
+    const datePattern = /^\d{2}\/\d{2}\/\d{4}$/;
     const isDateValid = formData.value.dateOfAssessment && datePattern.test(formData.value.dateOfAssessment);
     
     return !!(

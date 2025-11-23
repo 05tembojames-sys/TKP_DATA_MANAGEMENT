@@ -1,14 +1,14 @@
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  doc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  orderBy, 
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  query,
+  orderBy,
   where,
-  serverTimestamp 
+  serverTimestamp
 } from 'firebase/firestore'
 import { db } from '../firebase/config.js'
 import { storage, ID } from '../lib/appwrite.js'
@@ -19,7 +19,7 @@ class ReportService {
     // Define document types for proper separation
     this.customDocumentTypes = [
       'tkp-parent-guardian',
-      'parental-consent', 
+      'parental-consent',
       'child-admission',
       'medical-care'
     ]
@@ -27,7 +27,9 @@ class ReportService {
       'weekly',
       'monthly',
       'quarterly',
-      'annual'
+      'annual',
+      'financial',
+      'other'
     ]
   }
 
@@ -46,7 +48,7 @@ class ReportService {
 
       // Determine report category based on type
       const isCustomDocument = this.customDocumentTypes.includes(reportType);
-      
+
       // Get bucket ID from environment or use default
       const bucketId = import.meta.env.VITE_APPWRITE_BUCKET_ID || 'reports'
 
@@ -64,11 +66,11 @@ class ReportService {
       // Appwrite SDK returns URL object, convert to string
       const fileUrl = storage.getFileView(bucketId, uploadResult.$id)
       const downloadURL = storage.getFileDownload(bucketId, uploadResult.$id)
-      
+
       // Convert URLs to strings (handle both URL object and string)
       const fileUrlString = fileUrl?.href || fileUrl?.toString() || String(fileUrl)
       const downloadURLString = downloadURL?.href || downloadURL?.toString() || String(downloadURL)
-      
+
       console.log('Generated URLs:', { fileUrl: fileUrlString, downloadURL: downloadURLString })
 
       // Create report document in Firestore
@@ -114,10 +116,10 @@ class ReportService {
   async getAllReports(filters = {}) {
     try {
       let q = collection(db, this.collectionName)
-      
+
       // Apply filters - simplified to avoid composite index issues
       // We'll apply one primary filter and do additional filtering client-side
-      
+
       // Handle category filtering first (this is the key to separation)
       if (filters.category && filters.uploadedBy) {
         // When both category and uploadedBy are provided, we need to handle this carefully
@@ -157,31 +159,31 @@ class ReportService {
         // Filter by uploadedBy since category was used as primary filter
         reports = reports.filter(report => report.uploadedBy === filters.uploadedBy)
       }
-      
+
       if (filters.status && !filters.uploadedBy && !filters.category) {
         reports = reports.filter(report => report.status === filters.status)
       }
-      
+
       if (filters.reportType && !filters.uploadedBy && !filters.status && !filters.category) {
         reports = reports.filter(report => report.reportType === filters.reportType)
       }
-      
+
       if (filters.uploadedBy && filters.status && !filters.category) {
         reports = reports.filter(report => report.status === filters.status)
       }
-      
+
       if (filters.uploadedBy && filters.reportType && !filters.category) {
         reports = reports.filter(report => report.reportType === filters.reportType)
       }
-      
+
       if (filters.status && filters.reportType && !filters.uploadedBy && !filters.category) {
         reports = reports.filter(report => report.reportType === filters.reportType)
       }
-      
+
       if (filters.category && filters.status && !filters.uploadedBy) {
         reports = reports.filter(report => report.status === filters.status)
       }
-      
+
       if (filters.category && filters.reportType && !filters.uploadedBy) {
         reports = reports.filter(report => report.reportType === filters.reportType)
       }
@@ -189,7 +191,7 @@ class ReportService {
       // Apply search filter client-side if provided
       if (filters.searchQuery) {
         const searchTerm = filters.searchQuery.toLowerCase().trim()
-        reports = reports.filter(report => 
+        reports = reports.filter(report =>
           report.title?.toLowerCase().includes(searchTerm) ||
           report.description?.toLowerCase().includes(searchTerm) ||
           report.uploadedBy?.toLowerCase().includes(searchTerm)
@@ -210,7 +212,7 @@ class ReportService {
           const fallbackQuery = query(collection(db, this.collectionName), orderBy('uploadedAt', 'desc'))
           const fallbackSnapshot = await getDocs(fallbackQuery)
           let fallbackReports = []
-          
+
           fallbackSnapshot.forEach((doc) => {
             fallbackReports.push({
               id: doc.id,
@@ -219,33 +221,33 @@ class ReportService {
               approvedAt: doc.data().approvedAt?.toDate()
             })
           })
-          
+
           // Apply all filters client-side
           if (filters.category) {
             fallbackReports = fallbackReports.filter(report => report.category === filters.category)
           }
-          
+
           if (filters.uploadedBy) {
             fallbackReports = fallbackReports.filter(report => report.uploadedBy === filters.uploadedBy)
           }
-          
+
           if (filters.status) {
             fallbackReports = fallbackReports.filter(report => report.status === filters.status)
           }
-          
+
           if (filters.reportType) {
             fallbackReports = fallbackReports.filter(report => report.reportType === filters.reportType)
           }
-          
+
           if (filters.searchQuery) {
             const searchTerm = filters.searchQuery.toLowerCase().trim()
-            fallbackReports = fallbackReports.filter(report => 
+            fallbackReports = fallbackReports.filter(report =>
               report.title?.toLowerCase().includes(searchTerm) ||
               report.description?.toLowerCase().includes(searchTerm) ||
               report.uploadedBy?.toLowerCase().includes(searchTerm)
             )
           }
-          
+
           return {
             success: true,
             reports: fallbackReports
@@ -254,7 +256,7 @@ class ReportService {
           console.error('Fallback query also failed:', fallbackError)
         }
       }
-      
+
       return {
         success: false,
         error: error.message || 'Failed to fetch reports',
@@ -331,7 +333,7 @@ class ReportService {
   async getReportStatistics() {
     try {
       const allReportsResult = await this.getAllReports()
-      
+
       if (!allReportsResult.success) {
         return allReportsResult
       }

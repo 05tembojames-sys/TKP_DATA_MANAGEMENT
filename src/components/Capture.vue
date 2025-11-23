@@ -1,28 +1,12 @@
 <template>
   <div class="capture-container">
     <!-- Header -->
-    <div class="capture-header">
+    <!-- Top Header -->
+    <TopHeader />
+
+    <!-- App Sub-Header -->
+    <div class="capture-sub-header">
       <div class="header-left">
-        <button @click="goBack" class="back-button">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="m12 19-7-7 7-7" />
-            <path d="m19 12H5" />
-          </svg>
-          {{
-            route.query.returnTo === "tracker-capture"
-              ? "Back to Tracker Capture"
-              : "Back to Dashboard"
-          }}
-        </button>
-      </div>
-      <div class="header-center">
         <h1 class="capture-title">Data Capture</h1>
       </div>
       <div class="header-right">
@@ -71,21 +55,6 @@
             <polyline points="10,9 9,9 8,9" />
           </svg>
           Documents For TKP
-        </button>
-        <button @click="handleLogout" class="logout-button">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Logout
         </button>
       </div>
     </div>
@@ -209,6 +178,27 @@
         <div v-if="selectedDataSet === 'initial-referral'">
           <InitialReferralForm
             ref="referralForm"
+            @form-saved="handleReferralFormSaved"
+          />
+        </div>
+
+        <!-- Medical Intake Form -->
+        <div v-else-if="selectedDataSet === 'medical-intake'">
+          <MedicalIntakeForm
+            @form-saved="handleReferralFormSaved"
+          />
+        </div>
+
+        <!-- Child Overview Form -->
+        <div v-else-if="selectedDataSet === 'child-overview'">
+          <ChildOverviewForm
+            @form-saved="handleReferralFormSaved"
+          />
+        </div>
+
+        <!-- Initial Assessment Form -->
+        <div v-else-if="selectedDataSet === 'initial-assessment'">
+          <InitialAssessmentForm
             @form-saved="handleReferralFormSaved"
           />
         </div>
@@ -414,6 +404,7 @@
 </template>
 
 <script setup>
+import TopHeader from "./TopHeader.vue";
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import CaptureService from "../services/captureService.js";
@@ -421,6 +412,9 @@ import FormService from "../services/formService.js";
 import AuthService from "../services/auth.js";
 import TrackerService from "../services/trackerService.js";
 import InitialReferralForm from "./InitialReferralForm.vue";
+import MedicalIntakeForm from "./MedicalIntakeForm.vue";
+import ChildOverviewForm from "./ChildOverviewForm.vue";
+import InitialAssessmentForm from "./InitialAssessmentForm.vue";
 import CustomReports from "./CustomReports.vue";
 
 const router = useRouter();
@@ -1292,146 +1286,36 @@ watch(selectedFormId, async (newFormId) => {
   flex-direction: column;
 }
 
-.capture-header {
-  background: #ffffff;
-  border-bottom: 1px solid #e9ecef;
-  padding: 1rem 2rem;
+/* Capture Sub-Header */
+.capture-sub-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem 1.5rem;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.header-left {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.header-right {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  justify-content: flex-end;
-}
-
-.header-center {
-  flex: 2;
-  text-align: center;
-}
-
-.back-button,
-.logout-button {
-  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
+.capture-title {
+  font-size: 1.5rem;
   font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  min-height: 44px;
-  min-width: 44px;
-}
-
-.back-button:hover,
-.logout-button:hover {
-  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.logout-button {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
-}
-
-.logout-button:hover {
-  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
-  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+  color: #111827;
+  margin: 0;
 }
 
 .referral-button,
 .reports-button {
-  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
-  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin-right: 0.75rem;
-  min-height: 44px;
-  min-width: 44px;
-}
-
-.referral-button:hover,
-.reports-button:hover {
-  background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.reports-button {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
-  margin-right: 0;
-}
-
-.reports-button:hover {
-  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
-}
-
-/* Active tab styles */
-.referral-button.active,
-.reports-button.active {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-  color: #212529;
-  box-shadow: 0 2px 6px rgba(255, 193, 7, 0.4);
-}
-
-.referral-button.active:hover,
-.reports-button.active:hover {
-  background: linear-gradient(135deg, #e0a800 0%, #d39e00 100%);
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.5);
-}
-
-.referral-button,
-.reports-button {
-  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+  background-color: #2c6693;
   color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  padding: 0.625rem 1.25rem;
-  border-radius: 8px;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  transition: background-color 0.2s;
   margin-right: 0.75rem;
 }
 

@@ -71,6 +71,40 @@
           <div class="stat-number">{{ activeChildren }}</div>
           <div class="stat-label">Active Cases</div>
         </div>
+        
+        <!-- Toggle In-Housed Girls Button -->
+        <div class="stat-card action-card toggle-card">
+          <button @click="$emit('toggle-in-housed')" class="toggle-btn" :class="{ 'active': showOnlyComplete }">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              v-if="!showOnlyComplete"
+            >
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              v-else
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>{{ showOnlyComplete ? 'Show All Children' : 'In Housed Girls' }}</span>
+          </button>
+        </div>
+
         <!-- Medical Intake Forms Button - Only shows in "In Housed Girls" view -->
         <div v-if="showOnlyComplete" class="stat-card action-card">
           <button @click="goToMedicalIntakeForms" class="medical-intake-btn">
@@ -1231,7 +1265,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import FormService from "../services/formService.js";
 import AuthService from "../services/auth.js";
@@ -1258,7 +1292,8 @@ const props = defineProps({
 });
 
 // Emits
-const emit = defineEmits(["back-to-dashboard"]);
+// Emits
+const emit = defineEmits(["back-to-dashboard", "toggle-in-housed"]);
 
 // Reactive data
 const children = ref([]);
@@ -2123,6 +2158,10 @@ const handleLogout = async () => {
 
 // Lifecycle
 onMounted(() => {
+  loadChildren();
+});
+
+watch(() => props.showOnlyComplete, () => {
   loadChildren();
 });
 </script>
@@ -3791,18 +3830,6 @@ onMounted(() => {
     padding: 1rem 1.5rem;
   }
 
-  .fullscreen-header h2 {
-    font-size: 1.25rem;
-  }
-
-  .fullscreen-content {
-    padding: 1rem;
-  }
-
-  .header-spacer {
-    display: none;
-  }
-
   .fullscreen-header {
     justify-content: flex-start;
     gap: 1rem;
@@ -3825,5 +3852,45 @@ onMounted(() => {
   .fullscreen-content {
     padding: 0.75rem;
   }
+}
+
+.stat-card.action-card.toggle-card {
+  background: #fff;
+  border: 2px solid #4a148c;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: #4a148c;
+  padding: 0;
+}
+
+.toggle-btn svg {
+  width: 32px;
+  height: 32px;
+  transition: all 0.3s ease;
+}
+
+.toggle-btn span {
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.toggle-btn.active {
+  color: #28a745;
+}
+
+.toggle-btn:hover svg {
+  transform: scale(1.1);
 }
 </style>
