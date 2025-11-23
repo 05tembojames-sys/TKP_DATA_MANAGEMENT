@@ -36,8 +36,18 @@
       </div>
       <div class="header-actions">
         <!-- Apps Menu -->
-        <div class="action-item" title="Apps" @click="toggleAppMenu">
-          <i class="fas fa-th"></i>
+        <div class="action-item apps-icon" title="Apps" @click="toggleAppMenu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="5" cy="5" r="2" fill="currentColor"/>
+            <circle cx="12" cy="5" r="2" fill="currentColor"/>
+            <circle cx="19" cy="5" r="2" fill="currentColor"/>
+            <circle cx="5" cy="12" r="2" fill="currentColor"/>
+            <circle cx="12" cy="12" r="2" fill="currentColor"/>
+            <circle cx="19" cy="12" r="2" fill="currentColor"/>
+            <circle cx="5" cy="19" r="2" fill="currentColor"/>
+            <circle cx="12" cy="19" r="2" fill="currentColor"/>
+            <circle cx="19" cy="19" r="2" fill="currentColor"/>
+          </svg>
         </div>
         
         <!-- Notifications -->
@@ -220,13 +230,14 @@
           <div class="avatar large">{{ getInitials() }}</div>
           <div>
             <h3>{{ currentUserName }}</h3>
-        <div class="menu-item logout" @click="handleLogout">
-          <i class="fas fa-sign-out-alt"></i>
-          <span>Logout</span>
+          </div>
         </div>
       </div>
+      <div class="menu-item logout" @click="handleLogout">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </div>
     </div>
-</div>
 
     <!-- Click outside to close -->
     <div 
@@ -235,7 +246,6 @@
       @click="closeAllMenus"
     ></div>
   </div>
-</div>
 </template>
 
 <script setup>
@@ -518,6 +528,27 @@ const navigateToApp = (app) => {
   }
 };
 
+const editDashboard = () => {
+  closeAllMenus();
+  // TODO: Implement dashboard edit mode
+  console.log('Edit dashboard mode activated');
+  router.push({ path: '/dashboard', query: { mode: 'edit' } });
+};
+
+const shareDashboard = () => {
+  closeAllMenus();
+  // TODO: Implement dashboard sharing
+  console.log('Share dashboard');
+  router.push({ path: '/dashboard', query: { action: 'share' } });
+};
+
+const slideshowDashboard = () => {
+  closeAllMenus();
+  // TODO: Implement slideshow mode
+  console.log('Slideshow mode activated');
+  router.push({ path: '/dashboard', query: { mode: 'slideshow' } });
+};
+
 onMounted(() => {
   const currentUser = AuthService.getCurrentUser();
   if (currentUser) {
@@ -644,6 +675,18 @@ onMounted(() => {
 .action-item:hover {
   opacity: 1;
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Apps Icon */
+.apps-icon svg {
+  display: block;
+  color: rgba(255, 255, 255, 0.85);
+  transition: color 0.2s, transform 0.2s;
+}
+
+.apps-icon:hover svg {
+  color: white;
+  transform: scale(1.05);
 }
 
 .badge {
