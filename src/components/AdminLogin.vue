@@ -365,5 +365,7 @@ const handleLogin = async () => {
 
 @media (max-width: 480px) {
   .login-panel { padding: 1rem; }
+  .login-header { flex-direction: column; gap: 1rem; }
+  .login-footer { flex-direction: column; gap: 0.5rem; }
 }
 </style>

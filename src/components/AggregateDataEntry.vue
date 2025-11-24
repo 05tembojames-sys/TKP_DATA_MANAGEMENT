@@ -766,4 +766,67 @@ onMounted(() => {
   margin: 0;
   font-size: 0.9rem;
 }
+
+@media (max-width: 768px) {
+  .aggregate-data-entry {
+    flex-direction: column;
+  }
+
+  .org-unit-sidebar {
+    width: 100%;
+    height: auto;
+    max-height: 30vh;
+    border-right: none;
+    border-bottom: 1px solid #d5dce5;
+    display: none; /* Hide sidebar on mobile by default */
+  }
+
+  .selection-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 12px;
+  }
+
+  .selection-group {
+    width: 100%;
+  }
+
+  .dhis-select {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .period-selector {
+    width: 100%;
+  }
+
+  .period-select {
+    flex: 1;
+  }
+
+  .data-entry-area {
+    padding: 12px;
+  }
+
+  .form-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .form-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+}
 </style>

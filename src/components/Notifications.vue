@@ -833,4 +833,41 @@ onUnmounted(() => {
 .dhis2-btn.full-width {
   width: 100%;
 }
+
+@media (max-width: 768px) {
+  .app-content {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #d5d5d5;
+    display: none; /* Hide sidebar on mobile by default */
+  }
+
+  .workspace-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .search-bar {
+    width: 100%;
+  }
+
+  .notification-card {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .notification-icon-wrapper {
+    align-self: flex-start;
+  }
+
+  .modal-card {
+    width: 95%;
+  }
+}
 </style>

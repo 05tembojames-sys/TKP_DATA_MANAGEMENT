@@ -181,12 +181,12 @@
 
       <!-- Map View -->
       <div class="map-view-container" v-if="activeView === 'map'" style="flex: 1; display: flex; flex-direction: column;">
-        <Maps />
+        <Maps :show-header="false" />
       </div>
 
       <!-- Analytics View -->
       <div class="analytics-view-container" v-if="activeView === 'analytics'" style="flex: 1; display: flex; flex-direction: column; overflow: auto;">
-        <DataVisualizer />
+        <DataVisualizer :show-header="false" />
       </div>
     </div>
 
@@ -392,7 +392,7 @@ const createNewForm = (formType) => {
   showFormSelector.value = false;
   currentForm.value = EnhancedOutreachService.createFormTemplate(formType);
   // Add mock org unit
-  currentForm.value.orgUnit = selectedOrgUnit.value || "Lusaka District";
+  currentForm.value.orgUnit = selectedOrgUnit.value;
   activeView.value = 'editor';
 };
 
@@ -409,9 +409,13 @@ const viewForm = (form) => {
 const deleteForm = async (form) => {
   if (confirm(`Are you sure you want to delete the event for ${form.childName}?`)) {
     try {
-      // Mock delete from local state
-      forms.value = forms.value.filter(f => f.id !== form.id);
-      success("Event deleted successfully");
+      const result = await EnhancedOutreachService.deleteForm(form.id);
+      if (result.success) {
+        success("Event deleted successfully");
+        loadFormsFromStorage();
+      } else {
+        error("Failed to delete event: " + result.error);
+      }
     } catch (err) {
       error("Failed to delete event");
     }
@@ -523,10 +527,6 @@ const syncData = async () => {
 const loadFormsFromStorage = async () => {
   try {
     forms.value = await EnhancedOutreachService.getAllForms();
-    // Add mock org units if missing for demo
-    forms.value.forEach(f => {
-      if (!f.orgUnit) f.orgUnit = "Lusaka District";
-    });
   } catch (err) {
     console.error("Load error:", err);
   }
@@ -1124,5 +1124,84 @@ onMounted(async () => {
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   padding: 32px;
   min-height: 500px;
+}
+
+@media (max-width: 768px) {
+  .app-toolbar {
+    height: auto;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .toolbar-left, .toolbar-right {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .app-content {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #d5d5d5;
+    display: none; /* Hide sidebar on mobile by default */
+  }
+
+  .workspace-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .search-bar {
+    width: 100%;
+  }
+
+  .workspace-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .dhis2-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .editor-toolbar {
+    height: auto;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .editor-title {
+    justify-content: flex-start;
+  }
+
+  .editor-actions {
+    width: 100%;
+  }
+
+  .editor-actions button {
+    flex: 1;
+  }
+
+  .editor-content {
+    padding: 8px;
+  }
+
+  .form-wrapper {
+    padding: 16px;
+  }
+
+  .modal-content {
+    width: 95%;
+  }
 }
 </style>

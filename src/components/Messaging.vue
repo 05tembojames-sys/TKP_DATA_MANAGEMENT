@@ -847,4 +847,51 @@ const deleteMessage = () => {
   margin-bottom: 16px;
   display: block;
 }
+
+@media (max-width: 768px) {
+  .app-content {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #d5d5d5;
+    display: none; /* Hide sidebar on mobile by default */
+  }
+
+  .workspace-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .search-bar {
+    width: 100%;
+  }
+
+  .workspace-content {
+    flex-direction: column;
+  }
+
+  .messages-list {
+    width: 100%;
+    height: auto;
+    max-height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid #d5d5d5;
+  }
+
+  .message-detail-pane {
+    width: 100%;
+    flex: 1;
+    height: auto;
+    padding: 16px;
+  }
+
+  .modal-card {
+    width: 95%;
+  }
+}
 </style>

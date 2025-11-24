@@ -1982,29 +1982,10 @@ onMounted(async () => {
   .sidebar {
     width: 100%;
     height: auto;
-    max-height: 300px;
     border-right: none;
-    border-bottom: 1px solid var(--dhis2-border);
+    border-bottom: 1px solid #d5d5d5;
+    display: none; /* Hide sidebar on mobile by default */
   }
-  
-  .toolbar {
-    height: auto;
-    flex-wrap: wrap;
-    padding: 8px;
-    gap: 8px;
-  }
-  
-  .toolbar-left, .toolbar-right {
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-
-/* Advanced Chart Styles */
-.line-chart-svg, .area-chart-svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
 }
 
 .chart-point {

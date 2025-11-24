@@ -587,4 +587,51 @@ const runMaintenance = () => {
   font-size: 0.875rem;
   color: #6b7280;
 }
+
+@media (max-width: 768px) {
+  .maintenance-sub-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .header-left, .header-right {
+    width: 100%;
+    text-align: center;
+  }
+
+  .run-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .maintenance-content {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "status"
+      "tasks"
+      "history"
+      "resources";
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .status-grid, .resources-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .task-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .task-status {
+    align-self: flex-start;
+    margin: 0.5rem 0;
+  }
+
+  .run-single-btn {
+    width: 100%;
+  }
+}
 </style>

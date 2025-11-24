@@ -969,8 +969,56 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .filter-sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #d5d5d5;
+    display: none; /* Hidden by default on mobile to save space */
+  }
+
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .dhis2-btn {
+    flex: 1;
+  }
+
+  .user-list-container {
+    overflow-x: auto;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .modal-card {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .pagination-bar {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .pagination-controls {
+    justify-content: center;
+  }
 }
 </style>

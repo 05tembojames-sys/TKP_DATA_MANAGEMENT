@@ -1131,6 +1131,201 @@ const confirmDeleteReport = async (r) => {
   padding: 12px 24px;
   border-radius: 4px;
   color: white;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 550px;
+  max-width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.large-modal { width: 900px; }
+
+.modal-header {
+  padding: 24px 28px;
+  border-bottom: 2px solid #e8edf2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+}
+
+.modal-header h3 { 
+  margin: 0; 
+  font-size: 1.3rem; 
+  color: #147cd7;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #a0adba;
+  transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.close-btn:hover {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.dhis2-form { 
+  padding: 28px; 
+}
+
+.form-row { 
+  margin-bottom: 20px; 
+}
+
+.form-row label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #212934;
+  font-size: 0.95rem;
+}
+
+.dhis2-file-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px dashed #a0adba;
+  border-radius: 6px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.dhis2-file-input:hover {
+  border-color: #147cd7;
+  background: #e8f5ff;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #e8edf2;
+}
+
+/* Preview */
+.preview-container {
+  padding: 24px;
+  background: #f3f5f7;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #d5dde5;
+}
+
+.preview-frame { width: 100%; height: 600px; border: none; background: white; }
+.preview-img { max-width: 100%; max-height: 600px; }
+
+.no-preview { text-align: center; }
+.file-icon-large { font-size: 4rem; margin-bottom: 16px; }
+
+.approval-controls {
+  padding: 24px;
+  background: white;
+}
+
+.approval-header {
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #212934;
+}
+
+.comments-text {
+  color: #404b5a;
+  font-style: italic;
+  background: #f3f5f7;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Loading & Empty */
+.loading-overlay {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid #e8edf2;
+  border-top: 3px solid #147cd7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.empty-state-table {
+  text-align: center;
+  padding: 40px;
+  color: #6e7a8a;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 4px;
+  color: white;
   font-weight: 500;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   z-index: 2000;
@@ -1138,4 +1333,220 @@ const confirmDeleteReport = async (r) => {
 
 .toast.success { background: #2e7d32; }
 .toast.error { background: #d32f2f; }
+
+@media (max-width: 768px) {
+  .app-body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #d5dde5;
+    display: none; /* Hide sidebar on mobile by default, or toggle it */
+  }
+
+  /* If you want a toggle for the sidebar, you'd need to add a button and state */
+  /* For now, let's just stack it if visible or hide it */
+  
+  .content-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #a0adba;
+  transition: all 0.2s;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.close-btn:hover {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.dhis2-form { 
+  padding: 28px; 
+}
+
+.form-row { 
+  margin-bottom: 20px; 
+}
+
+.form-row label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #212934;
+  font-size: 0.95rem;
+}
+
+.dhis2-file-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px dashed #a0adba;
+  border-radius: 6px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.dhis2-file-input:hover {
+  border-color: #147cd7;
+  background: #e8f5ff;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #e8edf2;
+}
+
+/* Preview */
+.preview-container {
+  padding: 24px;
+  background: #f3f5f7;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #d5dde5;
+}
+
+.preview-frame { width: 100%; height: 600px; border: none; background: white; }
+.preview-img { max-width: 100%; max-height: 600px; }
+
+.no-preview { text-align: center; }
+.file-icon-large { font-size: 4rem; margin-bottom: 16px; }
+
+.approval-controls {
+  padding: 24px;
+  background: white;
+}
+
+.approval-header {
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #212934;
+}
+
+.comments-text {
+  color: #404b5a;
+  font-style: italic;
+  background: #f3f5f7;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Loading & Empty */
+.loading-overlay {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid #e8edf2;
+  border-top: 3px solid #147cd7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.empty-state-table {
+  text-align: center;
+  padding: 40px;
+  color: #6e7a8a;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 4px;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 2000;
+}
+
+.toast.success { background: #2e7d32; }
+.toast.error { background: #d32f2f; }
+
+@media (max-width: 768px) {
+  .app-body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #d5dde5;
+    display: none; /* Hide sidebar on mobile by default, or toggle it */
+  }
+
+  /* If you want a toggle for the sidebar, you'd need to add a button and state */
+  /* For now, let's just stack it if visible or hide it */
+  
+  .content-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .header-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .search-box input {
+    width: 100%;
+  }
+
+  .dhis2-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+}
 </style>

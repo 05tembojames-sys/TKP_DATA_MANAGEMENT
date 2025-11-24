@@ -261,7 +261,7 @@
         </div>
 
         <!-- Users Table -->
-        <div class="users-table">
+        <div class="users-table" style="overflow-x: auto;">
           <div v-if="loadingUsers" class="loading">Loading users...</div>
           <div v-else-if="users.length === 0" class="no-users">
             No users found. Add your first user above.
@@ -1793,36 +1793,67 @@ const createMiniCharts = async () => {
 }
 
 @media (max-width: 768px) {
-  .header-section {
+  /* Toolbar */
+  .dhis-toolbar-container {
     flex-direction: column;
-    gap: 1rem;
-    align-items: center;
-    padding: 1rem;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .toolbar-left {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .toolbar-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .dashboards-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dashboard-title {
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Dashboard Grid */
+  .dhis-dashboard-grid {
+    grid-template-columns: 1fr;
+    padding: 0;
   }
 
   .dashboard-content {
-    padding: 1rem;
+    padding: 12px;
   }
 
-  .dashboard-buttons-grid {
-    grid-template-columns: repeat(2, minmax(130px, 1fr));
-    justify-items: center;
-    max-width: none;
+  /* Widgets */
+  .dhis-widget {
+    height: auto;
+    min-height: 280px;
   }
 
-  .dashboard-btn {
-    width: 130px;
-    max-width: 130px;
+  /* Forms Section */
+  .forms-section {
+    height: auto !important;
+    min-height: calc(100vh - 150px);
   }
 
-  .section-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-  }
-
+  /* User Management */
   .header-actions {
-    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .header-actions button {
+    width: 100%;
   }
 
   .form-row {
@@ -1833,46 +1864,8 @@ const createMiniCharts = async () => {
     flex-direction: column;
   }
 
-  .form-header {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-    padding: 1.5rem;
-  }
-
-  .form-header h3 {
-    font-size: 1.2rem;
-    text-align: center;
-  }
-
-  .back-to-list-btn {
+  .form-actions button {
     width: 100%;
-    justify-content: center;
-  }
-
-  .actions {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .logo-card {
-    max-width: none;
-    width: 100%;
-  }
-
-  .logo-container {
-    width: 60px;
-    height: 60px;
-  }
-
-  .logo-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  .summary-stats {
-    grid-template-columns: 1fr;
   }
 }
 

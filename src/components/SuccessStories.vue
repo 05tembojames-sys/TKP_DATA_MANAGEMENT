@@ -2025,4 +2025,66 @@ onMounted(() => {
     height: 300px;
   }
 }
+
+@media (max-width: 768px) {
+  .page-header {
+    padding: 16px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .filter-tabs {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .stories-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row, .three-col {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .preview-images {
+    flex-direction: column;
+  }
+
+  .preview-arrow {
+    transform: rotate(90deg);
+  }
+
+  .story-hero-image {
+    height: 250px;
+  }
+}
 </style>

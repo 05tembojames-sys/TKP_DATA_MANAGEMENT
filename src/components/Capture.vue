@@ -1600,6 +1600,64 @@ watch(selectedFormId, async (newFormId) => {
   font-size: 0.9rem;
 }
 
+@media (max-width: 768px) {
+  .capture-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .referral-button,
+  .reports-button,
+  .save-button {
+    width: 100%;
+    margin: 0;
+    justify-content: center;
+  }
+
+  .capture-content {
+    padding: 1rem;
+  }
+
+  .selection-panel {
+    padding: 1rem;
+  }
+
+  .selection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .data-entry-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .entry-actions {
+    justify-content: stretch;
+  }
+
+  .validate-button,
+  .clear-button {
+    flex: 1;
+  }
+
+  .data-entry-form {
+    padding: 1rem;
+  }
+
+  .data-elements-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .element-input {
   padding: 0.75rem;
   border: 1px solid #ced4da;

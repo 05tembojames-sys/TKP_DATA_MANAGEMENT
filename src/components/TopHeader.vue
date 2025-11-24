@@ -116,7 +116,7 @@
           <div class="app-icon-wrapper orange"><i class="fa-solid fa-table"></i></div>
           <span>Pivot Tables</span>
         </div>
-        <div class="app-item" @click="navigateToApp('maps')">
+        <div class="app-item" v-if="isRestrictedAppUser" @click="navigateToApp('maps')">
           <div class="app-icon-wrapper green"><i class="fa-solid fa-map-marked-alt"></i></div>
           <span>Maps</span>
         </div>
@@ -124,23 +124,23 @@
           <div class="app-icon-wrapper red"><i class="fa-solid fa-route"></i></div>
           <span>Outreach</span>
         </div>
-        <div class="app-item" @click="navigateToApp('import-export')">
+        <div class="app-item" v-if="isRestrictedAppUser" @click="navigateToApp('import-export')">
           <div class="app-icon-wrapper indigo"><i class="fa-solid fa-file-import"></i></div>
           <span>Import/Export</span>
         </div>
-        <div class="app-item" @click="navigateToApp('data-quality')">
+        <div class="app-item" v-if="isRestrictedAppUser" @click="navigateToApp('data-quality')">
           <div class="app-icon-wrapper teal"><i class="fa-solid fa-check-double"></i></div>
           <span>Data Quality</span>
         </div>
-        <div class="app-item" @click="navigateToApp('approval')">
+        <div class="app-item" v-if="isRestrictedAppUser" @click="navigateToApp('approval')">
           <div class="app-icon-wrapper green"><i class="fa-solid fa-thumbs-up"></i></div>
           <span>Approval</span>
         </div>
-        <div class="app-item" @click="navigateToApp('messaging')">
+        <div class="app-item" v-if="isRestrictedAppUser" @click="navigateToApp('messaging')">
           <div class="app-icon-wrapper blue"><i class="fa-solid fa-comments"></i></div>
           <span>Messaging</span>
         </div>
-        <div class="app-item" @click="navigateToApp('maintenance')">
+        <div class="app-item" v-if="isRestrictedAppUser" @click="navigateToApp('maintenance')">
           <div class="app-icon-wrapper orange"><i class="fa-solid fa-tools"></i></div>
           <span>Maintenance</span>
         </div>
@@ -327,6 +327,11 @@ const isSuperAdmin = computed(() => {
   return currentUser && currentUser.email === 'davidchileshe33@gmail.com';
 });
 
+const isRestrictedAppUser = computed(() => {
+  const allowedEmails = ['davidchileshe33@gmail.com', '05tembojames@gmail.com'];
+  return allowedEmails.includes(currentUserEmail.value);
+});
+
 // Methods
 const getInitials = () => {
   if (!currentUserName.value) return "U";
@@ -334,7 +339,11 @@ const getInitials = () => {
   if (nameParts.length >= 2) {
     return (nameParts[0][0] + nameParts[1][0]).toUpperCase();
   }
-  return nameParts[0][0].toUpperCase();
+  // If only one part (e.g. email or single name), take first 2 chars
+  if (currentUserName.value.length >= 2) {
+      return currentUserName.value.substring(0, 2).toUpperCase();
+  }
+  return currentUserName.value[0].toUpperCase();
 };
 
 const toggleAppMenu = () => {
@@ -939,6 +948,8 @@ onUnmounted(() => {
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   padding: 16px;
+  max-height: 400px; /* Adjust height as needed */
+  overflow-y: auto;
 }
 
 .app-item {

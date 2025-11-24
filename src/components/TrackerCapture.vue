@@ -2924,7 +2924,110 @@ onMounted(async () => {
   transition: all 0.2s;
 }
 
-.view-details-btn:hover {
-  background: #f3f4f6;
+@media (max-width: 768px) {
+  .tracker-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .header-left,
+  .header-center,
+  .header-right {
+    flex: none;
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .header-right {
+    flex-direction: row;
+    gap: 1rem;
+    justify-content: space-between;
+  }
+
+  .entities-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .entity-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .entity-avatar {
+    margin-bottom: 1rem;
+  }
+
+  .entity-details {
+    width: 100%;
+  }
+
+  .entity-actions {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 1rem;
+  }
+
+  .quick-forms-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .enrollment-main {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .stage-step {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .stage-marker {
+    left: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .stages-timeline {
+    padding-left: 0;
+  }
+
+  .stages-timeline::before {
+    left: 15px;
+  }
+  
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-forms-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header-right {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .register-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .entity-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .action-button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 </style>

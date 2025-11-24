@@ -799,4 +799,49 @@ const viewRecord = (id) => {
   font-size: 0.9rem;
   line-height: 1.5;
 }
+
+@media (max-width: 768px) {
+  .app-content {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #d5d5d5;
+    display: none; /* Hide sidebar on mobile by default */
+  }
+
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .filter-group {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filter-actions {
+    width: 100%;
+  }
+
+  .dhis2-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dhis2-table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  .results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
 </style>

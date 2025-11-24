@@ -216,13 +216,16 @@ router.beforeEach(async (to, from, next) => {
   // Check if user is authenticated (all roles allowed)
   if (currentUser) {
     const userDoc = await AuthService.getUserRole(currentUser.uid);
-    // Allow any user with valid user data and active status
-    if (userDoc && (!userDoc.status || userDoc.status === "active")) {
+
+    // Check if user is explicitly inactive
+    const isInactive = userDoc && userDoc.status && userDoc.status !== "active";
+
+    if (!isInactive) {
       isAuthenticated = true;
       // Update AuthService state
       AuthService.user = currentUser;
-      AuthService.userRole = userDoc.role;
-      AuthService.userPermissions = userDoc.permissions || [];
+      AuthService.userRole = userDoc?.role || "user";
+      AuthService.userPermissions = userDoc?.permissions || [];
       AuthService.isAuthenticated = true;
     }
   }

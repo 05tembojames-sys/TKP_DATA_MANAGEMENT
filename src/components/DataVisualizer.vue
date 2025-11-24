@@ -1,6 +1,6 @@
 <template>
   <div class="dhis2-app-container">
-    <TopHeader />
+    <TopHeader v-if="showHeader" />
     
     <div class="app-shell">
       <!-- Left Sidebar - Configuration -->
@@ -264,6 +264,13 @@ ChartJS.register(
   Legend,
   Filler
 )
+
+const props = defineProps({
+  showHeader: {
+    type: Boolean,
+    default: true
+  }
+});
 
 const toast = useToast();
 

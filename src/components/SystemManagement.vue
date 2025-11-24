@@ -1566,4 +1566,34 @@ input:checked + .slider:before {
   background: #f0f0f0;
   color: #212121;
 }
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .system-sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #d5d5d5;
+    display: none; /* Hide sidebar on mobile by default */
+  }
+
+  .info-grid,
+  .cache-actions,
+  .tasks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .logs-filters {
+    flex-direction: column;
+  }
+}
 </style>

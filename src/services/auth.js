@@ -82,11 +82,11 @@ class AuthService {
       // First check localStorage flag
       const flag = localStorage.getItem(this.ADMIN_FLAG_KEY);
       if (flag === "true") return true;
-      
+
       // Check if we have a cached admin check result
       const cachedAdminCheck = localStorage.getItem('cached_admin_check');
       const lastCheckTime = localStorage.getItem('last_admin_check_time');
-      
+
       // If we have a recent cached result (within 1 hour), use it
       if (cachedAdminCheck && lastCheckTime) {
         const oneHourAgo = Date.now() - (60 * 60 * 1000);
@@ -94,13 +94,13 @@ class AuthService {
           return cachedAdminCheck === 'true';
         }
       }
-      
+
       try {
         // If no flag, check Firestore for admin users
         const usersRef = collection(this.db, 'users');
         const q = query(usersRef, where('role', '==', 'admin'), limit(1));
         const querySnapshot = await getDocs(q);
-        
+
         // If admin found in Firestore, update the flag
         if (!querySnapshot.empty) {
           localStorage.setItem(this.ADMIN_FLAG_KEY, "true");
@@ -108,7 +108,7 @@ class AuthService {
           localStorage.setItem('last_admin_check_time', Date.now().toString());
           return true;
         }
-        
+
         // Cache the negative result
         localStorage.setItem('cached_admin_check', 'false');
         localStorage.setItem('last_admin_check_time', Date.now().toString());
@@ -206,7 +206,7 @@ class AuthService {
       if (this.userRole === "admin") {
         try {
           localStorage.setItem(this.ADMIN_FLAG_KEY, "true");
-        } catch {}
+        } catch { }
       }
 
       this.isAuthenticated = true;
@@ -287,7 +287,7 @@ class AuthService {
         if (this.userRole === "admin") {
           try {
             localStorage.setItem(this.ADMIN_FLAG_KEY, "true");
-          } catch {}
+          } catch { }
         }
 
         this.saveOfflineUserData();
@@ -315,6 +315,11 @@ class AuthService {
 
   getUserRoleInfo() {
     return this.userRole;
+  }
+
+  hasPermission(permission) {
+    if (this.userRole === 'admin') return true;
+    return this.userPermissions && this.userPermissions.includes(permission);
   }
 
   getErrorMessage(errorCode) {

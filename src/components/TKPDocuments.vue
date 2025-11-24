@@ -1956,7 +1956,37 @@ watch(selectedFormId, async (newFormId) => {
   .capture-sub-header {
     flex-direction: column;
     gap: 16px;
-    align-items: flex-start;
+    align-items: stretch;
+  }
+
+  .dm-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .upload-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dm-filters {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .search-wrapper {
+    width: 100%;
+  }
+
+  .dm-select {
+    width: 100%;
+  }
+
+  .dm-pagination {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
   }
 }
 </style>

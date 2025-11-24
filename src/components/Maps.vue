@@ -1,6 +1,6 @@
 <template>
   <div class="dhis2-maps-app">
-    <TopHeader />
+    <TopHeader v-if="showHeader" />
     
     <!-- App Toolbar -->
     <div class="maps-toolbar">
@@ -155,6 +155,13 @@ let DefaultIcon = L.icon({
     iconAnchor: [12, 41]
 });
 L.Marker.prototype.options.icon = DefaultIcon;
+
+const props = defineProps({
+  showHeader: {
+    type: Boolean,
+    default: true
+  }
+});
 
 const toast = useToast();
 const showAddLayerModal = ref(false);
@@ -1062,5 +1069,53 @@ const openLayerSettings = () => {
   color: white;
   font-weight: bold;
   font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .maps-toolbar {
+    height: auto;
+    flex-wrap: wrap;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .toolbar-group {
+    flex-wrap: wrap;
+  }
+
+  .maps-workspace {
+    flex-direction: column;
+  }
+
+  .layers-panel {
+    width: 100%;
+    height: auto;
+    max-height: 30vh;
+    border-right: none;
+    border-bottom: 1px solid #d5d5d5;
+    display: none; /* Hide layers on mobile by default */
+  }
+
+  .map-canvas {
+    height: 60vh;
+  }
+
+  .map-controls-top-left {
+    left: 10px;
+    right: 10px;
+    width: auto;
+  }
+
+  .search-control {
+    width: 100%;
+  }
+
+  .layer-types-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    width: 95%;
+  }
 }
 </style>
