@@ -13,10 +13,11 @@
           </div>
        </div>
        <div class="toolbar-right">
-          <button class="tool-btn">Edit</button>
-          <button class="tool-btn">Share</button>
-          <button class="tool-btn">Slideshow</button>
-          <button class="tool-btn filter-btn"><i class="fas fa-filter"></i> Filter</button>
+          <button class="tool-btn" @click="openEditModal">Edit</button>
+          <button class="tool-btn" @click="openShareModal">Share</button>
+          <button class="tool-btn" @click="startSlideshow">Slideshow</button>
+          <button class="tool-btn filter-btn" @click="openFilterModal"><i class="fas fa-filter"></i> Filter</button>
+          <button class="tool-btn" @click="openMapsModal"><i class="fas fa-map-marked-alt"></i> Maps</button>
        </div>
     </div>
 
@@ -31,7 +32,7 @@
       <div v-if="currentView === 'main'" class="dhis-dashboard-grid">
           
           <!-- Welcome/Info Widget (Text) -->
-          <div class="dhis-widget text-widget double-height">
+          <div v-if="widgetVisibility.welcome" class="dhis-widget text-widget double-height">
              <div class="widget-header">
                 <div class="widget-title">Welcome, {{ getFirstName() }}</div>
                 <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
@@ -47,7 +48,7 @@
           </div>
 
           <!-- Tracker Capture Widget -->
-          <div class="dhis-widget chart-widget" @click="setCurrentView('tracker-capture')">
+          <div v-if="widgetVisibility.trackerCapture" class="dhis-widget chart-widget" @click="setCurrentView('tracker-capture')">
              <div class="widget-header">
                 <div class="widget-title">Tracker Capture</div>
                 <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
@@ -59,7 +60,7 @@
           </div>
 
            <!-- Data Entry Widget (Chart) -->
-          <div class="dhis-widget chart-widget" @click="setCurrentView('data-entry')">
+          <div v-if="widgetVisibility.dataEntry" class="dhis-widget chart-widget" @click="setCurrentView('data-entry')">
              <div class="widget-header">
                 <div class="widget-title">Data Entry Progress</div>
                 <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
@@ -70,7 +71,7 @@
           </div>
 
           <!-- Reports Widget (Chart) -->
-          <div class="dhis-widget chart-widget" @click="setCurrentView('reports')">
+          <div v-if="widgetVisibility.reports" class="dhis-widget chart-widget" @click="setCurrentView('reports')">
              <div class="widget-header">
                 <div class="widget-title">Reports Generated</div>
                 <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
@@ -81,7 +82,7 @@
           </div>
 
           <!-- Events Widget (Chart) -->
-          <div class="dhis-widget chart-widget" @click="setCurrentView('event-reports')">
+          <div v-if="widgetVisibility.events" class="dhis-widget chart-widget" @click="setCurrentView('event-reports')">
              <div class="widget-header">
                 <div class="widget-title">Event Status</div>
                 <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
@@ -92,7 +93,7 @@
           </div>
 
            <!-- Analytics Widget (Chart) -->
-          <div class="dhis-widget chart-widget" @click="setCurrentView('visualization')">
+          <div v-if="widgetVisibility.demographics" class="dhis-widget chart-widget" @click="setCurrentView('visualization')">
              <div class="widget-header">
                 <div class="widget-title">Demographics</div>
                 <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
@@ -103,7 +104,7 @@
           </div>
 
            <!-- Outreach Widget -->
-          <div class="dhis-widget chart-widget" @click="setCurrentView('outreach')">
+          <div v-if="widgetVisibility.outreach" class="dhis-widget chart-widget" @click="setCurrentView('outreach')">
              <div class="widget-header">
                 <div class="widget-title">Outreach</div>
                 <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
@@ -372,8 +373,222 @@
         </button>
       </div>
     </div>
+
+    <!-- Edit Dashboard Modal -->
+    <div v-if="showEditModal" class="modal-overlay" @click="closeEditModal">
+      <div class="modal-content modal-large" @click.stop>
+        <div class="modal-header">
+          <h3>Edit Main Dashboard</h3>
+          <button class="close-btn" @click="closeEditModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="edit-section">
+            <h4>Dashboard Settings</h4>
+            <div class="form-group">
+              <label>Dashboard Name</label>
+              <input v-model="dashboardName" type="text" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea v-model="dashboardDescription" class="form-control" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="edit-section">
+            <h4>Widget Visibility</h4>
+            <div class="widget-toggle-list">
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="widgetVisibility.welcome" />
+                <span>Welcome Widget</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="widgetVisibility.trackerCapture" />
+                <span>Tracker Capture</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="widgetVisibility.dataEntry" />
+                <span>Data Entry Progress</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="widgetVisibility.reports" />
+                <span>Reports Generated</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="widgetVisibility.events" />
+                <span>Event Status</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="widgetVisibility.demographics" />
+                <span>Demographics</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="widgetVisibility.outreach" />
+                <span>Outreach</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" @click="closeEditModal">Cancel</button>
+          <button class="btn-primary" @click="saveDashboardSettings">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Share Dashboard Modal -->
+    <div v-if="showShareModal" class="modal-overlay" @click="closeShareModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Share Dashboard</h3>
+          <button class="close-btn" @click="closeShareModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="share-section">
+            <h4>Share with Users</h4>
+            <div class="form-group">
+              <label>Search Users</label>
+              <input v-model="shareSearchQuery" type="text" class="form-control" placeholder="Search by name or email..." />
+            </div>
+            <div class="user-list">
+              <div v-for="user in filteredUsersForShare" :key="user.id" class="user-item">
+                <div class="user-info">
+                  <span class="user-name">{{ user.fullName }}</span>
+                  <span class="user-email">{{ user.email }}</span>
+                </div>
+                <div class="share-permissions">
+                  <label><input type="checkbox" v-model="user.canView" /> View</label>
+                  <label><input type="checkbox" v-model="user.canEdit" /> Edit</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="share-section">
+            <h4>Public Link</h4>
+            <div class="link-container">
+              <input v-model="publicLink" type="text" class="form-control" readonly />
+              <button class="btn-copy" @click="copyPublicLink">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="isPublicLinkEnabled" />
+              Enable public link access
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" @click="closeShareModal">Cancel</button>
+          <button class="btn-primary" @click="saveShareSettings">Share</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div v-if="showFilterModal" class="modal-overlay" @click="closeFilterModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Filter Dashboard Data</h3>
+          <button class="close-btn" @click="closeFilterModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="filter-group">
+            <label>Date Range</label>
+            <div class="date-range-selector">
+              <input v-model="filterDateFrom" type="date" class="form-control" />
+              <span>to</span>
+              <input v-model="filterDateTo" type="date" class="form-control" />
+            </div>
+          </div>
+          <div class="filter-group">
+            <label>Organization Unit</label>
+            <select v-model="filterOrgUnit" class="form-control">
+              <option value="">All Units</option>
+              <option value="headquarters">Headquarters</option>
+              <option value="regional-office">Regional Office</option>
+              <option value="field-office">Field Office</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select v-model="filterStatus" class="form-control">
+              <option value="">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Program</label>
+            <select v-model="filterProgram" class="form-control">
+              <option value="">All Programs</option>
+              <option value="child-protection">Child Protection</option>
+              <option value="health-services">Health Services</option>
+              <option value="education">Education</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" @click="resetFilters">Reset</button>
+          <button class="btn-primary" @click="applyFilters">Apply Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maps Modal -->
+    <div v-if="showMapsModal" class="modal-overlay" @click="closeMapsModal">
+      <div class="modal-content modal-large" @click.stop>
+        <div class="modal-header">
+          <h3>Geographic Data Visualization</h3>
+          <button class="close-btn" @click="closeMapsModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="maps-container">
+            <div class="map-controls">
+              <label>Data Layer</label>
+              <select v-model="selectedMapLayer" class="form-control">
+                <option value="children">Children Distribution</option>
+                <option value="events">Event Locations</option>
+                <option value="facilities">Service Facilities</option>
+                <option value="outreach">Outreach Coverage</option>
+              </select>
+            </div>
+            <div class="map-placeholder">
+              <i class="fas fa-map-marked-alt"></i>
+              <p>Map visualization will display geographic distribution of {{ selectedMapLayer }}</p>
+              <small>Integration with mapping library (Leaflet/Mapbox) required</small>
+            </div>
+            <div class="map-legend">
+              <h4>Legend</h4>
+              <div class="legend-item"><span class="legend-color" style="background: #10b981;"></span> Active</div>
+              <div class="legend-item"><span class="legend-color" style="background: #f59e0b;"></span> Pending</div>
+              <div class="legend-item"><span class="legend-color" style="background: #ef4444;"></span> Urgent</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" @click="closeMapsModal">Close</button>
+          <button class="btn-primary" @click="exportMapData">Export Map Data</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slideshow Overlay -->
+    <div v-if="isSlideshowActive" class="slideshow-overlay">
+      <div class="slideshow-controls">
+        <button @click="previousSlide" class="slide-nav-btn"><i class="fas fa-chevron-left"></i></button>
+        <div class="slide-info">{{ currentSlide + 1 }} / {{ slideshowWidgets.length }}</div>
+        <button @click="nextSlide" class="slide-nav-btn"><i class="fas fa-chevron-right"></i></button>
+        <button @click="exitSlideshow" class="slide-exit-btn"><i class="fas fa-times"></i> Exit</button>
+      </div>
+      <div class="slideshow-content">
+        <div class="slideshow-widget" v-if="slideshowWidgets[currentSlide]">
+          <h2>{{ slideshowWidgets[currentSlide].title }}</h2>
+          <div class="widget-preview" v-html="slideshowWidgets[currentSlide].content"></div>
+        </div>
+      </div>
+    </div>
  
-</template>
+ </template>
 
 <script setup>
 import TopHeader from "./TopHeader.vue";
@@ -422,6 +637,53 @@ const loadingUsers = ref(false);
   const reportsMiniChart = ref(null);
   const eventsMiniChart = ref(null);
   const analyticsMiniChart = ref(null);
+
+// Modal states
+const showEditModal = ref(false);
+const showShareModal = ref(false);
+const showFilterModal = ref(false);
+const showMapsModal = ref(false);
+
+// Dashboard edit functionality
+const dashboardName = ref('Main Dashboard');
+const dashboardDescription = ref('Overview of all TKP data management activities and statistics');
+const widgetVisibility = ref({
+  welcome: true,
+  trackerCapture: true,
+  dataEntry: true,
+  reports: true,
+  events: true,
+  demographics: true,
+  outreach: true,
+});
+
+// Share functionality
+const shareSearchQuery = ref('');
+const publicLink = ref(`${window.location.origin}/dashboard/shared?id=main-dashboard-${Date.now()}`);
+const isPublicLinkEnabled = ref(false);
+
+// Filter functionality
+const filterDateFrom = ref('');
+const filterDateTo = ref('');
+const filterOrgUnit = ref('');
+const filterStatus = ref('');
+const filterProgram = ref('');
+
+// Maps functionality
+const selectedMapLayer = ref('children');
+
+// Slideshow functionality
+const isSlideshowActive = ref(false);
+const currentSlide = ref(0);
+const slideshowWidgets = ref([
+  { title: 'Welcome Dashboard', content: '<p>Overview of TKP Data Management System</p>' },
+  { title: 'Tracker Capture', content: '<p>Search and track children in the system</p>' },
+  { title: 'Data Entry Progress', content: '<p>Monitor form completion and data entry activities</p>' },
+  { title: 'Reports Generated', content: '<p>View and manage system reports</p>' },
+  { title: 'Event Status', content: '<p>Track event statuses and activities</p>' },
+  { title: 'Demographics', content: '<p>Analyze demographic data</p>' },
+  { title: 'Outreach Activities', content: '<p>Manage offline sync and outreach programs</p>' },
+]);
 
 // Summary statistics
 const totalReports = ref(0);
@@ -495,6 +757,164 @@ const isSuperAdmin = computed(() => {
   const currentUser = AuthService.getCurrentUser();
   return currentUser && currentUser.email === 'davidchileshe33@gmail.com';
 });
+
+// Computed property for filtering users in share modal
+const filteredUsersForShare = computed(() => {
+  if (!shareSearchQuery.value) return users.value;
+  const query = shareSearchQuery.value.toLowerCase();
+  return users.value.filter(user => 
+    user.fullName?.toLowerCase().includes(query) ||
+    user.email?.toLowerCase().includes(query)
+  );
+});
+
+// Edit Modal Methods
+const openEditModal = () => {
+  showEditModal.value = true;
+};
+
+const closeEditModal = () => {
+  showEditModal.value = false;
+};
+
+const saveDashboardSettings = () => {
+  // Save settings to localStorage or backend
+  localStorage.setItem('dashboard_settings', JSON.stringify({
+    name: dashboardName.value,
+    description: dashboardDescription.value,
+    widgetVisibility: widgetVisibility.value
+  }));
+  success('Dashboard settings saved successfully!');
+  closeEditModal();
+};
+
+// Share Modal Methods
+const openShareModal = async () => {
+  await loadUsers(); // Load users for sharing
+  showShareModal.value = true;
+};
+
+const closeShareModal = () => {
+  showShareModal.value = false;
+  shareSearchQuery.value = '';
+};
+
+const saveShareSettings = () => {
+  // In a real implementation, this would save sharing settings to backend
+  const sharedUsers = users.value.filter(u => u.canView || u.canEdit);
+  console.log('Sharing dashboard with:', sharedUsers);
+  success(`Dashboard shared with ${sharedUsers.length} user(s)!`);
+  closeShareModal();
+};
+
+const copyPublicLink = async () => {
+  try {
+    await navigator.clipboard.writeText(publicLink.value);
+    success('Public link copied to clipboard!');
+  } catch (err) {
+    console.error('Failed to copy link:', err);
+    error('Failed to copy link. Please copy manually.');
+  }
+};
+
+// Filter Modal Methods
+const openFilterModal = () => {
+  showFilterModal.value = true;
+};
+
+const closeFilterModal = () => {
+  showFilterModal.value = false;
+};
+
+const applyFilters = () => {
+  // Apply filters to dashboard data
+  console.log('Applying filters:', {
+    dateFrom: filterDateFrom.value,
+    dateTo: filterDateTo.value,
+    orgUnit: filterOrgUnit.value,
+    status: filterStatus.value,
+    program: filterProgram.value
+  });
+  success('Filters applied successfully!');
+  closeFilterModal();
+  loadSummaryData(); // Reload data with filters
+};
+
+const resetFilters = () => {
+  filterDateFrom.value = '';
+  filterDateTo.value = '';
+  filterOrgUnit.value = '';
+  filterStatus.value = '';
+  filterProgram.value = '';
+  success('Filters reset');
+};
+
+// Maps Modal Methods
+const openMapsModal = () => {
+  showMapsModal.value = true;
+};
+
+const closeMapsModal = () => {
+  showMapsModal.value = false;
+};
+
+const exportMapData = () => {
+  // Export map data functionality
+  const mapData = {
+    layer: selectedMapLayer.value,
+    timestamp: new Date().toISOString(),
+    filters: {
+      dateFrom: filterDateFrom.value,
+      dateTo: filterDateTo.value,
+    }
+  };
+  
+  const dataStr = JSON.stringify(mapData, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(dataBlob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `map-data-${selectedMapLayer.value}-${Date.now()}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+  
+  success('Map data exported successfully!');
+};
+
+// Slideshow Methods
+const startSlideshow = () => {
+  currentSlide.value = 0;
+  isSlideshowActive.value = true;
+  // Auto-advance slides every 5 seconds
+  const interval = setInterval(() => {
+    if (isSlideshowActive.value) {
+      nextSlide();
+    } else {
+      clearInterval(interval);
+    }
+  }, 5000);
+};
+
+const exitSlideshow = () => {
+  isSlideshowActive.value = false;
+  currentSlide.value = 0;
+};
+
+const nextSlide = () => {
+  if (currentSlide.value < slideshowWidgets.value.length - 1) {
+    currentSlide.value++;
+  } else {
+    currentSlide.value = 0; // Loop back to start
+  }
+};
+
+const previousSlide = () => {
+  if (currentSlide.value > 0) {
+    currentSlide.value--;
+  } else {
+    currentSlide.value = slideshowWidgets.value.length - 1; // Go to last slide
+  }
+};
 
 // View management functions
 const setCurrentView = async (view) => {
@@ -1692,4 +2112,578 @@ const createMiniCharts = async () => {
   color: #ff9800;
   font-weight: 600;
 }
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+}
+
+.modal-content.modal-large {
+  max-width: 900px;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Form Controls */
+.form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #2c6693;
+  box-shadow: 0 0 0 3px rgba(44, 102, 147, 0.1);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+/* Buttons */
+.btn-primary, .btn-secondary {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  background: #2c6693;
+  color: white;
+  border-color: #2c6693;
+}
+
+.btn-primary:hover {
+  background: #234f72;
+  border-color: #234f72;
+}
+
+.btn-secondary {
+  background: white;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.btn-copy {
+  padding: 8px 16px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-copy:hover {
+  background: #e5e7eb;
+}
+
+/* Edit Modal Specific */
+.edit-section {
+  margin-bottom: 24px;
+}
+
+.edit-section h4 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c6693;
+}
+
+.widget-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.widget-toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.widget-toggle-item:hover {
+  background: #f3f4f6;
+}
+
+.widget-toggle-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.widget-toggle-item span {
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+/* Share Modal Specific */
+.share-section {
+  margin-bottom: 24px;
+}
+
+.share-section h4 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c6693;
+}
+
+.user-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  margin-top: 12px;
+}
+
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.user-item:last-child {
+  border-bottom: none;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-name {
+  font-weight: 500;
+  color: #111827;
+  font-size: 0.95rem;
+}
+
+.user-email {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.share-permissions {
+  display: flex;
+  gap: 16px;
+}
+
+.share-permissions label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
+}
+
+.share-permissions input[type="checkbox"] {
+  cursor: pointer;
+}
+
+.link-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #374151;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Filter Modal Specific */
+.filter-group {
+  margin-bottom: 20px;
+}
+
+.filter-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.date-range-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.date-range-selector span {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+/* Maps Modal Specific */
+.maps-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.map-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.map-controls label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.map-placeholder {
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 60px 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.map-placeholder i {
+  font-size: 4rem;
+  color: #9ca3af;
+  margin-bottom: 16px;
+}
+
+.map-placeholder p {
+  margin: 16px 0 8px 0;
+  font-size: 1rem;
+  color: #374151;
+}
+
+.map-placeholder small {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.map-legend {
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 6px;
+}
+
+.map-legend h4 {
+  margin: 0 0 12px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.legend-item:last-child {
+  margin-bottom: 0;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Slideshow Styles */
+.slideshow-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #111827;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.slideshow-controls {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.slide-nav-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slide-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.slide-info {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 500;
+  min-width: 100px;
+  text-align: center;
+}
+
+.slide-exit-btn {
+  background: #ef4444;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.slide-exit-btn:hover {
+  background: #dc2626;
+}
+
+.slideshow-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  overflow: hidden;
+}
+
+.slideshow-widget {
+  background: white;
+  border-radius: 12px;
+  padding: 48px;
+  max-width: 1200px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slideshow-widget h2 {
+  margin: 0 0 24px 0;
+  font-size: 2.5rem;
+  color: #2c6693;
+  font-weight: 700;
+}
+
+.widget-preview {
+  font-size: 1.2rem;
+  color: #374151;
+  line-height: 1.8;
+}
+
+/* Responsive Styles for Modals */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-footer {
+    padding: 12px 16px;
+    flex-direction: column;
+  }
+
+  .modal-footer button {
+    width: 100%;
+  }
+
+  .link-container {
+    flex-direction: column;
+  }
+
+  .date-range-selector {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .slideshow-widget {
+    padding: 24px;
+  }
+
+  .slideshow-widget h2 {
+    font-size: 1.8rem;
+  }
+
+  .widget-preview {
+    font-size: 1rem;
+  }
+
+  .slideshow-controls {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+}
+
 </style>

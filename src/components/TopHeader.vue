@@ -156,6 +156,10 @@
           <div class="app-icon-wrapper purple"><i class="fa-solid fa-house-user"></i></div>
           <span>In Housed Girls</span>
         </div>
+        <div class="app-item" @click="navigateToApp('success-stories')">
+          <div class="app-icon-wrapper red"><i class="fa-solid fa-heart"></i></div>
+          <span>Success Stories</span>
+        </div>
       </div>
     </div>
 
@@ -249,11 +253,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import AuthService from "../services/auth.js";
+import { db } from "../firebase/config.js";
+import { collection, query, where, onSnapshot, orderBy, limit, updateDoc, doc } from "firebase/firestore";
+import { useToast } from "../composables/useToast.js";
 
 const router = useRouter();
+const { error } = useToast();
 
 // UI State
 const showAppMenu = ref(false);
@@ -266,6 +274,12 @@ const searchQuery = ref("");
 // User Data
 const currentUserName = ref("");
 const currentUserEmail = ref("");
+const currentUserRole = ref("");
+
+// Data State
+const notifications = ref([]);
+const messages = ref([]);
+const listeners = [];
 
 // Apps list for search
 const allApps = ref([
@@ -288,56 +302,11 @@ const allApps = ref([
   { id: 'maintenance', name: 'Maintenance', icon: 'fa-solid fa-tools' },
   { id: 'user-management', name: 'User Management', icon: 'fa-solid fa-users-cog' },
   { id: 'system-management', name: 'System Management', icon: 'fa-solid fa-screwdriver-wrench' },
-  { id: 'child-tracker-2', name: 'In Housed Girls', icon: 'fa-solid fa-house-user' }
+  { id: 'child-tracker-2', name: 'In Housed Girls', icon: 'fa-solid fa-house-user' },
+  { id: 'success-stories', name: 'Success Stories', icon: 'fa-solid fa-heart' }
 ]);
 
 const filteredApps = ref([]);
-
-// Notifications
-const notifications = ref([
-  {
-    id: 1,
-    type: 'success',
-    title: 'Form Submitted',
-    message: 'Initial Referral form has been successfully submitted',
-    time: '5 minutes ago',
-    read: false
-  },
-  {
-    id: 2,
-    type: 'warning',
-    title: 'Pending Review',
-    message: 'Child Overview form requires your review',
-    time: '1 hour ago',
-    read: false
-  },
-  {
-    id: 3,
-    type: 'info',
-    title: 'System Update',
-    message: 'New features have been added to the dashboard',
-    time: '2 hours ago',
-    read: true
-  }
-]);
-
-// Messages
-const messages = ref([
-  {
-    id: 1,
-    sender: 'Sarah Johnson',
-    preview: 'Review the medical assessment for...',
-    time: '10 min ago',
-    read: false
-  },
-  {
-    id: 2,
-    sender: 'Michael Brown',
-    preview: 'Follow-up needed on case #1234',
-    time: '1 hour ago',
-    read: false
-  }
-]);
 
 const unreadMessages = computed(() => {
   return messages.value.filter(m => !m.read).length;
@@ -413,39 +382,32 @@ const getNotificationIcon = (type) => {
     success: 'fas fa-check-circle',
     warning: 'fas fa-exclamation-triangle',
     error: 'fas fa-times-circle',
-    info: 'fas fa-info-circle'
+    info: 'fas fa-info-circle',
+    heart: 'fas fa-heart'
   };
   return icons[type] || 'fas fa-bell';
 };
 
 const viewAllNotifications = () => {
   closeAllMenus();
-  // Navigate to notifications page or show modal
-  console.log('View all notifications');
+  router.push('/notifications');
 };
 
-const openMessage = (message) => {
+const openMessage = async (message) => {
   closeAllMenus();
-  // Open message detail
-  console.log('Open message:', message);
-};
-
-const navigateToProfile = () => {
-  closeAllMenus();
-  // Navigate to profile page
-  console.log('Navigate to profile');
-};
-
-const navigateToSettings = () => {
-  closeAllMenus();
-  // Navigate to settings page
-  console.log('Navigate to settings');
-};
-
-const navigateToHelp = () => {
-  closeAllMenus();
-  // Navigate to help page
-  console.log('Navigate to help');
+  
+  // Mark as read in Firestore
+  if (!message.read) {
+    try {
+      await updateDoc(doc(db, 'messages', message.id), {
+        read: true
+      });
+    } catch (err) {
+      console.error("Error marking message as read:", err);
+    }
+  }
+  
+  router.push('/messaging');
 };
 
 const handleLogout = async () => {
@@ -495,7 +457,6 @@ const navigateToApp = (app) => {
     case 'tkp-documents':
       router.push('/tkp-documents');
       break;
-    // New apps - now fully functional
     case 'data-visualizer':
       router.push('/data-visualizer');
       break;
@@ -523,30 +484,135 @@ const navigateToApp = (app) => {
     case 'child-tracker-2':
       router.push({ path: '/dashboard', query: { view: 'child-tracker-2' } });
       break;
+    case 'success-stories':
+      router.push('/success-stories');
+      break;
     default:
       router.push('/dashboard');
   }
 };
 
-const editDashboard = () => {
-  closeAllMenus();
-  // TODO: Implement dashboard edit mode
-  console.log('Edit dashboard mode activated');
-  router.push({ path: '/dashboard', query: { mode: 'edit' } });
+// Format relative time
+const formatTime = (timestamp) => {
+  if (!timestamp) return '';
+  
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+  
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  
+  return date.toLocaleDateString();
 };
 
-const shareDashboard = () => {
-  closeAllMenus();
-  // TODO: Implement dashboard sharing
-  console.log('Share dashboard');
-  router.push({ path: '/dashboard', query: { action: 'share' } });
+// Setup Real-time Listeners
+const setupListeners = () => {
+  // 1. Sponsorship Interests (Notifications)
+  // Only for admins/managers usually, but we'll show to all for now or check role
+  if (currentUserRole.value === 'admin' || currentUserRole.value === 'manager') {
+    const sponsorshipQuery = query(
+      collection(db, 'sponsorship_interests'),
+      where('status', '==', 'pending'),
+      orderBy('createdAt', 'desc'),
+      limit(10)
+    );
+
+    const unsubSponsorship = onSnapshot(sponsorshipQuery, (snapshot) => {
+      const sponsorshipNotifs = snapshot.docs.map(doc => ({
+        id: doc.id,
+        type: 'heart',
+        title: 'New Sponsorship Interest',
+        message: `${doc.data().name} is interested in sponsoring ${doc.data().childName}`,
+        time: formatTime(doc.data().createdAt),
+        rawTime: doc.data().createdAt,
+        read: false // In a real app, you'd track read status per user
+      }));
+      
+      updateNotifications(sponsorshipNotifs, 'sponsorship');
+    }, (err) => {
+      console.error("Error fetching sponsorships:", err);
+    });
+    listeners.push(unsubSponsorship);
+
+    // 2. Pending Approvals (Notifications)
+    // Assuming 'forms' collection has a 'status' field
+    const approvalsQuery = query(
+      collection(db, 'forms'),
+      where('status', '==', 'pending'),
+      orderBy('createdAt', 'desc'),
+      limit(10)
+    );
+
+    const unsubApprovals = onSnapshot(approvalsQuery, (snapshot) => {
+      const approvalNotifs = snapshot.docs.map(doc => ({
+        id: doc.id,
+        type: 'warning',
+        title: 'Pending Approval',
+        message: `Form ${doc.id.substring(0, 8)}... requires review`,
+        time: formatTime(doc.data().createdAt),
+        rawTime: doc.data().createdAt,
+        read: false
+      }));
+      
+      updateNotifications(approvalNotifs, 'approval');
+    }, (err) => {
+      // Ignore index errors if they happen, just log
+      console.log("Error fetching approvals (might need index):", err);
+    });
+    listeners.push(unsubApprovals);
+  }
+
+  // 3. Messages
+  if (currentUserEmail.value) {
+    const messagesQuery = query(
+      collection(db, 'messages'),
+      where('recipient', '==', currentUserEmail.value),
+      orderBy('createdAt', 'desc'),
+      limit(10)
+    );
+
+    const unsubMessages = onSnapshot(messagesQuery, (snapshot) => {
+      messages.value = snapshot.docs.map(doc => ({
+        id: doc.id,
+        sender: doc.data().senderName || doc.data().sender || 'Unknown',
+        preview: doc.data().subject || doc.data().body || 'No subject',
+        time: formatTime(doc.data().createdAt),
+        read: doc.data().read || false,
+        ...doc.data()
+      }));
+    }, (err) => {
+      console.error("Error fetching messages:", err);
+    });
+    listeners.push(unsubMessages);
+  }
 };
 
-const slideshowDashboard = () => {
-  closeAllMenus();
-  // TODO: Implement slideshow mode
-  console.log('Slideshow mode activated');
-  router.push({ path: '/dashboard', query: { mode: 'slideshow' } });
+// Helper to merge notifications from different sources
+const notificationSources = ref({
+  sponsorship: [],
+  approval: [],
+  system: []
+});
+
+const updateNotifications = (newItems, source) => {
+  notificationSources.value[source] = newItems;
+  
+  // Merge and sort
+  const all = [
+    ...notificationSources.value.sponsorship,
+    ...notificationSources.value.approval,
+    ...notificationSources.value.system
+  ];
+  
+  // Sort by time (newest first)
+  notifications.value = all.sort((a, b) => {
+    const timeA = a.rawTime?.toDate ? a.rawTime.toDate() : new Date(a.rawTime || 0);
+    const timeB = b.rawTime?.toDate ? b.rawTime.toDate() : new Date(b.rawTime || 0);
+    return timeB - timeA;
+  });
 };
 
 onMounted(() => {
@@ -554,19 +620,30 @@ onMounted(() => {
   if (currentUser) {
     currentUserName.value = currentUser.name || currentUser.fullName || currentUser.email;
     currentUserEmail.value = currentUser.email;
+    currentUserRole.value = AuthService.getUserRoleInfo();
+    
+    setupListeners();
   } else {
+    // Fallback for local storage if auth service not ready
     const savedUserData = localStorage.getItem("tkp_user_data");
     if (savedUserData) {
       try {
         const userData = JSON.parse(savedUserData);
         currentUserName.value = userData.user.name || userData.user.fullName || userData.user.email || "User";
         currentUserEmail.value = userData.user.email || "";
+        currentUserRole.value = userData.role || "user";
+        
+        setupListeners();
       } catch (e) {
-        currentUserName.value = "User";
-        currentUserEmail.value = "";
+        console.error("Error parsing saved user data", e);
       }
     }
   }
+});
+
+onUnmounted(() => {
+  // Unsubscribe from all listeners
+  listeners.forEach(unsub => unsub());
 });
 </script>
 

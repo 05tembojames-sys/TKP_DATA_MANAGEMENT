@@ -23,6 +23,9 @@ import PivotTables from "../components/PivotTables.vue";
 import Approval from "../components/Approval.vue";
 import Messaging from "../components/Messaging.vue";
 import Maintenance from "../components/Maintenance.vue";
+import SuccessStories from "../components/SuccessStories.vue";
+import Notifications from "../components/Notifications.vue";
+
 
 const routes = [
   {
@@ -154,6 +157,18 @@ const routes = [
     path: "/maintenance",
     name: "Maintenance",
     component: Maintenance,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/success-stories",
+    name: "SuccessStories",
+    component: SuccessStories,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/notifications",
+    name: "Notifications",
+    component: Notifications,
     meta: { requiresAuth: true },
   },
   {
