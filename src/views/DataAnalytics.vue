@@ -1,12 +1,14 @@
 <template>
   <div class="data-analytics">
-    <!-- Header -->
-    <div class="analytics-header">
-      <div>
+    <TopHeader />
+    <!-- Toolbar -->
+    <div class="analytics-toolbar">
+      <div class="toolbar-left">
         <h1><i class="fas fa-chart-bar"></i> Data Analytics</h1>
+        <span class="divider">|</span>
         <p>Explore and visualize your data</p>
       </div>
-      <div class="header-actions">
+      <div class="toolbar-actions">
         <button @click="refreshData" class="btn-secondary" :disabled="isLoading">
           <i class="fas fa-sync-alt" :class="{ 'fa-spin': isLoading }"></i> Refresh
         </button>
@@ -159,6 +161,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import TopHeader from '../components/TopHeader.vue';
 
 const isLoading = ref(false);
 const dateRange = ref('monthly');
@@ -225,38 +228,60 @@ const exportData = () => {
 
 <style scoped>
 .data-analytics {
-  padding: 2rem;
   background: #f5f5f5;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.analytics-header {
+.analytics-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
   background: white;
-  padding: 2rem;
-  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #d5d5d5;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-.analytics-header h1 {
-  color: #4a148c;
-  margin: 0 0 0.5rem 0;
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.analytics-toolbar h1 {
+  color: #2c6693;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 500;
 }
 
-.header-actions {
+.analytics-toolbar .divider {
+  color: #d5d5d5;
+  font-size: 1.25rem;
+}
+
+.analytics-toolbar p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.toolbar-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .analytics-layout {
   display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 2rem;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  flex: 1;
 }
 
 .filters-sidebar {
@@ -274,8 +299,11 @@ const exportData = () => {
 }
 
 .sidebar-header h3 {
-  color: #4a148c;
+  color: #2c6693;
   margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .badge {
@@ -398,7 +426,8 @@ const exportData = () => {
 
 .activity-section h3 {
   margin: 0 0 1.5rem 0;
-  color: #4a148c;
+  color: #2c6693;
+  font-size: 1.1rem;
 }
 
 .activity-table table {
@@ -410,8 +439,9 @@ const exportData = () => {
   text-align: left;
   padding: 1rem;
   background: #f9f9f9;
-  color: #4a148c;
+  color: #4a5568;
   font-weight: 600;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .activity-table td {
@@ -443,13 +473,22 @@ const exportData = () => {
   font-weight: 500;
 }
 
-.btn-secondary {
-  background: #f5f5f5;
-  color: #333;
+.btn-primary {
+  background: #2c6693;
+  color: white;
 }
 
-.btn-primary {
-  background: #4a148c;
-  color: white;
+.btn-primary:hover {
+  background: #1e4666;
+}
+
+.btn-secondary {
+  background: white;
+  color: #4a5568;
+  border: 1px solid #d5d5d5;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
 }
 </style>

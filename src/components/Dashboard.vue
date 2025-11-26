@@ -6,7 +6,32 @@
     <!-- Dashboard Toolbar -->
     <div class="dhis-toolbar-container" v-if="currentView === 'main'">
        <div class="toolbar-left">
-          <button class="dashboards-btn"><i class="fas fa-bars"></i> Dashboards</button>
+           <div class="dashboards-dropdown-wrapper">
+             <button class="dashboards-btn" @click="toggleDashboardsMenu">
+               <i class="fas fa-bars"></i> Dashboards
+             </button>
+             <!-- Dashboards Dropdown -->
+             <div v-if="showDashboardsMenu" class="dashboards-menu">
+               <div class="menu-header">Available Dashboards</div>
+               <div class="menu-item active" @click="selectDashboard('main')">
+                 <i class="fas fa-star"></i>
+                 <span>Main Dashboard</span>
+               </div>
+               <div class="menu-item" @click="selectDashboard('analytics')">
+                 <i class="fas fa-chart-line"></i>
+                 <span>Analytics Dashboard</span>
+               </div>
+               <div class="menu-item" @click="selectDashboard('reports')">
+                 <i class="fas fa-file-alt"></i>
+                 <span>Reports Overview</span>
+               </div>
+               <div class="menu-divider"></div>
+               <div class="menu-item" @click="createNewDashboard">
+                 <i class="fas fa-plus"></i>
+                 <span>Create New Dashboard</span>
+               </div>
+             </div>
+           </div>
           <div class="dashboard-title">
              <span>Main Dashboard</span>
              <i class="fas fa-star favorite-icon"></i>
@@ -552,10 +577,8 @@
                 <option value="outreach">Outreach Coverage</option>
               </select>
             </div>
-            <div class="map-placeholder">
-              <i class="fas fa-map-marked-alt"></i>
-              <p>Map visualization will display geographic distribution of {{ selectedMapLayer }}</p>
-              <small>Integration with mapping library (Leaflet/Mapbox) required</small>
+            <div class="map-container" ref="mapContainer">
+              <div id="dashboard-map" ref="dashboardMap" style="height: 500px; width: 100%; border-radius: 4px;"></div>
             </div>
             <div class="map-legend">
               <h4>Legend</h4>
@@ -643,6 +666,7 @@ const showEditModal = ref(false);
 const showShareModal = ref(false);
 const showFilterModal = ref(false);
 const showMapsModal = ref(false);
+const showDashboardsMenu = ref(false);
 
 // Dashboard edit functionality
 const dashboardName = ref('Main Dashboard');
@@ -671,10 +695,14 @@ const filterProgram = ref('');
 
 // Maps functionality
 const selectedMapLayer = ref('children');
+const dashboardMap = ref(null);
+const mapContainer = ref(null);
+const mapInstance = ref(null);
 
 // Slideshow functionality
 const isSlideshowActive = ref(false);
 const currentSlide = ref(0);
+const slideshowInterval = ref(null);
 const slideshowWidgets = ref([
   { title: 'Welcome Dashboard', content: '<p>Overview of TKP Data Management System</p>' },
   { title: 'Tracker Capture', content: '<p>Search and track children in the system</p>' },
@@ -777,6 +805,29 @@ const closeEditModal = () => {
   showEditModal.value = false;
 };
 
+// Dashboards Menu Methods
+const toggleDashboardsMenu = () => {
+  showDashboardsMenu.value = !showDashboardsMenu.value;
+};
+
+const selectDashboard = (dashboardId) => {
+  selectedDashboard.value = dashboardId;
+  showDashboardsMenu.value = false;
+  
+  if (dashboardId === 'main') {
+    success('Viewing Main Dashboard');
+  } else if (dashboardId === 'analytics') {
+    info('Analytics Dashboard - Coming soon!');
+  } else if (dashboardId === 'reports') {
+    info('Reports Dashboard - Coming soon!');
+  }
+};
+
+const createNewDashboard = () => {
+  showDashboardsMenu.value = false;
+  info('Create Dashboard feature - Coming soon!');
+};
+
 const saveDashboardSettings = () => {
   // Save settings to localStorage or backend
   localStorage.setItem('dashboard_settings', JSON.stringify({
@@ -850,11 +901,21 @@ const resetFilters = () => {
 };
 
 // Maps Modal Methods
-const openMapsModal = () => {
+const openMapsModal = async () => {
   showMapsModal.value = true;
+  
+  // Wait for DOM to update
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  initializeMap();
 };
 
 const closeMapsModal = () => {
+  // Clean up map instance
+  if (mapInstance.value) {
+    mapInstance.value.remove();
+    mapInstance.value = null;
+  }
   showMapsModal.value = false;
 };
 
@@ -881,16 +942,145 @@ const exportMapData = () => {
   success('Map data exported successfully!');
 };
 
+// Initialize Leaflet Map
+const initializeMap = async () => {
+  if (!dashboardMap.value) return;
+  
+  try {
+    // Load Leaflet CSS and JS from CDN if not already loaded
+    if (!window.L) {
+      // Add Leaflet CSS
+      const leafletCSS = document.createElement('link');
+      leafletCSS.rel = 'stylesheet';
+      leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      leafletCSS.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+      leafletCSS.crossOrigin = '';
+      document.head.appendChild(leafletCSS);
+      
+      // Add Leaflet JS
+      const leafletJS = document.createElement('script');
+      leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      leafletJS.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+      leafletJS.crossOrigin = '';
+      
+      await new Promise((resolve, reject) => {
+        leafletJS.onload = resolve;
+        leafletJS.onerror = reject;
+        document.head.appendChild(leafletJS);
+      });
+    }
+    
+    // Wait a bit for Leaflet to be fully loaded
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Initialize map centered on Zambia (Lusaka)
+    mapInstance.value = window.L.map('dashboard-map').setView([-15.4167, 28.2833], 12);
+    
+    // Add OpenStreetMap tiles
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 18,
+    }).addTo(mapInstance.value);
+    
+    // Load and display data based on selected layer
+    await loadMapData(selectedMapLayer.value);
+    
+  } catch (err) {
+    console.error('Error initializing map:', err);
+    error('Failed to load map. Please try again.');
+  }
+};
+
+// Load map data based on layer type
+const loadMapData = async (layerType) => {
+  if (!mapInstance.value) return;
+  
+  try {
+    // Sample data for demonstration - replace with real data from FormService
+    const sampleLocations = [
+      { name: 'Lusaka Main Center', lat: -15.4167, lng: 28.2833, type: 'Active', count: 45 },
+      { name: 'Chongwe Outreach', lat: -15.3308, lng: 28.6808, type: 'Active', count: 23 },
+      { name: 'Kafue Center', lat: -15.7694, lng: 28.1814, type: 'Pending', count: 12 },
+      { name: 'Chilanga Facility', lat: -15.5456, lng: 28.2769, type: 'Active', count: 18 },
+      { name: 'Kabwe Outreach', lat: -14.4469, lng: 28.4464, type: 'Urgent', count: 8 },
+    ];
+    
+    // Custom icons based on status
+    const getMarkerColor = (type) => {
+      switch(type) {
+        case 'Active': return '#10b981';
+        case 'Pending': return '#f59e0b';
+        case 'Urgent': return '#ef4444';
+        default: return '#6b7280';
+      }
+    };
+    
+    // Add markers
+    sampleLocations.forEach(location => {
+      const markerIcon = window.L.divIcon({
+        className: 'custom-marker',
+        html: `<div style="
+          background-color: ${getMarkerColor(location.type)};
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+          font-size: 12px;
+        ">${location.count}</div>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+      });
+      
+      const marker = window.L.marker([location.lat, location.lng], { icon: markerIcon })
+        .addTo(mapInstance.value);
+      
+      // Add popup with info
+      marker.bindPopup(
+        `<div style="font-family: Arial, sans-serif;">
+          <h4 style="margin: 0 0 8px 0; color: #2c6693;">${location.name}</h4>
+          <p style="margin: 4px 0;"><strong>Status:</strong> ${location.type}</p>
+          <p style="margin: 4px 0;"><strong>${layerType === 'children' ? 'Children' : 'Records'}:</strong> ${location.count}</p>
+        </div>`
+      );
+    });
+    
+    // Fit bounds to show all markers
+    const bounds = sampleLocations.map(loc => [loc.lat, loc.lng]);
+    mapInstance.value.fitBounds(bounds, { padding: [50, 50] });
+    
+    success(`Loaded ${sampleLocations.length} locations for ${layerType}`);
+    
+  } catch (err) {
+    console.error('Error loading map data:', err);
+    error('Failed to load map data');
+  }
+};
+
 // Slideshow Methods
 const startSlideshow = () => {
+  // Clear any existing interval first
+  if (slideshowInterval.value) {
+    clearInterval(slideshowInterval.value);
+  }
+  
   currentSlide.value = 0;
   isSlideshowActive.value = true;
+  
   // Auto-advance slides every 5 seconds
-  const interval = setInterval(() => {
+  slideshowInterval.value = setInterval(() => {
     if (isSlideshowActive.value) {
       nextSlide();
     } else {
-      clearInterval(interval);
+      if (slideshowInterval.value) {
+        clearInterval(slideshowInterval.value);
+        slideshowInterval.value = null;
+      }
     }
   }, 5000);
 };
@@ -898,6 +1088,12 @@ const startSlideshow = () => {
 const exitSlideshow = () => {
   isSlideshowActive.value = false;
   currentSlide.value = 0;
+  
+  // Clear the interval
+  if (slideshowInterval.value) {
+    clearInterval(slideshowInterval.value);
+    slideshowInterval.value = null;
+  }
 };
 
 const nextSlide = () => {
@@ -1265,6 +1461,19 @@ const formatDate = (timestamp) => {
 const getFirstName = () => {
   if (!currentUserName.value) return "User";
   
+  // If it's an email (contains @), extract and format the username part
+  if (currentUserName.value.includes('@')) {
+    const username = currentUserName.value.split('@')[0];
+    // Remove trailing numbers (like davidchileshe33 -> davidchileshe)
+    const cleanUsername = username.replace(/\d+$/, '');
+    // Split by common separators and capitalize each word
+    const nameParts = cleanUsername.split(/[._-]/);
+    const formatted = nameParts
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(' ');
+    return formatted;
+  }
+  
   // Try to get first name from full name
   const nameParts = currentUserName.value.split(" ");
   return nameParts[0];
@@ -1343,6 +1552,20 @@ watch(() => route.query.view, (newView) => {
   }
 });
 
+// Watch for map layer changes
+watch(selectedMapLayer, async (newLayer) => {
+  if (mapInstance.value && showMapsModal.value) {
+    // Clear existing markers
+    mapInstance.value.eachLayer((layer) => {
+      if (layer instanceof window.L.Marker) {
+        mapInstance.value.removeLayer(layer);
+      }
+    });
+    // Reload with new layer data
+    await loadMapData(newLayer);
+  }
+});
+
 // Load summary data when component mounts
 onMounted(() => {
   // Set current user name
@@ -1373,6 +1596,21 @@ onMounted(() => {
 
   // Update online status
   isOnline.value = navigator.onLine;
+
+  // Load saved dashboard settings
+  const savedSettings = localStorage.getItem('dashboard_settings');
+  if (savedSettings) {
+    try {
+      const settings = JSON.parse(savedSettings);
+      dashboardName.value = settings.name || 'Main Dashboard';
+      dashboardDescription.value = settings.description || 'Overview of all TKP data management activities and statistics';
+      if (settings.widgetVisibility) {
+        widgetVisibility.value = { ...widgetVisibility.value, ...settings.widgetVisibility };
+      }
+    } catch (err) {
+      console.error('Error loading dashboard settings:', err);
+    }
+  }
 
   loadSummaryData();
 
@@ -1500,23 +1738,97 @@ const createMiniCharts = async () => {
   gap: 16px;
 }
 
+.dashboards-dropdown-wrapper {
+  position: relative;
+}
+
 .dashboards-btn {
   display: flex;
   align-items: center;
   gap: 8px;
   background: white;
   border: 1px solid #d1d5db;
-  padding: 6px 12px;
+  padding: 8px 16px;
   border-radius: 4px;
-  color: #374151;
-  font-weight: 500;
+  color: #4b5563;
   cursor: pointer;
   transition: all 0.2s;
+  font-size: 0.9rem;
 }
 
 .dashboards-btn:hover {
+  background: #f3f4f6;
+}
+
+.dashboards-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  min-width: 250px;
+  z-index: 1000;
+  animation: slideDown 0.2s ease-out;
+}
+
+.dashboards-menu .menu-header {
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.dashboards-menu .menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.dashboards-menu .menu-item:hover {
   background: #f9fafb;
-  border-color: #9ca3af;
+}
+
+.dashboards-menu .menu-item.active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.dashboards-menu .menu-item i {
+  width: 16px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.dashboards-menu .menu-item.active i {
+  color: #2563eb;
+}
+
+.dashboards-menu .menu-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 4px 0;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dashboard-title {

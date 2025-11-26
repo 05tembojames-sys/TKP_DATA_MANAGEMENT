@@ -7,7 +7,10 @@
       <div class="toolbar-left">
         <span class="app-title">Outreach Management</span>
         <div class="toolbar-divider"></div>
-        <button class="toolbar-btn" :class="{ active: activeView === 'list' }" @click="activeView = 'list'">
+        <button class="toolbar-btn mobile-only" @click="showSidebar = !showSidebar">
+          <i class="fas" :class="showSidebar ? 'fa-times' : 'fa-bars'"></i>
+        </button>
+        <button class="toolbar-btn desktop-only" :class="{ active: activeView === 'list' }" @click="activeView = 'list'">
           <i class="fas fa-list"></i> List
         </button>
         <button class="toolbar-btn" :class="{ active: activeView === 'map' }" @click="activeView = 'map'">
@@ -32,7 +35,7 @@
 
     <div class="app-content">
       <!-- Left Sidebar: Org Unit & Filters -->
-      <aside class="sidebar" v-if="activeView === 'list'">
+      <aside class="sidebar" v-if="activeView === 'list'" :class="{ 'show-mobile': showSidebar }">
         <div class="sidebar-section">
           <div class="section-header">
             <h3>Organisation Unit</h3>
@@ -242,28 +245,16 @@
       
       <div class="editor-content">
         <div class="form-wrapper">
-          <BirthDeliveryForm
-            v-if="currentForm?.formType === 'birth-delivery'"
+          <InitialReferralForm
+            v-if="currentForm?.formType === 'initial-referral'"
             @form-saved="handleFormSaved"
           />
-          <CarePlanBabyForm
-            v-else-if="currentForm?.formType === 'care-plan-baby'"
+          <ChildOverviewForm
+            v-else-if="currentForm?.formType === 'child-overview'"
             @form-saved="handleFormSaved"
           />
-          <MedicalIntakeForm
-            v-else-if="currentForm?.formType === 'medical-intake'"
-            @form-saved="handleFormSaved"
-          />
-          <PsychologicalAssessmentForm
-            v-else-if="currentForm?.formType === 'psychological-assessment'"
-            @form-saved="handleFormSaved"
-          />
-          <AcademicsLiteracyForm
-            v-else-if="currentForm?.formType === 'academics-literacy'"
-            @form-saved="handleFormSaved"
-          />
-          <LifeSkillsSurveyForm
-            v-else-if="currentForm?.formType === 'life-skills'"
+          <InitialAssessmentForm
+            v-else-if="currentForm?.formType === 'initial-assessment'"
             @form-saved="handleFormSaved"
           />
         </div>
@@ -276,12 +267,9 @@
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import TopHeader from "./TopHeader.vue";
-import BirthDeliveryForm from "./BirthDeliveryForm.vue";
-import CarePlanBabyForm from "./CarePlanBabyForm.vue";
-import MedicalIntakeForm from "./MedicalIntakeForm.vue";
-import PsychologicalAssessmentForm from "./PsychologicalAssessmentForm.vue";
-import AcademicsLiteracyForm from "./AcademicsLiteracyForm.vue";
-import LifeSkillsSurveyForm from "./LifeSkillsSurveyForm.vue";
+import InitialReferralForm from "./InitialReferralForm.vue";
+import ChildOverviewForm from "./ChildOverviewForm.vue";
+import InitialAssessmentForm from "./InitialAssessmentForm.vue";
 import Maps from "./Maps.vue";
 import DataVisualizer from "./DataVisualizer.vue";
 import { useToast } from "../composables/useToast.js";
@@ -298,6 +286,7 @@ const showFormSelector = ref(false);
 const searchQuery = ref("");
 const selectedProgram = ref("child-care");
 const selectedOrgUnit = ref("Lusaka District");
+const showSidebar = ref(false); // Mobile sidebar toggle
 const filters = ref({
   active: true,
   completed: true,
@@ -317,12 +306,9 @@ const syncHistory = ref([]);
 
 // Configuration
 const formTypes = [
-  { id: "birth-delivery", name: "Birth & Delivery Report", icon: "fas fa-baby" },
-  { id: "care-plan-baby", name: "Care Plan (Baby)", icon: "fas fa-baby-carriage" },
-  { id: "medical-intake", name: "Medical Intake", icon: "fas fa-stethoscope" },
-  { id: "psychological-assessment", name: "Psychological Assessment", icon: "fas fa-brain" },
-  { id: "academics-literacy", name: "Academics & Literacy", icon: "fas fa-book-reader" },
-  { id: "life-skills", name: "Life Skills Survey", icon: "fas fa-users-cog" },
+  { id: "initial-referral", name: "Initial Referral", icon: "fas fa-file-medical" },
+  { id: "child-overview", name: "Child Overview", icon: "fas fa-child" },
+  { id: "initial-assessment", name: "Initial Assessment", icon: "fas fa-clipboard-check" },
 ];
 
 // Computed
@@ -1202,6 +1188,41 @@ onMounted(async () => {
 
   .modal-content {
     width: 95%;
+  }
+}
+
+/* Mobile/Desktop Visibility Utilities */
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: flex;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+  
+  .sidebar.show-mobile {
+    display: flex;
+    position: fixed;
+    top: 48px; /* Below toolbar */
+    left: 0;
+    width: 280px;
+    height: calc(100vh - 48px);
+    z-index: 1000;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  }
+  
+  /* Improve table responsiveness */
+  .data-table-container {
+    overflow-x: auto;
+  }
+  
+  .dhis2-table {
+    min-width: 800px; /* Force scroll on small screens */
   }
 }
 </style>

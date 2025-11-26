@@ -71,7 +71,9 @@ class EnhancedOutreachService {
     try {
       await this.initialize();
 
-      await this.formsStore.setItem(form.id, form);
+      // Deep clone to remove Vue proxies
+      const formToSave = JSON.parse(JSON.stringify(form));
+      await this.formsStore.setItem(formToSave.id, formToSave);
 
       return { success: true };
     } catch (error) {
@@ -398,12 +400,15 @@ class EnhancedOutreachService {
         (item) => item.id === form.id
       );
 
+      // Deep clone to remove Vue proxies
+      const formToSave = JSON.parse(JSON.stringify(form));
+
       if (existingIndex >= 0) {
         // Update existing item
-        existingQueue[existingIndex] = form;
+        existingQueue[existingIndex] = formToSave;
       } else {
         // Add new item
-        existingQueue.push(form);
+        existingQueue.push(formToSave);
       }
 
       await this.offlineQueueStore.setItem("queue", existingQueue);

@@ -1,45 +1,45 @@
 <template>
-  <div class="aggregate-data-entry">
+  <div class="aggregate-data-entry-page">
+    <div class="aggregate-data-entry">
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+      <button class="mobile-menu-btn" @click="toggleSidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+      <span class="mobile-title">Data Entry</span>
+    </div>
+
     <!-- Left Sidebar: Organisation Unit Tree -->
-    <div class="org-unit-sidebar">
+    <div class="org-unit-sidebar" :class="{ 'mobile-open': isSidebarOpen }">
       <div class="sidebar-header">
-        <i class="fas fa-sitemap"></i>
         <span>Organisation Unit</span>
+        <button class="close-sidebar-btn" @click="toggleSidebar">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
       <div class="search-ou">
         <input type="text" placeholder="Search organisation unit" v-model="ouSearch" />
         <i class="fas fa-search"></i>
       </div>
       <div class="ou-tree">
-        <div class="tree-item" :class="{ selected: selectedOu === 'Global' }" @click="selectOu('Global')">
-          <i class="fas fa-globe-africa"></i>
-          <span>Global</span>
+        <div v-if="loadingOrgUnits" class="loading-tree">
+          <i class="fas fa-spinner fa-spin"></i> Loading...
         </div>
-        <div class="tree-group">
-          <div class="tree-item" :class="{ selected: selectedOu === 'Zambia' }" @click="toggleExpand('Zambia')">
-            <i :class="expanded['Zambia'] ? 'fas fa-caret-down' : 'fas fa-caret-right'"></i>
-            <span @click.stop="selectOu('Zambia')">Zambia</span>
-          </div>
-          <div class="tree-children" v-if="expanded['Zambia']">
-            <div class="tree-item" :class="{ selected: selectedOu === 'Lusaka' }" @click="selectOu('Lusaka')">
-              <span class="spacer"></span>
-              <i class="fas fa-building"></i>
-              <span>Lusaka</span>
-            </div>
-            <div class="tree-item" :class="{ selected: selectedOu === 'Kabwe' }" @click="selectOu('Kabwe')">
-              <span class="spacer"></span>
-              <i class="fas fa-building"></i>
-              <span>Kabwe</span>
-            </div>
-            <div class="tree-item" :class="{ selected: selectedOu === 'Ndola' }" @click="selectOu('Ndola')">
-              <span class="spacer"></span>
-              <i class="fas fa-building"></i>
-              <span>Ndola</span>
-            </div>
-          </div>
-        </div>
+        <OrgUnitTreeNode 
+          v-else
+          v-for="ou in orgUnitTree" 
+          :key="ou.id"
+          :node="ou"
+          :selected="selectedOu"
+          :expanded="expandedOrgUnits"
+          @select="selectOu"
+          @toggle="toggleOrgUnit"
+        />
       </div>
     </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay" v-if="isSidebarOpen" @click="toggleSidebar"></div>
 
     <!-- Main Content Area -->
     <div class="main-content">
@@ -56,12 +56,12 @@
         <div class="selection-group">
           <label>Period</label>
           <div class="period-selector">
-            <button class="period-nav" @click="prevPeriod"><i class="fas fa-chevron-left"></i></button>
+            <button class="period-nav" @click="prevPeriod" :disabled="!selectedPeriod"><i class="fas fa-chevron-left"></i></button>
             <select v-model="selectedPeriod" class="dhis-select period-select">
               <option value="" disabled>Select Period</option>
               <option v-for="p in periods" :key="p.id" :value="p.id">{{ p.name }}</option>
             </select>
-            <button class="period-nav" @click="nextPeriod"><i class="fas fa-chevron-right"></i></button>
+            <button class="period-nav" @click="nextPeriod" :disabled="!selectedPeriod"><i class="fas fa-chevron-right"></i></button>
           </div>
         </div>
       </div>
@@ -76,6 +76,10 @@
             <span v-if="syncStatus === 'error'" class="status-error"><i class="fas fa-exclamation-circle"></i> Error saving</span>
           </div>
           <div class="form-actions">
+            <button class="action-btn" @click="runAggregation" :disabled="aggregating">
+              <i class="fas" :class="aggregating ? 'fa-spinner fa-spin' : 'fa-calculator'"></i> 
+              {{ aggregating ? 'Running...' : 'Run Aggregation' }}
+            </button>
             <button class="action-btn" @click="runValidation"><i class="fas fa-check-double"></i> Run Validation</button>
             <button class="action-btn primary" @click="completeDataSet"><i class="fas fa-check"></i> Complete</button>
           </div>
@@ -91,6 +95,11 @@
               </tr>
             </thead>
             <tbody>
+              <tr v-if="dataElements.length === 0">
+                <td :colspan="categoryOptions.length + 2" class="no-elements">
+                  No data elements defined for this data set.
+                </td>
+              </tr>
               <tr v-for="element in dataElements" :key="element.id" :class="{ 'section-header': element.isSection }">
                 <td v-if="element.isSection" :colspan="categoryOptions.length + 2" class="section-title">
                   {{ element.name }}
@@ -122,11 +131,13 @@
       <!-- Empty State -->
       <div class="empty-state" v-else>
         <div class="empty-content">
-          <i class="fas fa-arrow-up"></i>
+          <i class="fas fa-arrow-up mobile-hide"></i>
+          <i class="fas fa-bars mobile-show"></i>
           <h3>Please select Organisation Unit, Data Set, and Period</h3>
           <p>Use the controls above to start entering data.</p>
         </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
@@ -135,7 +146,10 @@
 import { ref, computed, reactive, onMounted, watch } from 'vue';
 import { useToast } from '../composables/useToast.js';
 import { db } from '../firebase/config.js';
-import { collection, doc, getDoc, setDoc, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import CaptureService from '../services/captureService.js';
+import OrgUnitTreeNode from './OrgUnitTreeNode.vue';
+import TopHeader from './TopHeader.vue';
 
 const { success, info, error } = useToast();
 
@@ -144,39 +158,23 @@ const selectedOu = ref('');
 const selectedDataSet = ref('');
 const selectedPeriod = ref('');
 const ouSearch = ref('');
-const expanded = reactive({ 'Zambia': true });
+const expandedOrgUnits = ref(new Set());
 const dataValues = reactive({});
 const loading = ref(false);
 const saving = ref(false);
+const isSidebarOpen = ref(false);
+const aggregating = ref(false);
 
-// System Data Sets (Mapped to TKP Forms)
-const dataSets = [
-  { id: 'initial-referral', name: 'Initial Child Referral Reporting' },
-  { id: 'child-overview', name: 'Child Overview & Enrollment Reporting' },
-  { id: 'initial-assessment', name: 'Initial Assessment Reporting' },
-  { id: 'medical-intake', name: 'Medical Intake Reporting' },
-  { id: 'care-plan', name: 'Care Plan Summary Reporting' },
-  { id: 'program-summary', name: 'Program Summary (Monthly)' }
-];
-
-// Dynamic Periods (Last 12 months)
-const periods = computed(() => {
-  const months = [];
-  const date = new Date();
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(date.getFullYear(), date.getMonth() - i, 1);
-    const id = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}`;
-    const name = d.toLocaleString('default', { month: 'long', year: 'numeric' });
-    months.push({ id, name });
-  }
-  return months;
-});
+const orgUnits = ref([]);
+const dataSets = ref([]);
+const periods = ref([]);
+const loadingOrgUnits = ref(false);
 
 const categoryOptions = [
   { id: 'default', name: 'Value' }
 ];
 
-// Data Elements Definition
+// Data Elements Definition (Mapping Aggregate Indicators to Tracker Programs)
 const dataElementsMap = {
   'initial-referral': [
     { id: 'sec1', name: 'Referral Statistics', isSection: true },
@@ -200,25 +198,24 @@ const dataElementsMap = {
     { id: 'asm_pending', name: 'Assessments Pending' },
     { id: 'asm_high_risk', name: 'High Risk Cases Identified' }
   ],
+  'monthly-report': [
+    { id: 'sec1', name: 'Monthly Activities', isSection: true },
+    { id: 'act_conducted', name: 'Activities Conducted' },
+    { id: 'act_participants', name: 'Total Participants' },
+    { id: 'act_meals', name: 'Meals Served' }
+  ],
+  'quarterly-review': [
+    { id: 'sec1', name: 'Quarterly Review', isSection: true },
+    { id: 'rev_completed', name: 'Reviews Completed' },
+    { id: 'rev_progress', name: 'Children Showing Progress' },
+    { id: 'rev_regression', name: 'Children Showing Regression' }
+  ],
   'medical-intake': [
     { id: 'sec1', name: 'Medical Statistics', isSection: true },
     { id: 'med_screened', name: 'Children Screened' },
     { id: 'med_referrals', name: 'Medical Referrals Made' },
     { id: 'med_chronic', name: 'Chronic Conditions Identified' },
     { id: 'med_treatment', name: 'Children on Treatment' }
-  ],
-  'care-plan': [
-    { id: 'sec1', name: 'Care Planning', isSection: true },
-    { id: 'cp_created', name: 'New Care Plans Created' },
-    { id: 'cp_reviewed', name: 'Care Plans Reviewed' },
-    { id: 'cp_completed', name: 'Care Plan Goals Achieved' }
-  ],
-  'program-summary': [
-    { id: 'sec1', name: 'Overall Program Stats', isSection: true },
-    { id: 'prog_active', name: 'Total Active Children' },
-    { id: 'prog_activities', name: 'Program Activities Conducted' },
-    { id: 'prog_meals', name: 'Meals Served' },
-    { id: 'prog_attendance', name: 'Average Attendance' }
   ]
 };
 
@@ -226,18 +223,97 @@ const dataElements = computed(() => {
   return dataElementsMap[selectedDataSet.value] || [];
 });
 
+const orgUnitTree = computed(() => {
+  // Build hierarchical tree from flat list
+  const map = new Map();
+  const roots = [];
+  
+  // Clone to avoid mutating original
+  const list = JSON.parse(JSON.stringify(orgUnits.value));
+  
+  list.forEach(ou => {
+    map.set(ou.id, { ...ou, children: [] });
+  });
+  
+  list.forEach(ou => {
+    const node = map.get(ou.id);
+    if (ou.parent) {
+      const parent = map.get(ou.parent);
+      if (parent) {
+        parent.children.push(node);
+      } else {
+        roots.push(node);
+      }
+    } else {
+      roots.push(node);
+    }
+  });
+  
+  return roots;
+});
+
 // Methods
-const selectOu = (ou) => {
-  selectedOu.value = ou;
+const loadOrgUnits = async () => {
+  loadingOrgUnits.value = true;
+  try {
+    const response = await CaptureService.getOrgUnits();
+    orgUnits.value = response;
+    // Auto-expand first level
+    if (response.length > 0) {
+      expandedOrgUnits.value.add(response[0].id);
+    }
+  } catch (err) {
+    console.error('Error loading org units:', err);
+    error('Failed to load organisation units');
+  } finally {
+    loadingOrgUnits.value = false;
+  }
+};
+
+const loadDataSets = async () => {
+  try {
+    const response = await CaptureService.getDataSets();
+    dataSets.value = response;
+  } catch (err) {
+    console.error('Error loading data sets:', err);
+  }
+};
+
+const loadPeriods = async () => {
+  try {
+    const response = await CaptureService.getPeriods();
+    periods.value = response;
+    // Set default to current month if available
+    if (response.length > 0) {
+      selectedPeriod.value = response[0].id;
+    }
+  } catch (err) {
+    console.error('Error loading periods:', err);
+  }
+};
+
+const selectOu = (ouId) => {
+  selectedOu.value = ouId;
+  if (window.innerWidth < 768) {
+    isSidebarOpen.value = false;
+  }
   loadData();
 };
 
-const toggleExpand = (ou) => {
-  expanded[ou] = !expanded[ou];
+const toggleOrgUnit = (ouId) => {
+  if (expandedOrgUnits.value.has(ouId)) {
+    expandedOrgUnits.value.delete(ouId);
+  } else {
+    expandedOrgUnits.value.add(ouId);
+  }
+};
+
+const toggleSidebar = () => {
+  isSidebarOpen.value = !isSidebarOpen.value;
 };
 
 const getDataSetName = (id) => {
-  const ds = dataSets.find(d => d.id === id);
+  const ds = dataSets.value.find(d => d.id === id);
   return ds ? ds.name : '';
 };
 
@@ -341,7 +417,6 @@ const saveDataValue = async (elementId, catId, value) => {
     
     syncStatus.value = 'saved';
     lastSavedTime.value = new Date();
-    console.log(`Saved ${value} for ${valueKey}`);
   } catch (err) {
     console.error("Error saving data:", err);
     syncStatus.value = 'error';
@@ -381,37 +456,175 @@ const openComment = (elementId) => {
   info(`Open comment for ${elementId}`);
 };
 
+// Aggregation Logic
+const runAggregation = async () => {
+  if (!selectedOu.value || !selectedDataSet.value || !selectedPeriod.value) return;
+  
+  aggregating.value = true;
+  info('Running aggregation from system data...');
+  
+  try {
+    // 1. Determine date range for the selected period
+    // Format: YYYYMM (Monthly)
+    const year = parseInt(selectedPeriod.value.substring(0, 4));
+    const month = parseInt(selectedPeriod.value.substring(4, 6)) - 1; // 0-indexed
+    
+    const startDate = new Date(year, month, 1);
+    const endDate = new Date(year, month + 1, 0, 23, 59, 59); // Last day of month
+    
+    // 2. Fetch forms based on dataset type
+    let forms = [];
+    let q;
+    
+    // Map dataset ID to formType
+    const formTypeMap = {
+      'initial-referral': 'initial-referral',
+      'child-overview': 'child-overview',
+      'initial-assessment': 'initial-assessment',
+      'medical-intake': 'medical-intake'
+    };
+    
+    const targetFormType = formTypeMap[selectedDataSet.value];
+    
+    if (targetFormType) {
+      q = query(
+        collection(db, 'forms'),
+        where('formType', '==', targetFormType)
+      );
+      
+      const snapshot = await getDocs(q);
+      
+      console.log(`Aggregation Debug: Found ${snapshot.docs.length} forms of type ${targetFormType} in total.`);
+      
+      forms = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(form => {
+          const createdAt = form.createdAt?.toDate ? form.createdAt.toDate() : new Date(form.createdAt);
+          const inRange = createdAt >= startDate && createdAt <= endDate;
+          
+          // Debug log for first few items
+          if (Math.random() < 0.1) {
+             console.log(`Form ${form.id} date: ${createdAt.toISOString()}, Range: ${startDate.toISOString()} - ${endDate.toISOString()}, In Range: ${inRange}`);
+          }
+          
+          return inRange;
+        });
+        
+      console.log(`Aggregation Debug: Filtered down to ${forms.length} forms for period ${selectedPeriod.value}`);
+      
+      // 3. Calculate indicators based on dataset
+      const newValues = {};
+      
+      if (selectedDataSet.value === 'initial-referral') {
+        newValues['ref_total-default'] = forms.length;
+        newValues['ref_male-default'] = forms.filter(f => f.gender === 'Male').length;
+        newValues['ref_female-default'] = forms.filter(f => f.gender === 'Female').length;
+        newValues['ref_urgent-default'] = forms.filter(f => f.priority === 'Urgent').length;
+        newValues['ref_processed-default'] = forms.filter(f => f.status === 'admitted').length;
+      } else if (selectedDataSet.value === 'child-overview') {
+        newValues['enr_total-default'] = forms.length;
+        newValues['enr_male-default'] = forms.filter(f => f.gender === 'Male').length;
+        newValues['enr_female-default'] = forms.filter(f => f.gender === 'Female').length;
+      } else if (selectedDataSet.value === 'initial-assessment') {
+        newValues['asm_total-default'] = forms.length;
+        newValues['asm_pending-default'] = forms.filter(f => f.status === 'pending').length;
+      } else if (selectedDataSet.value === 'medical-intake') {
+        newValues['med_screened-default'] = forms.length;
+        newValues['med_referrals-default'] = forms.filter(f => f.referralNeeded === true).length;
+      }
+      
+      // 4. Update UI and Save
+      Object.assign(dataValues, newValues);
+      
+      // Save all aggregated values
+      const docId = `${selectedOu.value}_${selectedDataSet.value}_${selectedPeriod.value}`;
+      const docRef = doc(db, 'aggregate_data', docId);
+      
+      const updateData = {
+        orgUnit: selectedOu.value,
+        dataSet: selectedDataSet.value,
+        period: selectedPeriod.value,
+        updatedAt: new Date(),
+        values: dataValues,
+        lastAggregated: new Date()
+      };
+      
+      await setDoc(docRef, updateData, { merge: true });
+      
+      success(`Aggregation complete. Processed ${forms.length} records.`);
+      lastSavedTime.value = new Date();
+    } else {
+      info('No automatic aggregation rules for this data set.');
+    }
+    
+  } catch (err) {
+    console.error('Aggregation error:', err);
+    error('Failed to run aggregation');
+  } finally {
+    aggregating.value = false;
+  }
+};
+
 // Watchers
 watch([selectedDataSet, selectedPeriod], () => {
   loadData();
 });
 
 // Initialize
-onMounted(() => {
-  // Set default period to current month
-  if (periods.value.length > 0) {
-    selectedPeriod.value = periods.value[0].id;
-  }
-  
-  // Set default OU
-  selectedOu.value = 'Lusaka';
-  
-  // Set default Data Set
-  if (dataSets.length > 0) {
-    selectedDataSet.value = dataSets[0].id;
-  }
-  
-  // Load data
-  loadData();
+onMounted(async () => {
+  await Promise.all([
+    loadOrgUnits(),
+    loadDataSets(),
+    loadPeriods()
+  ]);
 });
 </script>
 
 <style scoped>
+.aggregate-data-entry-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
 .aggregate-data-entry {
   display: flex;
-  height: calc(100vh - 48px); /* Subtract header height */
+  flex: 1;
   background: #f3f5f7;
   font-family: 'Roboto', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Mobile Header */
+.mobile-header {
+  display: none;
+  background: white;
+  padding: 12px 16px;
+  border-bottom: 1px solid #d5dce5;
+  align-items: center;
+  gap: 16px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  height: 50px;
+}
+
+.mobile-menu-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #2c6693;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.mobile-title {
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 1.1rem;
 }
 
 /* Sidebar */
@@ -422,6 +635,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  transition: transform 0.3s ease;
+  z-index: 30;
 }
 
 .sidebar-header {
@@ -431,7 +646,17 @@ onMounted(() => {
   font-weight: 500;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
+}
+
+.close-sidebar-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 1.1rem;
 }
 
 .search-ou {
@@ -463,40 +688,10 @@ onMounted(() => {
   padding: 8px 0;
 }
 
-.tree-item {
-  padding: 6px 12px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #333;
-  font-size: 0.9rem;
-  transition: background 0.1s;
-}
-
-.tree-item:hover {
-  background: #f0f5f9;
-}
-
-.tree-item.selected {
-  background: #e3f2fd;
-  color: #1976d2;
-  font-weight: 500;
-}
-
-.tree-item i {
-  color: #757575;
-  width: 16px;
+.loading-tree {
+  padding: 20px;
   text-align: center;
-}
-
-.tree-item.selected i {
-  color: #1976d2;
-}
-
-.spacer {
-  width: 16px;
-  display: inline-block;
+  color: #666;
 }
 
 /* Main Content */
@@ -505,6 +700,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  width: 100%;
 }
 
 .selection-bar {
@@ -515,6 +711,7 @@ onMounted(() => {
   gap: 24px;
   align-items: flex-end;
   box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  flex-wrap: wrap;
 }
 
 .selection-group {
@@ -565,7 +762,12 @@ onMounted(() => {
   justify-content: center;
 }
 
-.period-nav:hover {
+.period-nav:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.period-nav:hover:not(:disabled) {
   background: #e0e0e0;
 }
 
@@ -583,6 +785,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .form-header h3 {
@@ -654,6 +858,7 @@ onMounted(() => {
 .dhis-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 600px; /* Ensure table doesn't get too squashed */
 }
 
 .dhis-table th,
@@ -741,6 +946,13 @@ onMounted(() => {
   color: #2c6693;
 }
 
+.no-elements {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+  font-style: italic;
+}
+
 /* Empty State */
 .empty-state {
   flex: 1;
@@ -749,6 +961,7 @@ onMounted(() => {
   justify-content: center;
   color: #999;
   text-align: center;
+  padding: 20px;
 }
 
 .empty-content i {
@@ -767,25 +980,58 @@ onMounted(() => {
   font-size: 0.9rem;
 }
 
+.mobile-show {
+  display: none;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 25;
+}
+
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
   .aggregate-data-entry {
     flex-direction: column;
+    padding-top: 50px; /* Space for mobile header */
+  }
+
+  .mobile-header {
+    display: flex;
   }
 
   .org-unit-sidebar {
-    width: 100%;
-    height: auto;
-    max-height: 30vh;
-    border-right: none;
-    border-bottom: 1px solid #d5dce5;
-    display: none; /* Hide sidebar on mobile by default */
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 85%;
+    max-width: 320px;
+    transform: translateX(-100%);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+  }
+
+  .org-unit-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .close-sidebar-btn {
+    display: block;
+  }
+
+  .sidebar-overlay {
+    display: block;
   }
 
   .selection-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
-    padding: 12px;
+    padding: 12px 16px;
+    gap: 12px;
   }
 
   .selection-group {
@@ -800,33 +1046,36 @@ onMounted(() => {
   .period-selector {
     width: 100%;
   }
-
+  
   .period-select {
     flex: 1;
   }
 
   .data-entry-area {
-    padding: 12px;
+    padding: 16px;
   }
 
   .form-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
   }
 
   .form-actions {
     width: 100%;
-    flex-direction: column;
+    justify-content: space-between;
   }
 
   .action-btn {
-    width: 100%;
+    flex: 1;
     justify-content: center;
   }
 
-  .table-container {
-    overflow-x: auto;
+  .mobile-hide {
+    display: none;
+  }
+
+  .mobile-show {
+    display: inline-block;
   }
 }
 </style>

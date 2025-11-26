@@ -458,7 +458,7 @@ const navigateToApp = (app) => {
       router.push({ path: '/dashboard', query: { view: 'reports' } });
       break;
     case 'data-entry':
-      router.push({ path: '/dashboard', query: { view: 'data-entry' } });
+      router.push('/aggregate-data-entry');
       break;
     case 'capture':
       router.push('/capture');
@@ -525,8 +525,7 @@ const setupListeners = () => {
     const sponsorshipQuery = query(
       collection(db, 'sponsorship_interests'),
       where('status', '==', 'pending'),
-      orderBy('createdAt', 'desc'),
-      limit(10)
+      limit(20)
     );
 
     const unsubSponsorship = onSnapshot(sponsorshipQuery, (snapshot) => {
@@ -537,7 +536,7 @@ const setupListeners = () => {
         message: `${doc.data().name} is interested in sponsoring ${doc.data().childName}`,
         time: formatTime(doc.data().createdAt),
         rawTime: doc.data().createdAt,
-        read: false // In a real app, you'd track read status per user
+        read: false
       }));
       
       updateNotifications(sponsorshipNotifs, 'sponsorship');
@@ -547,12 +546,10 @@ const setupListeners = () => {
     listeners.push(unsubSponsorship);
 
     // 2. Pending Approvals (Notifications)
-    // Assuming 'forms' collection has a 'status' field
     const approvalsQuery = query(
       collection(db, 'forms'),
       where('status', '==', 'pending'),
-      orderBy('createdAt', 'desc'),
-      limit(10)
+      limit(20)
     );
 
     const unsubApprovals = onSnapshot(approvalsQuery, (snapshot) => {
@@ -568,8 +565,7 @@ const setupListeners = () => {
       
       updateNotifications(approvalNotifs, 'approval');
     }, (err) => {
-      // Ignore index errors if they happen, just log
-      console.log("Error fetching approvals (might need index):", err);
+      console.log("Error fetching approvals:", err);
     });
     listeners.push(unsubApprovals);
   }
@@ -579,19 +575,26 @@ const setupListeners = () => {
     const messagesQuery = query(
       collection(db, 'messages'),
       where('recipient', '==', currentUserEmail.value),
-      orderBy('createdAt', 'desc'),
-      limit(10)
+      limit(20)
     );
 
     const unsubMessages = onSnapshot(messagesQuery, (snapshot) => {
-      messages.value = snapshot.docs.map(doc => ({
+      const msgs = snapshot.docs.map(doc => ({
         id: doc.id,
         sender: doc.data().senderName || doc.data().sender || 'Unknown',
         preview: doc.data().subject || doc.data().body || 'No subject',
         time: formatTime(doc.data().createdAt),
+        createdAt: doc.data().createdAt,
         read: doc.data().read || false,
         ...doc.data()
       }));
+
+      // Sort client-side
+      messages.value = msgs.sort((a, b) => {
+        const timeA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+        const timeB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+        return timeB - timeA;
+      });
     }, (err) => {
       console.error("Error fetching messages:", err);
     });

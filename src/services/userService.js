@@ -1,19 +1,19 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
   where,
   orderBy,
   serverTimestamp,
   increment
 } from 'firebase/firestore'
-import { 
-  createUserWithEmailAndPassword, 
+import {
+  createUserWithEmailAndPassword,
   updatePassword,
   deleteUser as deleteAuthUser,
   sendPasswordResetEmail
@@ -42,14 +42,14 @@ class UserService {
         collection(db, this.usersCollection),
         orderBy('createdAt', 'desc')
       )
-      
+
       const querySnapshot = await getDocs(q)
       const users = []
-      
+
       for (const docSnapshot of querySnapshot.docs) {
         try {
           const userData = docSnapshot.data()
-          
+
           // Ensure required fields have default values
           const safeUserData = {
             name: userData.name || 'Unknown User',
@@ -63,7 +63,7 @@ class UserService {
             avatar: userData.avatar || null,
             ...userData
           }
-          
+
           // Check if user is currently online (with fallback)
           let isOnline = false
           try {
@@ -71,7 +71,7 @@ class UserService {
           } catch (error) {
             console.warn('Failed to check online status for user:', docSnapshot.id)
           }
-          
+
           // Get user's last login (with fallback)
           let lastLogin = null
           try {
@@ -79,7 +79,7 @@ class UserService {
           } catch (error) {
             console.warn('Failed to get last login for user:', docSnapshot.id)
           }
-          
+
           // Get login count (with fallback)
           let loginCount = 0
           try {
@@ -87,7 +87,7 @@ class UserService {
           } catch (error) {
             console.warn('Failed to get login count for user:', docSnapshot.id)
           }
-          
+
           users.push({
             id: docSnapshot.id,
             ...safeUserData,
@@ -104,7 +104,7 @@ class UserService {
           continue
         }
       }
-      
+
       return { success: true, users }
     } catch (error) {
       console.error('Error getting users:', error)
@@ -115,25 +115,25 @@ class UserService {
   // Add a new user with comprehensive data structure
   async addUser(userData) {
     try {
-      const { 
-        name, 
-        username, 
-        email, 
-        phone, 
-        password, 
-        role, 
-        orgUnit, 
+      const {
+        name,
+        username,
+        email,
+        phone,
+        password,
+        role,
+        orgUnit,
         status,
         permissions
       } = userData
-      
+
       // Validate permissions based on role
       const validatedPermissions = this.validatePermissions(role, permissions)
-      
+
       // Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password)
       const authUser = userCredential.user
-      
+
       // Store comprehensive user data in Firestore
       const userDoc = {
         uid: authUser.uid,
@@ -152,25 +152,25 @@ class UserService {
         isOnline: false,
         avatar: null
       }
-      
+
       const docRef = await addDoc(collection(db, this.usersCollection), userDoc)
-      
+
       // Log user creation activity
       await this.logUserActivity(docRef.id, 'user_created', {
         createdBy: auth.currentUser?.uid,
         userRole: role
       })
-      
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         id: docRef.id,
         message: 'User created successfully'
       }
     } catch (error) {
       console.error('Error adding user:', error)
-      return { 
-        success: false, 
-        error: this.getErrorMessage(error.code) || error.message 
+      return {
+        success: false,
+        error: this.getErrorMessage(error.code) || error.message
       }
     }
   }
@@ -179,7 +179,7 @@ class UserService {
   async updateUser(userId, userData) {
     try {
       const userDocRef = doc(db, this.usersCollection, userId)
-      
+
       // Validate permissions if they are being updated
       if (userData.permissions && userData.role) {
         userData.permissions = this.validatePermissions(userData.role, userData.permissions)
@@ -191,32 +191,32 @@ class UserService {
           userData.permissions = this.validatePermissions(currentData.role, userData.permissions)
         }
       }
-      
+
       // Prepare update data
       const updateData = {
         ...userData,
         updatedAt: serverTimestamp()
       }
-      
+
       // Remove undefined values
       Object.keys(updateData).forEach(key => {
         if (updateData[key] === undefined) {
           delete updateData[key]
         }
       })
-      
+
       // Update user data in Firestore
       await updateDoc(userDocRef, updateData)
-      
+
       // Log user update activity
       await this.logUserActivity(userId, 'user_updated', {
         updatedBy: auth.currentUser?.uid,
         updatedFields: Object.keys(userData)
       })
-      
-      return { 
-        success: true, 
-        message: 'User updated successfully' 
+
+      return {
+        success: true,
+        message: 'User updated successfully'
       }
     } catch (error) {
       console.error('Error updating user:', error)
@@ -229,32 +229,32 @@ class UserService {
     try {
       const userDocRef = doc(db, this.usersCollection, userId)
       const userDoc = await getDoc(userDocRef)
-      
+
       if (!userDoc.exists()) {
         return { success: false, error: 'User not found' }
       }
-      
+
       const userData = userDoc.data()
-      
+
       // Log user deletion activity before deletion
       await this.logUserActivity(userId, 'user_deleted', {
         deletedBy: auth.currentUser?.uid,
         userRole: userData.role,
         userName: userData.name
       })
-      
+
       // Delete user sessions
       await this.cleanupUserSessions(userId)
-      
+
       // Delete user activities
       await this.cleanupUserActivities(userId)
-      
+
       // Delete from Firestore
       await deleteDoc(userDocRef)
-      
-      return { 
-        success: true, 
-        message: 'User deleted successfully' 
+
+      return {
+        success: true,
+        message: 'User deleted successfully'
       }
     } catch (error) {
       console.error('Error deleting user:', error)
@@ -267,21 +267,21 @@ class UserService {
     try {
       const userDocRef = doc(db, this.usersCollection, userId)
       const userDoc = await getDoc(userDocRef)
-      
+
       if (!userDoc.exists()) {
         return { success: false, error: 'User not found' }
       }
-      
+
       const userData = userDoc.data()
-      
+
       // Get additional user data
       const isOnline = await this.checkUserOnlineStatus(userId)
       const lastLogin = await this.getUserLastLogin(userId)
       const loginCount = await this.getUserLoginCount(userId)
-      
-      return { 
-        success: true, 
-        user: { 
+
+      return {
+        success: true,
+        user: {
           id: userDoc.id,
           ...userData,
           isOnline,
@@ -289,7 +289,7 @@ class UserService {
           loginCount,
           createdAt: userData.createdAt?.toDate?.()?.toISOString() || userData.createdAt,
           updatedAt: userData.updatedAt?.toDate?.()?.toISOString() || userData.updatedAt
-        } 
+        }
       }
     } catch (error) {
       console.error('Error getting user:', error)
@@ -301,21 +301,21 @@ class UserService {
   async updateUserStatus(userId, status) {
     try {
       const userDocRef = doc(db, this.usersCollection, userId)
-      
+
       await updateDoc(userDocRef, {
         status: status,
         updatedAt: serverTimestamp()
       })
-      
+
       // Log status change
       await this.logUserActivity(userId, 'status_changed', {
         changedBy: auth.currentUser?.uid,
         newStatus: status
       })
-      
-      return { 
-        success: true, 
-        message: `User ${status === 'active' ? 'activated' : status} successfully` 
+
+      return {
+        success: true,
+        message: `User ${status === 'active' ? 'activated' : status} successfully`
       }
     } catch (error) {
       console.error('Error updating user status:', error)
@@ -327,157 +327,25 @@ class UserService {
   async resetUserPassword(email) {
     try {
       await sendPasswordResetEmail(auth, email)
-      
-      return { 
-        success: true, 
-        message: 'Password reset email sent successfully' 
-      }
-    } catch (error) {
-      console.error('Error resetting password:', error)
-      return { 
-        success: false, 
-        error: this.getErrorMessage(error.code) || error.message 
-      }
-    }
-  }
-
-  // Check if user is currently online
-  async checkUserOnlineStatus(userId) {
-    try {
       const sessionQuery = query(
         collection(db, this.userSessionsCollection),
         where('userId', '==', userId),
         where('isActive', '==', true)
       )
-      
+
       const querySnapshot = await getDocs(sessionQuery)
-      return !querySnapshot.empty
-    } catch (error) {
-      console.error('Error checking online status:', error)
-      return false
-    }
-  }
-
-  // Get user's last login time
-  async getUserLastLogin(userId) {
-    try {
-      // Try with index first, fall back to simple query if index doesn't exist
-      let sessionQuery
-      
-      try {
-        sessionQuery = query(
-          collection(db, this.userSessionsCollection),
-          where('userId', '==', userId),
-          orderBy('loginTime', 'desc')
-        )
-        const querySnapshot = await getDocs(sessionQuery)
-        if (!querySnapshot.empty) {
-          const lastSession = querySnapshot.docs[0].data()
-          return lastSession.loginTime?.toDate?.()?.toISOString() || lastSession.loginTime
-        }
-      } catch (indexError) {
-        // If index doesn't exist, fall back to getting all user sessions and sorting manually
-        console.warn('Index not found for userSessions, using fallback method')
-        const fallbackQuery = query(
-          collection(db, this.userSessionsCollection),
-          where('userId', '==', userId)
-        )
-        const fallbackSnapshot = await getDocs(fallbackQuery)
-        
-        if (!fallbackSnapshot.empty) {
-          // Sort manually by loginTime
-          const sessions = fallbackSnapshot.docs
-            .map(doc => doc.data())
-            .filter(session => session.loginTime)
-            .sort((a, b) => {
-              const aTime = a.loginTime?.toDate?.() || new Date(a.loginTime)
-              const bTime = b.loginTime?.toDate?.() || new Date(b.loginTime)
-              return bTime - aTime
-            })
-          
-          if (sessions.length > 0) {
-            return sessions[0].loginTime?.toDate?.()?.toISOString() || sessions[0].loginTime
-          }
-        }
-      }
-      
-      return null
-    } catch (error) {
-      console.error('Error getting last login:', error)
-      return null
-    }
-  }
-
-  // Get user's total login count
-  async getUserLoginCount(userId) {
-    try {
-      const userDocRef = doc(db, this.usersCollection, userId)
-      const userDoc = await getDoc(userDocRef)
-      
-      if (userDoc.exists()) {
-        return userDoc.data().loginCount || 0
-      }
-      
-      return 0
-    } catch (error) {
-      console.error('Error getting login count:', error)
-      return 0
-    }
-  }
-
-  // Record user login
-  async recordUserLogin(userId) {
-    try {
-      // Update login count and last login time
-      const userDocRef = doc(db, this.usersCollection, userId)
-      await updateDoc(userDocRef, {
-        loginCount: increment(1),
-        lastLogin: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      })
-      
-      // Create user session
-      await addDoc(collection(db, this.userSessionsCollection), {
-        userId: userId,
-        loginTime: serverTimestamp(),
-        isActive: true,
-        userAgent: navigator.userAgent || 'Unknown',
-        ipAddress: 'Unknown' // Would need additional service to get real IP
-      })
-      
-      // Log login activity
-      await this.logUserActivity(userId, 'user_login', {})
-      
-      return { success: true }
-    } catch (error) {
-      console.error('Error recording login:', error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  // Record user logout
-  async recordUserLogout(userId) {
-    try {
-      // Update active sessions to inactive
-      const sessionQuery = query(
-        collection(db, this.userSessionsCollection),
-        where('userId', '==', userId),
-        where('isActive', '==', true)
-      )
-      
-      const querySnapshot = await getDocs(sessionQuery)
-      const updatePromises = querySnapshot.docs.map(doc => 
+      const updatePromises = querySnapshot.docs.map(doc =>
         updateDoc(doc.ref, {
           isActive: false,
           logoutTime: serverTimestamp()
         })
       )
-      
+
       await Promise.all(updatePromises)
-      
+
       // Log logout activity
       await this.logUserActivity(userId, 'user_logout', {})
-      
+
       return { success: true }
     } catch (error) {
       console.error('Error recording logout:', error)
@@ -508,10 +376,10 @@ class UserService {
         collection(db, this.userSessionsCollection),
         where('userId', '==', userId)
       )
-      
+
       const querySnapshot = await getDocs(sessionQuery)
       const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref))
-      
+
       await Promise.all(deletePromises)
     } catch (error) {
       console.error('Error cleaning up user sessions:', error)
@@ -525,10 +393,10 @@ class UserService {
         collection(db, this.userActivitiesCollection),
         where('userId', '==', userId)
       )
-      
+
       const querySnapshot = await getDocs(activityQuery)
       const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref))
-      
+
       await Promise.all(deletePromises)
     } catch (error) {
       console.error('Error cleaning up user activities:', error)
@@ -539,11 +407,11 @@ class UserService {
   async getUserStatistics() {
     try {
       const users = await this.getAllUsers()
-      
+
       if (!users.success) {
         return users
       }
-      
+
       const stats = {
         total: users.users.length,
         active: users.users.filter(u => u.status === 'active').length,
@@ -557,7 +425,7 @@ class UserService {
           viewer: users.users.filter(u => u.role === 'viewer').length
         }
       }
-      
+
       return { success: true, stats }
     } catch (error) {
       console.error('Error getting user statistics:', error)
@@ -569,11 +437,11 @@ class UserService {
   async exportUsers(format = 'json') {
     try {
       const result = await this.getAllUsers()
-      
+
       if (!result.success) {
         return result
       }
-      
+
       const exportData = result.users.map(user => ({
         name: user.name,
         username: user.username,
@@ -586,12 +454,12 @@ class UserService {
         lastLogin: user.lastLogin,
         loginCount: user.loginCount
       }))
-      
+
       if (format === 'csv') {
         const csvContent = this.convertToCSV(exportData)
         return { success: true, data: csvContent, format: 'csv' }
       }
-      
+
       return { success: true, data: exportData, format: 'json' }
     } catch (error) {
       console.error('Error exporting users:', error)
@@ -602,15 +470,15 @@ class UserService {
   // Convert data to CSV format
   convertToCSV(data) {
     if (!data.length) return ''
-    
+
     const headers = Object.keys(data[0])
     const csvContent = [
       headers.join(','),
-      ...data.map(row => headers.map(header => 
+      ...data.map(row => headers.map(header =>
         JSON.stringify(row[header] || '')
       ).join(','))
     ].join('\n')
-    
+
     return csvContent
   }
 
@@ -626,11 +494,11 @@ class UserService {
         'system_admin'
       ]
     }
-    
+
     // For other roles, validate that permissions are valid
     const validPermissions = []
     const allValidPermissions = Object.values(this.permissionStructure).flat()
-    
+
     if (Array.isArray(permissions)) {
       permissions.forEach(permission => {
         if (allValidPermissions.includes(permission)) {
@@ -638,7 +506,7 @@ class UserService {
         }
       })
     }
-    
+
     // Remove duplicates
     return [...new Set(validPermissions)]
   }
@@ -648,10 +516,10 @@ class UserService {
     try {
       const user = await this.getUserById(userId)
       if (!user.success) return false
-      
+
       // Admins have all permissions
       if (user.user.role === 'admin') return true
-      
+
       // Check if user has specific permission
       return Array.isArray(user.user.permissions) && user.user.permissions.includes(permission)
     } catch (error) {
@@ -665,7 +533,7 @@ class UserService {
     try {
       const user = await this.getUserById(userId)
       if (!user.success) return []
-      
+
       // Admins have all permissions
       if (user.user.role === 'admin') {
         return [
@@ -676,7 +544,7 @@ class UserService {
           'system_admin'
         ]
       }
-      
+
       return Array.isArray(user.user.permissions) ? user.user.permissions : []
     } catch (error) {
       console.error('Error getting user permissions:', error)
@@ -688,7 +556,7 @@ class UserService {
   async getUserPermissionCategories(userId) {
     try {
       const permissions = await this.getUserPermissions(userId)
-      
+
       const categories = {}
       for (const [category, perms] of Object.entries(this.permissionStructure)) {
         categories[category] = {
@@ -696,7 +564,7 @@ class UserService {
           hasPermission: perms.some(p => permissions.includes(p))
         }
       }
-      
+
       return { success: true, categories }
     } catch (error) {
       console.error('Error getting user permission categories:', error)

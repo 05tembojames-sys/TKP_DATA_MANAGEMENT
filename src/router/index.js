@@ -25,6 +25,7 @@ import Messaging from "../components/Messaging.vue";
 import Maintenance from "../components/Maintenance.vue";
 import SuccessStories from "../components/SuccessStories.vue";
 import Notifications from "../components/Notifications.vue";
+import AggregateDataEntry from "../components/AggregateDataEntry.vue";
 
 
 const routes = [
@@ -169,6 +170,12 @@ const routes = [
     path: "/notifications",
     name: "Notifications",
     component: Notifications,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/aggregate-data-entry",
+    name: "AggregateDataEntry",
+    component: AggregateDataEntry,
     meta: { requiresAuth: true },
   },
   {
