@@ -7,7 +7,12 @@
     <div class="tracker-sub-header">
       <div class="header-left">
         <h1 class="tracker-title">Tracker Capture</h1>
-        <span class="program-badge">Child Protection Program</span>
+        <div class="program-select-container">
+          <select v-model="selectedProgram" class="program-select">
+            <option value="" disabled>Select Program</option>
+            <option v-for="prog in programs" :key="prog.id" :value="prog.id">{{ prog.name }}</option>
+          </select>
+        </div>
       </div>
       <div class="header-right">
         <button @click="showRegisterModal = true" class="register-button">
@@ -24,6 +29,9 @@
         <div class="sidebar-header">
           <h3>Organisation Units</h3>
         </div>
+        <div class="org-search-container" style="padding: 0.5rem;">
+           <input type="text" placeholder="Search Org Unit..." class="search-org-input" />
+        </div>
         <div class="org-tree">
           <div 
             v-for="unit in orgUnits" 
@@ -38,8 +46,8 @@
         </div>
       </div>
 
-      <!-- Center Panel - Tracked Entities List -->
-      <div class="entities-panel">
+      <!-- Center Panel - Tracked Entities List (Visible when no entity selected) -->
+      <div v-if="!selectedEntity" class="entities-panel">
         <!-- Search and Filters -->
         <div class="search-section">
           <div class="search-bar">
@@ -48,7 +56,6 @@
               type="text" 
               v-model="searchQuery"
               placeholder="Search by name, ID..."
-              @input="filterEntities"
             />
             <button v-if="searchQuery" @click="searchQuery = ''" class="clear-btn">
               <i class="fas fa-times"></i>
@@ -83,7 +90,7 @@
           </div>
           
           <div 
-            v-for="entity in filteredEntities" 
+            v-for="entity in paginatedEntities" 
             :key="entity.id"
             class="entity-item"
             :class="{ selected: selectedEntity?.id === entity.id }"
@@ -125,15 +132,14 @@
         </div>
       </div>
 
-      <!-- Right Panel - Entity Dashboard -->
-      <div class="dashboard-panel">
-        <div v-if="!selectedEntity" class="no-selection">
-          <i class="fas fa-user-alt"></i>
-          <h3>No Entity Selected</h3>
-          <p>Select a tracked entity to view details</p>
-        </div>
-
-        <div v-else class="entity-dashboard">
+      <!-- Right Panel - Entity Dashboard (Full Main Area when selected) -->
+      <div v-else class="dashboard-panel">
+         <div class="dashboard-top-bar">
+             <button @click="backToSearch" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to List
+             </button>
+         </div>
+         <div class="entity-dashboard">
           <!-- Profile Header -->
           <div class="profile-header">
             <div class="profile-avatar">
@@ -397,6 +403,7 @@
     <!-- Register Modal -->
     <div v-if="showRegisterModal" class="modal-overlay" @click="showRegisterModal = false">
       <div class="modal-content" @click.stop>
+        <div class="modal-header">
           <h3>Register New Tracked Entity</h3>
           <button @click="showRegisterModal = false" class="close-btn">×</button>
         </div>
@@ -649,27 +656,29 @@
         </div>
       </div>
     </div>
- 
+  </div>
 </template>
 
 <script setup>
 import { useRouter } from "vue-router";
 import TopHeader from "./TopHeader.vue";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, nextTick, watch } from "vue";
 import TrackerService from "../services/trackerService.js";
 import FormService from "../services/formService.js";
 import { useToast } from "../composables/useToast.js";
 
-const { showToast } = useToast();
+const { addToast: showToast } = useToast();
 const router = useRouter();
 
 // State
 const searchQuery = ref("");
+const appliedSearchQuery = ref(""); // For debounced search
 const filterStatus = ref("");
 const filterGender = ref("");
 const selectedOrgUnit = ref("main");
+const selectedProgram = ref("child-protection");
 const selectedEntity = ref(null);
-const activeTab = ref("attributes");
+const activeTab = ref("enrollment");
 const currentPage = ref(1);
 const pageSize = ref(10);
 const showRegisterModal = ref(false);
@@ -712,11 +721,16 @@ const orgUnits = ref([
   { id: "chongwe", name: "Chongwe Outreach", icon: "fas fa-map-marker-alt" }
 ]);
 
+const programs = ref([
+  { id: "child-protection", name: "Child Protection Program" },
+  { id: "pregnancy-support", name: "Pregnancy Support Program" },
+  { id: "family-support", name: "Family Support Program" }
+]);
+
 const tabs = ref([
-  { id: "attributes", label: "Attributes", icon: "fas fa-list" },
-  { id: "enrollment", label: "Enrollment", icon: "fas fa-user-check" },
-  { id: "events", label: "Events", icon: "fas fa-calendar-alt" },
-  { id: "indicators", label: "Indicators", icon: "fas fa-chart-line" },
+  { id: "enrollment", label: "Enrollment", icon: "fas fa-briefcase" },
+  { id: "attributes", label: "Profile", icon: "fas fa-user" },
+  { id: "events", label: "Data Entry", icon: "fas fa-edit" },
   { id: "notes", label: "Notes", icon: "fas fa-sticky-note" }
 ]);
 
@@ -751,18 +765,26 @@ const programIndicators = computed(() => {
 // Computed
 const filteredEntities = computed(() => {
   return allEntities.value.filter(entity => {
-    const matchesSearch = !searchQuery.value || 
-      entity.childFirstName?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      entity.childLastName?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      entity.childName?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      entity.childId?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      entity.caseId?.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchesSearch = !appliedSearchQuery.value || 
+      entity.childFirstName?.toLowerCase().includes(appliedSearchQuery.value.toLowerCase()) ||
+      entity.childLastName?.toLowerCase().includes(appliedSearchQuery.value.toLowerCase()) ||
+      entity.childName?.toLowerCase().includes(appliedSearchQuery.value.toLowerCase()) ||
+      entity.childId?.toLowerCase().includes(appliedSearchQuery.value.toLowerCase()) ||
+      entity.caseId?.toLowerCase().includes(appliedSearchQuery.value.toLowerCase());
     
     const matchesStatus = !filterStatus.value || entity.status === filterStatus.value;
     const matchesGender = !filterGender.value || entity.gender?.toLowerCase() === filterGender.value.toLowerCase();
+    const matchesOrgUnit = !selectedOrgUnit.value || entity.orgUnit === selectedOrgUnit.value;
+    const matchesProgram = !selectedProgram.value || entity.program === selectedProgram.value || (!entity.program && selectedProgram.value === 'child-protection');
     
-    return matchesSearch && matchesStatus && matchesGender;
+    return matchesSearch && matchesStatus && matchesGender && matchesOrgUnit && matchesProgram;
   });
+});
+
+const paginatedEntities = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return filteredEntities.value.slice(start, end);
 });
 
 const totalPages = computed(() => Math.ceil(filteredEntities.value.length / pageSize.value));
@@ -895,6 +917,25 @@ const getCompletedForms = (entity) => {
   return entity.events.filter(e => e.status === 'completed' || e.status === 'complete');
 };
 
+const formatMedications = (meds) => {
+  if (!meds) return 'None';
+  if (typeof meds === 'string') return meds;
+  
+  // Handle the specific object structure with a 'list' array
+  if (meds.list && Array.isArray(meds.list)) {
+      if (meds.list.length === 0) return 'None';
+      return meds.list.map(m => {
+          if (!m.name) return '';
+          const dosage = m.dosage ? ` (${m.dosage})` : '';
+          const freq = m.frequency ? ` - ${m.frequency}` : '';
+          return `${m.name}${dosage}${freq}`;
+      }).filter(Boolean).join(', ');
+  }
+  
+  // Fallback if it's an object but not matching the structure
+  return 'None';
+};
+
 // Methods
 const loadCases = async () => {
   loading.value = true;
@@ -938,7 +979,7 @@ const loadCases = async () => {
           // Medical Information
           medicalConditions: formData.medicalConditions || formData.knownMedicalConditions || 'None reported',
           allergies: formData.allergies || 'None reported',
-          medications: formData.currentMedications || formData.medications || 'None',
+          medications: formatMedications(formData.currentMedications || formData.medications),
           
           // Program Information
           program: case_.program || formData.program || 'Child Protection Program',
@@ -968,7 +1009,9 @@ const loadCases = async () => {
           age: case_.age || 0,
           gender: case_.gender || 'Unknown',
           enrollmentDate: case_.enrollmentDate || case_.createdAt,
+          enrollmentDate: case_.enrollmentDate || case_.createdAt,
           status: case_.status || 'active',
+          orgUnit: case_.orgUnit || 'main',
           caseId: case_.caseId,
           childId: case_.childId,
           childName: case_.childName,
@@ -986,51 +1029,45 @@ const loadCases = async () => {
         };
       });
       
-      // De-duplicate based on strict criteria - only remove obvious duplicates
+      // De-duplication based on caseId (optimised O(N))
       const uniqueEntities = [];
-      const seenCaseIds = new Set();
+      const entityMap = new Map();
       
       for (const entity of entities) {
-        let isDuplicate = false;
-        
-        // Only consider duplicate if:
-        // 1. Has the EXACT same caseId (high confidence duplicate)
-        if (entity.caseId && seenCaseIds.has(entity.caseId)) {
-          isDuplicate = true;
+        // If no caseId, treat as unique
+        if (!entity.caseId) {
+          uniqueEntities.push(entity);
+          continue;
+        }
+
+        if (entityMap.has(entity.caseId)) {
+          // It's a duplicate - merge it
+          const existingEntity = entityMap.get(entity.caseId);
           
-          // Merge with existing entry
-          const existingEntity = uniqueEntities.find(e => e.caseId === entity.caseId);
+          // Merge events, avoiding duplicates
+          if (entity.events && entity.events.length > 0) {
+            const existingEventIds = new Set(existingEntity.events.map(e => e.id));
+            entity.events.forEach(event => {
+              if (!existingEventIds.has(event.id)) {
+                existingEntity.events.push(event);
+              }
+            });
+          }
           
-          if (existingEntity) {
-            // Merge events, avoiding duplicates
-            if (entity.events && entity.events.length > 0) {
-              const existingEventIds = new Set(existingEntity.events.map(e => e.id));
-              entity.events.forEach(event => {
-                if (!existingEventIds.has(event.id)) {
-                  existingEntity.events.push(event);
-                }
-              });
-            }
-            
-            // Merge attributes - prefer non-N/A values
-            for (const [key, value] of Object.entries(entity.attributes)) {
-              if (value && value !== 'N/A' && value !== 'None reported' && value !== 'None') {
-                if (!existingEntity.attributes[key] || 
-                    existingEntity.attributes[key] === 'N/A' || 
-                    existingEntity.attributes[key] === 'None reported' || 
-                    existingEntity.attributes[key] === 'None') {
-                  existingEntity.attributes[key] = value;
-                }
+          // Merge attributes - prefer non-N/A values from the duplicate if current is missing/N/A
+          for (const [key, value] of Object.entries(entity.attributes)) {
+            if (value && value !== 'N/A' && value !== 'None reported' && value !== 'None') {
+              if (!existingEntity.attributes[key] || 
+                  existingEntity.attributes[key] === 'N/A' || 
+                  existingEntity.attributes[key] === 'None reported' || 
+                  existingEntity.attributes[key] === 'None') {
+                existingEntity.attributes[key] = value;
               }
             }
           }
-        }
-        
-        // If not a duplicate, add to unique list
-        if (!isDuplicate) {
-          if (entity.caseId) {
-            seenCaseIds.add(entity.caseId);
-          }
+        } else {
+          // New unique entity
+          entityMap.set(entity.caseId, entity);
           uniqueEntities.push(entity);
         }
       }
@@ -1080,13 +1117,28 @@ const selectEntity = async (entity) => {
       selectedEntity.value = entity;
       activeTab.value = "attributes";
     }
+    
+    // Scroll to dashboard on mobile
+    nextTick(() => {
+      if (window.innerWidth <= 768) {
+        const dashboard = document.querySelector('.dashboard-panel');
+        if (dashboard) {
+          dashboard.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    });
   } catch (error) {
     console.error('Error loading entity details:', error);
     selectedEntity.value = entity;
-    activeTab.value = "attributes";
+    activeTab.value = "enrollment"; // Default to Enrollment widget
   } finally {
     loading.value = false;
   }
+};
+
+const backToSearch = () => {
+    selectedEntity.value = null;
+    currentPage.value = 1;
 };
 
 const filterEntities = () => {
@@ -1166,10 +1218,32 @@ const editEntity = () => {
   showToast('Edit functionality coming soon', 'info');
 };
 
-const deleteEntity = () => {
-  if (confirm(`Are you sure you want to delete ${selectedEntity.value.firstName} ${selectedEntity.value.lastName}?`)) {
-    console.log("Delete entity:", selectedEntity.value);
-    showToast('Delete functionality coming soon', 'info');
+const deleteEntity = async () => {
+  if (!selectedEntity.value) return;
+
+  if (confirm(`Are you sure you want to PERMANENTLY delete ${selectedEntity.value.firstName} ${selectedEntity.value.lastName} and all associated records? This action cannot be undone.`)) {
+    try {
+      loading.value = true;
+      // Use caseId if available, otherwise fallback to id
+      const deleteId = selectedEntity.value.caseId || selectedEntity.value.id;
+      
+      const result = await TrackerService.deleteCase(deleteId);
+      
+      if (result.success) {
+        showToast('Entity and associated data deleted successfully', 'success');
+        // Clear selection to return to list view
+        selectedEntity.value = null;
+        // Reload list to reflect changes
+        await loadCases();
+      } else {
+        showToast(result.error || 'Failed to delete entity', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting entity:', error);
+      showToast('An unexpected error occurred while deleting', 'error');
+    } finally {
+      loading.value = false;
+    }
   }
 };
 
@@ -1375,6 +1449,16 @@ const saveNote = () => {
   showToast('Note added successfully', 'success');
 };
 
+// Debounced search watcher
+let searchTimeout;
+watch(searchQuery, (newVal) => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    appliedSearchQuery.value = newVal;
+    currentPage.value = 1;
+  }, 300);
+});
+
 // Load data on mount
 onMounted(async () => {
   await loadCases();
@@ -1401,23 +1485,49 @@ onMounted(async () => {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.5rem;
+  flex: 1;
 }
 
 .tracker-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #111827;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #2c6693; /* DHIS2 Blue */
   margin: 0;
+  white-space: nowrap;
 }
 
 .program-badge {
   padding: 0.25rem 0.75rem;
-  background: #dbeafe;
-  color: #1e40af;
-  border-radius: 12px;
+  background: #E0F2F1;
+  color: #00695C;
+  border-radius: 4px;
   font-size: 0.875rem;
   font-weight: 500;
+  border: 1px solid #B2DFDB;
+}
+
+.search-org-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.program-select-container {
+  flex: 1;
+  max-width: 300px;
+}
+
+.program-select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #374151;
 }
 
 .register-button {
@@ -1440,57 +1550,60 @@ onMounted(async () => {
 
 .tracker-main {
   display: grid;
-  grid-template-columns: 250px 450px 1fr;
+  grid-template-columns: 280px 1fr;
   flex: 1;
-  height: calc(100vh - 110px);
+  height: calc(100vh - 100px);
   overflow: hidden;
+  background: #F4F6F8;
 }
 
 /* Organisation Unit Sidebar */
 .org-unit-sidebar {
   background: white;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid #D5D5D5;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar-header {
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  background: #F3F5F7;
+  border-bottom: 1px solid #D5D5D5;
 }
 
 .sidebar-header h3 {
   margin: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #6b7280;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #494949;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .org-tree {
-  padding: 0.5rem;
+  padding: 8px;
 }
 
 .org-unit-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 2px;
   cursor: pointer;
-  transition: all 0.2s;
-  color: #374151;
-  margin-bottom: 0.25rem;
+  color: #333;
+  margin-bottom: 2px;
+  font-size: 14px;
+  border: 1px solid transparent;
 }
 
 .org-unit-item:hover {
-  background: #f3f4f6;
+  background: #E8F4F8;
 }
 
 .org-unit-item.active {
-  background: #dbeafe;
-  color: #1e40af;
-  font-weight: 500;
+  background: #FF9800; /* DHIS2 Orange */
+  color: white;
 }
 
 .org-unit-item i {
@@ -1569,45 +1682,60 @@ onMounted(async () => {
 
 .list-header {
   display: grid;
-  grid-template-columns: 2fr 1fr 0.5fr 0.75fr 1fr 0.5fr;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
+  grid-template-columns: 2fr 1.2fr 0.5fr 0.6fr 1fr 100px;
+  gap: 0;
+  padding: 0;
+  background: #F3F5F7;
+  border-bottom: 1px solid #D5D5D5;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.list-header span {
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #4A5768;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  border-right: 1px solid #E0E0E0;
+  display: flex;
+  align-items: center;
 }
 
 .entity-item {
   display: grid;
-  grid-template-columns: 2fr 1fr 0.5fr 0.75fr 1fr 0.5fr;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #f3f4f6;
+  grid-template-columns: 2fr 1.2fr 0.5fr 0.6fr 1fr 100px;
+  gap: 0;
+  padding: 0;
+  border-bottom: 1px solid #EEE;
   cursor: pointer;
-  transition: background 0.2s;
-  font-size: 0.875rem;
-  align-items: center;
+  transition: background 0.1s;
+  font-size: 13px;
+  align-items: stretch;
+  background: white;
+}
+
+.entity-item:nth-child(even) {
+  background: #FBFBFB; /* Zebra striping */
 }
 
 .entity-item:hover {
-  background: #f9fafb;
+  background: #E3F2FD; /* Highlight row */
 }
 
 .entity-item.selected {
-  background: #eff6ff;
-  border-left: 3px solid #3b82f6;
+  background: #FFF8E1;
+  border-left: 3px solid #ff9800;
 }
 
 .entity-name {
+  font-weight: 500;
+  color: #1D5288;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
-  color: #111827;
+  gap: 8px;
+  padding: 8px 12px;
 }
 
 .entity-name i {
@@ -1707,8 +1835,33 @@ onMounted(async () => {
   margin: 0 0 0.5rem 0;
 }
 
+.dashboard-top-bar {
+  padding: 0.5rem 1rem;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #374151;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.back-btn:hover {
+  background: #f3f4f6;
+  color:#111827;
+}
+
 .entity-dashboard {
-  height: 100%;
+  height: calc(100% - 50px); /* Adjust for top bar */
   display: flex;
   flex-direction: column;
 }
@@ -1717,19 +1870,19 @@ onMounted(async () => {
   display: flex;
   align-items: flex-start;
   gap: 1.5rem;
-  padding: 2rem;
-  border-bottom: 2px solid #e5e7eb;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: white; /* DHIS2 style is often white with blue accents, or simple gray */
+  color: #111827;
 }
 
 .profile-avatar {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border: 3px solid white;
+  background: #2c6693; /* DHIS2 Blue */
+  color: white;
+  border: 3px solid #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1744,13 +1897,14 @@ onMounted(async () => {
 .profile-info h2 {
   margin: 0 0 0.75rem 0;
   font-size: 1.75rem;
+  color: #111827;
 }
 
 .profile-meta {
   display: flex;
   gap: 1.5rem;
   font-size: 0.9375rem;
-  opacity: 0.95;
+  color: #4b5563;
 }
 
 .profile-meta span {
@@ -1768,9 +1922,9 @@ onMounted(async () => {
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1779,11 +1933,17 @@ onMounted(async () => {
 }
 
 .action-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.action-btn.danger {
+  color: #ef4444;
+  border-color: #fca5a5;
 }
 
 .action-btn.danger:hover {
-  background: #ef4444;
+  background: #fee2e2;
   border-color: #ef4444;
 }
 
@@ -2924,51 +3084,194 @@ onMounted(async () => {
   transition: all 0.2s;
 }
 
+@media (max-width: 1024px) {
+  .tracker-main {
+    grid-template-columns: 200px 350px 1fr;
+  }
+}
+
 @media (max-width: 768px) {
-  .tracker-header {
+  .tracker-main {
+    display: flex;
     flex-direction: column;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .org-unit-sidebar {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .entities-panel {
+    width: 100%;
+    height: auto;
+    min-height: 500px;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .dashboard-panel {
+    width: 100%;
+    height: auto;
+    min-height: 500px;
+    overflow: visible;
+  }
+
+  /* Header adjustments */
+  .tracker-sub-header {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 1rem;
-    align-items: stretch;
+  }
+
+  .header-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .header-right {
+    width: 100%;
+  }
+
+  .register-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Filters */
+  .search-section {
+    padding: 1rem;
+  }
+  
+  .filters {
+    flex-direction: column;
+    margin-top: 0.5rem;
+  }
+
+  /* List View to Cards */
+  .list-header {
+    display: none;
+  }
+
+  .entity-item {
+    display: grid;
+    grid-template-areas: 
+      "name name"
+      "id age"
+      "gender date"
+      "action action";
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    height: auto;
+  }
+
+  .entity-item > span:nth-child(1) { 
+    grid-area: name; 
+    font-size: 1.125rem;
+    color: #111827;
+  }
+
+  .entity-item > span:nth-child(2) { 
+    grid-area: id; 
+    font-size: 0.875rem;
+  }
+  .entity-item > span:nth-child(2)::before { content: 'ID: '; color: #6b7280; font-weight: 500; }
+
+  .entity-item > span:nth-child(3) { 
+    grid-area: age; 
+    font-size: 0.875rem;
+  }
+  .entity-item > span:nth-child(3)::before { content: 'Age: '; color: #6b7280; font-weight: 500; }
+
+  .entity-item > span:nth-child(4) { 
+    grid-area: gender; 
+    font-size: 0.875rem;
+  }
+  .entity-item > span:nth-child(4)::before { content: 'Sex: '; color: #6b7280; font-weight: 500; }
+
+  .entity-item > span:nth-child(5) { 
+    grid-area: date; 
+    font-size: 0.875rem;
+  }
+  .entity-item > span:nth-child(5)::before { content: 'Enrolled: '; color: #6b7280; font-weight: 500; }
+
+  .entity-item > span:nth-child(6) { 
+    grid-area: action; 
+    justify-self: end;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+    border-top: 1px solid #f3f4f6;
+    padding-top: 0.75rem;
+  }
+
+  /* Dashboard Tabs */
+  .dashboard-tabs {
+    overflow-x: auto;
+    padding: 0 1rem;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-button {
     padding: 1rem;
   }
 
-  .header-left,
-  .header-center,
-  .header-right {
-    flex: none;
-    width: 100%;
-    justify-content: center;
+  /* Dashboard Header */
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
     text-align: center;
+    padding: 1.5rem;
   }
 
-  .header-right {
-    flex-direction: row;
+  .profile-meta {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .profile-actions {
+    margin-top: 1rem;
+  }
+
+  /* Tab Contents */
+  .attributes-grid {
+    grid-template-columns: 1fr;
     gap: 1rem;
-    justify-content: space-between;
   }
 
-  .entities-grid {
+  /* Detail Modals */
+  .detail-grid {
     grid-template-columns: 1fr;
   }
 
-  .entity-card {
+  .enrollment-actions {
     flex-direction: column;
-    align-items: flex-start;
   }
 
-  .entity-avatar {
-    margin-bottom: 1rem;
-  }
-
-  .entity-details {
+  .action-button {
     width: 100%;
+    justify-content: center;
+  }
+  
+  /* Modals */
+  .modal-content {
+    width: 95%;
+    max-height: 95vh;
   }
 
-  .entity-actions {
-    width: 100%;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-top: 1rem;
+  .form-row {
+     grid-template-columns: 1fr;
   }
 
   .quick-forms-grid {
@@ -2998,11 +3301,6 @@ onMounted(async () => {
   .stages-timeline::before {
     left: 15px;
   }
-  
-  .modal-content {
-    width: 95%;
-    max-height: 90vh;
-  }
 }
 
 @media (max-width: 480px) {
@@ -3010,24 +3308,5 @@ onMounted(async () => {
     grid-template-columns: 1fr;
   }
 
-  .header-right {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .register-button {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .entity-actions {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .action-button {
-    width: 100%;
-    justify-content: center;
-  }
 }
 </style>

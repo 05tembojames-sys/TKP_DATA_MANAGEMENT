@@ -1814,7 +1814,7 @@ th {
 
 .metric-trend.down {
   color: #dc3545;
-}
+
   font-weight: 700;
   color: #4A148C;
   font-size: 1.1rem;

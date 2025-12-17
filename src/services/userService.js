@@ -10,7 +10,8 @@ import {
   where,
   orderBy,
   serverTimestamp,
-  increment
+  increment,
+  limit
 } from 'firebase/firestore'
 import {
   createUserWithEmailAndPassword,
@@ -400,6 +401,59 @@ class UserService {
       await Promise.all(deletePromises)
     } catch (error) {
       console.error('Error cleaning up user activities:', error)
+    }
+  }
+
+  // Check if user is online
+  async checkUserOnlineStatus(userId) {
+    try {
+      const q = query(
+        collection(db, this.userSessionsCollection),
+        where('userId', '==', userId),
+        where('isActive', '==', true),
+        limit(1)
+      )
+      const snapshot = await getDocs(q)
+      return !snapshot.empty
+    } catch (error) {
+      // Silent fail for online status check
+      return false
+    }
+  }
+
+  // Get user's last login
+  async getUserLastLogin(userId) {
+    try {
+      const q = query(
+        collection(db, this.userActivitiesCollection),
+        where('userId', '==', userId),
+        where('activityType', '==', 'user_login'),
+        orderBy('timestamp', 'desc'),
+        limit(1)
+      )
+      const snapshot = await getDocs(q)
+      if (!snapshot.empty) {
+        const data = snapshot.docs[0].data()
+        return data.timestamp?.toDate?.()?.toISOString() || data.timestamp
+      }
+      return null
+    } catch (error) {
+      return null
+    }
+  }
+
+  // Get user login count
+  async getUserLoginCount(userId) {
+    try {
+      const q = query(
+        collection(db, this.userActivitiesCollection),
+        where('userId', '==', userId),
+        where('activityType', '==', 'user_login')
+      )
+      const snapshot = await getDocs(q)
+      return snapshot.size
+    } catch (error) {
+      return 0
     }
   }
 

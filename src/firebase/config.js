@@ -1,10 +1,11 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import {
-  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   disableNetwork,
   enableNetwork,
-  enableMultiTabIndexedDbPersistence,
 } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -20,19 +21,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
-
-// Enable offline persistence for Firestore
-enableMultiTabIndexedDbPersistence(db).catch((err) => {
-  if (err.code == "failed-precondition") {
-    // Multiple tabs open, persistence can only be enabled in one tab at a time
-    console.warn("Firebase persistence failed: Multiple tabs open");
-  } else if (err.code == "unimplemented") {
-    // The current browser doesn't support persistence
-    console.warn("Firebase persistence not supported by browser");
-  }
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  })
 });
+export const storage = getStorage(app);
 
 // Function to manually control network status for Firestore
 export const setFirestoreNetworkStatus = async (online) => {

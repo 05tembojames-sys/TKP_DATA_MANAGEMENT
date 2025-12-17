@@ -8,52 +8,23 @@
     <div class="capture-sub-header">
       <div class="header-left">
         <h1 class="capture-title">Data Capture</h1>
+        <span class="module-badge">Data Entry Module</span>
       </div>
       <div class="header-right">
         <button
           @click="showInitialReferral"
-          class="referral-button"
+          class="action-button referral-button"
           :class="{ active: activeTab === 'referral' }"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-            />
-            <polyline points="14,2 14,8 20,8" />
-            <line x1="16" y1="13" x2="8" y2="13" />
-            <line x1="16" y1="17" x2="8" y2="17" />
-            <polyline points="10,9 9,9 8,9" />
-          </svg>
+          <i class="fas fa-file-medical"></i>
           New Referral
         </button>
         <button
           @click="showCustomReportsTab"
-          class="reports-button"
+          class="action-button reports-button"
           :class="{ active: activeTab === 'reports' }"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-            />
-            <polyline points="14,2 14,8 20,8" />
-            <line x1="16" y1="13" x2="8" y2="13" />
-            <line x1="16" y1="17" x2="8" y2="17" />
-            <polyline points="10,9 9,9 8,9" />
-          </svg>
+          <i class="fas fa-file-alt"></i>
           Documents For TKP
         </button>
       </div>
@@ -407,6 +378,7 @@
 import TopHeader from "./TopHeader.vue";
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { useToast } from "../composables/useToast.js";
 import CaptureService from "../services/captureService.js";
 import FormService from "../services/formService.js";
 import AuthService from "../services/auth.js";
@@ -419,6 +391,7 @@ import CustomReports from "./CustomReports.vue";
 
 const router = useRouter();
 const route = useRoute();
+const { addToast } = useToast();
 
 // Ref for accessing the InitialReferralForm component
 const referralForm = ref(null);
@@ -619,7 +592,7 @@ const loadDataEntry = async () => {
   } catch (error) {
     console.error("❌❌❌ ERROR in loadDataEntry:", error);
     console.error("Error details:", error.message, error.stack);
-    alert("Failed to load data entry form: " + error.message);
+    addToast("Failed to load data entry form: " + error.message, 'error');
   } finally {
     console.log('🏁 loadDataEntry() complete');
     loading.value = false;
@@ -754,7 +727,7 @@ const handleRouteQuery = async () => {
 // Handle when the Initial Referral Form is saved
 const handleReferralFormSaved = (data) => {
   // Show success message
-  alert("Initial Referral Form saved successfully!");
+  addToast("Initial Referral Form saved successfully!", 'success');
 
   // Reset the form selection
   showDataEntry.value = false;
@@ -869,9 +842,9 @@ const validateData = () => {
   isValid.value = valid;
 
   if (valid) {
-    alert("Data validation passed!");
+    addToast("Data validation passed!", 'success');
   } else {
-    alert("Please fix the validation errors before proceeding");
+    addToast("Please fix the validation errors before proceeding", 'error');
   }
 };
 
@@ -880,7 +853,7 @@ const saveData = async () => {
   if (selectedDataSet.value === "initial-referral" && referralForm.value) {
     // Trigger the save method of the InitialReferralForm component
     // This would require exposing a save method in InitialReferralForm
-    alert("Please use the Save button in the Initial Referral Form");
+    addToast("Please use the Save button in the Initial Referral Form", 'info');
     return;
   }
 

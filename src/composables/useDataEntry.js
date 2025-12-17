@@ -3,10 +3,6 @@ import { db } from '../firebase/config';
 import { doc, getDoc, setDoc, collection, query, where, getDocs, addDoc, orderBy, limit as fbLimit } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
 
-/**
- * Advanced Data Entry Composable
- * Provides comprehensive functionality for aggregate data entry
- */
 export function useDataEntry() {
     // State
     const isOnline = ref(navigator.onLine);

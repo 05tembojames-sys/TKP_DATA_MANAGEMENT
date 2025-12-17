@@ -117,29 +117,36 @@ class ReportService {
     try {
       let q = collection(db, this.collectionName)
 
-      // Apply filters - simplified to avoid composite index issues
+      // Apply filters
       // We'll apply one primary filter and do additional filtering client-side
+      // To avoid composite index requirements (where + orderBy), we will ONLY apply the filter in Firestore
+      // and do the sorting client-side if a filter is present.
+
+      let hasFilter = false
 
       // Handle category filtering first (this is the key to separation)
       if (filters.category && filters.uploadedBy) {
-        // When both category and uploadedBy are provided, we need to handle this carefully
-        // Since Firestore doesn't support composite queries without indexes, we'll use category as primary
         q = query(q, where('category', '==', filters.category))
+        hasFilter = true
       } else if (filters.category) {
         q = query(q, where('category', '==', filters.category))
+        hasFilter = true
       } else if (filters.uploadedBy) {
-        // Primary filter - this is the most common use case
         q = query(q, where('uploadedBy', '==', filters.uploadedBy))
+        hasFilter = true
       } else if (filters.status) {
-        // Alternative primary filter
         q = query(q, where('status', '==', filters.status))
+        hasFilter = true
       } else if (filters.reportType) {
-        // Alternative primary filter
         q = query(q, where('reportType', '==', filters.reportType))
+        hasFilter = true
       }
 
       // Order by upload date (newest first)
-      q = query(q, orderBy('uploadedAt', 'desc'))
+      // ONLY apply server-side sort if NO filters are present to avoid index errors
+      if (!hasFilter) {
+        q = query(q, orderBy('uploadedAt', 'desc'))
+      }
 
       const querySnapshot = await getDocs(q)
       let reports = []
@@ -154,9 +161,15 @@ class ReportService {
         })
       })
 
-      // Apply additional filters client-side to avoid composite index issues
+      // Always perform client-side sort to ensure correct order
+      reports.sort((a, b) => {
+        const dateA = a.uploadedAt || new Date(0)
+        const dateB = b.uploadedAt || new Date(0)
+        return dateB - dateA // Descending order
+      })
+
+      // Apply additional filters client-side
       if (filters.category && filters.uploadedBy) {
-        // Filter by uploadedBy since category was used as primary filter
         reports = reports.filter(report => report.uploadedBy === filters.uploadedBy)
       }
 
@@ -204,10 +217,10 @@ class ReportService {
       }
     } catch (error) {
       console.error('Error fetching reports:', error)
-      // Handle the specific case of missing indexes
+
+      // Fallback: get all reports and filter client-side
       if (error.code === 'failed-precondition' && error.message.includes('index')) {
         console.warn('Firestore index required. Falling back to less efficient query.')
-        // Fallback: get all reports and filter client-side
         try {
           const fallbackQuery = query(collection(db, this.collectionName), orderBy('uploadedAt', 'desc'))
           const fallbackSnapshot = await getDocs(fallbackQuery)

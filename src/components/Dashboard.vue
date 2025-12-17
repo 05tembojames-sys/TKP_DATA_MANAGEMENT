@@ -25,6 +25,21 @@
                  <i class="fas fa-file-alt"></i>
                  <span>Reports Overview</span>
                </div>
+               
+               <!-- Custom Dashboards -->
+               <div v-if="customDashboards.length > 0" class="menu-divider"></div>
+               <div v-if="customDashboards.length > 0" class="menu-header">My Dashboards</div>
+               <div 
+                 v-for="dashboard in customDashboards" 
+                 :key="dashboard.id" 
+                 class="menu-item"
+                 :class="{ active: selectedDashboard === dashboard.id }"
+                 @click="selectDashboard(dashboard.id)"
+               >
+                 <i class="fas fa-columns"></i>
+                 <span>{{ dashboard.name }}</span>
+               </div>
+               
                <div class="menu-divider"></div>
                <div class="menu-item" @click="createNewDashboard">
                  <i class="fas fa-plus"></i>
@@ -60,7 +75,17 @@
           <div v-if="widgetVisibility.welcome" class="dhis-widget text-widget double-height">
              <div class="widget-header">
                 <div class="widget-title">Welcome, {{ getFirstName() }}</div>
-                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+                <div class="widget-controls" @click.stop="toggleWidgetMenu('welcome')">
+                   <i class="fas fa-ellipsis-h"></i>
+                   <div v-if="activeWidgetMenu === 'welcome'" class="widget-menu">
+                      <div class="menu-item" @click.stop="refreshWidget('welcome')">
+                         <i class="fas fa-sync-alt"></i> Refresh
+                      </div>
+                      <div class="menu-item" @click.stop="hideWidget('welcome')">
+                         <i class="fas fa-eye-slash"></i> Hide
+                      </div>
+                   </div>
+                </div>
              </div>
              <div class="widget-content welcome-content">
                 <h3>{{ getGreeting() }}!</h3>
@@ -76,7 +101,17 @@
           <div v-if="widgetVisibility.trackerCapture" class="dhis-widget chart-widget" @click="setCurrentView('tracker-capture')">
              <div class="widget-header">
                 <div class="widget-title">Tracker Capture</div>
-                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+                <div class="widget-controls" @click.stop="toggleWidgetMenu('trackerCapture')">
+                   <i class="fas fa-ellipsis-h"></i>
+                   <div v-if="activeWidgetMenu === 'trackerCapture'" class="widget-menu">
+                      <div class="menu-item" @click.stop="viewWidgetDetails('tracker-capture')">
+                         <i class="fas fa-external-link-alt"></i> Open App
+                      </div>
+                      <div class="menu-item" @click.stop="hideWidget('trackerCapture')">
+                         <i class="fas fa-eye-slash"></i> Hide
+                      </div>
+                   </div>
+                </div>
              </div>
              <div class="widget-content center-content">
                  <div class="big-icon"><i class="fa-solid fa-search"></i></div>
@@ -88,7 +123,20 @@
           <div v-if="widgetVisibility.dataEntry" class="dhis-widget chart-widget" @click="setCurrentView('data-entry')">
              <div class="widget-header">
                 <div class="widget-title">Data Entry Progress</div>
-                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+                <div class="widget-controls" @click.stop="toggleWidgetMenu('dataEntry')">
+                   <i class="fas fa-ellipsis-h"></i>
+                   <div v-if="activeWidgetMenu === 'dataEntry'" class="widget-menu">
+                      <div class="menu-item" @click.stop="refreshWidget('dataEntry')">
+                         <i class="fas fa-sync-alt"></i> Refresh
+                      </div>
+                      <div class="menu-item" @click.stop="viewWidgetDetails('data-entry')">
+                         <i class="fas fa-external-link-alt"></i> View Details
+                      </div>
+                      <div class="menu-item" @click.stop="hideWidget('dataEntry')">
+                         <i class="fas fa-eye-slash"></i> Hide
+                      </div>
+                   </div>
+                </div>
              </div>
              <div class="widget-content">
                  <canvas ref="formsMiniChart"></canvas>
@@ -99,7 +147,20 @@
           <div v-if="widgetVisibility.reports" class="dhis-widget chart-widget" @click="setCurrentView('reports')">
              <div class="widget-header">
                 <div class="widget-title">Reports Generated</div>
-                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+                <div class="widget-controls" @click.stop="toggleWidgetMenu('reports')">
+                   <i class="fas fa-ellipsis-h"></i>
+                   <div v-if="activeWidgetMenu === 'reports'" class="widget-menu">
+                      <div class="menu-item" @click.stop="refreshWidget('reports')">
+                         <i class="fas fa-sync-alt"></i> Refresh
+                      </div>
+                      <div class="menu-item" @click.stop="viewWidgetDetails('reports')">
+                         <i class="fas fa-external-link-alt"></i> View Details
+                      </div>
+                      <div class="menu-item" @click.stop="hideWidget('reports')">
+                         <i class="fas fa-eye-slash"></i> Hide
+                      </div>
+                   </div>
+                </div>
              </div>
              <div class="widget-content">
                  <canvas ref="reportsMiniChart"></canvas>
@@ -110,7 +171,20 @@
           <div v-if="widgetVisibility.events" class="dhis-widget chart-widget" @click="setCurrentView('event-reports')">
              <div class="widget-header">
                 <div class="widget-title">Event Status</div>
-                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+                <div class="widget-controls" @click.stop="toggleWidgetMenu('events')">
+                   <i class="fas fa-ellipsis-h"></i>
+                   <div v-if="activeWidgetMenu === 'events'" class="widget-menu">
+                      <div class="menu-item" @click.stop="refreshWidget('events')">
+                         <i class="fas fa-sync-alt"></i> Refresh
+                      </div>
+                      <div class="menu-item" @click.stop="viewWidgetDetails('event-reports')">
+                         <i class="fas fa-external-link-alt"></i> View Details
+                      </div>
+                      <div class="menu-item" @click.stop="hideWidget('events')">
+                         <i class="fas fa-eye-slash"></i> Hide
+                      </div>
+                   </div>
+                </div>
              </div>
              <div class="widget-content">
                  <canvas ref="eventsMiniChart"></canvas>
@@ -121,7 +195,20 @@
           <div v-if="widgetVisibility.demographics" class="dhis-widget chart-widget" @click="setCurrentView('visualization')">
              <div class="widget-header">
                 <div class="widget-title">Demographics</div>
-                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+                <div class="widget-controls" @click.stop="toggleWidgetMenu('demographics')">
+                   <i class="fas fa-ellipsis-h"></i>
+                   <div v-if="activeWidgetMenu === 'demographics'" class="widget-menu">
+                      <div class="menu-item" @click.stop="refreshWidget('demographics')">
+                         <i class="fas fa-sync-alt"></i> Refresh
+                      </div>
+                      <div class="menu-item" @click.stop="viewWidgetDetails('visualization')">
+                         <i class="fas fa-external-link-alt"></i> View Details
+                      </div>
+                      <div class="menu-item" @click.stop="hideWidget('demographics')">
+                         <i class="fas fa-eye-slash"></i> Hide
+                      </div>
+                   </div>
+                </div>
              </div>
              <div class="widget-content">
                  <canvas ref="analyticsMiniChart"></canvas>
@@ -132,7 +219,17 @@
           <div v-if="widgetVisibility.outreach" class="dhis-widget chart-widget" @click="setCurrentView('outreach')">
              <div class="widget-header">
                 <div class="widget-title">Outreach</div>
-                <div class="widget-controls"><i class="fas fa-ellipsis-h"></i></div>
+                <div class="widget-controls" @click.stop="toggleWidgetMenu('outreach')">
+                   <i class="fas fa-ellipsis-h"></i>
+                   <div v-if="activeWidgetMenu === 'outreach'" class="widget-menu">
+                      <div class="menu-item" @click.stop="viewWidgetDetails('outreach')">
+                         <i class="fas fa-external-link-alt"></i> Open App
+                      </div>
+                      <div class="menu-item" @click.stop="hideWidget('outreach')">
+                         <i class="fas fa-eye-slash"></i> Hide
+                      </div>
+                   </div>
+                </div>
              </div>
              <div class="widget-content center-content">
                  <div class="big-icon"><i class="fa-solid fa-route"></i></div>
@@ -611,30 +708,91 @@
       </div>
     </div>
  
+    <!-- Create Dashboard Modal -->
+    <div v-if="showCreateDashboardModal" class="modal-overlay" @click="closeCreateDashboardModal">
+      <div class="modal-content modal-large" @click.stop>
+        <div class="modal-header">
+          <h3>Create New Dashboard</h3>
+          <button class="close-btn" @click="closeCreateDashboardModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="edit-section">
+            <h4>Dashboard Details</h4>
+            <div class="form-group">
+              <label>Dashboard Name</label>
+              <input v-model="newDashboard.name" type="text" class="form-control" placeholder="Enter dashboard name" />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea v-model="newDashboard.description" class="form-control" rows="3" placeholder="Enter dashboard description"></textarea>
+            </div>
+          </div>
+          <div class="edit-section">
+            <h4>Select Widgets</h4>
+            <div class="widget-toggle-list">
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="newDashboard.widgets.welcome" />
+                <span>Welcome Widget</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="newDashboard.widgets.trackerCapture" />
+                <span>Tracker Capture</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="newDashboard.widgets.dataEntry" />
+                <span>Data Entry Progress</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="newDashboard.widgets.reports" />
+                <span>Reports Generated</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="newDashboard.widgets.events" />
+                <span>Event Status</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="newDashboard.widgets.demographics" />
+                <span>Demographics</span>
+              </label>
+              <label class="widget-toggle-item">
+                <input type="checkbox" v-model="newDashboard.widgets.outreach" />
+                <span>Outreach</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" @click="closeCreateDashboardModal">Cancel</button>
+          <button class="btn-primary" @click="saveNewDashboard">Create Dashboard</button>
+        </div>
+      </div>
+    </div>
+ 
  </template>
 
 <script setup>
 import TopHeader from "./TopHeader.vue";
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, defineAsyncComponent } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useToast } from "../composables/useToast.js";
 import AuthService from "../services/auth.js";
 import UserService from "../services/userService.js";
 import KLogo from "./KLogo.vue";
-import InitialReferralForm from "./InitialReferralForm.vue";
-import ChildOverviewForm from "./ChildOverviewForm.vue";
-import InitialAssessmentForm from "./InitialAssessmentForm.vue";
-import MedicalIntakeForm from "./MedicalIntakeForm.vue";
-import FormsList from "./FormsList.vue";
-import ChildTracker from "./ChildTracker.vue";
-import DataVisualization from "./DataVisualization.vue";
-import DataAnalysis from "./DataAnalysis.vue";
-import Reports from "./Reports.vue";
-import EventReports from "./EventReports.vue";
 import FormService from "../services/formService.js";
-import OutreachModule from "./OutreachModule.vue";
-import AggregateDataEntry from "./AggregateDataEntry.vue";
-import Chart from "chart.js/auto";
+
+// Async Components for better performance
+const InitialReferralForm = defineAsyncComponent(() => import("./InitialReferralForm.vue"));
+const ChildOverviewForm = defineAsyncComponent(() => import("./ChildOverviewForm.vue"));
+const InitialAssessmentForm = defineAsyncComponent(() => import("./InitialAssessmentForm.vue"));
+const MedicalIntakeForm = defineAsyncComponent(() => import("./MedicalIntakeForm.vue"));
+const FormsList = defineAsyncComponent(() => import("./FormsList.vue"));
+const ChildTracker = defineAsyncComponent(() => import("./ChildTracker.vue"));
+const DataVisualization = defineAsyncComponent(() => import("./DataVisualization.vue"));
+const DataAnalysis = defineAsyncComponent(() => import("./DataAnalysis.vue"));
+const Reports = defineAsyncComponent(() => import("./Reports.vue"));
+const EventReports = defineAsyncComponent(() => import("./EventReports.vue"));
+const OutreachModule = defineAsyncComponent(() => import("./OutreachModule.vue"));
+const AggregateDataEntry = defineAsyncComponent(() => import("./AggregateDataEntry.vue"));
 
 // Import custom SVG icon (uncomment when you add the file)
 // import DataEntryIcon from '../assets/icons/data-entry.svg?url'
@@ -698,6 +856,48 @@ const selectedMapLayer = ref('children');
 const dashboardMap = ref(null);
 const mapContainer = ref(null);
 const mapInstance = ref(null);
+
+// Widget Menu State
+const activeWidgetMenu = ref(null);
+
+const toggleWidgetMenu = (widgetName) => {
+  if (activeWidgetMenu.value === widgetName) {
+    activeWidgetMenu.value = null;
+  } else {
+    activeWidgetMenu.value = widgetName;
+  }
+};
+
+const hideWidget = (widgetName) => {
+  if (widgetVisibility.value.hasOwnProperty(widgetName)) {
+    widgetVisibility.value[widgetName] = false;
+    success('Widget hidden');
+  }
+  activeWidgetMenu.value = null;
+};
+
+const viewWidgetDetails = (viewName) => {
+  setCurrentView(viewName);
+  activeWidgetMenu.value = null;
+};
+
+const refreshWidget = async (widgetName) => {
+  // In a real app, we might fetch data specific to the wdget
+  // For now, we'll reload the summary data and charts
+  await loadSummaryData();
+  await createMiniCharts();
+  success('Widget data refreshed');
+  activeWidgetMenu.value = null;
+};
+
+// Close widget menu when clicking outside
+onMounted(() => {
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.widget-controls')) {
+      activeWidgetMenu.value = null;
+    }
+  });
+});
 
 // Slideshow functionality
 const isSlideshowActive = ref(false);
@@ -810,22 +1010,107 @@ const toggleDashboardsMenu = () => {
   showDashboardsMenu.value = !showDashboardsMenu.value;
 };
 
+// Custom Dashboards State
+const showCreateDashboardModal = ref(false);
+const customDashboards = ref([]);
+const newDashboard = ref({
+  name: '',
+  description: '',
+  widgets: {
+    welcome: true,
+    trackerCapture: true,
+    dataEntry: true,
+    reports: true,
+    events: true,
+    demographics: true,
+    outreach: true,
+  }
+});
+
+const createNewDashboard = () => {
+  showDashboardsMenu.value = false;
+  // Reset form
+  newDashboard.value = {
+    name: '',
+    description: '',
+    widgets: {
+      welcome: true,
+      trackerCapture: true,
+      dataEntry: true,
+      reports: true,
+      events: true,
+      demographics: true,
+      outreach: true,
+    }
+  };
+  showCreateDashboardModal.value = true;
+};
+
+const closeCreateDashboardModal = () => {
+  showCreateDashboardModal.value = false;
+};
+
+const saveNewDashboard = () => {
+  if (!newDashboard.value.name.trim()) {
+    error('Please enter a dashboard name');
+    return;
+  }
+
+  const dashboardId = 'custom-' + Date.now();
+  const dashboard = {
+    id: dashboardId,
+    name: newDashboard.value.name,
+    description: newDashboard.value.description,
+    widgets: { ...newDashboard.value.widgets }
+  };
+
+  customDashboards.value.push(dashboard);
+  
+  // Save to localStorage
+  localStorage.setItem('custom_dashboards', JSON.stringify(customDashboards.value));
+  
+  success(`Dashboard "${dashboard.name}" created successfully!`);
+  closeCreateDashboardModal();
+  
+  // Switch to the new dashboard
+  selectDashboard(dashboardId);
+};
+
 const selectDashboard = (dashboardId) => {
   selectedDashboard.value = dashboardId;
   showDashboardsMenu.value = false;
   
   if (dashboardId === 'main') {
+    setCurrentView('main');
+    // Restore default widgets or saved main dashboard settings
+    const savedSettings = localStorage.getItem('dashboard_settings');
+    if (savedSettings) {
+       const settings = JSON.parse(savedSettings);
+       if (settings.widgetVisibility) {
+         widgetVisibility.value = { ...settings.widgetVisibility };
+       }
+    } else {
+      // Default all true
+      Object.keys(widgetVisibility.value).forEach(key => widgetVisibility.value[key] = true);
+    }
+    dashboardName.value = 'Main Dashboard';
     success('Viewing Main Dashboard');
   } else if (dashboardId === 'analytics') {
-    info('Analytics Dashboard - Coming soon!');
+    setCurrentView('visualization');
+    success('Viewing Analytics Dashboard');
   } else if (dashboardId === 'reports') {
-    info('Reports Dashboard - Coming soon!');
+    setCurrentView('reports');
+    success('Viewing Reports Dashboard');
+  } else if (dashboardId.startsWith('custom-')) {
+    // Handle custom dashboard
+    const dashboard = customDashboards.value.find(d => d.id === dashboardId);
+    if (dashboard) {
+      setCurrentView('main'); // Use main view layout
+      widgetVisibility.value = { ...dashboard.widgets }; // Apply custom widget visibility
+      dashboardName.value = dashboard.name; // Update title
+      success(`Viewing ${dashboard.name}`);
+    }
   }
-};
-
-const createNewDashboard = () => {
-  showDashboardsMenu.value = false;
-  info('Create Dashboard feature - Coming soon!');
 };
 
 const saveDashboardSettings = () => {
@@ -996,14 +1281,49 @@ const loadMapData = async (layerType) => {
   if (!mapInstance.value) return;
   
   try {
-    // Sample data for demonstration - replace with real data from FormService
-    const sampleLocations = [
-      { name: 'Lusaka Main Center', lat: -15.4167, lng: 28.2833, type: 'Active', count: 45 },
-      { name: 'Chongwe Outreach', lat: -15.3308, lng: 28.6808, type: 'Active', count: 23 },
-      { name: 'Kafue Center', lat: -15.7694, lng: 28.1814, type: 'Pending', count: 12 },
-      { name: 'Chilanga Facility', lat: -15.5456, lng: 28.2769, type: 'Active', count: 18 },
-      { name: 'Kabwe Outreach', lat: -14.4469, lng: 28.4464, type: 'Urgent', count: 8 },
-    ];
+    let locations = [];
+    
+    // Fetch real data counts
+    const [referrals, overviews, assessments] = await Promise.all([
+      FormService.getForms('initial-referral', 1000),
+      FormService.getForms('child-overview', 1000),
+      FormService.getForms('initial-assessment', 1000)
+    ]);
+    
+    const totalReferrals = referrals.success ? referrals.forms.length : 0;
+    const totalOverviews = overviews.success ? overviews.forms.length : 0;
+    const totalAssessments = assessments.success ? assessments.forms.length : 0;
+
+    // Distribute these counts across locations (Simulated distribution of real data)
+    if (layerType === 'children') {
+        locations = [
+            { name: 'Lusaka Main Center', lat: -15.4167, lng: 28.2833, type: 'Active', count: Math.ceil(totalOverviews * 0.4) },
+            { name: 'Chongwe Outreach', lat: -15.3308, lng: 28.6808, type: 'Active', count: Math.ceil(totalOverviews * 0.2) },
+            { name: 'Kafue Center', lat: -15.7694, lng: 28.1814, type: 'Pending', count: Math.ceil(totalOverviews * 0.15) },
+            { name: 'Chilanga Facility', lat: -15.5456, lng: 28.2769, type: 'Active', count: Math.ceil(totalOverviews * 0.15) },
+            { name: 'Kabwe Outreach', lat: -14.4469, lng: 28.4464, type: 'Urgent', count: Math.ceil(totalOverviews * 0.1) },
+        ];
+    } else if (layerType === 'events') {
+         locations = [
+            { name: 'Lusaka Main Center', lat: -15.4167, lng: 28.2833, type: 'Active', count: Math.ceil(totalAssessments * 0.5) },
+            { name: 'Chongwe Outreach', lat: -15.3308, lng: 28.6808, type: 'Active', count: Math.ceil(totalAssessments * 0.2) },
+            { name: 'Kafue Center', lat: -15.7694, lng: 28.1814, type: 'Pending', count: Math.ceil(totalAssessments * 0.1) },
+            { name: 'Chilanga Facility', lat: -15.5456, lng: 28.2769, type: 'Active', count: Math.ceil(totalAssessments * 0.1) },
+            { name: 'Kabwe Outreach', lat: -14.4469, lng: 28.4464, type: 'Urgent', count: Math.ceil(totalAssessments * 0.1) },
+        ];
+    } else {
+        // Default/Facilities
+        locations = [
+            { name: 'Lusaka Main Center', lat: -15.4167, lng: 28.2833, type: 'Active', count: 1 },
+            { name: 'Chongwe Outreach', lat: -15.3308, lng: 28.6808, type: 'Active', count: 1 },
+            { name: 'Kafue Center', lat: -15.7694, lng: 28.1814, type: 'Pending', count: 1 },
+            { name: 'Chilanga Facility', lat: -15.5456, lng: 28.2769, type: 'Active', count: 1 },
+            { name: 'Kabwe Outreach', lat: -14.4469, lng: 28.4464, type: 'Urgent', count: 1 },
+        ];
+    }
+    
+    // Use the locations array
+    const sampleLocations = locations;
     
     // Custom icons based on status
     const getMarkerColor = (type) => {
@@ -1219,14 +1539,18 @@ const toggleInHousedMode = () => {
 // Load summary data
 const loadSummaryData = async () => {
   try {
-    // Load users count
-    const usersResult = await UserService.getAllUsers();
+    // Fetch data in parallel for faster loading
+    const [usersResult, formStatsResult] = await Promise.all([
+      UserService.getAllUsers(),
+      FormService.getFormStatistics()
+    ]);
+
+    // Handle users result
     if (usersResult.success) {
       users.value = usersResult.users || [];
     }
 
-    // Load form statistics
-    const formStatsResult = await FormService.getFormStatistics();
+    // Handle form stats result
     if (formStatsResult.success) {
       totalReports.value = formStatsResult.statistics.totalReferrals;
       totalChildren.value = formStatsResult.statistics.totalOverviews;
@@ -1612,6 +1936,16 @@ onMounted(() => {
     }
   }
 
+  // Load custom dashboards
+  const savedCustomDashboards = localStorage.getItem('custom_dashboards');
+  if (savedCustomDashboards) {
+    try {
+      customDashboards.value = JSON.parse(savedCustomDashboards);
+    } catch (err) {
+      console.error('Error loading custom dashboards:', err);
+    }
+  }
+
   loadSummaryData();
 
   // Check for query parameters (e.g., from Child Tracker navigation)
@@ -1656,6 +1990,9 @@ onMounted(() => {
 
 const createMiniCharts = async () => {
   try {
+    // Dynamically import Chart.js
+    const { default: Chart } = await import("chart.js/auto");
+
     const [referrals, overviews, assessments] = await Promise.all([
       FormService.getForms('initial-referral', 100),
       FormService.getForms('child-overview', 100),
@@ -1668,6 +2005,10 @@ const createMiniCharts = async () => {
 
     if (formsMiniChart.value) {
       const ctx = formsMiniChart.value.getContext('2d');
+      // Check if a chart instance already exists and destroy it
+      const existingChart = Chart.getChart(formsMiniChart.value);
+      if (existingChart) existingChart.destroy();
+
       const data = {
         labels: ['Initial Referral', 'Child Overview', 'Assessment'],
         datasets: [{
@@ -1680,6 +2021,9 @@ const createMiniCharts = async () => {
 
     if (reportsMiniChart.value) {
       const ctx = reportsMiniChart.value.getContext('2d');
+      const existingChart = Chart.getChart(reportsMiniChart.value);
+      if (existingChart) existingChart.destroy();
+
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       const count = new Array(12).fill(0);
       [...overviewForms, ...referralForms, ...assessmentForms].forEach(f => {
@@ -1694,6 +2038,9 @@ const createMiniCharts = async () => {
 
     if (eventsMiniChart.value) {
       const ctx = eventsMiniChart.value.getContext('2d');
+      const existingChart = Chart.getChart(eventsMiniChart.value);
+      if (existingChart) existingChart.destroy();
+
       const statusCount = {};
       [...overviewForms, ...assessmentForms, ...referralForms].forEach(f => { const s = f.status || f.caseStatus || 'Unknown'; statusCount[s] = (statusCount[s]||0)+1; });
       const labels = Object.keys(statusCount);
@@ -1703,11 +2050,16 @@ const createMiniCharts = async () => {
 
     if (analyticsMiniChart.value) {
       const ctx = analyticsMiniChart.value.getContext('2d');
+      const existingChart = Chart.getChart(analyticsMiniChart.value);
+      if (existingChart) existingChart.destroy();
+
       const genderCount = { Female: 0, Male: 0 };
       [...overviewForms, ...referralForms, ...assessmentForms].forEach(f => { const g = f.gender; if (g === 'Female') genderCount.Female++; else if (g === 'Male') genderCount.Male++; });
       new Chart(ctx, { type: 'pie', data: { labels: Object.keys(genderCount), datasets: [{ data: Object.values(genderCount), backgroundColor: ['#10b981', '#ef4444'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error("Error creating mini charts:", e);
+  }
 };
 </script>
 
@@ -1928,10 +2280,44 @@ const createMiniCharts = async () => {
 .widget-controls {
   color: #9ca3af;
   cursor: pointer;
+  position: relative;
 }
 
 .widget-controls:hover {
   color: #4b5563;
+}
+
+.widget-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  min-width: 150px;
+  z-index: 10;
+  padding: 4px 0;
+  text-align: left;
+}
+
+.widget-menu .menu-item {
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.widget-menu .menu-item:hover {
+  background: #f3f4f6;
+}
+
+.widget-menu .menu-item i {
+  width: 16px;
+  color: #6b7280;
 }
 
 .widget-content {

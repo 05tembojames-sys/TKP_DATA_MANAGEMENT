@@ -286,6 +286,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useToast } from '../composables/useToast.js';
 import TopHeader from './TopHeader.vue';
 import InitialReferralForm from './InitialReferralForm.vue';
 import MedicalIntakeForm from './MedicalIntakeForm.vue';
@@ -298,6 +299,7 @@ import FormDataDisplay from './FormDataDisplay.vue';
 
 const router = useRouter();
 const route = useRoute();
+const { addToast } = useToast();
 
 // State
 const orgUnits = ref([]);
@@ -319,7 +321,8 @@ const pageSize = ref(10);
 
 // Computed
 const filteredEvents = computed(() => {
-  let filtered = events.value;
+  // Create a shallow copy to avoid mutating the original reactive array during sort
+  let filtered = [...events.value];
   
   // Search filter
   if (searchQuery.value) {
@@ -337,8 +340,10 @@ const filteredEvents = computed(() => {
     let bVal = b[sortColumn.value];
     
     if (sortColumn.value === 'date') {
-      aVal = new Date(a.createdAt);
-      bVal = new Date(b.createdAt);
+      const dateA = a.createdAt;
+      const dateB = b.createdAt;
+      aVal = dateA?.toDate ? dateA.toDate() : new Date(dateA || 0);
+      bVal = dateB?.toDate ? dateB.toDate() : new Date(dateB || 0);
     }
     
     if (sortDirection.value === 'asc') {
@@ -470,7 +475,7 @@ const toggleOrgUnit = (ouId) => {
 
 const registerNewEvent = () => {
   if (!selectedProgram.value) {
-    alert('Please select a program first');
+    addToast('Please select a program first', 'warning');
     return;
   }
   currentEventData.value = null;
@@ -505,18 +510,20 @@ const deleteEvent = async (eventId) => {
     if (result.success) {
       await loadEvents();
       selectedEvent.value = null;
+      addToast('Event deleted successfully', 'success');
     } else {
-      alert('Failed to delete event: ' + result.error);
+      addToast('Failed to delete event: ' + result.error, 'error');
     }
   } catch (error) {
     console.error('Error deleting event:', error);
-    alert('Error deleting event');
+    addToast('Error deleting event', 'error');
   } finally {
     loading.value = false;
   }
 };
 
 const handleFormSaved = async () => {
+  addToast('Form saved successfully!', 'success');
   viewMode.value = 'list';
   await loadEvents();
 };
@@ -579,7 +586,6 @@ watch(selectedProgram, () => {
 onMounted(async () => {
   await loadOrgUnits();
   await loadPrograms();
-  await loadEvents();
 });
 </script>
 

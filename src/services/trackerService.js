@@ -1,13 +1,13 @@
 import FormService from './formService.js'
 
 class TrackerService {
-  
+
   // Create new enrollment/case - Now saves to Firebase via FormService
   static async createEnrollment(enrollmentData) {
     try {
       // Generate a unique case ID
       const caseId = this.generateCaseId()
-      
+
       // Create the form data for the initial form type
       const formData = {
         childFirstName: enrollmentData.childFirstName,
@@ -20,7 +20,7 @@ class TrackerService {
         program: enrollmentData.program,
         status: 'draft'
       }
-      
+
       // Save the form using FormService based on initial form type
       let result
       switch (enrollmentData.initialFormType) {
@@ -33,7 +33,7 @@ class TrackerService {
         default:
           result = await FormService.saveChildOverview(formData)
       }
-      
+
       if (result.success) {
         return {
           success: true,
@@ -50,7 +50,7 @@ class TrackerService {
       } else {
         throw new Error(result.error)
       }
-      
+
     } catch (error) {
       console.error('Error creating enrollment:', error)
       return {
@@ -59,32 +59,68 @@ class TrackerService {
       }
     }
   }
-  
+
   // Get all cases - Now gets real data from Firebase forms
   static async getAllCases() {
     try {
       console.log('Loading cases from Firebase forms...')
-      
+
       // Get all forms from Firebase
-      const [referralResult, overviewResult, assessmentResult] = await Promise.all([
+      const [
+        referralResult,
+        overviewResult,
+        assessmentResult,
+        medicalIntakeResult,
+        academicsLiteracyResult,
+        psychologicalAssessmentResult,
+        lifeSkillsSurveyResult,
+        birthDeliveryResult,
+        carePlanSummaryResult,
+        carePlanBabyResult,
+        carePlanOngoingResult
+      ] = await Promise.all([
         FormService.getForms('initial-referral', 1000),
         FormService.getForms('child-overview', 1000),
-        FormService.getForms('initial-assessment', 1000)
+        FormService.getForms('initial-assessment', 1000),
+        FormService.getForms('medical-intake', 1000),
+        FormService.getForms('academics-literacy', 1000),
+        FormService.getForms('psychological-assessment', 1000),
+        FormService.getForms('life-skills-survey', 1000),
+        FormService.getForms('birth-delivery', 1000),
+        FormService.getForms('care-plan-summary', 1000),
+        FormService.getForms('care-plan-baby', 1000),
+        FormService.getForms('care-plan-ongoing-life-skills', 1000)
       ])
-      
-      console.log('Form results:', { 
-        referrals: referralResult.forms?.length || 0, 
-        overviews: overviewResult.forms?.length || 0, 
-        assessments: assessmentResult.forms?.length || 0 
+
+      console.log('Form results:', {
+        referrals: referralResult.forms?.length || 0,
+        overviews: overviewResult.forms?.length || 0,
+        assessments: assessmentResult.forms?.length || 0,
+        other: (medicalIntakeResult.forms?.length || 0) + (carePlanSummaryResult.forms?.length || 0)
       })
-      
-      const generatedCases = await this.generateCasesFromForms()
-      
+
+      // Combine all forms into a flat array with sourceType
+      const allForms = [
+        ...(referralResult.success ? referralResult.forms.map(f => ({ ...f, sourceType: 'initial-referral' })) : []),
+        ...(overviewResult.success ? overviewResult.forms.map(f => ({ ...f, sourceType: 'child-overview' })) : []),
+        ...(assessmentResult.success ? assessmentResult.forms.map(f => ({ ...f, sourceType: 'initial-assessment' })) : []),
+        ...(medicalIntakeResult.success ? medicalIntakeResult.forms.map(f => ({ ...f, sourceType: 'medical-intake' })) : []),
+        ...(academicsLiteracyResult.success ? academicsLiteracyResult.forms.map(f => ({ ...f, sourceType: 'academics-literacy' })) : []),
+        ...(psychologicalAssessmentResult.success ? psychologicalAssessmentResult.forms.map(f => ({ ...f, sourceType: 'psychological-assessment' })) : []),
+        ...(lifeSkillsSurveyResult.success ? lifeSkillsSurveyResult.forms.map(f => ({ ...f, sourceType: 'life-skills-survey' })) : []),
+        ...(birthDeliveryResult.success ? birthDeliveryResult.forms.map(f => ({ ...f, sourceType: 'birth-delivery' })) : []),
+        ...(carePlanSummaryResult.success ? carePlanSummaryResult.forms.map(f => ({ ...f, sourceType: 'care-plan-summary' })) : []),
+        ...(carePlanBabyResult.success ? carePlanBabyResult.forms.map(f => ({ ...f, sourceType: 'care-plan-baby' })) : []),
+        ...(carePlanOngoingResult.success ? carePlanOngoingResult.forms.map(f => ({ ...f, sourceType: 'care-plan-ongoing-life-skills' })) : [])
+      ]
+
+      const generatedCases = await this.generateCasesFromForms(allForms)
+
       return {
         success: true,
         cases: generatedCases
       }
-      
+
     } catch (error) {
       console.error('Error getting all cases:', error)
       return {
@@ -94,15 +130,18 @@ class TrackerService {
       }
     }
   }
-  
+
+
+
+
   // Get specific case details - Now works with Firebase data
   static async getCaseDetails(caseId) {
     try {
       // First try to get the specific form by ID
       const formResult = await FormService.getFormById(caseId)
-      
+
       let case_ = null
-      
+
       if (formResult.success) {
         // Build case from the form data
         const form = formResult.form
@@ -132,7 +171,7 @@ class TrackerService {
           case_ = allCases.cases.find(c => c.id === caseId || c.caseId === caseId)
         }
       }
-      
+
       if (!case_) {
         // Check if there's a draft in localStorage for this case
         const draftEvents = this.loadDraftEventsFromLocalStorage(caseId)
@@ -140,7 +179,7 @@ class TrackerService {
           // Create a case from the draft data
           const latestDraft = draftEvents[0]
           const draftData = latestDraft.data
-          
+
           case_ = {
             id: caseId,
             caseId: caseId,
@@ -167,14 +206,14 @@ class TrackerService {
           }
         }
       }
-      
+
       // Load events/forms for this case (by caseId and fallback to child name)
       const events = await this.loadCaseEvents(case_.caseId, {
         firstName: case_.childFirstName,
         lastName: case_.childLastName,
         dateOfBirth: case_.dateOfBirth
       })
-      
+
       return {
         success: true,
         details: {
@@ -182,7 +221,7 @@ class TrackerService {
           events: events
         }
       }
-      
+
     } catch (error) {
       console.error('Error getting case details:', error)
       return {
@@ -191,7 +230,7 @@ class TrackerService {
       }
     }
   }
-  
+
   // Load events/forms for a specific case
   static async loadCaseEvents(caseId, childInfo = null) {
     try {
@@ -221,9 +260,9 @@ class TrackerService {
         FormService.getForms('care-plan-baby', 500),
         FormService.getForms('care-plan-ongoing-life-skills', 500)
       ])
-      
+
       const allEvents = []
-      
+
       // Helper: name match fallback
       const matchesChild = (form) => {
         if (!childInfo) return false
@@ -261,25 +300,25 @@ class TrackerService {
       pushIfMatch(carePlanSummaryResult, 'Care Plan Summary', 'care-plan-summary')
       pushIfMatch(carePlanBabyResult, 'Care Plan (Baby)', 'care-plan-baby')
       pushIfMatch(carePlanOngoingResult, 'Care Plan - Ongoing Life Skills', 'care-plan-ongoing-life-skills')
-      
+
       // Sort events by date
       allEvents.sort((a, b) => new Date(b.date) - new Date(a.date))
-      
+
       return allEvents
-      
+
     } catch (error) {
       console.error('Error loading case events:', error)
       return []
     }
   }
-  
+
   // Load draft events from localStorage
   static loadDraftEventsFromLocalStorage(caseId) {
     const events = []
-    const localStorageKeys = Object.keys(localStorage).filter(key => 
+    const localStorageKeys = Object.keys(localStorage).filter(key =>
       key.startsWith('capture-data-')
     )
-    
+
     localStorageKeys.forEach(key => {
       try {
         const storedData = JSON.parse(localStorage.getItem(key))
@@ -289,7 +328,7 @@ class TrackerService {
             // Extract form type from key (format: capture-data-{formType}-{orgUnit}-{period})
             const parts = key.split('-')
             const formType = parts[2]
-            
+
             // Map form type to display name and stage
             const formTypeMap = {
               'initial-referral': { name: 'Initial Referral', stage: 'referral' },
@@ -299,9 +338,9 @@ class TrackerService {
               'regular-follow-up': { name: 'Regular Follow-up', stage: 'follow-up' },
               'child-overview': { name: 'Child Overview', stage: 'enrollment' }
             }
-            
+
             const formInfo = formTypeMap[formType] || { name: formType, stage: 'other' }
-            
+
             events.push({
               id: `draft-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
               formType: `${formInfo.name} (Draft)`,
@@ -316,103 +355,47 @@ class TrackerService {
         console.error('Error parsing localStorage data:', e)
       }
     })
-    
+
     return events
   }
-  
+
   // Generate cases from existing forms - Enhanced for real Firebase data
-  static async generateCasesFromForms() {
+  static async generateCasesFromForms(allForms) {
     try {
       const cases = []
-      
-      // Get all forms from FormService with larger limits for real data
-      const [
-        referralResult, 
-        overviewResult, 
-        assessmentResult,
-        medicalIntakeResult,
-        academicsLiteracyResult,
-        psychologicalAssessmentResult,
-        lifeSkillsSurveyResult,
-        birthDeliveryResult,
-        carePlanSummaryResult,
-        carePlanBabyResult,
-        carePlanOngoingResult
-      ] = await Promise.all([
-        FormService.getForms('initial-referral', 1000),
-        FormService.getForms('child-overview', 1000),
-        FormService.getForms('initial-assessment', 1000),
-        FormService.getForms('medical-intake', 1000),
-        FormService.getForms('academics-literacy', 1000),
-        FormService.getForms('psychological-assessment', 1000),
-        FormService.getForms('life-skills-survey', 1000),
-        FormService.getForms('birth-delivery', 1000),
-        FormService.getForms('care-plan-summary', 1000),
-        FormService.getForms('care-plan-baby', 1000),
-        FormService.getForms('care-plan-ongoing-life-skills', 1000)
-      ])
-      
-      console.log('Raw form results:', {
-        referrals: referralResult.forms?.length || 0,
-        overviews: overviewResult.forms?.length || 0,
-        assessments: assessmentResult.forms?.length || 0,
-        medicalIntake: medicalIntakeResult.forms?.length || 0,
-        academicsLiteracy: academicsLiteracyResult.forms?.length || 0,
-        psychologicalAssessment: psychologicalAssessmentResult.forms?.length || 0,
-        lifeSkillsSurvey: lifeSkillsSurveyResult.forms?.length || 0,
-        birthDelivery: birthDeliveryResult.forms?.length || 0,
-        carePlanSummary: carePlanSummaryResult.forms?.length || 0,
-        carePlanBaby: carePlanBabyResult.forms?.length || 0,
-        carePlanOngoing: carePlanOngoingResult.forms?.length || 0
-      })
-      
-      const allForms = [
-        ...(referralResult.success ? referralResult.forms.map(f => ({ ...f, sourceType: 'initial-referral' })) : []),
-        ...(overviewResult.success ? overviewResult.forms.map(f => ({ ...f, sourceType: 'child-overview' })) : []),
-        ...(assessmentResult.success ? assessmentResult.forms.map(f => ({ ...f, sourceType: 'initial-assessment' })) : []),
-        ...(medicalIntakeResult.success ? medicalIntakeResult.forms.map(f => ({ ...f, sourceType: 'medical-intake' })) : []),
-        ...(academicsLiteracyResult.success ? academicsLiteracyResult.forms.map(f => ({ ...f, sourceType: 'academics-literacy' })) : []),
-        ...(psychologicalAssessmentResult.success ? psychologicalAssessmentResult.forms.map(f => ({ ...f, sourceType: 'psychological-assessment' })) : []),
-        ...(lifeSkillsSurveyResult.success ? lifeSkillsSurveyResult.forms.map(f => ({ ...f, sourceType: 'life-skills-survey' })) : []),
-        ...(birthDeliveryResult.success ? birthDeliveryResult.forms.map(f => ({ ...f, sourceType: 'birth-delivery' })) : []),
-        ...(carePlanSummaryResult.success ? carePlanSummaryResult.forms.map(f => ({ ...f, sourceType: 'care-plan-summary' })) : []),
-        ...(carePlanBabyResult.success ? carePlanBabyResult.forms.map(f => ({ ...f, sourceType: 'care-plan-baby' })) : []),
-        ...(carePlanOngoingResult.success ? carePlanOngoingResult.forms.map(f => ({ ...f, sourceType: 'care-plan-ongoing-life-skills' })) : [])
-      ]
-      
-      console.log('Total forms found:', allForms.length)
-      
-      if (allForms.length === 0) {
+
+      console.log('Total forms passed to generateCasesFromForms:', allForms ? allForms.length : 0)
+
+      if (!allForms || allForms.length === 0) {
         console.log('No forms found, creating sample cases')
         return this.createSampleCases()
       }
-      
+
       // Group forms by child (based on name and date of birth similarity)
       const childGroups = this.groupFormsByChild(allForms)
-      
+
+
       console.log('Child groups created:', Object.keys(childGroups).length)
-      
+
       // Create cases from grouped forms
       Object.keys(childGroups).forEach((childKey, index) => {
         const forms = childGroups[childKey]
         const primaryForm = forms[0] // Use first form as primary data source
-        
+
         // Check if this child has been housed (has both initial-assessment AND child-overview forms)
         const formTypes = forms.map(f => f.sourceType)
         const hasInitialAssessment = formTypes.includes('initial-assessment')
         const hasChildOverview = formTypes.includes('child-overview')
-        
+
         // Only include children who have BOTH forms (indicating they've been housed)
-        if (!hasInitialAssessment || !hasChildOverview) {
-          console.log(`Skipping child ${this.getChildNameFromForm(primaryForm)} - not housed yet (has assessment: ${hasInitialAssessment}, has overview: ${hasChildOverview})`)
-          return // Skip this child
+        // [MODIFIED] Relaxed filter: Allow any child with at least one form to appear
+        if (forms.length === 0) {
+          return
         }
-        
-        console.log(`Including housed child: ${this.getChildNameFromForm(primaryForm)}`)
-        
+
         // Use existing caseId if available, otherwise generate new one
         const caseId = primaryForm.caseId || this.generateCaseId()
-        
+
         const case_ = {
           id: primaryForm.id, // Use form ID as case ID for linking
           caseId: caseId,
@@ -433,40 +416,40 @@ class TrackerService {
           createdAt: this.formatFirestoreDate(primaryForm.createdAt),
           updatedAt: this.formatFirestoreDate(primaryForm.updatedAt || primaryForm.createdAt)
         }
-        
+
         cases.push(case_)
       })
-      
+
       console.log('Generated cases:', cases.length)
-      
+
       // Sort by creation date (most recent first)
       cases.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      
+
       return cases
-      
+
     } catch (error) {
       console.error('Error generating cases from forms:', error)
       return this.createSampleCases()
     }
   }
-  
+
   // Group forms by child - Enhanced matching logic
   static groupFormsByChild(forms) {
     const groups = {}
-    
+
     forms.forEach(form => {
       const childName = this.getChildNameFromForm(form)
       const normalizedName = childName.toLowerCase().trim().replace(/\s+/g, ' ')
       const dateOfBirth = this.formatFirestoreDate(form.dateOfBirth)
-      
+
       // Create a more unique key using name and date of birth
       let groupKey = normalizedName || `unknown_${form.id}`
-      
+
       // If we have date of birth, use it to make grouping more accurate
       if (dateOfBirth) {
         groupKey = `${normalizedName}_${dateOfBirth}`
       }
-      
+
       // Check if a similar group already exists (in case of slight name variations)
       let existingGroupKey = groupKey
       if (!groups[groupKey]) {
@@ -476,37 +459,37 @@ class TrackerService {
           const keyName = key.split('_')[0] // Get name part before date
           return this.isSimilarName(keyName, normalizedName)
         })
-        
+
         if (similarKey) {
           existingGroupKey = similarKey
         }
       }
-      
+
       if (!groups[existingGroupKey]) {
         groups[existingGroupKey] = []
       }
-      
+
       groups[existingGroupKey].push(form)
     })
-    
+
     return groups
   }
-  
+
   // Check if two names are similar (simple string similarity)
   static isSimilarName(name1, name2) {
     if (!name1 || !name2) return false
-    
+
     // Check for exact match
     if (name1 === name2) return true
-    
+
     // Check if one name contains the other (for partial matches)
     if (name1.length > 3 && name2.length > 3) {
       return name1.includes(name2) || name2.includes(name1)
     }
-    
+
     return false
   }
-  
+
   // Get child name from form data
   static getChildNameFromForm(form) {
     if (form.childFirstName && form.childLastName) {
@@ -522,13 +505,13 @@ class TrackerService {
     }
     return 'Unknown Child'
   }
-  
+
   // Determine case status from forms
   static determineStatus(forms) {
     // Check if any forms are marked as complete
     const hasCompleted = forms.some(form => form.status === 'completed' || form.status === 'complete')
     const hasDrafts = forms.some(form => form.status === 'draft')
-    
+
     if (hasCompleted && !hasDrafts) {
       return 'completed'
     } else if (hasDrafts) {
@@ -537,11 +520,11 @@ class TrackerService {
       return 'active'
     }
   }
-  
+
   // Determine current stage from forms
   static determineCurrentStage(forms) {
     const formTypes = forms.map(f => f.sourceType || f.formType)
-    
+
     // Priority order for determining current stage (most recent/advanced stage)
     if (formTypes.includes('care-plan-ongoing-life-skills')) {
       return 'follow-up'
@@ -566,20 +549,20 @@ class TrackerService {
     } else if (formTypes.includes('initial-referral')) {
       return 'referral'
     }
-    
+
     return 'referral'
   }
-  
+
   // Get last activity date from forms
   static getLastActivity(forms) {
     const dates = forms.map(form => {
       return form.updatedAt || form.createdAt || new Date().toISOString()
     })
-    
+
     dates.sort((a, b) => new Date(b) - new Date(a))
     return dates[0] || new Date().toISOString()
   }
-  
+
   // Create events from forms
   static createEventsFromForms(forms) {
     return forms.map(form => ({
@@ -591,7 +574,7 @@ class TrackerService {
       data: form
     }))
   }
-  
+
   // Get stage ID from form type
   static getStageIdFromFormType(formType) {
     const stageMap = {
@@ -609,7 +592,7 @@ class TrackerService {
     }
     return stageMap[formType] || 'referral'
   }
-  
+
   // Get display name for form type
   static getFormTypeDisplayName(formType) {
     const displayNames = {
@@ -627,7 +610,7 @@ class TrackerService {
     }
     return displayNames[formType] || formType
   }
-  
+
   // Create sample cases for demo
   static createSampleCases() {
     const sampleCases = [
@@ -692,10 +675,10 @@ class TrackerService {
         updatedAt: '2024-10-12T13:00:00Z'
       }
     ]
-    
+
     return sampleCases
   }
-  
+
   // Update case information - Now updates Firebase form
   static async updateCase(caseId, updateData) {
     try {
@@ -704,7 +687,7 @@ class TrackerService {
         ...updateData,
         updatedAt: new Date()
       })
-      
+
       if (updateResult.success) {
         // Get the updated case details
         const caseDetails = await this.getCaseDetails(caseId)
@@ -718,7 +701,7 @@ class TrackerService {
           error: updateResult.error
         }
       }
-      
+
     } catch (error) {
       console.error('Error updating case:', error)
       return {
@@ -727,7 +710,7 @@ class TrackerService {
       }
     }
   }
-  
+
   // Add event to case - Now creates a new form in Firebase
   static async addEventToCase(caseId, eventData) {
     try {
@@ -739,9 +722,9 @@ class TrackerService {
           error: 'Case not found'
         }
       }
-      
+
       const case_ = caseDetails.details
-      
+
       // Create form data for the new event
       const formData = {
         ...eventData,
@@ -751,11 +734,11 @@ class TrackerService {
         linkedCaseId: caseId,
         eventDate: eventData.date || new Date().toISOString()
       }
-      
+
       // Save as appropriate form type based on event
       let result
       const formType = eventData.formType || 'child-overview'
-      
+
       switch (formType) {
         case 'initial-referral':
           result = await FormService.saveInitialReferral(formData)
@@ -766,7 +749,7 @@ class TrackerService {
         default:
           result = await FormService.saveChildOverview(formData)
       }
-      
+
       if (result.success) {
         return {
           success: true,
@@ -783,7 +766,7 @@ class TrackerService {
           error: result.error
         }
       }
-      
+
     } catch (error) {
       console.error('Error adding event to case:', error)
       return {
@@ -792,25 +775,101 @@ class TrackerService {
       }
     }
   }
-  
+
+  // Delete a case and all its associated forms/events
+  static async deleteCase(caseId) {
+    try {
+      console.log(`Attempting to delete case: ${caseId}`)
+
+      // Get detailed case info to find all associated forms
+      const caseDetails = await this.getCaseDetails(caseId)
+
+      if (!caseDetails.success) {
+        return { success: false, error: 'Case not found' }
+      }
+
+      const details = caseDetails.details
+      const events = details.events || []
+
+      // Collect all form IDs to delete
+      // Include the main case ID if it corresponds to a form (often the caseId is the id of the primary form)
+      const formIdsToDelete = new Set()
+
+      // Add event form IDs
+      events.forEach(event => {
+        if (event.id && !event.id.startsWith('draft-')) {
+          formIdsToDelete.add(event.id)
+        }
+      })
+
+      // Add the main case ID/form ID if it exists and isn't a draft
+      if (details.id && !details.id.startsWith('case-') && !details.id.startsWith('TKP-')) {
+        formIdsToDelete.add(details.id)
+      }
+
+      console.log(`Found ${formIdsToDelete.size} forms to delete for case ${caseId}`)
+
+      // Delete all forms from Firestore
+      const deletePromises = Array.from(formIdsToDelete).map(formId =>
+        FormService.deleteForm(formId)
+      )
+
+      const results = await Promise.all(deletePromises)
+
+      const failed = results.filter(r => !r.success)
+      if (failed.length > 0) {
+        console.warn(`Failed to delete ${failed.length} forms`, failed)
+      }
+
+      // Also clean up any localStorage drafts
+      const localStorageKeys = Object.keys(localStorage).filter(key =>
+        key.startsWith('capture-data-')
+      )
+
+      localStorageKeys.forEach(key => {
+        try {
+          const storedData = JSON.parse(localStorage.getItem(key))
+          if (storedData && storedData.dataValues && storedData.dataValues.caseId === caseId) {
+            localStorage.removeItem(key)
+            console.log(`Refmoved draft: ${key}`)
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      })
+
+      return {
+        success: true,
+        message: `Case and ${results.length} associated records deleted successfully`
+      }
+
+    } catch (error) {
+      console.error('Error deleting case:', error)
+      return {
+        success: false,
+        error: error.message
+      }
+    }
+  }
+
   // Get cases statistics - Now uses Firebase data
   static async getCaseStatistics() {
     try {
       const allCasesResult = await this.getAllCases()
-      
+
       if (!allCasesResult.success) {
         throw new Error(allCasesResult.error)
       }
-      
+
       const cases = allCasesResult.cases
-      
+
       const stats = {
         totalCases: cases.length,
         activeCases: cases.filter(c => c.status === 'active').length,
         completedCases: cases.filter(c => c.status === 'completed').length,
         pendingCases: cases.filter(c => c.status === 'pending' || c.status === 'draft').length,
         transferredCases: cases.filter(c => c.status === 'transferred').length,
-        
+
         // Age distribution
         ageGroups: {
           '0-5': cases.filter(c => c.age <= 5).length,
@@ -818,7 +877,7 @@ class TrackerService {
           '13-17': cases.filter(c => c.age >= 13 && c.age <= 17).length,
           '18+': cases.filter(c => c.age >= 18).length
         },
-        
+
         // Stage distribution
         stages: {
           referral: cases.filter(c => c.currentStage === 'referral').length,
@@ -827,7 +886,7 @@ class TrackerService {
           'care-plan': cases.filter(c => c.currentStage === 'care-plan').length,
           'follow-up': cases.filter(c => c.currentStage === 'follow-up').length
         },
-        
+
         // New cases this month
         newThisMonth: cases.filter(c => {
           const enrollmentDate = new Date(c.enrollmentDate)
@@ -836,12 +895,12 @@ class TrackerService {
           return enrollmentDate >= thisMonth
         }).length
       }
-      
+
       return {
         success: true,
         statistics: stats
       }
-      
+
     } catch (error) {
       console.error('Error getting case statistics:', error)
       return {
@@ -851,47 +910,48 @@ class TrackerService {
       }
     }
   }
-  
+
   // Helper methods
-  
+
   static generateCaseId() {
     const year = new Date().getFullYear()
     const timestamp = Date.now().toString().slice(-6)
-    return `TKP-${year}-${timestamp}`
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
+    return `TKP-${year}-${timestamp}-${random}`
   }
-  
+
   static generateId() {
     return `id-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
   }
-  
+
   static calculateAge(dateOfBirth) {
     if (!dateOfBirth) return 0
-    
+
     const birth = new Date(dateOfBirth)
     const today = new Date()
     let age = today.getFullYear() - birth.getFullYear()
     const monthDiff = today.getMonth() - birth.getMonth()
-    
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
       age--
     }
-    
+
     return Math.max(0, age)
   }
-  
+
   // Format Firestore date objects to ISO string
   static formatFirestoreDate(date) {
     if (!date) return new Date().toISOString()
-    
+
     // If it's a Firestore timestamp with toDate() method
     if (date.toDate && typeof date.toDate === 'function') {
       return date.toDate().toISOString()
     }
-    
+
     // If it's already a Date object or string
     return new Date(date).toISOString()
   }
-  
+
   // Determine program from form data
   static determineProgramFromForm(form) {
     // Check form type and content to determine program
@@ -902,55 +962,55 @@ class TrackerService {
     } else if (form.sourceType === 'child-overview') {
       return 'family-support'
     }
-    
+
     return 'child-protection' // default
   }
-  
+
   // Get age from form with fallbacks
   static getAgeFromForm(form) {
     // Try different age fields that might exist in the forms
     if (form.age && !isNaN(form.age)) {
       return parseInt(form.age)
     }
-    
+
     if (form.ageAtIntake && !isNaN(form.ageAtIntake)) {
       return parseInt(form.ageAtIntake)
     }
-    
+
     // Calculate from date of birth if available
     if (form.dateOfBirth) {
       return this.calculateAge(form.dateOfBirth)
     }
-    
+
     return 0
   }
-  
+
   // Search cases - Now uses Firebase data
   static async searchCases(query, filters = {}) {
     try {
       const allCasesResult = await this.getAllCases()
-      
+
       if (!allCasesResult.success) {
         throw new Error(allCasesResult.error)
       }
-      
+
       let filtered = allCasesResult.cases
-      
+
       // Apply text search
       if (query && query.trim()) {
         const searchTerm = query.toLowerCase().trim()
-        filtered = filtered.filter(case_ => 
+        filtered = filtered.filter(case_ =>
           case_.childName.toLowerCase().includes(searchTerm) ||
           case_.caseId.toLowerCase().includes(searchTerm) ||
           case_.childId.toLowerCase().includes(searchTerm)
         )
       }
-      
+
       // Apply filters
       if (filters.status) {
         filtered = filtered.filter(case_ => case_.status === filters.status)
       }
-      
+
       if (filters.ageGroup) {
         filtered = filtered.filter(case_ => {
           const age = case_.age
@@ -963,17 +1023,17 @@ class TrackerService {
           }
         })
       }
-      
+
       if (filters.stage) {
         filtered = filtered.filter(case_ => case_.currentStage === filters.stage)
       }
-      
+
       return {
         success: true,
         cases: filtered,
         count: filtered.length
       }
-      
+
     } catch (error) {
       console.error('Error searching cases:', error)
       return {

@@ -26,7 +26,7 @@ class FormService {
       if (draftId) {
         const formRef = doc(db, this.formsCollection, draftId);
         const formSnap = await getDoc(formRef);
-        
+
         if (formSnap.exists()) {
           await updateDoc(formRef, {
             ...formData,
@@ -85,7 +85,7 @@ class FormService {
       if (draftId) {
         const formRef = doc(db, this.formsCollection, draftId);
         const formSnap = await getDoc(formRef);
-        
+
         if (formSnap.exists()) {
           await updateDoc(formRef, {
             ...formData,
@@ -237,7 +237,7 @@ class FormService {
       if (draftId) {
         const formRef = doc(db, this.formsCollection, draftId);
         const formSnap = await getDoc(formRef);
-        
+
         if (formSnap.exists()) {
           await updateDoc(formRef, {
             ...formData,
@@ -296,7 +296,7 @@ class FormService {
       if (draftId) {
         const formRef = doc(db, this.formsCollection, draftId);
         const formSnap = await getDoc(formRef);
-        
+
         if (formSnap.exists()) {
           await updateDoc(formRef, {
             ...formData,
@@ -347,7 +347,7 @@ class FormService {
       const nameParts = (formData.nameOfGirl || '').trim().split(' ');
       const childFirstName = nameParts[0] || '';
       const childSurname = nameParts[nameParts.length - 1] || nameParts[0] || '';
-      
+
       // Get child data from sessionStorage if available (for better matching)
       let dateOfBirth = formData.dateOfBirth;
       if (!dateOfBirth) {
@@ -361,7 +361,7 @@ class FormService {
           console.warn('Could not retrieve child data from sessionStorage:', e);
         }
       }
-      
+
       const formDoc = {
         formType: "academics-literacy",
         ...formData,
@@ -398,7 +398,7 @@ class FormService {
       let childFirstName = formData.childFirstName;
       let childSurname = formData.childSurname;
       let dateOfBirth = formData.dateOfBirth;
-      
+
       if (!childFirstName || !childSurname || !dateOfBirth) {
         try {
           const storedChildData = sessionStorage.getItem('selectedChildForForm');
@@ -412,7 +412,7 @@ class FormService {
           console.warn('Could not retrieve child data from sessionStorage:', e);
         }
       }
-      
+
       const formDoc = {
         formType: "psychological-assessment",
         ...formData,
@@ -449,7 +449,7 @@ class FormService {
       let childFirstName = formData.childFirstName || '';
       let childSurname = formData.childSurname || '';
       let dateOfBirth = formData.dateOfBirth || '';
-      
+
       // If not in formData, try to get from sessionStorage
       if (!childFirstName || !childSurname || !dateOfBirth) {
         try {
@@ -464,14 +464,14 @@ class FormService {
           console.warn('Could not retrieve child data from sessionStorage:', e);
         }
       }
-      
+
       // If we still don't have child data, try to extract from nameOfGirl field
       if ((!childFirstName || !childSurname) && formData.nameOfGirl) {
         const nameParts = formData.nameOfGirl.trim().split(' ');
         childFirstName = childFirstName || nameParts[0] || '';
         childSurname = childSurname || nameParts[nameParts.length - 1] || nameParts[0] || '';
       }
-      
+
       const formDoc = {
         formType: "life-skills-survey",
         ...formData,
@@ -507,7 +507,7 @@ class FormService {
       let childFirstName = formData.childFirstName;
       let childSurname = formData.childSurname;
       let dateOfBirth = formData.dateOfBirth;
-      
+
       if (!childFirstName || !childSurname || !dateOfBirth) {
         try {
           const storedChildData = sessionStorage.getItem('selectedChildForForm');
@@ -521,7 +521,7 @@ class FormService {
           console.warn('Could not retrieve child data from sessionStorage:', e);
         }
       }
-      
+
       const formDoc = {
         formType: "birth-delivery",
         ...formData,
@@ -557,7 +557,7 @@ class FormService {
       let childFirstName = formData.childFirstName || '';
       let childSurname = formData.childSurname || '';
       let dateOfBirth = formData.dateOfBirth || '';
-      
+
       // If not in formData, try to get from sessionStorage
       if (!childFirstName || !childSurname || !dateOfBirth) {
         try {
@@ -572,14 +572,14 @@ class FormService {
           console.warn('Could not retrieve child data from sessionStorage:', e);
         }
       }
-      
+
       // If we still don't have child data, try to extract from nameOfGirl field
       if ((!childFirstName || !childSurname) && formData.nameOfGirl) {
         const nameParts = formData.nameOfGirl.trim().split(' ');
         childFirstName = childFirstName || nameParts[0] || '';
         childSurname = childSurname || nameParts[nameParts.length - 1] || nameParts[0] || '';
       }
-      
+
       const formDoc = {
         formType: "care-plan-summary",
         ...formData,
@@ -616,7 +616,7 @@ class FormService {
       let childFirstName = formData.childFirstName || '';
       let childSurname = formData.childSurname || '';
       let dateOfBirth = formData.dateOfBirth || '';
-      
+
       // If not in formData, try to get from sessionStorage
       if (!childFirstName || !childSurname || !dateOfBirth) {
         try {
@@ -631,14 +631,14 @@ class FormService {
           console.warn('Could not retrieve child data from sessionStorage:', e);
         }
       }
-      
+
       // If we still don't have child data, try to extract from nameOfMother field
       if ((!childFirstName || !childSurname) && formData.nameOfMother) {
         const nameParts = formData.nameOfMother.trim().split(' ');
         childFirstName = childFirstName || nameParts[0] || '';
         childSurname = childSurname || nameParts[nameParts.length - 1] || nameParts[0] || '';
       }
-      
+
       const formDoc = {
         formType: "care-plan-baby",
         ...formData,
@@ -675,7 +675,7 @@ class FormService {
       let childFirstName = formData.childFirstName || '';
       let childSurname = formData.childSurname || '';
       let dateOfBirth = formData.dateOfBirth || '';
-      
+
       // If not in formData, try to get from sessionStorage
       if (!childFirstName || !childSurname || !dateOfBirth) {
         try {
@@ -690,14 +690,14 @@ class FormService {
           console.warn('Could not retrieve child data from sessionStorage:', e);
         }
       }
-      
+
       // If we still don't have child data, try to extract from girlName field
       if ((!childFirstName || !childSurname) && formData.girlName) {
         const nameParts = formData.girlName.trim().split(' ');
         childFirstName = childFirstName || nameParts[0] || '';
         childSurname = childSurname || nameParts[nameParts.length - 1] || nameParts[0] || '';
       }
-      
+
       const formDoc = {
         formType: "care-plan-ongoing-life-skills",
         ...formData,
@@ -752,7 +752,7 @@ class FormService {
         const data = doc.data();
         // Extract the custom id field before spreading
         const { id: customId, ...restData } = data;
-        
+
         forms.push({
           id: doc.id, // Use Firestore document ID as the primary ID
           firestoreId: doc.id, // Also store as firestoreId for clarity
@@ -801,7 +801,7 @@ class FormService {
       if (formSnap.exists()) {
         const data = formSnap.data();
         const { id: customId, ...restData } = data;
-        
+
         return {
           success: true,
           form: {
@@ -820,6 +820,24 @@ class FormService {
       }
     } catch (error) {
       console.error("Error getting form:", error);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // Delete form by ID
+  async deleteForm(formId) {
+    try {
+      const formRef = doc(db, this.formsCollection, formId);
+      await deleteDoc(formRef);
+      return {
+        success: true,
+        message: "Form deleted successfully",
+      };
+    } catch (error) {
+      console.error("Error deleting form:", error);
       return {
         success: false,
         error: error.message,
@@ -909,9 +927,9 @@ class FormService {
     try {
       console.log('🗑️ FormService: Attempting to delete document:', formId);
       console.log('🗑️ Collection:', this.formsCollection);
-      
+
       const formRef = doc(db, this.formsCollection, formId);
-      
+
       // First verify the document exists
       const formSnap = await getDoc(formRef);
       if (!formSnap.exists()) {
@@ -921,10 +939,10 @@ class FormService {
           error: "Document not found",
         };
       }
-      
+
       console.log('✅ Document exists, proceeding with deletion...');
       await deleteDoc(formRef);
-      
+
       // Verify deletion
       const verifySnap = await getDoc(formRef);
       if (verifySnap.exists()) {
@@ -934,7 +952,7 @@ class FormService {
           error: "Failed to delete document - still exists after deletion",
         };
       }
-      
+
       console.log('✅ Document successfully deleted and verified');
       return {
         success: true,
