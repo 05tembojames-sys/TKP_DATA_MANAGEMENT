@@ -857,4 +857,371 @@ onMounted(() => {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .dhis2-app-container {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .app-shell {
+    flex-direction: column;
+  }
+
+  /* Sidebar adjustments */
+  .sidebar {
+    width: 100%;
+    max-height: 60vh;
+    border-right: none;
+    border-bottom: 1px solid var(--dhis2-border);
+    overflow-y: auto;
+  }
+
+  .sidebar.collapsed {
+    width: 100%;
+    max-height: 48px;
+  }
+
+  .sidebar-header {
+    padding: 0 12px;
+  }
+
+  .sidebar-title {
+    font-size: 0.85rem;
+  }
+
+  .sidebar-content {
+    padding-bottom: 16px;
+  }
+
+  .dimension-header {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .dimension-header .icon {
+    font-size: 1rem;
+  }
+
+  .dimension-body {
+    padding: 10px 12px;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+
+  .form-group label {
+    font-size: 0.8rem;
+  }
+
+  .dhis2-select {
+    padding: 10px 8px;
+    font-size: 16px; /* Prevent iOS zoom */
+    height: 44px; /* Touch-friendly */
+  }
+
+  .selection-list {
+    max-height: 180px;
+  }
+
+  .list-control,
+  .list-item {
+    padding: 8px;
+  }
+
+  .checkbox-label {
+    font-size: 0.85rem;
+    /* Larger touch target */
+    min-height: 40px;
+  }
+
+  /* Main content */
+  .main-content {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    height: auto;
+    min-height: 48px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .toolbar-left {
+    width: 100%;
+    order: 1;
+  }
+
+  .toolbar-right {
+    width: 100%;
+    order: 2;
+    justify-content: flex-end;
+  }
+
+  .update-btn {
+    flex: 1;
+    height: 40px;
+    font-size: 0.85rem;
+  }
+
+  .toolbar-btn {
+    height: 36px;
+    padding: 0 10px;
+    font-size: 0.85rem;
+  }
+
+  .divider {
+    display: none; /* Hide divider on mobile */
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter-chip {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+  }
+
+  /* Table area */
+  .table-area {
+    padding: 12px;
+  }
+
+  .pivot-container {
+    border-radius: 4px;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dhis2-pivot-table {
+    min-width: 600px;
+    font-size: 11px;
+  }
+
+  .dhis2-pivot-table th,
+  .dhis2-pivot-table td {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .dhis2-pivot-table td.row-header {
+    min-width: 120px;
+  }
+
+  .corner-header {
+    min-width: 120px;
+  }
+
+  /* Empty state */
+  .empty-icon {
+    font-size: 3rem;
+  }
+
+  .empty-content h2 {
+    font-size: 1.1rem;
+  }
+
+  .empty-content p {
+    font-size: 0.9rem;
+    padding: 0 16px;
+  }
+
+  .info-message {
+    font-size: 0.8rem;
+  }
+}
+
+/* Very Small Screens */
+@media (max-width: 480px) {
+  .sidebar {
+    max-height: 50vh;
+  }
+
+  .sidebar-header {
+    padding: 0 10px;
+  }
+
+  .sidebar-title {
+    font-size: 0.8rem;
+  }
+
+  .dimension-header {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .dimension-header .icon {
+    font-size: 0.95rem;
+    margin-right: 8px;
+  }
+
+  .dimension-body {
+    padding: 8px 10px;
+  }
+
+  .form-group {
+    margin-bottom: 8px;
+  }
+
+  .dhis2-select {
+    padding: 10px 8px;
+    font-size: 16px;
+  }
+
+  .checkbox-label {
+    font-size: 0.8rem;
+  }
+
+  .label-text {
+    font-size: 0.8rem;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    padding: 6px 10px;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    gap: 6px;
+  }
+
+  .update-btn {
+    width: 100%;
+    height: 44px;
+    font-size: 0.9rem;
+  }
+
+  .toolbar-btn {
+    flex: 1;
+    height: 40px;
+    font-size: 0.8rem;
+    padding: 0 8px;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .filter-chip {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+  }
+
+  .chip-label,
+  .chip-value {
+    font-size: 0.75rem;
+  }
+
+  /* Table area */
+  .table-area {
+    padding: 8px;
+  }
+
+  .dhis2-pivot-table {
+    min-width: 500px;
+    font-size: 10px;
+  }
+
+  .dhis2-pivot-table th,
+  .dhis2-pivot-table td {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+
+  .dhis2-pivot-table td.row-header {
+    min-width: 100px;
+  }
+
+  .corner-header {
+    min-width: 100px;
+  }
+
+  /* Empty state */
+  .empty-icon {
+    font-size: 2.5rem;
+  }
+
+  .empty-content {
+    padding: 0 16px;
+  }
+
+  .empty-content h2 {
+    font-size: 1rem;
+  }
+
+  .empty-content p {
+    font-size: 0.85rem;
+  }
+
+  .spinner {
+    width: 28px;
+    height: 28px;
+  }
+
+  .loading-overlay p {
+    font-size: 0.85rem;
+  }
+}
+
+/* Landscape orientation optimization for tablets */
+@media (max-width: 1024px) and (orientation: landscape) {
+  .sidebar {
+    max-height: 40vh;
+  }
+
+  .dimension-body {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Enhance touch targets */
+  .dimension-header {
+    min-height: 44px;
+  }
+
+  .checkbox-label {
+    min-height: 44px;
+    padding: 8px 0;
+  }
+
+  .update-btn,
+  .toolbar-btn {
+    min-height: 44px;
+  }
+
+  .icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Visual feedback for touch */
+  .dimension-header:active,
+  .toolbar-btn:active {
+    background: var(--dhis2-blue-light);
+  }
+}
 </style>

@@ -491,4 +491,253 @@ const exportData = () => {
 .btn-secondary:hover {
   background: #f9fafb;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .analytics-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .toolbar-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .analytics-toolbar h1 {
+    font-size: 1.1rem;
+  }
+
+  .analytics-toolbar .divider {
+    display: none;
+  }
+
+  .analytics-toolbar p {
+    font-size: 0.85rem;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .toolbar-actions button {
+    flex: 1;
+  }
+
+  .analytics-layout {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .filters-sidebar {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .sidebar-header h3 {
+    font-size: 0.85rem;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .filter-group {
+    margin-bottom: 1rem;
+  }
+
+  .filter-group h4 {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .filter-options label {
+    padding: 0.4rem;
+    font-size: 0.9rem;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-card {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .summary-card i {
+    font-size: 2rem;
+  }
+
+  .summary-card h3 {
+    font-size: 1.5rem;
+  }
+
+  .summary-card p {
+    font-size: 0.85rem;
+  }
+
+  .activity-section {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .activity-section h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .activity-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .activity-table table {
+    min-width: 600px;
+    font-size: 0.85rem;
+  }
+
+  .activity-table th,
+  .activity-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .badge-type,
+  .badge-draft {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .btn-reset {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .date-tabs button {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .form-select {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-secondary,
+  .btn-primary {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Very Small Screens */
+@media (max-width: 480px) {
+  .analytics-toolbar {
+    padding: 0.75rem;
+  }
+
+  .analytics-toolbar h1 {
+    font-size: 1rem;
+  }
+
+  .analytics-toolbar h1 i {
+    font-size: 1rem;
+  }
+
+  .analytics-toolbar p {
+    font-size: 0.8rem;
+  }
+
+  .analytics-layout {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .filters-sidebar {
+    padding: 0.75rem;
+  }
+
+  .sidebar-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .summary-card {
+    padding: 0.75rem;
+  }
+
+  .summary-card i {
+    font-size: 1.75rem;
+  }
+
+  .summary-card h3 {
+    font-size: 1.25rem;
+  }
+
+  .summary-card p {
+    font-size: 0.8rem;
+  }
+
+  .activity-section {
+    padding: 0.75rem;
+  }
+
+  .activity-section h3 {
+    font-size: 0.95rem;
+  }
+
+  .activity-table table {
+    font-size: 0.75rem;
+  }
+
+  .activity-table th,
+  .activity-table td {
+    padding: 0.5rem 0.35rem;
+    font-size: 0.75rem;
+  }
+
+  .badge-type,
+  .badge-draft {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+  }
+
+  .filter-group h4 {
+    font-size: 0.85rem;
+  }
+
+  .filter-options label {
+    font-size: 0.85rem;
+  }
+
+  .btn-secondary,
+  .btn-primary {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .toolbar-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .toolbar-actions button {
+    width: 100%;
+  }
+}
 </style>

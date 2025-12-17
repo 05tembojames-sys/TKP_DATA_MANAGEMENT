@@ -1854,6 +1854,24 @@ onMounted(async () => {
   width: 100%;
 }
 
+/* Line List Toolbar */
+.list-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 200px;
+}
+
+.dhis2-select.inline {
+  width: auto;
+  min-width: 150px;
+}
+
 /* Dropdown Menu */
 .dropdown-container {
   position: relative;
@@ -1977,14 +1995,332 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .app-shell {
     flex-direction: column;
+    height: calc(100vh - 48px); /* Account for TopHeader */
   }
   
   .sidebar {
     width: 100%;
     height: auto;
+    max-height: 70vh;
     border-right: none;
     border-bottom: 1px solid #d5d5d5;
-    display: none; /* Hide sidebar on mobile by default */
+    overflow-y: auto;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .sidebar.mobile-hidden {
+    display: none;
+  }
+  
+  .sidebar-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 5;
+    padding: 12px;
+  }
+  
+  .sidebar-header h2 {
+    font-size: 1rem;
+  }
+  
+  .update-btn-primary {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .sidebar-content {
+    padding-bottom: 60px; /* Space for mobile actions */
+  }
+  
+  .accordion-header {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .accordion-content {
+    padding: 8px 12px;
+  }
+  
+  .selection-list {
+    max-height: 150px;
+  }
+  
+  /* Main Content */
+  .main-content {
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  /* Toolbar - Make it responsive */
+  .toolbar {
+    height: auto;
+    min-height: 48px;
+    flex-wrap: wrap;
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .toolbar-left, .toolbar-right {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .toolbar-left {
+    width: 100%;
+    justify-content: center;
+    order: 2;
+  }
+  
+  .toolbar-right {
+    width: 100%;
+    justify-content: center;
+    order: 3;
+    margin-top: 4px;
+  }
+  
+  .btn-group {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .toolbar-btn {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    flex: 1;
+  }
+  
+  .toolbar-btn.icon-btn {
+    flex: auto;
+    white-space: nowrap;
+  }
+  
+  /* Visualization Area */
+  .visualization-area {
+    padding: 8px;
+    overflow-x: hidden;
+  }
+  
+  /* Table View - Enable horizontal scroll */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .dhis2-table {
+    font-size: 12px;
+    min-width: 600px; /* Force horizontal scroll for wide tables */
+  }
+  
+  .dhis2-table th,
+  .dhis2-table td {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  
+  .dhis2-table th {
+    white-space: nowrap;
+  }
+  
+  /* Chart View */
+  .chart-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .chart-controls select,
+  .chart-controls button {
+    width: 100%;
+  }
+  
+  .chart-canvas {
+    padding: 12px;
+    min-height: 300px;
+  }
+  
+  .chart-container {
+    min-height: 300px !important;
+  }
+  
+  .chart-title {
+    font-size: 1rem;
+    margin-bottom: 12px;
+  }
+  
+  /* Line List View */
+  .list-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .list-toolbar input,
+  .list-toolbar select,
+  .list-toolbar button {
+    width: 100%;
+  }
+  
+  /* Pagination */
+  .pagination-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.85rem;
+  }
+  
+  .pagination-bar span {
+    width: 100%;
+    text-align: center;
+    order: -1;
+  }
+  
+  .page-btn {
+    padding: 6px 16px;
+    font-size: 0.85rem;
+  }
+  
+  /* Modal on Mobile */
+  .modal-content {
+    width: 90%;
+    max-width: 400px;
+    margin: 0 16px;
+  }
+  
+  .modal-header h3 {
+    font-size: 1rem;
+  }
+  
+  .modal-body {
+    padding: 12px;
+  }
+  
+  /* Dropdown Menu */
+  .dropdown-menu {
+    position: fixed;
+    top: auto;
+    right: 8px;
+    left: 8px;
+    width: auto;
+  }
+  
+  /* Chart Types - Specific adjustments */
+  .pie-chart-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .pie-chart-svg {
+    width: 240px;
+    height: 240px;
+  }
+  
+  .pie-legend {
+    max-height: 200px;
+    width: 100%;
+  }
+  
+  /* Bar chart adjustments */
+  .bar-label {
+    width: 100px;
+    font-size: 10px;
+  }
+  
+  .bar-track {
+    height: 20px;
+  }
+  
+  .bar-value {
+    font-size: 10px;
+    right: 4px;
+  }
+  
+  /* Empty state */
+  .placeholder-icon {
+    font-size: 32px;
+  }
+  
+  .placeholder-content h3 {
+    font-size: 1rem;
+  }
+  
+  .placeholder-content p {
+    font-size: 0.9rem;
+  }
+  
+  /* Status tags */
+  .status-tag {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+  
+  /* Form elements in modals */
+  .dhis2-input,
+  .dhis2-select,
+  .dhis2-textarea {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .sidebar-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .app-title {
+    font-size: 0.9rem;
+  }
+  
+  .update-btn-primary {
+    width: 100%;
+  }
+  
+  .toolbar {
+    padding: 6px;
+  }
+  
+  .toolbar-btn {
+    font-size: 0.8rem;
+    padding: 6px 8px;
+  }
+  
+  .dhis2-table {
+    font-size: 10px;
+  }
+  
+  .dhis2-table th,
+  .dhis2-table td {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+  
+  .chart-canvas {
+    padding: 8px;
+  }
+  
+  .chart-container {
+    min-height: 250px !important;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 0 8px;
+  }
+  
+  .btn-group {
+    flex-direction: column;
+  }
+  
+  .toolbar-btn {
+    border-right: none;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .toolbar-btn:last-child {
+    border-bottom: none;
   }
 }
 

@@ -832,4 +832,384 @@ details[open] .chevron {
   background: #fafafa;
   font-weight: 500;
 }
+
+.period-info {
+  padding: 8px;
+  background: #f9f9f9;
+  border-radius: 3px;
+  margin-top: 8px;
+}
+
+.period-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--dhis2-text-secondary);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .dhis2-app-container {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .app-shell {
+    flex-direction: column;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 100%;
+    max-height: 60vh;
+    border-right: none;
+    border-bottom: 1px solid var(--dhis2-border);
+    overflow-y: auto;
+  }
+
+  .sidebar-header {
+    padding: 10px 12px;
+  }
+
+  .app-title {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+
+  .update-btn-primary {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+
+  .sidebar-content {
+    padding-bottom: 16px;
+  }
+
+  .accordion-header {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+  }
+
+  .accordion-content {
+    padding: 12px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group label {
+    font-size: 0.85rem;
+  }
+
+  .dhis2-select {
+    padding: 10px 8px;
+    font-size: 16px; /* Prevent iOS zoom */
+    min-height: 44px;
+  }
+
+  .selection-list {
+    max-height: 180px;
+  }
+
+  .list-control,
+  .list-item {
+    padding: 8px;
+  }
+
+  .checkbox-label {
+    font-size: 0.85rem;
+    min-height: 40px;
+  }
+
+  .info-box {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+
+  /* Main content */
+  .main-content {
+    flex: 1;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    height: auto;
+    min-height: 48px;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .chart-type-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    width: 100%;
+  }
+
+  .chart-type-btn {
+    padding: 10px;
+    font-size: 1.5rem;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .toolbar-right {
+    display: flex;
+    gap: 8px;
+  }
+
+  .toolbar-btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    min-height: 40px;
+    justify-content: center;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    height: auto;
+    min-height: 40px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .filter-group {
+    font-size: 0.8rem;
+  }
+
+  .filter-chip {
+    font-size: 0.75rem;
+    padding: 3px 10px;
+  }
+
+  /* Visualization area */
+  .visualization-area {
+    padding: 12px;
+  }
+
+  .chart-container {
+    min-height: 300px;
+  }
+
+  /* Pivot table */
+  .pivot-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dhis2-pivot-table {
+    min-width: 600px;
+    font-size: 11px;
+  }
+
+  .dhis2-pivot-table th,
+  .dhis2-pivot-table td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  /* Empty/Loading states */
+  .placeholder-icon {
+    font-size: 3rem;
+  }
+
+  .empty-state h2 {
+    font-size: 1.2rem;
+  }
+
+  .empty-state p {
+    font-size: 0.9rem;
+    padding: 0 16px;
+  }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+  }
+
+  .period-info p {
+    font-size: 0.8rem;
+  }
+}
+
+/* Very Small Screens */
+@media (max-width: 480px) {
+  .sidebar {
+    max-height: 50vh;
+  }
+
+  .sidebar-header {
+    padding: 8px 10px;
+  }
+
+  .app-title {
+    font-size: 0.95rem;
+  }
+
+  .update-btn-primary {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+
+  .accordion-header {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+
+  .icon {
+    font-size: 1rem;
+  }
+
+  .accordion-content {
+    padding: 10px;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+
+  .checkbox-label {
+    font-size: 0.8rem;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    padding: 6px;
+  }
+
+  .chart-type-selector {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .chart-type-btn {
+    padding: 8px;
+    font-size: 1.3rem;
+    min-height: 44px;
+  }
+
+  .toolbar-btn {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .filter-group {
+    font-size: 0.75rem;
+  }
+
+  .filter-chip {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+  }
+
+  /* Visualization */
+  .visualization-area {
+    padding: 8px;
+  }
+
+  .chart-container {
+    min-height: 250px;
+  }
+
+  /* Pivot table */
+  .dhis2-pivot-table {
+    min-width: 500px;
+    font-size: 10px;
+  }
+
+  .dhis2-pivot-table th,
+  .dhis2-pivot-table td {
+    padding: 6px 4px;
+    font-size: 10px;
+  }
+
+  /* Empty/Loading states */
+  .placeholder-icon {
+    font-size: 2.5rem;
+  }
+
+  .empty-state h2 {
+    font-size: 1.1rem;
+  }
+
+  .empty-state p {
+    font-size: 0.85rem;
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+  }
+
+  .loading-state p {
+    font-size: 0.85rem;
+  }
+}
+
+/* Landscape orientation for tablets */
+@media (max-width: 1024px) and (orientation: landscape) {
+  .sidebar {
+    max-height: 40vh;
+  }
+
+  .accordion-content {
+    max-height: 150px;
+    overflow-y: auto;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Enhanced touch targets */
+  .accordion-header {
+    min-height: 44px;
+  }
+
+  .checkbox-label {
+    min-height: 44px;
+    padding: 8px 0;
+  }
+
+  .chart-type-btn {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  .toolbar-btn,
+  .update-btn-primary {
+    min-height: 44px;
+  }
+
+  /* Visual feedback */
+  .accordion-header:active {
+    background: var(--dhis2-blue-light);
+  }
+
+  .chart-type-btn:active {
+    transform: scale(0.95);
+  }
+
+  .toolbar-btn:active {
+    background: var(--dhis2-blue-light);
+  }
+}
 </style>
