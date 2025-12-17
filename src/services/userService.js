@@ -11,7 +11,8 @@ import {
   orderBy,
   serverTimestamp,
   increment,
-  limit
+  limit,
+  getCountFromServer
 } from 'firebase/firestore'
 import {
   createUserWithEmailAndPassword,
@@ -37,7 +38,7 @@ class UserService {
   }
 
   // Get all users with comprehensive data
-  async getAllUsers() {
+  async getAllUsers(detailed = true) {
     try {
       const q = query(
         collection(db, this.usersCollection),
@@ -47,7 +48,8 @@ class UserService {
       const querySnapshot = await getDocs(q)
       const users = []
 
-      for (const docSnapshot of querySnapshot.docs) {
+      // Execute detailed checks in parallel if requested
+      const userPromises = querySnapshot.docs.map(async (docSnapshot) => {
         try {
           const userData = docSnapshot.data()
 
@@ -65,31 +67,24 @@ class UserService {
             ...userData
           }
 
-          // Check if user is currently online (with fallback)
           let isOnline = false
-          try {
-            isOnline = await this.checkUserOnlineStatus(docSnapshot.id)
-          } catch (error) {
-            console.warn('Failed to check online status for user:', docSnapshot.id)
-          }
-
-          // Get user's last login (with fallback)
           let lastLogin = null
-          try {
-            lastLogin = await this.getUserLastLogin(docSnapshot.id)
-          } catch (error) {
-            console.warn('Failed to get last login for user:', docSnapshot.id)
-          }
-
-          // Get login count (with fallback)
           let loginCount = 0
-          try {
-            loginCount = await this.getUserLoginCount(docSnapshot.id)
-          } catch (error) {
-            console.warn('Failed to get login count for user:', docSnapshot.id)
+
+          if (detailed) {
+            // Run these in parallel for better performance
+            const [onlineStatus, loginData, countData] = await Promise.all([
+              this.checkUserOnlineStatus(docSnapshot.id).catch(() => false),
+              this.getUserLastLogin(docSnapshot.id).catch(() => null),
+              this.getUserLoginCount(docSnapshot.id).catch(() => 0)
+            ])
+
+            isOnline = onlineStatus
+            lastLogin = loginData
+            loginCount = countData
           }
 
-          users.push({
+          return {
             id: docSnapshot.id,
             ...safeUserData,
             isOnline,
@@ -98,18 +93,32 @@ class UserService {
             // Convert Firestore timestamps to ISO strings
             createdAt: safeUserData.createdAt?.toDate?.()?.toISOString() || safeUserData.createdAt || new Date().toISOString(),
             updatedAt: safeUserData.updatedAt?.toDate?.()?.toISOString() || safeUserData.updatedAt || new Date().toISOString()
-          })
+          }
         } catch (userError) {
           console.error('Error processing user:', docSnapshot.id, userError)
-          // Skip this user but continue with others
-          continue
+          return null
         }
-      }
+      })
+
+      const processedUsers = await Promise.all(userPromises)
+      users.push(...processedUsers.filter(u => u !== null))
 
       return { success: true, users }
     } catch (error) {
       console.error('Error getting users:', error)
       return { success: false, error: error.message }
+    }
+  }
+
+  // Get total user count (Optimized)
+  async getUserCount() {
+    try {
+      const coll = collection(db, this.usersCollection);
+      const snapshot = await getCountFromServer(coll);
+      return snapshot.data().count;
+    } catch (error) {
+      console.error("Error getting user count:", error);
+      return 0;
     }
   }
 

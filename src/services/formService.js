@@ -11,6 +11,7 @@ import {
   where,
   updateDoc,
   deleteDoc,
+  getCountFromServer,
 } from "firebase/firestore";
 import { db } from "../firebase/config.js";
 
@@ -727,6 +728,27 @@ class FormService {
     }
   }
 
+  // Get count of forms by type (Optimized)
+  async getFormCount(formType = null) {
+    try {
+      let q;
+      if (formType) {
+        q = query(
+          collection(db, this.formsCollection),
+          where("formType", "==", formType)
+        );
+      } else {
+        q = collection(db, this.formsCollection);
+      }
+
+      const snapshot = await getCountFromServer(q);
+      return snapshot.data().count;
+    } catch (error) {
+      console.error("Error getting form count:", error);
+      return 0;
+    }
+  }
+
   // Get forms with pagination
   async getForms(formType = null, pageSize = 10, lastDoc = null) {
     try {
@@ -973,46 +995,45 @@ class FormService {
   async getFormStatistics() {
     try {
       const [
-        referralResult,
-        overviewResult,
-        assessmentResult,
-        medicalIntakeResult,
-        academicsLiteracyResult,
-        psychologicalAssessmentResult,
-        lifeSkillsSurveyResult,
-        birthDeliveryResult,
+        totalReferrals,
+        totalOverviews,
+        totalAssessments,
+        totalMedicalIntakes,
+        totalAcademicsLiteracy,
+        totalPsychologicalAssessments,
+        totalLifeSkillsSurveys,
+        totalBirthDeliveryReports
       ] = await Promise.all([
-        this.getForms("initial-referral", 1000),
-        this.getForms("child-overview", 1000),
-        this.getForms("initial-assessment", 1000),
-        this.getForms("medical-intake", 1000),
-        this.getForms("academics-literacy", 1000),
-        this.getForms("psychological-assessment", 1000),
-        this.getForms("life-skills-survey", 1000),
-        this.getForms("birth-delivery", 1000),
+        this.getFormCount("initial-referral"),
+        this.getFormCount("child-overview"),
+        this.getFormCount("initial-assessment"),
+        this.getFormCount("medical-intake"),
+        this.getFormCount("academics-literacy"),
+        this.getFormCount("psychological-assessment"),
+        this.getFormCount("life-skills-survey"),
+        this.getFormCount("birth-delivery"),
       ]);
 
       return {
         success: true,
         statistics: {
-          totalReferrals: referralResult.forms.length,
-          totalOverviews: overviewResult.forms.length,
-          totalAssessments: assessmentResult.forms.length,
-          totalMedicalIntakes: medicalIntakeResult.forms.length,
-          totalAcademicsLiteracy: academicsLiteracyResult.forms.length,
-          totalPsychologicalAssessments:
-            psychologicalAssessmentResult.forms.length,
-          totalLifeSkillsSurveys: lifeSkillsSurveyResult.forms.length,
-          totalBirthDeliveryReports: birthDeliveryResult.forms.length,
+          totalReferrals,
+          totalOverviews,
+          totalAssessments,
+          totalMedicalIntakes,
+          totalAcademicsLiteracy,
+          totalPsychologicalAssessments,
+          totalLifeSkillsSurveys,
+          totalBirthDeliveryReports,
           totalForms:
-            referralResult.forms.length +
-            overviewResult.forms.length +
-            assessmentResult.forms.length +
-            medicalIntakeResult.forms.length +
-            academicsLiteracyResult.forms.length +
-            psychologicalAssessmentResult.forms.length +
-            lifeSkillsSurveyResult.forms.length +
-            birthDeliveryResult.forms.length,
+            totalReferrals +
+            totalOverviews +
+            totalAssessments +
+            totalMedicalIntakes +
+            totalAcademicsLiteracy +
+            totalPsychologicalAssessments +
+            totalLifeSkillsSurveys +
+            totalBirthDeliveryReports,
         },
       };
     } catch (error) {

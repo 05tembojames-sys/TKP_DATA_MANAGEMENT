@@ -69,7 +69,43 @@
           <span>Working in offline mode. Data will sync when connection is restored.</span>
         </div>
       </div>
-      <div v-if="currentView === 'main'" class="dhis-dashboard-grid">
+
+      <!-- Loading State -->
+      <div v-if="currentView === 'main' && isDashboardLoading" class="dashboard-loading">
+        <div class="loading-header">
+          <div class="loading-spinner"></div>
+          <h2>Loading Dashboard...</h2>
+          <p>Please wait while we fetch your data</p>
+        </div>
+        <div class="skeleton-grid">
+          <!-- Skeleton Welcome Widget -->
+          <div class="skeleton-widget skeleton-double">
+            <div class="skeleton-header">
+              <div class="skeleton-title"></div>
+            </div>
+            <div class="skeleton-content">
+              <div class="skeleton-text skeleton-text-lg"></div>
+              <div class="skeleton-text skeleton-text-md"></div>
+              <div class="skeleton-stats">
+                <div class="skeleton-stat"></div>
+                <div class="skeleton-stat"></div>
+              </div>
+            </div>
+          </div>
+          <!-- Skeleton Chart Widgets -->
+          <div class="skeleton-widget" v-for="n in 6" :key="n">
+            <div class="skeleton-header">
+              <div class="skeleton-title"></div>
+            </div>
+            <div class="skeleton-content">
+              <div class="skeleton-chart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Dashboard Grid -->
+      <div v-else-if="currentView === 'main'" class="dhis-dashboard-grid">
           
           <!-- Welcome/Info Widget (Text) -->
           <div v-if="widgetVisibility.welcome" class="dhis-widget text-widget double-height">
@@ -865,6 +901,7 @@ const currentView = ref("main");
 const users = ref([]);
 const loadingUsers = ref(false);
   const loading = ref(false);
+  const isDashboardLoading = ref(true); // Track dashboard data loading
   const showAddUserForm = ref(false);
   const showEditUserForm = ref(false);
   const currentUserName = ref("");
@@ -946,15 +983,6 @@ const refreshWidget = async (widgetName) => {
   success('Widget data refreshed');
   activeWidgetMenu.value = null;
 };
-
-// Close widget menu when clicking outside
-onMounted(() => {
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.widget-controls')) {
-      activeWidgetMenu.value = null;
-    }
-  });
-});
 
 // Slideshow functionality
 const isSlideshowActive = ref(false);
@@ -1579,15 +1607,12 @@ const loadMapData = async (layerType) => {
     let locations = [];
     
     // Fetch real data counts
-    const [referrals, overviews, assessments] = await Promise.all([
-      FormService.getForms('initial-referral', 1000),
-      FormService.getForms('child-overview', 1000),
-      FormService.getForms('initial-assessment', 1000)
+    // Fetch real data counts efficiently
+    const [totalReferrals, totalOverviews, totalAssessments] = await Promise.all([
+      FormService.getFormCount('initial-referral'),
+      FormService.getFormCount('child-overview'),
+      FormService.getFormCount('initial-assessment')
     ]);
-    
-    const totalReferrals = referrals.success ? referrals.forms.length : 0;
-    const totalOverviews = overviews.success ? overviews.forms.length : 0;
-    const totalAssessments = assessments.success ? assessments.forms.length : 0;
 
     // Distribute these counts across locations (Simulated distribution of real data)
     if (layerType === 'children') {
@@ -1973,10 +1998,11 @@ const toggleInHousedMode = () => {
 
 // Load summary data
 const loadSummaryData = async () => {
+  isDashboardLoading.value = true;
   try {
     // Fetch data in parallel for faster loading
     const [usersResult, formStatsResult] = await Promise.all([
-      UserService.getAllUsers(),
+      UserService.getAllUsers(false), // Fetch simple user list for speed
       FormService.getFormStatistics()
     ]);
 
@@ -2005,8 +2031,30 @@ const loadSummaryData = async () => {
     totalChildren.value = 156;
     totalEvents.value = 89;
     totalDataEntries.value = 1247;
+  } finally {
+    isDashboardLoading.value = false;
   }
 };
+
+// Initialize dashboard
+onMounted(async () => {
+  await loadSummaryData();
+  
+  // Create mini charts after data is loaded and DOM is updated
+  setTimeout(() => {
+    createMiniCharts();
+    if (showMapsModal.value) {
+      initializeMap();
+    }
+  }, 100);
+  
+  // Close widget menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.widget-controls')) {
+      activeWidgetMenu.value = null;
+    }
+  });
+});
 
 const getSectionTitle = (view) => {
   const titles = {
@@ -4141,5 +4189,151 @@ const createMiniCharts = async () => {
     display: none; /* Show only icons on very small screens */
   }
 }
+
+/* Dashboard Loading State Styles */
+.dashboard-loading {
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.loading-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.loading-header h2 {
+  font-size: 1.8rem;
+  color: #1e293b;
+  margin: 0;
+  font-weight: 600;
+}
+
+.loading-header p {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Skeleton Loader Grid */
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  width: 100%;
+  max-width: 1400px;
+}
+
+.skeleton-widget {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.skeleton-double {
+  grid-column: span 2;
+  height: 300px;
+}
+
+@media (max-width: 768px) {
+  .skeleton-double {
+    grid-column: span 1;
+  }
+}
+
+/* Skeleton Elements with Shimmer Effect */
+.skeleton-title,
+.skeleton-text,
+.skeleton-stat,
+.skeleton-chart {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 60%;
+  border-radius: 6px;
+}
+
+.skeleton-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeleton-text {
+  height: 16px;
+  width: 100%;
+}
+
+.skeleton-text-lg {
+  height: 20px;
+  width: 80%;
+}
+
+.skeleton-text-md {
+  width: 90%;
+}
+
+.skeleton-stats {
+  display: flex;
+  gap: 20px;
+  margin-top: auto;
+}
+
+.skeleton-stat {
+  height: 40px;
+  flex: 1;
+  border-radius: 8px;
+}
+
+.skeleton-chart {
+  flex: 1;
+  width: 100%;
+  border-radius: 8px;
+}
+
 
 </style>
