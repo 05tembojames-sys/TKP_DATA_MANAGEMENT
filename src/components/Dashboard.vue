@@ -693,18 +693,75 @@
     </div>
 
     <!-- Slideshow Overlay -->
-    <div v-if="isSlideshowActive" class="slideshow-overlay">
-      <div class="slideshow-controls">
-        <button @click="previousSlide" class="slide-nav-btn"><i class="fas fa-chevron-left"></i></button>
-        <div class="slide-info">{{ currentSlide + 1 }} / {{ slideshowWidgets.length }}</div>
-        <button @click="nextSlide" class="slide-nav-btn"><i class="fas fa-chevron-right"></i></button>
-        <button @click="exitSlideshow" class="slide-exit-btn"><i class="fas fa-times"></i> Exit</button>
-      </div>
-      <div class="slideshow-content">
-        <div class="slideshow-widget" v-if="slideshowWidgets[currentSlide]">
-          <h2>{{ slideshowWidgets[currentSlide].title }}</h2>
-          <div class="widget-preview" v-html="slideshowWidgets[currentSlide].content"></div>
+    <div v-if="isSlideshowActive" class="slideshow-overlay" :class="{ 'fullscreen': isFullscreen }">
+      <!-- Top Control Bar -->
+      <div class="slideshow-header">
+        <div class="slideshow-info">
+          <div class="presentation-title"><i class="fas fa-presentation"></i> Dashboard Presentation</div>
+          <div class="slide-counter">
+            <span class="current-slide">{{ currentSlide + 1 }}</span>
+            <span class="divider">/</span>
+            <span class="total-slides">{{ slideshowWidgets.length }}</span>
+          </div>
         </div>
+        <div class="slideshow-actions">
+          <button @click="togglePlayPause" class="control-btn" :title="isPlaying ? 'Pause' : 'Play'">
+            <i class="fas" :class="isPlaying ? 'fa-pause' : 'fa-play'"></i>
+          </button>
+          <select v-model="slideshowSpeed" class="speed-selector" @change="updateSlideshowSpeed">
+            <option :value="3000">Fast (3s)</option>
+            <option :value="5000">Normal (5s)</option>
+            <option :value="8000">Slow (8s)</option>
+            <option :value="10000">Very Slow (10s)</option>
+          </select>
+          <button @click="toggleFullscreen" class="control-btn" :title="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
+            <i class="fas" :class="isFullscreen ? 'fa-compress' : 'fa-expand'"></i>
+          </button>
+          <button @click="exitSlideshow" class="exit-btn">
+            <i class="fas fa-times"></i> Exit
+          </button>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-container">
+        <div class="progress-bar" :style="{ width: progressBarWidth + '%' }"></div>
+      </div>
+
+      <!-- Main Slide Content -->
+      <div class="slideshow-content">
+        <transition :name="slideTransition" mode="out-in">
+          <div class="slideshow-widget" v-if="slideshowWidgets[currentSlide]" :key="currentSlide">
+            <div class="slide-number">{{ currentSlide + 1 }}</div>
+            <h2 class="slide-title">{{ slideshowWidgets[currentSlide].title }}</h2>
+            <div class="widget-preview" v-html="slideshowWidgets[currentSlide].content"></div>
+          </div>
+        </transition>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <div class="slideshow-footer">
+        <button @click="firstSlide" class="nav-btn" :disabled="currentSlide === 0">
+          <i class="fas fa-fast-backward"></i>
+        </button>
+        <button @click="previousSlide" class="nav-btn nav-btn-main" :disabled="currentSlide === 0">
+          <i class="fas fa-chevron-left"></i> Previous
+        </button>
+        <div class="slide-dots">
+          <span 
+            v-for="(widget, index) in slideshowWidgets" 
+            :key="index"
+            class="dot"
+            :class="{ active: index === currentSlide }"
+            @click="goToSlide(index)"
+          ></span>
+        </div>
+        <button @click="nextSlide" class="nav-btn nav-btn-main" :disabled="currentSlide === slideshowWidgets.length - 1">
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
+        <button @click="lastSlide" class="nav-btn" :disabled="currentSlide === slideshowWidgets.length - 1">
+          <i class="fas fa-fast-forward"></i>
+        </button>
       </div>
     </div>
  
@@ -903,21 +960,259 @@ onMounted(() => {
 const isSlideshowActive = ref(false);
 const currentSlide = ref(0);
 const slideshowInterval = ref(null);
-const slideshowWidgets = ref([
-  { title: 'Welcome Dashboard', content: '<p>Overview of TKP Data Management System</p>' },
-  { title: 'Tracker Capture', content: '<p>Search and track children in the system</p>' },
-  { title: 'Data Entry Progress', content: '<p>Monitor form completion and data entry activities</p>' },
-  { title: 'Reports Generated', content: '<p>View and manage system reports</p>' },
-  { title: 'Event Status', content: '<p>Track event statuses and activities</p>' },
-  { title: 'Demographics', content: '<p>Analyze demographic data</p>' },
-  { title: 'Outreach Activities', content: '<p>Manage offline sync and outreach programs</p>' },
-]);
+const isPlaying = ref(true);
+const isFullscreen = ref(false);
+const slideshowSpeed = ref(5000);
+const slideTransition = ref('slide-fade');
 
-// Summary statistics
+// Summary statistics - moved before slideshowWidgets to prevent initialization errors
 const totalReports = ref(0);
 const totalChildren = ref(0);
 const totalEvents = ref(0);
 const totalDataEntries = ref(0);
+
+const slideshowWidgets = ref([
+  { 
+    title: 'Welcome to TKP Dashboard', 
+    content: `
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+        <div>
+          <img src="C:/Users/David Chileshe/.gemini/antigravity/brain/b963cd9a-81af-477a-8441-97c3d0052a54/dashboard_overview_chart_1766001393919.png" 
+               style="width: 100%; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);" 
+               alt="Dashboard Overview" />
+        </div>
+        <div>
+          <h3 style="color: #2c6693; margin-bottom: 20px; font-size: 1.8rem;">Overview</h3>
+          <p style="font-size: 1.2rem; line-height: 1.8; color: #475569;">
+            Welcome to the TKP Data Management System - your comprehensive platform for tracking, 
+            managing, and analyzing child protection data.
+          </p>
+          <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+            <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+              <div style="font-size: 2.5rem; font-weight: 700;">${totalChildren.value || 245}</div>
+              <div style="font-size: 0.9rem; opacity: 0.9;">Children Tracked</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+              <div style="font-size: 2.5rem; font-weight: 700;">${totalReports.value || 1,247}</div>
+              <div style="font-size: 0.9rem; opacity: 0.9;">Reports Generated</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  { 
+    title: 'Tracker Capture System', 
+    content: `
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px;">
+        <div>
+          <img src="C:/Users/David Chileshe/.gemini/antigravity/brain/b963cd9a-81af-477a-8441-97c3d0052a54/tracker_capture_interface_1766001418566.png" 
+               style="width: 100%; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);" 
+               alt="Tracker Interface" />
+        </div>
+        <div>
+          <h3 style="color: #2c6693; margin-bottom: 20px; font-size: 1.6rem;">Search & Track</h3>
+          <p style="font-size: 1.1rem; line-height: 1.7; color: #475569; margin-bottom: 25px;">
+            Powerful search capabilities to quickly find and track children in the system.
+          </p>
+          <ul style="list-style: none; padding: 0; font-size: 1.1rem;">
+            <li style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center;">
+              <span style="color: #10b981; margin-right: 12px; font-size: 1.3rem;">✓</span>
+              Real-time search functionality
+            </li>
+            <li style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center;">
+              <span style="color: #10b981; margin-right: 12px; font-size: 1.3rem;">✓</span>
+              Comprehensive child profiles
+            </li>
+            <li style="padding: 12px 0; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center;">
+              <span style="color: #10b981; margin-right: 12px; font-size: 1.3rem;">✓</span>
+              History tracking & updates
+            </li>
+            <li style="padding: 12px 0; display: flex; align-items: center;">
+              <span style="color: #10b981; margin-right: 12px; font-size: 1.3rem;">✓</span>
+              Quick enrollment process
+            </li>
+          </ul>
+        </div>
+      </div>
+    `
+  },
+  { 
+    title: 'Data Entry Progress', 
+    content: `
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+        <div>
+          <h3 style="color: #2c6693; margin-bottom: 20px; font-size: 1.6rem;">Form Completion Monitoring</h3>
+          <p style="font-size: 1.1rem; line-height: 1.7; color: #475569; margin-bottom: 30px;">
+            Track form completion rates across all programs and monitor data entry activities in real-time.
+          </p>
+          <div style="background: #f8fafc; padding: 25px; border-radius: 12px; border-left: 4px solid #3b82f6;">
+            <div style="margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-weight: 600; color: #475569;">Initial Referrals</span>
+                <span style="font-weight: 700; color: #2c6693;">87%</span>
+              </div>
+              <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #3b82f6, #60a5fa); width: 87%; height: 100%;"></div>
+              </div>
+            </div>
+            <div style="margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-weight: 600; color: #475569;">Assessments</span>
+                <span style="font-weight: 700; color: #2c6693;">72%</span>
+              </div>
+              <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #10b981, #34d399); width: 72%; height: 100%;"></div>
+              </div>
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-weight: 600; color: #475569;">Care Plans</span>
+                <span style="font-weight: 700; color: #2c6693;">94%</span>
+              </div>
+              <div style="background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden;">
+                <div style="background: linear-gradient(90deg, #8b5cf6, #a78bfa); width: 94%; height: 100%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <img src="C:/Users/David Chileshe/.gemini/antigravity/brain/b963cd9a-81af-477a-8441-97c3d0052a54/data_entry_progress_1766001458543.png" 
+               style="width: 100%; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);" 
+               alt="Progress Dashboard" />
+        </div>
+      </div>
+    `
+  },
+  { 
+    title: 'Geographic Distribution', 
+    content: `
+      <div>
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h3 style="color: #2c6693; margin-bottom: 15px; font-size: 1.8rem;">Service Coverage Map</h3>
+          <p style="font-size: 1.2rem; color: #64748b;">Real-time geographic visualization of program activities across Zambia</p>
+        </div>
+        <img src="C:/Users/David Chileshe/.gemini/antigravity/brain/b963cd9a-81af-477a-8441-97c3d0052a54/geographic_map_visualization_1766001492440.png" 
+             style="width: 100%; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); margin-bottom: 30px;" 
+             alt="Geographic Map" />
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700;">5</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Active Centers</div>
+          </div>
+          <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700;">12</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Districts Covered</div>
+          </div>
+          <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700;">3</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Provinces</div>
+          </div>
+          <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 20px; border-radius: 12px; color: white; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700;">89%</div>
+            <div style="font-size: 0.9rem; opacity: 0.9;">Coverage Rate</div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  { 
+    title: 'Demographics Analysis', 
+    content: `
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+        <div>
+          <img src="C:/Users/David Chileshe/.gemini/antigravity/brain/b963cd9a-81af-477a-8441-97c3d0052a54/demographics_pie_chart_1766001516745.png" 
+               style="width: 100%; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);" 
+               alt="Demographics Charts" />
+        </div>
+        <div>
+          <h3 style="color: #2c6693; margin-bottom: 20px; font-size: 1.6rem;">Population Insights</h3>
+          <p style="font-size: 1.1rem; line-height: 1.7; color: #475569; margin-bottom: 25px;">
+            Comprehensive demographic breakdown and trend analysis
+          </p>
+          <div style="background: #f8fafc; padding: 25px; border-radius: 12px;">
+            <div style="margin-bottom: 25px;">
+              <h4 style="color: #475569; font-size: 1.1rem; margin-bottom: 15px;">Age Distribution</h4>
+              <div style="display: flex; gap: 15px;">
+                <div style="flex: 1; text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                  <div style="font-size: 1.8rem; font-weight: 700; color: #3b82f6;">35%</div>
+                  <div style="font-size: 0.9rem; color: #64748b;">0-5 years</div>
+                </div>
+                <div style="flex: 1; text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                  <div style="font-size: 1.8rem; font-weight: 700; color: #10b981;">42%</div>
+                  <div style="font-size: 0.9rem; color: #64748b;">6-12 years</div>
+                </div>
+                <div style="flex: 1; text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                  <div style="font-size: 1.8rem; font-weight: 700; color: #8b5cf6;">23%</div>
+                  <div style="font-size: 0.9rem; color: #64748b;">13-18 years</div>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h4 style="color: #475569; font-size: 1.1rem; margin-bottom: 15px;">Gender Distribution</h4>
+              <div style="display: flex; gap: 15px;">
+                <div style="flex: 1; text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                  <div style="font-size: 1.8rem; font-weight: 700; color: #3b82f6;">52%</div>
+                  <div style="font-size: 0.9rem; color: #64748b;">Female</div>
+                </div>
+                <div style="flex: 1; text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                  <div style="font-size: 1.8rem; font-weight: 700; color: #10b981;">48%</div>
+                  <div style="font-size: 0.9rem; color: #64748b;">Male</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  { 
+    title: 'Outreach Programs', 
+    content: `
+      <div>
+        <div style="margin-bottom: 30px;">
+          <h3 style="color: #2c6693; margin-bottom: 15px; font-size: 1.8rem;">Community Outreach Coverage</h3>
+          <p style="font-size: 1.2rem; color: #64748b;">Mobile outreach activities and offline data synchronization</p>
+        </div>
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px;">
+          <div>
+            <img src="C:/Users/David Chileshe/.gemini/antigravity/brain/b963cd9a-81af-477a-8441-97c3d0052a54/outreach_activities_map_1766001547975.png" 
+                 style="width: 100%; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);" 
+                 alt="Outreach Map" />
+          </div>
+          <div>
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 25px; border-radius: 12px; color: white; margin-bottom: 20px;">
+              <div style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px;">847</div>
+              <div style="font-size: 1.1rem; opacity: 0.95;">Children Reached</div>
+            </div>
+            <div style="background: #f8fafc; padding: 20px; border-radius: 12px;">
+              <h4 style="color: #475569; font-size: 1.1rem; margin-bottom: 15px;">Recent Activities</h4>
+              <div style="font-size: 0.95rem; color: #64748b; line-height: 1.8;">
+                <div style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                  <strong style="color: #2c6693;">Chongwe</strong> - 45 children registered
+                </div>
+                <div style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                  <strong style="color: #2c6693;">Kafue</strong> - 32 follow-ups completed
+                </div>
+                <div style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                  <strong style="color: #2c6693;">Kabwe</strong> - 28 assessments conducted
+                </div>
+                <div style="padding: 10px 0;">
+                  <strong style="color: #2c6693;">Chilanga</strong> - 15 care plans updated
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+]);
+
+// Progress bar computed property
+const progressBarWidth = computed(() => {
+  return ((currentSlide.value + 1) / slideshowWidgets.value.length) *100;
+});
 
 // Forms management
 const currentForm = ref("initial-referral-list");
@@ -1391,44 +1686,184 @@ const startSlideshow = () => {
   
   currentSlide.value = 0;
   isSlideshowActive.value = true;
+  isPlaying.value = true;
   
-  // Auto-advance slides every 5 seconds
+  // Auto-advance slides
   slideshowInterval.value = setInterval(() => {
-    if (isSlideshowActive.value) {
+    if (isSlideshowActive.value && isPlaying.value) {
       nextSlide();
-    } else {
-      if (slideshowInterval.value) {
-        clearInterval(slideshowInterval.value);
-        slideshowInterval.value = null;
-      }
     }
-  }, 5000);
+  }, slideshowSpeed.value);
+  
+  // Add keyboard navigation
+  document.addEventListener('keydown', handleSlideshowKeyboard);
+  
+  success('Presentation started');
 };
 
 const exitSlideshow = () => {
   isSlideshowActive.value = false;
   currentSlide.value = 0;
+  isPlaying.value = false;
   
   // Clear the interval
   if (slideshowInterval.value) {
     clearInterval(slideshowInterval.value);
     slideshowInterval.value = null;
   }
+  
+  // Remove keyboard listener
+  document.removeEventListener('keydown', handleSlideshowKeyboard);
+  
+  // Exit fullscreen if active
+  if (isFullscreen.value && document.fullscreenElement) {
+    document.exitFullscreen();
+    isFullscreen.value = false;
+  }
 };
 
 const nextSlide = () => {
   if (currentSlide.value < slideshowWidgets.value.length - 1) {
+    slideTransition.value = 'slide-left';
     currentSlide.value++;
   } else {
+    slideTransition.value = 'slide-left';
     currentSlide.value = 0; // Loop back to start
   }
 };
 
 const previousSlide = () => {
+  slideTransition.value = 'slide-right';
   if (currentSlide.value > 0) {
     currentSlide.value--;
   } else {
     currentSlide.value = slideshowWidgets.value.length - 1; // Go to last slide
+  }
+};
+
+const firstSlide = () => {
+  slideTransition.value = 'slide-right';
+  currentSlide.value = 0;
+};
+
+const lastSlide = () => {
+  slideTransition.value = 'slide-left';
+  currentSlide.value = slideshowWidgets.value.length - 1;
+};
+
+const goToSlide = (index) => {
+  slideTransition.value = index > currentSlide.value ? 'slide-left' : 'slide-right';
+  currentSlide.value = index;
+};
+
+const togglePlayPause = () => {
+  isPlaying.value = !isPlaying.value;
+  
+  if (isPlaying.value) {
+    // Resume auto-play
+    if (slideshowInterval.value) {
+      clearInterval(slideshowInterval.value);
+    }
+    slideshowInterval.value = setInterval(() => {
+      if (isSlideshowActive.value && isPlaying.value) {
+        nextSlide();
+      }
+    }, slideshowSpeed.value);
+  } else {
+    // Pause auto-play
+    if (slideshowInterval.value) {
+      clearInterval(slideshowInterval.value);
+      slideshowInterval.value = null;
+    }
+  }
+};
+
+const updateSlideshowSpeed = () => {
+  // Update the interval with new speed
+  if (slideshowInterval.value) {
+    clearInterval(slideshowInterval.value);
+  }
+  
+  if (isPlaying.value) {
+    slideshowInterval.value = setInterval(() => {
+      if (isSlideshowActive.value && isPlaying.value) {
+        nextSlide();
+      }
+    }, slideshowSpeed.value);
+  }
+};
+
+const toggleFullscreen = async () => {
+  const slideshowElement = document.querySelector('.slideshow-overlay');
+  
+  if (!isFullscreen.value) {
+    // Enter fullscreen
+    try {
+      if (slideshowElement.requestFullscreen) {
+        await slideshowElement.requestFullscreen();
+      } else if (slideshowElement.webkitRequestFullscreen) {
+        await slideshowElement.webkitRequestFullscreen();
+      } else if (slideshowElement.msRequestFullscreen) {
+        await slideshowElement.msRequestFullscreen();
+      }
+      isFullscreen.value = true;
+    } catch (err) {
+      error('Unable to enter fullscreen mode');
+      console.error(err);
+    }
+  } else {
+    // Exit fullscreen
+    try {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        await document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        await document.msExitFullscreen();
+      }
+      isFullscreen.value = false;
+    } catch (err) {
+      error('Unable to exit fullscreen mode');
+      console.error(err);
+    }
+  }
+};
+
+const handleSlideshowKeyboard = (event) => {
+  if (!isSlideshowActive.value) return;
+  
+  switch(event.key) {
+    case 'ArrowRight':
+    case ' ': // Spacebar
+      event.preventDefault();
+      nextSlide();
+      break;
+    case 'ArrowLeft':
+      event.preventDefault();
+      previousSlide();
+      break;
+    case 'Home':
+      event.preventDefault();
+      firstSlide();
+      break;
+    case 'End':
+      event.preventDefault();
+      lastSlide();
+      break;
+    case 'Escape':
+      event.preventDefault();
+      exitSlideshow();
+      break;
+    case 'f':
+    case 'F':
+      event.preventDefault();
+      toggleFullscreen();
+      break;
+    case 'p':
+    case 'P':
+      event.preventDefault();
+      togglePlayPause();
+      break;
   }
 };
 
@@ -3214,116 +3649,348 @@ const createMiniCharts = async () => {
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* Slideshow Styles */
+/* Slideshow Presentation Styles */
 .slideshow-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: #111827;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   z-index: 10000;
   display: flex;
   flex-direction: column;
   animation: fadeIn 0.3s ease-out;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.slideshow-controls {
-  background: rgba(0, 0, 0, 0.8);
-  padding: 16px 24px;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Header Controls */
+.slideshow-header {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  padding: 16px 32px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 24px;
+  justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.slide-nav-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
+.slideshow-info {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 24px;
 }
 
-.slide-nav-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.slide-info {
+.presentation-title {
   color: white;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.presentation-title i {
+  color: #60a5fa;
+}
+
+.slide-counter {
+  color: #94a3b8;
+  font-size: 1rem;
   font-weight: 500;
-  min-width: 100px;
-  text-align: center;
 }
 
-.slide-exit-btn {
-  background: #ef4444;
-  border: none;
+.slide-counter .current-slide {
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.slide-counter .divider {
+  margin: 0 4px;
+}
+
+.slideshow-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.control-btn, .exit-btn {
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-  padding: 10px 20px;
-  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.control-btn:active {
+  transform: translateY(0);
+}
+
+.exit-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-color: #b91c1c;
+}
+
+.exit-btn:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.speed-selector {
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
   font-weight: 500;
-  margin-left: auto;
+  transition: all 0.2s ease;
 }
 
-.slide-exit-btn:hover {
-  background: #dc2626;
+.speed-selector:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
+.speed-selector option {
+  background: #1e293b;
+  color: white;
+}
+
+/* Progress Bar */
+.progress-container {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+/* Slide Content */
 .slideshow-content {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 50px;
   overflow: hidden;
+  position: relative;
 }
 
 .slideshow-widget {
   background: white;
-  border-radius: 12px;
-  padding: 48px;
-  max-width: 1200px;
+  border-radius: 16px;
+  padding: 60px 80px;
+  max-width: 1400px;
   width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  animation: slideIn 0.5s ease-out;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+  position: relative;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
 }
 
-@keyframes slideIn {
-  from {
-    transform: translateX(100px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.slideshow-widget h2 {
-  margin: 0 0 24px 0;
-  font-size: 2.5rem;
-  color: #2c6693;
+.slide-number {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
   font-weight: 700;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+.slide-title {
+  margin: 0 0 32px 0;
+  font-size: 3rem;
+  color: #1e293b;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  background: linear-gradient(135deg, #2c6693 0%, #1e3a5f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .widget-preview {
-  font-size: 1.2rem;
-  color: #374151;
-  line-height: 1.8;
+  font-size: 1.4rem;
+  color: #475569;
+  line-height: 1.9;
+  flex: 1;
+}
+
+.widget-preview p {
+  margin: 1em 0;
+}
+
+/* Slide Transitions */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.4s ease;
+}
+
+.slide-fade-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active,
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-left-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-left-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-right-enter-from {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-right-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* Footer Navigation */
+.slideshow-footer {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-btn {
+  padding: 12px 20px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.nav-btn-main {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #1d4ed8;
+  padding: 12px 28px;
+}
+
+.nav-btn-main:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+/* Slide Dots */
+.slide-dots {
+  display: flex;
+  gap: 12px;
+  padding: 0 20px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(1.2);
+}
+
+.dot.active {
+  background: #60a5fa;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.6);
+  width: 32px;
+  border-radius: 6px;
+}
+
+/* Fullscreen Mode */
+.slideshow-overlay.fullscreen .slideshow-widget {
+  max-width: 90%;
+  padding: 80px 100px;
+}
+
+.slideshow-overlay.fullscreen .slide-title {
+  font-size: 3.5rem;
+}
+
+.slideshow-overlay.fullscreen .widget-preview {
+  font-size: 1.6rem;
 }
 
 /* Responsive Styles for Modals */
@@ -3359,21 +4026,119 @@ const createMiniCharts = async () => {
     align-items: stretch;
   }
 
-  .slideshow-widget {
-    padding: 24px;
+  /* Mobile Slideshow */
+  .slideshow-header {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
   }
 
-  .slideshow-widget h2 {
-    font-size: 1.8rem;
+  .slideshow-info {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .presentation-title {
+    font-size: 1rem;
+    justify-content: center;
+  }
+
+  .slideshow-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .control-btn, .exit-btn {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  .speed-selector {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .slideshow-content {
+    padding: 20px;
+  }
+
+  .slideshow-widget {
+    padding: 30px 24px;
+    min-height: 300px;
+  }
+
+  .slide-number {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    top: 16px;
+    right: 16px;
+  }
+
+  .slide-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+  }
+
+  .widget-preview {
+    font-size: 1.1rem;
+  }
+
+  .slideshow-footer {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .nav-btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+
+  .nav-btn:first-child,
+  .nav-btn:last-child {
+    display: none; /* Hide first/last slide buttons on mobile */
+  }
+
+  .slide-dots {
+    width: 100%;
+    justify-content: center;
+    order: -1;
+    padding: 8px 0;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .dot.active {
+    width: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .slideshow-widget {
+    padding: 24px 16px;
+  }
+
+  .slide-title {
+    font-size: 1.6rem;
   }
 
   .widget-preview {
     font-size: 1rem;
   }
 
-  .slideshow-controls {
-    padding: 12px 16px;
-    gap: 12px;
+  .control-btn i {
+    margin: 0;
+  }
+
+  .control-btn span,
+  .exit-btn span {
+    display: none; /* Show only icons on very small screens */
   }
 }
 
