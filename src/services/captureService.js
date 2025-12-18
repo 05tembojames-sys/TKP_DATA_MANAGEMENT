@@ -16,8 +16,48 @@ class CaptureService {
       },
       {
         id: 'initial-assessment',
-        name: 'TKP Initial Assessment Forms', 
+        name: 'TKP Initial Assessment Forms',
         description: 'Assessment forms for child eligibility and admission'
+      },
+      {
+        id: 'medical-intake',
+        name: 'Medical Intake Assessment',
+        description: 'Initial health screening and medical history'
+      },
+      {
+        id: 'academics-literacy',
+        name: 'Academics & Literacy Plan',
+        description: 'Education capability assessment and planning'
+      },
+      {
+        id: 'psychological-assessment',
+        name: 'Psychological Assessment',
+        description: 'Mental health and behavioral assessment'
+      },
+      {
+        id: 'life-skills-survey',
+        name: 'Life Skills Survey',
+        description: 'Assessment of daily living and social skills'
+      },
+      {
+        id: 'birth-delivery',
+        name: 'Birth Delivery Report',
+        description: 'Details of birth events for pregnant beneficiaries'
+      },
+      {
+        id: 'care-plan-summary',
+        name: 'Care Plan Summary',
+        description: 'Overall care plan strategy and goals'
+      },
+      {
+        id: 'care-plan-baby',
+        name: 'Care Plan (Baby)',
+        description: 'Care plan for infants'
+      },
+      {
+        id: 'care-plan-ongoing-life-skills',
+        name: 'Care Plan (Life Skills)',
+        description: 'Ongoing life skills development plan'
       },
       {
         id: 'monthly-report',
@@ -36,78 +76,93 @@ class CaptureService {
   static async getOrgUnits() {
     return [
       {
-        id: 'kukhoma-main',
-        name: 'The Kukhoma Project - Main Center',
+        id: 'kukhoma-admin',
+        name: 'The Kukhoma Project - Administration',
         level: 1
       },
       {
-        id: 'outreach-lusaka',
-        name: 'Community Outreach - Lusaka',
+        id: 'kukhoma-me',
+        name: 'The Kukhoma Project - Monitoring & Evaluation',
         level: 2
       },
       {
-        id: 'outreach-chongwe',
-        name: 'Community Outreach - Chongwe',
-        level: 2
+        id: 'ward-1',
+        name: 'Ward 1 - Medical',
+        level: 3
       },
       {
-        id: 'educational-support',
-        name: 'Educational Support Unit',
-        level: 2
+        id: 'ward-2',
+        name: 'Ward 2 - Recovery',
+        level: 3
       },
       {
-        id: 'health-services',
-        name: 'Health Services Unit',
-        level: 2
-      },
-      {
-        id: 'family-support',
-        name: 'Family Support Services',
-        level: 2
+        id: 'ward-3',
+        name: 'Ward 3 - Intensive Care',
+        level: 3
       }
     ]
   }
 
   // Get available periods
+  // Get available periods
   static async getPeriods() {
     const currentYear = new Date().getFullYear()
-    const currentMonth = new Date().getMonth()
-    
+
+    // Generate periods for Current Year and Next Year
+    const years = [currentYear, currentYear + 1]
     const periods = []
-    
-    // Generate monthly periods for current year
-    for (let i = 0; i < 12; i++) {
-      const month = i + 1
-      const monthName = new Date(currentYear, i, 1).toLocaleString('default', { month: 'long' })
+
+    years.forEach(year => {
+      // Monthly periods
+      for (let i = 0; i < 12; i++) {
+        const month = i + 1
+        const monthName = new Date(year, i, 1).toLocaleString('default', { month: 'long' })
+        periods.push({
+          id: `${year}${month.toString().padStart(2, '0')}`,
+          name: `${monthName} ${year}`,
+          type: 'MONTHLY',
+          year: year,
+          month: month
+        })
+      }
+
+      // Quarterly periods
+      const quarters = ['Q1', 'Q2', 'Q3', 'Q4']
+      quarters.forEach((quarter, index) => {
+        periods.push({
+          id: `${year}${quarter}`,
+          name: `${quarter} ${year}`,
+          type: 'QUARTERLY',
+          year: year,
+          quarter: index + 1
+        })
+      })
+
+      // Annual period
       periods.push({
-        id: `${currentYear}${month.toString().padStart(2, '0')}`,
-        name: `${monthName} ${currentYear}`,
-        type: 'MONTHLY',
-        year: currentYear,
-        month: month
+        id: `${year}`,
+        name: `${year}`,
+        type: 'YEARLY',
+        year: year
+      })
+    })
+
+    // Add future yearly periods (next 5 years)
+    for (let i = 2; i <= 5; i++) {
+      const futureYear = currentYear + i
+      periods.push({
+        id: `${futureYear}`,
+        name: `${futureYear}`,
+        type: 'YEARLY',
+        year: futureYear
       })
     }
-    
-    // Generate quarterly periods
-    const quarters = ['Q1', 'Q2', 'Q3', 'Q4']
-    quarters.forEach((quarter, index) => {
-      periods.push({
-        id: `${currentYear}${quarter}`,
-        name: `${quarter} ${currentYear}`,
-        type: 'QUARTERLY',
-        year: currentYear,
-        quarter: index + 1
-      })
-    })
-    
-    // Generate annual period
-    periods.push({
-      id: `${currentYear}`,
-      name: `${currentYear}`,
-      type: 'YEARLY',
-      year: currentYear
-    })
-    
+
+    // Sort periods: most recent first? Or chronological? 
+    // Usually chronological for data entry.
+    // But maybe the user wants to see future?
+    // Let's keep them in the order generated (Chronological: Current Year -> Next Year -> Future Years)
+
     return periods
   }
 
@@ -115,13 +170,13 @@ class CaptureService {
   static async loadDataEntryForm({ dataSetId, orgUnitId, periodId }) {
     // Mock delay to simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
+
     // Generate form structure based on dataset
     const formStructure = this.generateFormStructure(dataSetId)
-    
+
     // Load existing data values if any
     const existingData = await this.loadExistingDataValues({ dataSetId, orgUnitId, periodId })
-    
+
     return {
       sections: formStructure.sections,
       dataValues: existingData.dataValues || {},
@@ -458,6 +513,117 @@ class CaptureService {
           }
         ]
       },
+      'medical-intake': {
+        sections: [
+          {
+            id: 'section-health-info',
+            name: 'Health Information',
+            dataElements: [
+              { id: 'childName', name: 'Child Name', valueType: 'TEXT', required: true },
+              { id: 'screenDate', name: 'Screening Date', valueType: 'DATE', required: true },
+              { id: 'weight', name: 'Weight (kg)', valueType: 'NUMBER', required: true },
+              { id: 'height', name: 'Height (cm)', valueType: 'NUMBER', required: true },
+              { id: 'chronicConditions', name: 'Chronic Conditions', valueType: 'TEXT', required: false },
+              { id: 'referralNeeded', name: 'Referral Needed', valueType: 'BOOLEAN', required: true }
+            ]
+          }
+        ]
+      },
+      'academics-literacy': {
+        sections: [
+          {
+            id: 'section-academic-info',
+            name: 'Academic Assessment',
+            dataElements: [
+              { id: 'childName', name: 'Child Name', valueType: 'TEXT', required: true },
+              { id: 'schoolGrade', name: 'Current Grade', valueType: 'TEXT', required: true },
+              { id: 'literacyLevel', name: 'Literacy Level', valueType: 'SELECT', options: ['Beginner', 'Intermediate', 'Advanced'], required: true },
+              { id: 'schoolEnrolled', name: 'Enrolled in School', valueType: 'BOOLEAN', required: true }
+            ]
+          }
+        ]
+      },
+      'psychological-assessment': {
+        sections: [
+          {
+            id: 'section-psych-eval',
+            name: 'Psychological Evaluation',
+            dataElements: [
+              { id: 'childName', name: 'Child Name', valueType: 'TEXT', required: true },
+              { id: 'assessmentDate', name: 'Assessment Date', valueType: 'DATE', required: true },
+              { id: 'traumaSymptoms', name: 'Trauma Symptoms', valueType: 'TEXT', required: false },
+              { id: 'recommendCounseling', name: 'Recommend Counseling', valueType: 'BOOLEAN', required: true }
+            ]
+          }
+        ]
+      },
+      'life-skills-survey': {
+        sections: [
+          {
+            id: 'section-life-skills',
+            name: 'Life Skills Survey',
+            dataElements: [
+              { id: 'childName', name: 'Child Name', valueType: 'TEXT', required: true },
+              { id: 'surveyDate', name: 'Survey Date', valueType: 'DATE', required: true },
+              { id: 'competencyScore', name: 'Competency Score (1-10)', valueType: 'NUMBER', min: 1, max: 10, required: true }
+            ]
+          }
+        ]
+      },
+      'birth-delivery': {
+        sections: [
+          {
+            id: 'section-birth-details',
+            name: 'Birth Details',
+            dataElements: [
+              { id: 'motherName', name: 'Mother Name', valueType: 'TEXT', required: true },
+              { id: 'deliveryDate', name: 'Delivery Date', valueType: 'DATE', required: true },
+              { id: 'hospitalDelivery', name: 'Hospital Delivery', valueType: 'BOOLEAN', required: true },
+              { id: 'complications', name: 'Complications', valueType: 'TEXT', required: false }
+            ]
+          }
+        ]
+      },
+      'care-plan-summary': {
+        sections: [
+          {
+            id: 'section-care-plan',
+            name: 'Care Plan Overview',
+            dataElements: [
+              { id: 'childName', name: 'Child Name', valueType: 'TEXT', required: true },
+              { id: 'planDate', name: 'Plan Date', valueType: 'DATE', required: true },
+              { id: 'primaryGoal', name: 'Primary Goal', valueType: 'TEXT', required: true },
+              { id: 'status', name: 'Status', valueType: 'SELECT', options: ['New', 'In Progress', 'Completed', 'Reviewed'], required: true }
+            ]
+          }
+        ]
+      },
+      'care-plan-baby': {
+        sections: [
+          {
+            id: 'section-baby-care',
+            name: 'Infant Care Plan',
+            dataElements: [
+              { id: 'babyName', name: 'Baby Name', valueType: 'TEXT', required: true },
+              { id: 'dob', name: 'Date of Birth', valueType: 'DATE', required: true },
+              { id: 'nutritionPlan', name: 'Nutrition Plan', valueType: 'TEXT', required: true }
+            ]
+          }
+        ]
+      },
+      'care-plan-ongoing-life-skills': {
+        sections: [
+          {
+            id: 'section-skills-plan',
+            name: 'Life Skills Plan',
+            dataElements: [
+              { id: 'childName', name: 'Child Name', valueType: 'TEXT', required: true },
+              { id: 'skillFocus', name: 'Skill Focus', valueType: 'TEXT', required: true },
+              { id: 'targetDate', name: 'Target Date', valueType: 'DATE', required: true }
+            ]
+          }
+        ]
+      },
       'ds-003': {
         sections: [
           {
@@ -524,7 +690,7 @@ class CaptureService {
         ]
       }
     }
-    
+
     return formStructures[dataSetId] || { sections: [] }
   }
 
@@ -534,23 +700,23 @@ class CaptureService {
       // First check localStorage for unsaved work
       const key = `${dataSetId}-${orgUnitId}-${periodId}`
       const stored = localStorage.getItem(`capture-data-${key}`)
-      
+
       if (stored) {
         const localData = JSON.parse(stored)
         if (localData.status === 'DRAFT' || localData.status === 'NEW') {
           return localData
         }
       }
-      
+
       // Then check Firebase for existing forms
       const formsResult = await FormService.getForms(dataSetId, 50)
       if (formsResult.success && formsResult.forms.length > 0) {
         // Find forms that match the criteria (could be enhanced with better filtering)
-        const matchingForm = formsResult.forms.find(form => 
+        const matchingForm = formsResult.forms.find(form =>
           // For now, just find the most recent form of this type
           form.formType === dataSetId
         )
-        
+
         if (matchingForm) {
           return {
             dataValues: matchingForm,
@@ -559,7 +725,7 @@ class CaptureService {
           }
         }
       }
-      
+
       return {
         dataValues: {},
         lastUpdated: null,
@@ -579,7 +745,7 @@ class CaptureService {
   static calculateCompletionStatus(formStructure, dataValues) {
     let totalElements = 0
     let filledElements = 0
-    
+
     formStructure.sections.forEach(section => {
       section.dataElements.forEach(element => {
         totalElements++
@@ -589,7 +755,7 @@ class CaptureService {
         }
       })
     })
-    
+
     return totalElements > 0 ? Math.round((filledElements / totalElements) * 100) : 0
   }
 
@@ -597,7 +763,7 @@ class CaptureService {
   static async saveDataValues({ dataSetId, orgUnitId, periodId, dataValues }) {
     try {
       let result
-      
+
       // Normalize and link data to a case if possible (names, caseId)
       const normalized = await this.normalizeAndLinkCase(dataSetId, dataValues)
 
@@ -640,13 +806,13 @@ class CaptureService {
           // For other form types, create a generic save (fallback)
           result = await this.saveGenericForm(dataSetId, normalized)
       }
-      
+
       if (result.success) {
         // Clear localStorage draft after successful save
         const key = `${dataSetId}-${orgUnitId}-${periodId}`
         localStorage.removeItem(`capture-data-${key}`)
       }
-      
+
       return result
     } catch (error) {
       console.error('Error saving data values:', error)
@@ -663,11 +829,11 @@ class CaptureService {
       // Check if there's already a draft for this case that we should update
       let result
       const caseId = dataValues.caseId
-      
+
       if (caseId) {
         // Look for existing draft forms for this case
         const existingFormsResult = await FormService.getFormsByCaseId(caseId, dataSetId)
-        
+
         if (existingFormsResult.success && existingFormsResult.forms.length > 0) {
           // Found existing draft, update it
           const existingForm = existingFormsResult.forms[0] // Use the most recent one
@@ -679,7 +845,7 @@ class CaptureService {
             periodId: periodId,
             updatedAt: new Date()
           }
-          
+
           result = await FormService.updateForm(existingForm.id, updatedData)
           result.id = existingForm.id // Preserve the existing ID
         } else {
@@ -691,7 +857,7 @@ class CaptureService {
             orgUnitId: orgUnitId,
             periodId: periodId
           }
-          
+
           // Save to Firebase based on form type
           switch (dataSetId) {
             case 'initial-referral':
@@ -702,6 +868,30 @@ class CaptureService {
               break
             case 'initial-assessment':
               result = await FormService.saveInitialAssessment(draftData)
+              break
+            case 'medical-intake':
+              result = await FormService.saveMedicalIntakeAssessment(draftData)
+              break
+            case 'academics-literacy':
+              result = await FormService.saveAcademicsLiteracyPlan(draftData)
+              break
+            case 'psychological-assessment':
+              result = await FormService.savePsychologicalAssessment(draftData)
+              break
+            case 'life-skills-survey':
+              result = await FormService.saveLifeSkillsSurvey(draftData)
+              break
+            case 'birth-delivery':
+              result = await FormService.saveBirthDeliveryReport(draftData)
+              break
+            case 'care-plan-summary':
+              result = await FormService.saveCarePlanSummary(draftData)
+              break
+            case 'care-plan-baby':
+              result = await FormService.saveCarePlanBaby(draftData)
+              break
+            case 'care-plan-ongoing-life-skills':
+              result = await FormService.saveCarePlanOngoingLifeSkills(draftData)
               break
             default:
               // For other form types, create a generic save
@@ -717,7 +907,7 @@ class CaptureService {
           orgUnitId: orgUnitId,
           periodId: periodId
         }
-        
+
         // Save to Firebase based on form type
         switch (dataSetId) {
           case 'initial-referral':
@@ -729,12 +919,36 @@ class CaptureService {
           case 'initial-assessment':
             result = await FormService.saveInitialAssessment(draftData)
             break
+          case 'medical-intake':
+            result = await FormService.saveMedicalIntakeAssessment(draftData)
+            break
+          case 'academics-literacy':
+            result = await FormService.saveAcademicsLiteracyPlan(draftData)
+            break
+          case 'psychological-assessment':
+            result = await FormService.savePsychologicalAssessment(draftData)
+            break
+          case 'life-skills-survey':
+            result = await FormService.saveLifeSkillsSurvey(draftData)
+            break
+          case 'birth-delivery':
+            result = await FormService.saveBirthDeliveryReport(draftData)
+            break
+          case 'care-plan-summary':
+            result = await FormService.saveCarePlanSummary(draftData)
+            break
+          case 'care-plan-baby':
+            result = await FormService.saveCarePlanBaby(draftData)
+            break
+          case 'care-plan-ongoing-life-skills':
+            result = await FormService.saveCarePlanOngoingLifeSkills(draftData)
+            break
           default:
             // For other form types, create a generic save
             result = await this.saveGenericForm(dataSetId, draftData)
         }
       }
-      
+
       if (result.success) {
         // Also save to localStorage as a backup
         const key = `${dataSetId}-${orgUnitId}-${periodId}`
@@ -745,9 +959,9 @@ class CaptureService {
         }
         localStorage.setItem(`capture-data-${key}`, JSON.stringify(localStorageData))
       }
-      
+
       console.log('Draft saved to Firebase:', { dataSetId, orgUnitId, periodId, dataValues })
-      
+
       return result
     } catch (error) {
       console.error('Error saving draft to Firebase:', error)
@@ -762,7 +976,7 @@ class CaptureService {
   static async completeDataEntry({ dataSetId, orgUnitId, periodId, dataValues }) {
     // Mock delay
     await new Promise(resolve => setTimeout(resolve, 1200))
-    
+
     const key = `${dataSetId}-${orgUnitId}-${periodId}`
     const dataToSave = {
       dataValues,
@@ -771,12 +985,12 @@ class CaptureService {
       completedBy: 'current-user', // In real app, get from auth
       completedAt: new Date().toISOString()
     }
-    
+
     localStorage.setItem(`capture-data-${key}`, JSON.stringify(dataToSave))
-    
+
     // In real implementation, this would mark as complete in database
     console.log('Data entry completed:', { dataSetId, orgUnitId, periodId, dataValues })
-    
+
     return {
       success: true,
       message: 'Data entry completed successfully'
@@ -863,7 +1077,7 @@ class CaptureService {
     try {
       // Get actual statistics from FormService
       const statsResult = await FormService.getFormStatistics()
-      
+
       if (statsResult.success) {
         const stats = statsResult.statistics
         return {
@@ -878,11 +1092,11 @@ class CaptureService {
       } else {
         // Fallback to localStorage data
         const allKeys = Object.keys(localStorage).filter(key => key.startsWith('capture-data-'))
-        
+
         let totalEntries = 0
         let completedEntries = 0
         let draftEntries = 0
-        
+
         allKeys.forEach(key => {
           try {
             const data = JSON.parse(localStorage.getItem(key))
@@ -896,7 +1110,7 @@ class CaptureService {
             // Skip invalid entries
           }
         })
-        
+
         return {
           totalEntries,
           completedEntries,
@@ -919,24 +1133,24 @@ class CaptureService {
   static validateDataEntry(formStructure, dataValues) {
     const errors = {}
     let isValid = true
-    
+
     formStructure.sections.forEach(section => {
       section.dataElements.forEach(element => {
         const value = dataValues[element.id]
-        
+
         // Required field validation
         if (element.required && (value === undefined || value === null || value === '')) {
           errors[element.id] = 'This field is required'
           isValid = false
         }
-        
+
         // Type validation
         if (value !== undefined && value !== null && value !== '') {
           if (element.valueType === 'NUMBER' && isNaN(value)) {
             errors[element.id] = 'Please enter a valid number'
             isValid = false
           }
-          
+
           // Range validation for numbers
           if (element.valueType === 'NUMBER' && !isNaN(value)) {
             const numValue = parseFloat(value)
@@ -952,7 +1166,7 @@ class CaptureService {
         }
       })
     })
-    
+
     return {
       isValid,
       errors
@@ -963,15 +1177,15 @@ class CaptureService {
   static async getDataEntryHistory({ dataSetId, orgUnitId, limit = 10 }) {
     // Mock delay
     await new Promise(resolve => setTimeout(resolve, 300))
-    
+
     const allKeys = Object.keys(localStorage)
       .filter(key => key.startsWith('capture-data-') && key.includes(dataSetId) && key.includes(orgUnitId))
       .slice(0, limit)
-    
+
     const history = allKeys.map(key => {
       const data = JSON.parse(localStorage.getItem(key))
       const [, , dataSet, orgUnit, period] = key.split('-')
-      
+
       return {
         dataSetId: dataSet,
         orgUnitId: orgUnit,
@@ -984,7 +1198,7 @@ class CaptureService {
         )
       }
     })
-    
+
     return history.sort((a, b) => new Date(b.lastUpdated) - new Date(a.lastUpdated))
   }
 }

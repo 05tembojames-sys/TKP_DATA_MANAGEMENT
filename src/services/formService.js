@@ -342,8 +342,28 @@ class FormService {
   }
 
   // Save Academics & Literacy Plan Form
-  async saveAcademicsLiteracyPlan(formData) {
+  async saveAcademicsLiteracyPlan(formData, draftId = null) {
     try {
+      // If draftId is provided, update the existing draft instead of creating new
+      if (draftId) {
+        const formRef = doc(db, this.formsCollection, draftId);
+        const formSnap = await getDoc(formRef);
+
+        if (formSnap.exists()) {
+          await updateDoc(formRef, {
+            ...formData,
+            updatedAt: new Date(),
+            status: "submitted",
+            isDraft: false
+          });
+          return {
+            success: true,
+            id: draftId,
+            message: "Academics & Literacy Plan submitted successfully",
+          };
+        }
+      }
+
       // Parse nameOfGirl to extract first and last name for matching
       const nameParts = (formData.nameOfGirl || '').trim().split(' ');
       const childFirstName = nameParts[0] || '';
@@ -366,12 +386,13 @@ class FormService {
       const formDoc = {
         formType: "academics-literacy",
         ...formData,
-        childFirstName: childFirstName,  // Add for TrackerService matching
-        childSurname: childSurname,      // Add for TrackerService matching
-        dateOfBirth: dateOfBirth,         // Add for precise matching
+        childFirstName: childFirstName,
+        childSurname: childSurname,
+        dateOfBirth: dateOfBirth,
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "submitted",
+        isDraft: false
       };
 
       const docRef = await addDoc(
@@ -393,8 +414,28 @@ class FormService {
   }
 
   // Save Psychological Assessment Form
-  async savePsychologicalAssessment(formData) {
+  async savePsychologicalAssessment(formData, draftId = null) {
     try {
+      // If draftId is provided, update the existing draft instead of creating new
+      if (draftId) {
+        const formRef = doc(db, this.formsCollection, draftId);
+        const formSnap = await getDoc(formRef);
+
+        if (formSnap.exists()) {
+          await updateDoc(formRef, {
+            ...formData,
+            updatedAt: new Date(),
+            status: "submitted",
+            isDraft: false
+          });
+          return {
+            success: true,
+            id: draftId,
+            message: "Psychological Assessment submitted successfully",
+          };
+        }
+      }
+
       // Get child data from sessionStorage for matching
       let childFirstName = formData.childFirstName;
       let childSurname = formData.childSurname;
@@ -423,6 +464,7 @@ class FormService {
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "submitted",
+        isDraft: false
       };
 
       const docRef = await addDoc(
@@ -444,8 +486,28 @@ class FormService {
   }
 
   // Save Life Skills Survey Form
-  async saveLifeSkillsSurvey(formData) {
+  async saveLifeSkillsSurvey(formData, draftId = null) {
     try {
+      // If draftId is provided, update the existing draft instead of creating new
+      if (draftId) {
+        const formRef = doc(db, this.formsCollection, draftId);
+        const formSnap = await getDoc(formRef);
+
+        if (formSnap.exists()) {
+          await updateDoc(formRef, {
+            ...formData,
+            updatedAt: new Date(),
+            status: "submitted",
+            isDraft: false
+          });
+          return {
+            success: true,
+            id: draftId,
+            message: "Life Skills Survey submitted successfully",
+          };
+        }
+      }
+
       // Get child data from formData or sessionStorage for matching
       let childFirstName = formData.childFirstName || '';
       let childSurname = formData.childSurname || '';
@@ -482,6 +544,7 @@ class FormService {
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "submitted",
+        isDraft: false
       };
 
       const docRef = await addDoc(
@@ -502,8 +565,28 @@ class FormService {
     }
   }
 
-  async saveBirthDeliveryReport(formData) {
+  async saveBirthDeliveryReport(formData, draftId = null) {
     try {
+      // If draftId is provided, update the existing draft instead of creating new
+      if (draftId) {
+        const formRef = doc(db, this.formsCollection, draftId);
+        const formSnap = await getDoc(formRef);
+
+        if (formSnap.exists()) {
+          await updateDoc(formRef, {
+            ...formData,
+            updatedAt: new Date(),
+            status: "submitted",
+            isDraft: false
+          });
+          return {
+            success: true,
+            id: draftId,
+            message: "Birth and Delivery Report submitted successfully",
+          };
+        }
+      }
+
       // Get child data from sessionStorage for matching
       let childFirstName = formData.childFirstName;
       let childSurname = formData.childSurname;
@@ -532,6 +615,7 @@ class FormService {
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "submitted",
+        isDraft: false
       };
 
       const docRef = await addDoc(
@@ -552,8 +636,28 @@ class FormService {
     }
   }
 
-  async saveCarePlanSummary(formData) {
+  async saveCarePlanSummary(formData, draftId = null) {
     try {
+      // If draftId is provided, update the existing draft instead of creating new
+      if (draftId) {
+        const formRef = doc(db, this.formsCollection, draftId);
+        const formSnap = await getDoc(formRef);
+
+        if (formSnap.exists()) {
+          await updateDoc(formRef, {
+            ...formData,
+            updatedAt: new Date(),
+            status: "submitted",
+            isDraft: false
+          });
+          return {
+            success: true,
+            id: draftId,
+            message: "Care Plan Summary submitted successfully",
+          };
+        }
+      }
+
       // Get child data from formData or sessionStorage for matching
       let childFirstName = formData.childFirstName || '';
       let childSurname = formData.childSurname || '';
@@ -590,6 +694,7 @@ class FormService {
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "submitted",
+        isDraft: false
       };
 
       const docRef = await addDoc(
@@ -611,8 +716,28 @@ class FormService {
   }
 
   // Save Care Plan Baby Form
-  async saveCarePlanBaby(formData) {
+  async saveCarePlanBaby(formData, draftId = null) {
     try {
+      // If draftId is provided, update the existing draft instead of creating new
+      if (draftId) {
+        const formRef = doc(db, this.formsCollection, draftId);
+        const formSnap = await getDoc(formRef);
+
+        if (formSnap.exists()) {
+          await updateDoc(formRef, {
+            ...formData,
+            updatedAt: new Date(),
+            status: "submitted",
+            isDraft: false
+          });
+          return {
+            success: true,
+            id: draftId,
+            message: "Care Plan (Baby) submitted successfully",
+          };
+        }
+      }
+
       // Get child data from formData or sessionStorage for matching
       let childFirstName = formData.childFirstName || '';
       let childSurname = formData.childSurname || '';
@@ -649,6 +774,7 @@ class FormService {
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "submitted",
+        isDraft: false
       };
 
       const docRef = await addDoc(
@@ -670,8 +796,28 @@ class FormService {
   }
 
   // Save Care Plan - Ongoing Life Skills Form
-  async saveCarePlanOngoingLifeSkills(formData) {
+  async saveCarePlanOngoingLifeSkills(formData, draftId = null) {
     try {
+      // If draftId is provided, update the existing draft instead of creating new
+      if (draftId) {
+        const formRef = doc(db, this.formsCollection, draftId);
+        const formSnap = await getDoc(formRef);
+
+        if (formSnap.exists()) {
+          await updateDoc(formRef, {
+            ...formData,
+            updatedAt: new Date(),
+            status: "submitted",
+            isDraft: false
+          });
+          return {
+            success: true,
+            id: draftId,
+            message: "Care Plan - Ongoing Life Skills submitted successfully",
+          };
+        }
+      }
+
       // Get child data from formData or sessionStorage for matching
       let childFirstName = formData.childFirstName || '';
       let childSurname = formData.childSurname || '';
@@ -708,6 +854,7 @@ class FormService {
         createdAt: new Date(),
         updatedAt: new Date(),
         status: "submitted",
+        isDraft: false
       };
 
       const docRef = await addDoc(

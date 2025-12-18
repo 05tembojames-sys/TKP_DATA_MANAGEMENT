@@ -110,7 +110,7 @@
           <!-- Welcome/Info Widget (Text) -->
           <div v-if="widgetVisibility.welcome" class="dhis-widget text-widget double-height">
              <div class="widget-header">
-                <div class="widget-title">Welcome, {{ getFirstName() }}</div>
+                <div class="widget-title">Welcome, {{ getFirstName().split(' ')[0] }}</div>
                 <div class="widget-controls" @click.stop="toggleWidgetMenu('welcome')">
                    <i class="fas fa-ellipsis-h"></i>
                    <div v-if="activeWidgetMenu === 'welcome'" class="widget-menu">

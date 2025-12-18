@@ -1,45 +1,11 @@
 <template>
   <div class="aggregate-data-entry-page">
+    <TopHeader />
     <div class="aggregate-data-entry">
     <!-- Mobile Header -->
     <div class="mobile-header">
-      <button class="mobile-menu-btn" @click="toggleSidebar">
-        <i class="fas fa-bars"></i>
-      </button>
-      <span class="mobile-title">Data Entry</span>
+      <span class="mobile-title">System Data Entry</span>
     </div>
-
-    <!-- Left Sidebar: Organisation Unit Tree -->
-    <div class="org-unit-sidebar" :class="{ 'mobile-open': isSidebarOpen }">
-      <div class="sidebar-header">
-        <span>Organisation Unit</span>
-        <button class="close-sidebar-btn" @click="toggleSidebar">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="search-ou">
-        <input type="text" placeholder="Search organisation unit" v-model="ouSearch" />
-        <i class="fas fa-search"></i>
-      </div>
-      <div class="ou-tree">
-        <div v-if="loadingOrgUnits" class="loading-tree">
-          <i class="fas fa-spinner fa-spin"></i> Loading...
-        </div>
-        <OrgUnitTreeNode 
-          v-else
-          v-for="ou in orgUnitTree" 
-          :key="ou.id"
-          :node="ou"
-          :selected="selectedOu"
-          :expanded="expandedOrgUnits"
-          @select="selectOu"
-          @toggle="toggleOrgUnit"
-        />
-      </div>
-    </div>
-
-    <!-- Overlay for mobile sidebar -->
-    <div class="sidebar-overlay" v-if="isSidebarOpen" @click="toggleSidebar"></div>
 
     <!-- Main Content Area -->
     <div class="main-content">
@@ -67,26 +33,60 @@
       </div>
 
       <!-- Data Entry Table -->
-      <div class="data-entry-area" v-if="selectedOu && selectedDataSet && selectedPeriod">
-        <div class="form-header">
-          <h3>{{ getDataSetName(selectedDataSet) }} - {{ getPeriodName(selectedPeriod) }}</h3>
-          <div class="sync-status" v-if="syncStatus">
-            <span v-if="syncStatus === 'syncing'" class="status-syncing"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
-            <span v-if="syncStatus === 'saved'" class="status-saved"><i class="fas fa-check"></i> Saved</span>
-            <span v-if="syncStatus === 'error'" class="status-error"><i class="fas fa-exclamation-circle"></i> Error saving</span>
-          </div>
-          <div class="form-actions">
-            <button class="action-btn" @click="runAggregation" :disabled="aggregating">
-              <i class="fas" :class="aggregating ? 'fa-spinner fa-spin' : 'fa-calculator'"></i> 
-              {{ aggregating ? 'Running...' : 'Run Aggregation' }}
-            </button>
-            <button class="action-btn" @click="runValidation"><i class="fas fa-check-double"></i> Run Validation</button>
-            <button class="action-btn primary" @click="completeDataSet"><i class="fas fa-check"></i> Complete</button>
-          </div>
+      <div class="data-entry-area" v-if="selectedDataSet && selectedPeriod">
+        <!-- Component-based Forms -->
+        <div v-if="selectedDataSet === 'initial-referral'" class="form-component-wrapper">
+          <InitialReferralForm @form-saved="handleReferralFormSaved" />
+        </div>
+        <div v-else-if="selectedDataSet === 'medical-intake'" class="form-component-wrapper">
+          <MedicalIntakeForm @form-saved="handleReferralFormSaved" />
+        </div>
+        <div v-else-if="selectedDataSet === 'child-overview'" class="form-component-wrapper">
+          <ChildOverviewForm @form-saved="handleReferralFormSaved" />
+        </div>
+        <div v-else-if="selectedDataSet === 'initial-assessment'" class="form-component-wrapper">
+          <InitialAssessmentForm @form-saved="handleReferralFormSaved" />
+        </div>
+        <div v-else-if="selectedDataSet === 'academics-literacy'" class="form-component-wrapper">
+          <AcademicsLiteracyForm @form-saved="handleReferralFormSaved" />
+        </div>
+        <div v-else-if="selectedDataSet === 'psychological-assessment'" class="form-component-wrapper">
+          <PsychologicalAssessmentForm @form-saved="handleReferralFormSaved" />
+        </div>
+        <div v-else-if="selectedDataSet === 'life-skills-survey'" class="form-component-wrapper">
+          <LifeSkillsSurveyForm @form-saved="handleReferralFormSaved" />
+        </div>
+        <div v-else-if="selectedDataSet === 'birth-delivery'" class="form-component-wrapper">
+          <BirthDeliveryForm @form-saved="handleReferralFormSaved" />
+        </div>
+        <div v-else-if="selectedDataSet === 'care-plan-summary'" class="form-component-wrapper">
+          <CarePlanSummaryForm @form-saved="handleReferralFormSaved" />
+        </div>
+        <div v-else-if="selectedDataSet === 'care-plan-baby'" class="form-component-wrapper">
+          <CarePlanBabyForm @form-saved="handleReferralFormSaved" />
+        </div>
+        <div v-else-if="selectedDataSet === 'care-plan-ongoing-life-skills'" class="form-component-wrapper">
+          <CarePlanOngoingLifeSkillsForm @form-saved="handleReferralFormSaved" />
         </div>
 
-        <div class="table-container">
-          <table class="dhis-table">
+        <!-- Generic Table View (Fallback) -->
+        <div v-else class="generic-table-view">
+          <div class="form-header">
+            <h3>{{ getDataSetName(selectedDataSet) }} - {{ getPeriodName(selectedPeriod) }}</h3>
+            <div class="sync-status" v-if="syncStatus">
+              <span v-if="syncStatus === 'syncing'" class="status-syncing"><i class="fas fa-spinner fa-spin"></i> Saving...</span>
+              <span v-if="syncStatus === 'saved'" class="status-saved"><i class="fas fa-check"></i> Saved</span>
+              <span v-if="syncStatus === 'error'" class="status-error"><i class="fas fa-exclamation-circle"></i> Error saving</span>
+            </div>
+            <div class="form-actions">
+              <!-- Aggregation button removed as per user request -->
+              <button class="action-btn" @click="runValidation"><i class="fas fa-check-double"></i> Run Validation</button>
+              <button class="action-btn primary" @click="completeDataSet"><i class="fas fa-check"></i> Complete</button>
+            </div>
+          </div>
+  
+          <div class="table-container">
+            <table class="dhis-table">
             <thead>
               <tr>
                 <th class="element-header">Data Element</th>
@@ -110,13 +110,66 @@
                 </td>
                 <template v-if="!element.isSection">
                   <td v-for="cat in categoryOptions" :key="cat.id" class="input-cell">
+                    <!-- Text Input -->
                     <input 
+                      v-if="!element.valueType || element.valueType === 'TEXT'"
+                      type="text" 
+                      v-model="dataValues[`${element.id}-${cat.id}`]"
+                      @focus="handleFocus($event)"
+                      @blur="handleBlur($event, element.id, cat.id)"
+                      :class="{ 'has-value': dataValues[`${element.id}-${cat.id}`] }"
+                      :placeholder="element.placeholder || ''"
+                    />
+                    
+                    <!-- Number Input -->
+                    <input 
+                      v-else-if="element.valueType === 'NUMBER'"
                       type="number" 
                       v-model="dataValues[`${element.id}-${cat.id}`]"
                       @focus="handleFocus($event)"
                       @blur="handleBlur($event, element.id, cat.id)"
                       :class="{ 'has-value': dataValues[`${element.id}-${cat.id}`] }"
+                      :min="element.min"
+                      :max="element.max"
                     />
+
+                    <!-- Date Input -->
+                    <input 
+                      v-else-if="element.valueType === 'DATE'"
+                      type="date" 
+                      v-model="dataValues[`${element.id}-${cat.id}`]"
+                      @focus="handleFocus($event)"
+                      @blur="handleBlur($event, element.id, cat.id)"
+                      :class="{ 'has-value': dataValues[`${element.id}-${cat.id}`] }"
+                    />
+
+                    <!-- Select Input -->
+                    <select
+                      v-else-if="element.valueType === 'SELECT'"
+                      v-model="dataValues[`${element.id}-${cat.id}`]"
+                      @focus="handleFocus($event)"
+                      @blur="handleBlur($event, element.id, cat.id)"
+                      :class="{ 'has-value': dataValues[`${element.id}-${cat.id}`] }"
+                      class="dhis-select-input"
+                    >
+                      <option value="">Select option</option>
+                      <option v-for="opt in element.options" :key="opt" :value="opt">{{ opt }}</option>
+                    </select>
+
+                    <!-- Boolean Input -->
+                    <select
+                      v-else-if="element.valueType === 'BOOLEAN'"
+                      v-model="dataValues[`${element.id}-${cat.id}`]"
+                      @focus="handleFocus($event)"
+                      @blur="handleBlur($event, element.id, cat.id)"
+                      :class="{ 'has-value': dataValues[`${element.id}-${cat.id}`] }"
+                      class="dhis-select-input"
+                    >
+                      <option value="">Select</option>
+                      <option :value="true">Yes</option>
+                      <option :value="false">No</option>
+                    </select>
+
                   </td>
                   <td class="comment-cell">
                     <i class="fas fa-comment-alt" @click="openComment(element.id)"></i>
@@ -124,7 +177,8 @@
                 </template>
               </tr>
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -132,8 +186,7 @@
       <div class="empty-state" v-else>
         <div class="empty-content">
           <i class="fas fa-arrow-up mobile-hide"></i>
-          <i class="fas fa-bars mobile-show"></i>
-          <h3>Please select Organisation Unit, Data Set, and Period</h3>
+          <h3>Please select Data Set and Period</h3>
           <p>Use the controls above to start entering data.</p>
         </div>
       </div>
@@ -144,26 +197,41 @@
 
 <script setup>
 import { ref, computed, reactive, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useToast } from '../composables/useToast.js';
 import { db } from '../firebase/config.js';
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import CaptureService from '../services/captureService.js';
-import OrgUnitTreeNode from './OrgUnitTreeNode.vue';
+import FormService from '../services/formService.js';
 import TopHeader from './TopHeader.vue';
 
+// Import Specific Form Components
+import InitialReferralForm from "./InitialReferralForm.vue";
+import MedicalIntakeForm from "./MedicalIntakeForm.vue";
+import ChildOverviewForm from "./ChildOverviewForm.vue";
+import InitialAssessmentForm from "./InitialAssessmentForm.vue";
+import AcademicsLiteracyForm from "./AcademicsLiteracyForm.vue";
+import PsychologicalAssessmentForm from "./PsychologicalAssessmentForm.vue";
+import LifeSkillsSurveyForm from "./LifeSkillsSurveyForm.vue";
+import BirthDeliveryForm from "./BirthDeliveryForm.vue";
+import CarePlanSummaryForm from "./CarePlanSummaryForm.vue";
+import CarePlanBabyForm from "./CarePlanBabyForm.vue";
+import CarePlanOngoingLifeSkillsForm from "./CarePlanOngoingLifeSkillsForm.vue";
+
+const router = useRouter();
+const route = useRoute();
 const { success, info, error } = useToast();
 
 // State
-const selectedOu = ref('');
+const selectedOu = ref('kukhoma-admin'); // Default to main/system org unit
 const selectedDataSet = ref('');
 const selectedPeriod = ref('');
-const ouSearch = ref('');
-const expandedOrgUnits = ref(new Set());
+// const ouSearch = ref(''); // Removed
+// const expandedOrgUnits = ref(new Set()); // Removed
 const dataValues = reactive({});
 const loading = ref(false);
 const saving = ref(false);
 const isSidebarOpen = ref(false);
-const aggregating = ref(false);
 
 const orgUnits = ref([]);
 const dataSets = ref([]);
@@ -174,100 +242,52 @@ const categoryOptions = [
   { id: 'default', name: 'Value' }
 ];
 
-// Data Elements Definition (Mapping Aggregate Indicators to Tracker Programs)
-const dataElementsMap = {
-  'initial-referral': [
-    { id: 'sec1', name: 'Referral Statistics', isSection: true },
-    { id: 'ref_total', name: 'Total Referrals Received' },
-    { id: 'ref_male', name: 'Referrals - Male' },
-    { id: 'ref_female', name: 'Referrals - Female' },
-    { id: 'ref_urgent', name: 'Urgent Referrals' },
-    { id: 'ref_processed', name: 'Referrals Processed/Admitted' }
-  ],
-  'child-overview': [
-    { id: 'sec1', name: 'Enrollment Statistics', isSection: true },
-    { id: 'enr_total', name: 'New Enrollments' },
-    { id: 'enr_male', name: 'New Enrollments - Male' },
-    { id: 'enr_female', name: 'New Enrollments - Female' },
-    { id: 'enr_reintegration', name: 'Re-integrations' },
-    { id: 'enr_dropout', name: 'Dropouts/Exits' }
-  ],
-  'initial-assessment': [
-    { id: 'sec1', name: 'Assessment Activities', isSection: true },
-    { id: 'asm_total', name: 'Initial Assessments Completed' },
-    { id: 'asm_pending', name: 'Assessments Pending' },
-    { id: 'asm_high_risk', name: 'High Risk Cases Identified' }
-  ],
-  'monthly-report': [
-    { id: 'sec1', name: 'Monthly Activities', isSection: true },
-    { id: 'act_conducted', name: 'Activities Conducted' },
-    { id: 'act_participants', name: 'Total Participants' },
-    { id: 'act_meals', name: 'Meals Served' }
-  ],
-  'quarterly-review': [
-    { id: 'sec1', name: 'Quarterly Review', isSection: true },
-    { id: 'rev_completed', name: 'Reviews Completed' },
-    { id: 'rev_progress', name: 'Children Showing Progress' },
-    { id: 'rev_regression', name: 'Children Showing Regression' }
-  ],
-  'medical-intake': [
-    { id: 'sec1', name: 'Medical Statistics', isSection: true },
-    { id: 'med_screened', name: 'Children Screened' },
-    { id: 'med_referrals', name: 'Medical Referrals Made' },
-    { id: 'med_chronic', name: 'Chronic Conditions Identified' },
-    { id: 'med_treatment', name: 'Children on Treatment' }
-  ]
-};
-
+// Data Elements derived dynamically from CaptureService
 const dataElements = computed(() => {
-  return dataElementsMap[selectedDataSet.value] || [];
+  if (!selectedDataSet.value) return [];
+  
+  try {
+    const structure = CaptureService.generateFormStructure(selectedDataSet.value);
+    const flat = [];
+    
+    if (structure && structure.sections) {
+      structure.sections.forEach(section => {
+        flat.push({ 
+          id: section.id, 
+          name: section.name, 
+          isSection: true 
+        });
+        
+        if (section.dataElements) {
+          section.dataElements.forEach(element => {
+            flat.push({ 
+              ...element, 
+              isSection: false 
+            });
+          });
+        }
+      });
+    }
+    return flat;
+  } catch (err) {
+    console.error("Error generating form structure:", err);
+    return [];
+  }
 });
 
-const orgUnitTree = computed(() => {
-  // Build hierarchical tree from flat list
-  const map = new Map();
-  const roots = [];
-  
-  // Clone to avoid mutating original
-  const list = JSON.parse(JSON.stringify(orgUnits.value));
-  
-  list.forEach(ou => {
-    map.set(ou.id, { ...ou, children: [] });
-  });
-  
-  list.forEach(ou => {
-    const node = map.get(ou.id);
-    if (ou.parent) {
-      const parent = map.get(ou.parent);
-      if (parent) {
-        parent.children.push(node);
-      } else {
-        roots.push(node);
-      }
-    } else {
-      roots.push(node);
-    }
-  });
-  
-  return roots;
-});
+// const orgUnitTree = computed(() => { ... }); // Removed
 
 // Methods
 const loadOrgUnits = async () => {
-  loadingOrgUnits.value = true;
-  try {
-    const response = await CaptureService.getOrgUnits();
-    orgUnits.value = response;
-    // Auto-expand first level
-    if (response.length > 0) {
-      expandedOrgUnits.value.add(response[0].id);
-    }
-  } catch (err) {
-    console.error('Error loading org units:', err);
-    error('Failed to load organisation units');
-  } finally {
-    loadingOrgUnits.value = false;
-  }
+  // loadingOrgUnits.value = true;
+  // try {
+  //   const response = await CaptureService.getOrgUnits();
+  //   orgUnits.value = response;
+  // } catch (err) {
+  //   console.error('Error loading org units:', err);
+  // } finally {
+  //   loadingOrgUnits.value = false;
+  // }
 };
 
 const loadDataSets = async () => {
@@ -283,8 +303,18 @@ const loadPeriods = async () => {
   try {
     const response = await CaptureService.getPeriods();
     periods.value = response;
-    // Set default to current month if available
-    if (response.length > 0) {
+    
+    // Auto-select current month
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const currentPeriodId = `${currentYear}${currentMonth.toString().padStart(2, '0')}`;
+    
+    // Check if current period exists in list, if not fallback to first
+    const found = response.find(p => p.id === currentPeriodId);
+    if (found) {
+      selectedPeriod.value = currentPeriodId;
+    } else if (response.length > 0) {
       selectedPeriod.value = response[0].id;
     }
   } catch (err) {
@@ -294,18 +324,11 @@ const loadPeriods = async () => {
 
 const selectOu = (ouId) => {
   selectedOu.value = ouId;
-  if (window.innerWidth < 768) {
-    isSidebarOpen.value = false;
-  }
   loadData();
 };
 
 const toggleOrgUnit = (ouId) => {
-  if (expandedOrgUnits.value.has(ouId)) {
-    expandedOrgUnits.value.delete(ouId);
-  } else {
-    expandedOrgUnits.value.add(ouId);
-  }
+  // ...
 };
 
 const toggleSidebar = () => {
@@ -363,10 +386,11 @@ const loadData = async () => {
   
   loading.value = true;
   syncStatus.value = 'saved';
-  // Clear current values
+  // Clear current values in the generic table
   Object.keys(dataValues).forEach(key => delete dataValues[key]);
   
   try {
+    // 1. Load Generic Aggregate Data (for Table View)
     const docId = `${selectedOu.value}_${selectedDataSet.value}_${selectedPeriod.value}`;
     const docRef = doc(db, 'aggregate_data', docId);
     const docSnap = await getDoc(docRef);
@@ -378,6 +402,11 @@ const loadData = async () => {
         lastSavedTime.value = data.updatedAt.toDate();
       }
     }
+
+    // 2. Load Existing Individual Forms (for Component View)
+    // In a real scenario, we might want to list all forms for this period/OU
+    // But for now, we just rely on the component handling its own data or creating new
+    
   } catch (err) {
     console.error("Error loading data:", err);
     error("Failed to load data");
@@ -386,8 +415,16 @@ const loadData = async () => {
   }
 };
 
-// Save Data to Firestore
+const handleReferralFormSaved = (data) => {
+  success('Form saved successfully!');
+  // Optionally redirect or clear selection
+  // selectedDataSet.value = '';
+};
+ 
+// Save Data to Firestore (Generic Table)
 const saveDataValue = async (elementId, catId, value) => {
+  // ... existing logic ...
+  // (kept as is for the table view)
   if (!selectedOu.value || !selectedDataSet.value || !selectedPeriod.value) return;
   
   saving.value = true;
@@ -397,13 +434,9 @@ const saveDataValue = async (elementId, catId, value) => {
     const docId = `${selectedOu.value}_${selectedDataSet.value}_${selectedPeriod.value}`;
     const docRef = doc(db, 'aggregate_data', docId);
     
-    // Create the key for this value
     const valueKey = `${elementId}-${catId}`;
-    
-    // Update local state first
     dataValues[valueKey] = value;
     
-    // Prepare update object
     const updateData = {
       orgUnit: selectedOu.value,
       dataSet: selectedDataSet.value,
@@ -412,7 +445,6 @@ const saveDataValue = async (elementId, catId, value) => {
       [`values.${valueKey}`]: value
     };
     
-    // Use setDoc with merge to create or update
     await setDoc(docRef, updateData, { merge: true });
     
     syncStatus.value = 'saved';
@@ -456,115 +488,6 @@ const openComment = (elementId) => {
   info(`Open comment for ${elementId}`);
 };
 
-// Aggregation Logic
-const runAggregation = async () => {
-  if (!selectedOu.value || !selectedDataSet.value || !selectedPeriod.value) return;
-  
-  aggregating.value = true;
-  info('Running aggregation from system data...');
-  
-  try {
-    // 1. Determine date range for the selected period
-    // Format: YYYYMM (Monthly)
-    const year = parseInt(selectedPeriod.value.substring(0, 4));
-    const month = parseInt(selectedPeriod.value.substring(4, 6)) - 1; // 0-indexed
-    
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 0, 23, 59, 59); // Last day of month
-    
-    // 2. Fetch forms based on dataset type
-    let forms = [];
-    let q;
-    
-    // Map dataset ID to formType
-    const formTypeMap = {
-      'initial-referral': 'initial-referral',
-      'child-overview': 'child-overview',
-      'initial-assessment': 'initial-assessment',
-      'medical-intake': 'medical-intake'
-    };
-    
-    const targetFormType = formTypeMap[selectedDataSet.value];
-    
-    if (targetFormType) {
-      q = query(
-        collection(db, 'forms'),
-        where('formType', '==', targetFormType)
-      );
-      
-      const snapshot = await getDocs(q);
-      
-      console.log(`Aggregation Debug: Found ${snapshot.docs.length} forms of type ${targetFormType} in total.`);
-      
-      forms = snapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
-        .filter(form => {
-          const createdAt = form.createdAt?.toDate ? form.createdAt.toDate() : new Date(form.createdAt);
-          const inRange = createdAt >= startDate && createdAt <= endDate;
-          
-          // Debug log for first few items
-          if (Math.random() < 0.1) {
-             console.log(`Form ${form.id} date: ${createdAt.toISOString()}, Range: ${startDate.toISOString()} - ${endDate.toISOString()}, In Range: ${inRange}`);
-          }
-          
-          return inRange;
-        });
-        
-      console.log(`Aggregation Debug: Filtered down to ${forms.length} forms for period ${selectedPeriod.value}`);
-      
-      // 3. Calculate indicators based on dataset
-      const newValues = {};
-      
-      if (selectedDataSet.value === 'initial-referral') {
-        newValues['ref_total-default'] = forms.length;
-        newValues['ref_male-default'] = forms.filter(f => f.gender === 'Male').length;
-        newValues['ref_female-default'] = forms.filter(f => f.gender === 'Female').length;
-        newValues['ref_urgent-default'] = forms.filter(f => f.priority === 'Urgent').length;
-        newValues['ref_processed-default'] = forms.filter(f => f.status === 'admitted').length;
-      } else if (selectedDataSet.value === 'child-overview') {
-        newValues['enr_total-default'] = forms.length;
-        newValues['enr_male-default'] = forms.filter(f => f.gender === 'Male').length;
-        newValues['enr_female-default'] = forms.filter(f => f.gender === 'Female').length;
-      } else if (selectedDataSet.value === 'initial-assessment') {
-        newValues['asm_total-default'] = forms.length;
-        newValues['asm_pending-default'] = forms.filter(f => f.status === 'pending').length;
-      } else if (selectedDataSet.value === 'medical-intake') {
-        newValues['med_screened-default'] = forms.length;
-        newValues['med_referrals-default'] = forms.filter(f => f.referralNeeded === true).length;
-      }
-      
-      // 4. Update UI and Save
-      Object.assign(dataValues, newValues);
-      
-      // Save all aggregated values
-      const docId = `${selectedOu.value}_${selectedDataSet.value}_${selectedPeriod.value}`;
-      const docRef = doc(db, 'aggregate_data', docId);
-      
-      const updateData = {
-        orgUnit: selectedOu.value,
-        dataSet: selectedDataSet.value,
-        period: selectedPeriod.value,
-        updatedAt: new Date(),
-        values: dataValues,
-        lastAggregated: new Date()
-      };
-      
-      await setDoc(docRef, updateData, { merge: true });
-      
-      success(`Aggregation complete. Processed ${forms.length} records.`);
-      lastSavedTime.value = new Date();
-    } else {
-      info('No automatic aggregation rules for this data set.');
-    }
-    
-  } catch (err) {
-    console.error('Aggregation error:', err);
-    error('Failed to run aggregation');
-  } finally {
-    aggregating.value = false;
-  }
-};
-
 // Watchers
 watch([selectedDataSet, selectedPeriod], () => {
   loadData();
@@ -573,7 +496,7 @@ watch([selectedDataSet, selectedPeriod], () => {
 // Initialize
 onMounted(async () => {
   await Promise.all([
-    loadOrgUnits(),
+    // loadOrgUnits(), 
     loadDataSets(),
     loadPeriods()
   ]);
@@ -858,13 +781,21 @@ onMounted(async () => {
 .dhis-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px; /* Ensure table doesn't get too squashed */
+  min-width: 800px; /* Ensure table accommodates wider form inputs */
 }
 
 .dhis-table th,
 .dhis-table td {
   border: 1px solid #e0e0e0;
   padding: 8px 12px;
+}
+
+.dhis-table tbody tr:nth-child(even) {
+  background-color: #fcfcfc;
+}
+
+.dhis-table tbody tr:hover {
+  background-color: #f0f7ff;
 }
 
 .dhis-table thead th {
@@ -877,8 +808,9 @@ onMounted(async () => {
 }
 
 .value-header {
-  width: 150px;
-  text-align: center !important;
+  min-width: 200px;
+  width: auto; 
+  text-align: left !important;
 }
 
 .comment-header {
@@ -913,19 +845,32 @@ onMounted(async () => {
   height: 40px;
 }
 
-.input-cell input {
+.input-cell input,
+.input-cell select {
   width: 100%;
   height: 100%;
   border: none;
   padding: 0 12px;
   font-size: 0.95rem;
-  text-align: center;
+  text-align: left;
   outline: none;
   transition: background 0.2s;
+  background: transparent;
 }
 
-.input-cell input:focus {
+.input-cell select {
+  cursor: pointer;
+}
+
+.input-cell input:focus,
+.input-cell select:focus {
   background: #e3f2fd;
+}
+
+.form-component-wrapper {
+  background: white;
+  padding: 0;
+  border-radius: 4px;
 }
 
 .input-cell.focused {
